@@ -9,7 +9,6 @@ namespace TemplateFrame.Services;
 /// <summary>
 /// 业务场景服务的泛型基类：业务服务继承它，声明契约 + 组装版式 + 手写映射，
 /// 即可获得强类型 <c>BuildInitialTemplateFile / Validate / Fill / Parse</c>。
-/// 按迭代计划：Fill 在迭代 2、Parse 在迭代 3 落地（当前为骨架，抛 NotSupportedException）。
 /// </summary>
 public abstract class TemplateService<TData>
 {
@@ -50,14 +49,14 @@ public abstract class TemplateService<TData>
     public TemplateValidationResult Validate(Stream template)
         => _engine.Validate(template, Contract);
 
-    /// <summary>填充：模板 + 强类型数据 → 新文件流（骨架，迭代 2 落地）。</summary>
+    /// <summary>填充：模板 + 强类型数据 → 新文件流（迭代 2 已落地，含填充时软校验）。</summary>
     public Stream Fill(Stream template, TData data)
     {
         FillData fillData = MapToData(data);
         return _engine.Fill(template, Contract, fillData);
     }
 
-    /// <summary>回读：已填充模板 → 强类型数据（骨架，迭代 3 落地）。</summary>
+    /// <summary>回读：已填充模板 → 强类型数据（迭代 3 落地，当前为骨架）。</summary>
     public TData Parse(Stream template)
     {
         FillData fillData = _engine.Parse(template, Contract);

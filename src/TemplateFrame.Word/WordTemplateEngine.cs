@@ -8,10 +8,21 @@ namespace TemplateFrame.Word;
 
 /// <summary>
 /// Word 引擎：实现 <see cref="ITemplateEngine"/>，把契约 + 数据形状翻译成 .docx。
-/// 按迭代计划：Fill 在迭代 2、Parse 在迭代 3 落地（当前抛 NotSupportedException）。
 /// </summary>
 public sealed class WordTemplateEngine : ITemplateEngine
 {
+    private readonly WordTemplateFiller _filler;
+
+    /// <summary>创建默认引擎（缺失必填元素时填充抛错）。</summary>
+    public WordTemplateEngine()
+        : this(null)
+    {
+    }
+
+    /// <summary>以指定填充配置创建引擎（可配置缺失必填元素的处理策略，见设计文档 §5.3）。</summary>
+    public WordTemplateEngine(WordFillOptions? options)
+        => _filler = new WordTemplateFiller(options ?? new WordFillOptions());
+
     /// <inheritdoc />
     public Stream BuildInitialTemplate(TemplateContract contract, Action<ITemplateBuilder> compose)
     {
@@ -32,7 +43,7 @@ public sealed class WordTemplateEngine : ITemplateEngine
 
     /// <inheritdoc />
     public Stream Fill(Stream template, TemplateContract contract, FillData data)
-        => throw new NotSupportedException("Word 填充（Fill）在迭代 2 提供。");
+        => _filler.Fill(template, contract, data).Output;
 
     /// <inheritdoc />
     public FillData Parse(Stream template, TemplateContract contract)

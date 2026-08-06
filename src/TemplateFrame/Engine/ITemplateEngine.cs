@@ -17,9 +17,9 @@ public interface ITemplateEngine
     /// <summary>校验模板与契约是否匹配（Missing / WrongType / Ambiguous 等）。</summary>
     TemplateValidationResult Validate(Stream template, TemplateContract contract);
 
-    /// <summary>填充：模板 + FillData → 新文件流（迭代 2 提供）。</summary>
+    /// <summary>填充：模板 + FillData → 新文件流（含填充时软校验，见设计文档 §5.3）。</summary>
     Stream Fill(Stream template, TemplateContract contract, FillData data);
 
-    /// <summary>回读：已填充模板 → FillData（迭代 3 提供）。</summary>
+    /// <summary>回读：已填充模板 → FillData（迭代 3 提供，当前为骨架）。</summary>
     FillData Parse(Stream template, TemplateContract contract);
 }
