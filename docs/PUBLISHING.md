@@ -1,12 +1,10 @@
-# 发布指南（参考 StreamFrame，暂不启用）
+# 发布指南
 
-> 本文件内容参考 StreamFrame 的 docs/PUBLISHING.md 移植。
-> **当前状态：自动化发布在迭代 6 才启用。** 在此之前：
-> - 不推送 `v*` tag，则 `release.yml` / `publish-nuget.yml` 不会触发；
-> - 本地用 `dotnet pack` 验证打包；
-> - 以下"一次性前置配置"在迭代 6 开始前完成即可。
+> **当前状态：已启用。** 2026-08-07 首次发布 `v1.0.0` 成功（GitHub Release + nuget.org）。
+> - 打 `v*` tag 即触发 `release.yml`（构建/测试/打包 + GitHub Release）与 `publish-nuget.yml`（OIDC 推送 nuget.org）；
+> - 以下"一次性前置配置"已全部完成。
 
-## 发布流程（迭代 6 后生效）
+## 发布流程
 
 打 `v*` 标签 → GitHub Actions 自动构建、建 GitHub Release、推 nuget.org。
 
