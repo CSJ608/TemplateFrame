@@ -7,15 +7,23 @@ using TemplateFrame.Word;
 namespace TemplateFrame.Demo;
 
 /// <summary>
-/// 送货单示例场景服务：演示"业务服务 = 声明契约 + 组装版式 + 手写映射"的三层用法，
-/// 以及能力接口（builder is I...）的按需探测：页面设置 / 页眉页脚 / 布局表 / 文本格式 / 页码 / 表格列宽。
-/// A5 横版；页眉左中右（供应商/单号 | 送货单 | 二维码）；正文明细表（行号/物料名称/数量/单位）；
-/// 页脚左中右（打印时间/打印人 | 1/1 | 到货时间/收货人）。
+/// 送货单示例场景服务：演示"业务服务 = 声明契约 + 无参数 BuildInitialTemplate 直接用具体构建器实例"的用法。
+/// 继承 <c>TemplateService&lt;DeliveryOrderData, WordTemplateBuilder&gt;</c> 即声明"我用的是 Word 插件"，
+/// <see cref="BuildInitialTemplate"/> 里直接调用 Builder 的全部能力，不再有接口/能力探测。
+/// A5 横版；页眉左中右（供应商/单号 | 送货单 | 二维码，三栏底部对齐）；
+/// 正文明细表（行号/物料名称/数量/单位）；页脚左中右（打印时间/打印人 | 第x页，总x页 | 收货时间/收货人手写横线）。
 /// </summary>
-public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrderData>
+public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrderData, WordTemplateBuilder>
 {
     private static readonly TextFormat SmallHei = new() { FontName = "黑体", SizePt = 12 };
     private static readonly TextFormat SmallHeiRight = new() { FontName = "黑体", SizePt = 12, Alignment = TextAlignment.Right };
+    private static readonly TextFormat HandWriteBlank = new()
+    {
+        FontName = "黑体",
+        SizePt = 12,
+        Alignment = TextAlignment.Right,
+        Underline = true,
+    };
     private static readonly TextFormat PageNoFormat = new() { FontName = "黑体", SizePt = 10.5, Alignment = TextAlignment.Center };
 
     public DeliveryOrderTemplateService()
@@ -41,15 +49,6 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                     Required = true,
                 },
                 new TextElement { Key = "Printer", DisplayName = "打印人", Required = true },
-                new TextElement
-                {
-                    Key = "ArrivalTime",
-                    DisplayName = "到货时间",
-                    ValueType = typeof(DateTime),
-                    Format = "yyyy-MM-dd HH:mm",
-                    Required = false,
-                },
-                new TextElement { Key = "Receiver", DisplayName = "收货人", Required = true },
                 new TableElement
                 {
                     Key = "Lines",
@@ -66,141 +65,102 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
             ],
         };
 
-    protected override void BuildInitialTemplate(ITemplateBuilder builder)
+    protected override void BuildInitialTemplate()
     {
         // A5 横版
-        if (builder is IPageSetupBuilder page)
+        Builder.SetPageSetup(new PageSetup
         {
-            page.SetPageSetup(new PageSetup
-            {
-                Size = PageSize.A5,
-                Orientation = PageOrientation.Landscape,
-                MarginTopMm = 8,
-                MarginBottomMm = 8,
-                MarginLeftMm = 10,
-                MarginRightMm = 10,
-            });
-        }
+            Size = PageSize.A5,
+            Orientation = PageOrientation.Landscape,
+            MarginTopMm = 8,
+            MarginBottomMm = 8,
+            MarginLeftMm = 10,
+            MarginRightMm = 10,
+        });
 
-        // 页眉（左中右）+ 页脚（左中右）
-        if (builder is IHeaderFooterBuilder headerFooter)
-        {
-            headerFooter.AddHeader(BuildHeader);
-            headerFooter.AddFooter(BuildFooter);
-        }
+        // 页眉（左中右，底部对齐）+ 页脚（左中右，底部对齐）
+        Builder.AddHeader(BuildHeader);
+        Builder.AddFooter(BuildFooter);
 
         // 正文明细表：居中，黑体四号，显式列宽
-        if (builder is ITableFormatBuilder table)
+        Builder.AddTable("Lines", ["行号", "物料名称", "数量", "单位"], new TableFormat
         {
-            table.AddTable("Lines", ["行号", "物料名称", "数量", "单位"], new TableFormat
-            {
-                HeaderFormat = new TextFormat { FontName = "黑体", SizePt = 14, Bold = true },
-                CellFormat = new TextFormat { FontName = "黑体", SizePt = 14 },
-                Alignment = TextAlignment.Center,
-                ColumnWidthsCm = [1.8, 8.5, 3.2, 3.0],
-            });
-        }
+            HeaderFormat = new TextFormat { FontName = "黑体", SizePt = 14, Bold = true },
+            CellFormat = new TextFormat { FontName = "黑体", SizePt = 14 },
+            Alignment = TextAlignment.Center,
+            ColumnWidthsCm = [1.8, 8.5, 3.2, 3.0],
+            VerticalAlignment = CellVerticalAlignment.Middle,
+        });
     }
 
-    private static void BuildHeader(ITemplateBuilder h)
+    private static void BuildHeader(WordTemplateBuilder h)
     {
-        if (h is not ILayoutTableBuilder layout)
+        // 三栏底部对齐：让左/中/右内容"有底"，底部在同一水平线
+        h.AddLayoutTable(1, 3, new TableFormat
         {
-            return;
-        }
-
-        layout.AddLayoutTable(1, 3, new TableFormat { Bordered = false, ColumnWidthsCm = [6.5, 6.0, 6.5] });
+            Bordered = false,
+            ColumnWidthsCm = [6.5, 6.0, 6.5],
+            VerticalAlignment = CellVerticalAlignment.Bottom,
+        });
 
         // 左：两层（供应商 / 单号），小四黑体左对齐
-        layout.AddCell(c =>
+        h.AddCell(c =>
         {
-            if (c is not ITextFormatBuilder tf)
-            {
-                return;
-            }
-
-            tf.AddParagraph("供应商：", SmallHei);
-            tf.AddElement("Supplier", SmallHei);
-            tf.AddParagraph("送货单号：", SmallHei);
-            tf.AddElement("No", SmallHei);
+            c.AddParagraph("供应商：", SmallHei);
+            c.AddElement("Supplier", SmallHei);
+            c.AddParagraph("送货单号：", SmallHei);
+            c.AddElement("No", SmallHei);
         });
 
         // 中：送货单，二号黑体居中
-        layout.AddCell(c =>
+        h.AddCell(c => c.AddParagraph("送货单", new TextFormat
         {
-            if (c is ITextFormatBuilder tf)
-            {
-                tf.AddParagraph("送货单", new TextFormat
-                {
-                    FontName = "黑体",
-                    SizePt = 22,
-                    Bold = true,
-                    Alignment = TextAlignment.Center,
-                });
-            }
-        });
+            FontName = "黑体",
+            SizePt = 22,
+            Bold = true,
+            Alignment = TextAlignment.Center,
+        }));
 
         // 右：二维码（右对齐，占位图外包 SDT，填充时换成真实二维码）
-        layout.AddCell(c =>
+        h.AddCell(c =>
         {
-            if (c is ITextFormatBuilder tf)
-            {
-                tf.AddParagraph(string.Empty, new TextFormat { Alignment = TextAlignment.Right });
-            }
-
+            c.AddParagraph(string.Empty, new TextFormat { Alignment = TextAlignment.Right });
             c.AddImage("QRCode", widthInches: 1.0, heightInches: 1.0);
         });
     }
 
-    private static void BuildFooter(ITemplateBuilder f)
+    private static void BuildFooter(WordTemplateBuilder f)
     {
-        if (f is not ILayoutTableBuilder layout)
+        f.AddLayoutTable(1, 3, new TableFormat
         {
-            return;
-        }
-
-        layout.AddLayoutTable(1, 3, new TableFormat { Bordered = false, ColumnWidthsCm = [6.5, 6.0, 6.5] });
+            Bordered = false,
+            ColumnWidthsCm = [6.5, 6.0, 6.5],
+            VerticalAlignment = CellVerticalAlignment.Bottom,
+        });
 
         // 左：两层（打印时间 / 打印人），小四黑体
-        layout.AddCell(c =>
+        f.AddCell(c =>
         {
-            if (c is not ITextFormatBuilder tf)
-            {
-                return;
-            }
-
-            tf.AddParagraph("打印时间：", SmallHei);
-            tf.AddElement("PrintTime", SmallHei);
-            tf.AddParagraph("打印人：", SmallHei);
-            tf.AddElement("Printer", SmallHei);
+            c.AddParagraph("打印时间：", SmallHei);
+            c.AddElement("PrintTime", SmallHei);
+            c.AddParagraph("打印人：", SmallHei);
+            c.AddElement("Printer", SmallHei);
         });
 
-        // 中：页码 1/1，五号黑体
-        layout.AddCell(c =>
+        // 中：第x页，总x页，五号黑体
+        f.AddCell(c =>
         {
-            if (c is ITextFormatBuilder tf)
-            {
-                tf.AddParagraph(string.Empty, PageNoFormat);
-            }
-
-            if (c is IPageNumberBuilder pageNumber)
-            {
-                pageNumber.AddPageNumber("/", PageNoFormat);
-            }
+            c.AddParagraph(string.Empty, PageNoFormat);
+            c.AddPageNumber(format: PageNoFormat);
         });
 
-        // 右：两层（到货时间 / 收货人），小四黑体右对齐
-        layout.AddCell(c =>
+        // 右：两层（收货时间 / 收货人），只划横线预留手写，不填值、不进契约
+        f.AddCell(c =>
         {
-            if (c is not ITextFormatBuilder tf)
-            {
-                return;
-            }
-
-            tf.AddParagraph("到货时间：", SmallHeiRight);
-            tf.AddElement("ArrivalTime", SmallHeiRight);
-            tf.AddParagraph("收货人：", SmallHeiRight);
-            tf.AddElement("Receiver", SmallHeiRight);
+            c.AddParagraph("收货时间：", SmallHeiRight);
+            c.AddText("____________", HandWriteBlank);
+            c.AddParagraph("收货人：", SmallHeiRight);
+            c.AddText("____________", HandWriteBlank);
         });
     }
 
@@ -214,8 +174,6 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                 ["No"] = data.No,
                 ["PrintTime"] = data.PrintTime,
                 ["Printer"] = data.Printer,
-                ["ArrivalTime"] = data.ArrivalTime,
-                ["Receiver"] = data.Receiver,
                 ["QRCode"] = string.IsNullOrEmpty(data.QrContent) ? null : QrCodeGenerator.CreatePng(data.QrContent),
             },
             Tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>
@@ -243,8 +201,6 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                 : string.Empty,
             PrintTime = GetDateTime(data, "PrintTime"),
             Printer = GetString(data, "Printer"),
-            ArrivalTime = GetNullableDateTime(data, "ArrivalTime"),
-            Receiver = GetString(data, "Receiver"),
             Lines = data.Tables.TryGetValue("Lines", out var lines)
                 ? lines
                     .Select(row => new DeliveryOrderLine
@@ -263,7 +219,4 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 
     private static DateTime GetDateTime(FillData data, string key)
         => data.Values.TryGetValue(key, out var value) && value is DateTime dateTime ? dateTime : default;
-
-    private static DateTime? GetNullableDateTime(FillData data, string key)
-        => data.Values.TryGetValue(key, out var value) && value is DateTime dateTime ? dateTime : null;
 }

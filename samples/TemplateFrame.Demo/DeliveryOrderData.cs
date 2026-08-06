@@ -26,9 +26,5 @@ public sealed record DeliveryOrderData
 
     public string Printer { get; init; } = string.Empty;
 
-    public DateTime? ArrivalTime { get; init; }
-
-    public string Receiver { get; init; } = string.Empty;
-
     public IReadOnlyList<DeliveryOrderLine> Lines { get; init; } = [];
 }

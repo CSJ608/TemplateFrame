@@ -73,7 +73,7 @@ internal static class Program
         using (var filledStream = File.OpenRead(filledPath))
         {
             var parsed = service.Parse(filledStream);
-            Console.WriteLine($"\n[5] Parse 回读：供应商={parsed.Supplier} 单号={parsed.No} 打印={parsed.PrintTime:yyyy-MM-dd HH:mm} 打印人={parsed.Printer} 收货人={parsed.Receiver} 明细 {parsed.Lines.Count} 行");
+            Console.WriteLine($"\n[5] Parse 回读：供应商={parsed.Supplier} 单号={parsed.No} 打印={parsed.PrintTime:yyyy-MM-dd HH:mm} 打印人={parsed.Printer} 明细 {parsed.Lines.Count} 行");
             foreach (var line in parsed.Lines)
             {
                 Console.WriteLine($"      - 行号 {line.RowNo} {line.MaterialName} × {line.Qty} {line.Unit}");
@@ -89,8 +89,6 @@ internal static class Program
             QrContent = "DO|DO202608060001",
             PrintTime = new DateTime(2026, 8, 7, 10, 30, 0),
             Printer = "王芳",
-            ArrivalTime = new DateTime(2026, 8, 8, 9, 0, 0),
-            Receiver = "陈磊",
             Lines =
             [
                 new DeliveryOrderLine { RowNo = 1, MaterialName = "铝型材 6063-T5", Qty = 120m, Unit = "支" },
