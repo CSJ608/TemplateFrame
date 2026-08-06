@@ -7,7 +7,7 @@ internal static class Program
 {
     private static void Main(string[] args)
     {
-        var service = new DemoOrderTemplateService();
+        var service = new DeliveryOrderTemplateService();
 
         Console.WriteLine($"契约：{service.Contract.Name} v{service.Contract.Version}，元素 {service.Contract.Elements.Count} 个");
         foreach (var element in service.Contract.Elements)
@@ -19,10 +19,10 @@ internal static class Program
             ? args[0]
             : Path.Combine(Path.GetTempPath(), "TemplateFrame-Demo");
         Directory.CreateDirectory(dir);
-        var templatePath = Path.Combine(dir, "DemoOrder-template.docx");
-        var filledPath = Path.Combine(dir, "DemoOrder-filled.docx");
+        var templatePath = Path.Combine(dir, "DeliveryOrder-template.docx");
+        var filledPath = Path.Combine(dir, "DeliveryOrder-filled.docx");
 
-        // 1) 生成初始模板（含内容控件 SDT）
+        // 1) 生成初始模板（A5 横版，页眉/页脚 + 内容控件 SDT）
         using (var template = service.BuildInitialTemplateFile())
         {
             File.WriteAllBytes(templatePath, ReadAllBytes(template));
@@ -60,7 +60,7 @@ internal static class Program
             Console.WriteLine($"      - [{issue.Code}] {issue.Message}（{issue.Severity}）");
         }
 
-        // 4) Fill：模板 + 强类型数据 → 填充后的 .docx（文本/图片/表格行）
+        // 4) Fill：模板 + 强类型数据 → 填充后的 .docx（文本/二维码/表格行）
         using (var templateStream = File.OpenRead(templatePath))
         using (var filled = service.Fill(templateStream, order))
         {
@@ -73,26 +73,29 @@ internal static class Program
         using (var filledStream = File.OpenRead(filledPath))
         {
             var parsed = service.Parse(filledStream);
-            Console.WriteLine($"\n[5] Parse 回读：单号={parsed.OrderNo} 客户={parsed.CustomerName} 日期={parsed.OrderDate:yyyy-MM-dd} 金额={parsed.TotalAmount:N2} 明细 {parsed.Lines.Count} 行");
+            Console.WriteLine($"\n[5] Parse 回读：供应商={parsed.Supplier} 单号={parsed.No} 打印={parsed.PrintTime:yyyy-MM-dd HH:mm} 打印人={parsed.Printer} 收货人={parsed.Receiver} 明细 {parsed.Lines.Count} 行");
             foreach (var line in parsed.Lines)
             {
-                Console.WriteLine($"      - {line.MaterialCode} {line.MaterialName} × {line.Quantity}");
+                Console.WriteLine($"      - 行号 {line.RowNo} {line.MaterialName} × {line.Qty} {line.Unit}");
             }
         }
     }
 
-    private static DemoOrderData CreateDemoOrder()
+    private static DeliveryOrderData CreateDemoOrder()
         => new()
         {
-            OrderNo = "PO-2026-0807-001",
-            CustomerName = "科力尔电机",
-            OrderDate = new DateTime(2026, 8, 7),
-            TotalAmount = 2468.00m,
+            Supplier = "科力尔电机",
+            No = "SO-2026-0807-001",
+            QrContent = "https://example.com/delivery/SO-2026-0807-001",
+            PrintTime = new DateTime(2026, 8, 7, 10, 30, 0),
+            Printer = "张三",
+            ArrivalTime = new DateTime(2026, 8, 8, 9, 0, 0),
+            Receiver = "李四",
             Lines =
             [
-                new DemoOrderLine { MaterialCode = "M-1001", MaterialName = "伺服电机", Quantity = 12m },
-                new DemoOrderLine { MaterialCode = "M-1002", MaterialName = "减速机", Quantity = 6m },
-                new DemoOrderLine { MaterialCode = "M-1003", MaterialName = "联轴器", Quantity = 30m },
+                new DeliveryOrderLine { RowNo = 1, MaterialName = "伺服电机", Qty = 12m, Unit = "台" },
+                new DeliveryOrderLine { RowNo = 2, MaterialName = "减速机", Qty = 6m, Unit = "台" },
+                new DeliveryOrderLine { RowNo = 3, MaterialName = "联轴器", Qty = 30m, Unit = "个" },
             ],
         };
 
