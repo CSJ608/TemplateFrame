@@ -58,6 +58,21 @@ gh run list --workflow publish-nuget.yml
 - 每次改动记录到 `## [Unreleased]` 段，按 `新增` / `修复` / `变更` 分类。
 - 发版时 `release.yml` 自动提取当前 tag 对应版本段落作为 Release 正文；找不到则回退到 GitHub 自动生成。
 
+## 首次发布检查清单（迭代 6 就绪后执行）
+
+发布前请按顺序确认：
+
+1. **工作流已就绪**：`.github/workflows/release.yml` 与 `publish-nuget.yml` 已在仓库（触发条件：`v*` tag）。
+2. **一次性前置配置**（浏览器）：
+   - nuget.org → Account → API Keys → **Trusted Publishers** → Register Publisher（仓库 `CSJ608/TemplateFrame`，subject `repo:CSJ608/TemplateFrame:ref:refs/tags/v*`）；
+   - GitHub 仓库 → Settings → Secrets and variables → Actions → **Variables** → 新建 `NUGET_USER`（你的 nuget.org 用户名）。
+3. **CHANGELOG**：把 `## [Unreleased]` 改为 `## [1.0.0]`（release.yml 提取该段作为 Release 正文）。
+4. **版本号一致**：csproj `<Version>` 与 git tag 一致（当前 `1.0.0` ↔ `v1.0.0`）。
+5. **本地兜底**：`dotnet build TemplateFrame.slnx` + `dotnet test TemplateFrame.slnx` + `dotnet pack` 均通过。
+6. **打 tag 发布**：`git tag -a v1.0.0 -m "..." && git push origin v1.0.0`（触发 release + publish-nuget；push 前请确认前置配置已完成）。
+
+> 注意：前置配置（Trusted Publisher / NUGET_USER）需仓库账号操作，未完成前**不要**推送 `v*` tag，否则 publish-nuget 会失败。
+
 ## 本地验证（迭代 6 前的兜底）
 
 ```bash
