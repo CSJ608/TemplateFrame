@@ -8,7 +8,7 @@ namespace TemplateFrame.Demo;
 
 /// <summary>
 /// 送货单示例场景服务：演示"业务服务 = 声明契约 + 组装版式 + 手写映射"的三层用法，
-/// 以及能力接口（builder is I...）的按需探测：页面设置 / 页眉页脚 / 布局表 / 文本格式 / 页码。
+/// 以及能力接口（builder is I...）的按需探测：页面设置 / 页眉页脚 / 布局表 / 文本格式 / 页码 / 表格列宽。
 /// A5 横版；页眉左中右（供应商/单号 | 送货单 | 二维码）；正文明细表（行号/物料名称/数量/单位）；
 /// 页脚左中右（打印时间/打印人 | 1/1 | 到货时间/收货人）。
 /// </summary>
@@ -31,7 +31,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
             Elements =
             [
                 new TextElement { Key = "Supplier", DisplayName = "供应商", Required = true },
-                new TextElement { Key = "No", DisplayName = "单号", Required = true },
+                new TextElement { Key = "No", DisplayName = "送货单号", Required = true },
                 new TextElement
                 {
                     Key = "PrintTime",
@@ -56,10 +56,10 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                     DisplayName = "明细行",
                     Columns =
                     [
-                        new TextElement { Key = "RowNo", DisplayName = "行号", ValueType = typeof(int) },
-                        new TextElement { Key = "MaterialName", DisplayName = "物料名称" },
-                        new TextElement { Key = "Qty", DisplayName = "数量", ValueType = typeof(decimal), Format = "N2" },
-                        new TextElement { Key = "Unit", DisplayName = "单位" },
+                        new TextElement { Key = "行号", DisplayName = "行号", ValueType = typeof(int) },
+                        new TextElement { Key = "物料名称", DisplayName = "物料名称" },
+                        new TextElement { Key = "数量", DisplayName = "数量", ValueType = typeof(decimal), Format = "N2" },
+                        new TextElement { Key = "单位", DisplayName = "单位" },
                     ],
                 },
                 new ImageElement { Key = "QRCode", DisplayName = "二维码", PictureType = "png" },
@@ -89,14 +89,15 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
             headerFooter.AddFooter(BuildFooter);
         }
 
-        // 正文明细表：居中，黑体四号
+        // 正文明细表：居中，黑体四号，显式列宽
         if (builder is ITableFormatBuilder table)
         {
-            table.AddTable("Lines", ["RowNo", "MaterialName", "Qty", "Unit"], new TableFormat
+            table.AddTable("Lines", ["行号", "物料名称", "数量", "单位"], new TableFormat
             {
                 HeaderFormat = new TextFormat { FontName = "黑体", SizePt = 14, Bold = true },
                 CellFormat = new TextFormat { FontName = "黑体", SizePt = 14 },
                 Alignment = TextAlignment.Center,
+                ColumnWidthsCm = [1.8, 8.5, 3.2, 3.0],
             });
         }
     }
@@ -108,7 +109,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
             return;
         }
 
-        layout.AddLayoutTable(1, 3, new TableFormat { Bordered = false });
+        layout.AddLayoutTable(1, 3, new TableFormat { Bordered = false, ColumnWidthsCm = [6.5, 6.0, 6.5] });
 
         // 左：两层（供应商 / 单号），小四黑体左对齐
         layout.AddCell(c =>
@@ -120,7 +121,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 
             tf.AddParagraph("供应商：", SmallHei);
             tf.AddElement("Supplier", SmallHei);
-            tf.AddParagraph("单号：", SmallHei);
+            tf.AddParagraph("送货单号：", SmallHei);
             tf.AddElement("No", SmallHei);
         });
 
@@ -139,8 +140,16 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
             }
         });
 
-        // 右：二维码（占位图外包 SDT，填充时换成真实二维码）
-        layout.AddCell(c => c.AddImage("QRCode", widthInches: 1.0, heightInches: 1.0));
+        // 右：二维码（右对齐，占位图外包 SDT，填充时换成真实二维码）
+        layout.AddCell(c =>
+        {
+            if (c is ITextFormatBuilder tf)
+            {
+                tf.AddParagraph(string.Empty, new TextFormat { Alignment = TextAlignment.Right });
+            }
+
+            c.AddImage("QRCode", widthInches: 1.0, heightInches: 1.0);
+        });
     }
 
     private static void BuildFooter(ITemplateBuilder f)
@@ -150,7 +159,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
             return;
         }
 
-        layout.AddLayoutTable(1, 3, new TableFormat { Bordered = false });
+        layout.AddLayoutTable(1, 3, new TableFormat { Bordered = false, ColumnWidthsCm = [6.5, 6.0, 6.5] });
 
         // 左：两层（打印时间 / 打印人），小四黑体
         layout.AddCell(c =>
@@ -214,10 +223,10 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                 ["Lines"] = data.Lines
                     .Select(line => (IReadOnlyDictionary<string, object?>)new Dictionary<string, object?>
                     {
-                        ["RowNo"] = line.RowNo,
-                        ["MaterialName"] = line.MaterialName,
-                        ["Qty"] = line.Qty,
-                        ["Unit"] = line.Unit,
+                        ["行号"] = line.RowNo,
+                        ["物料名称"] = line.MaterialName,
+                        ["数量"] = line.Qty,
+                        ["单位"] = line.Unit,
                     })
                     .ToList(),
             },
@@ -240,10 +249,10 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                 ? lines
                     .Select(row => new DeliveryOrderLine
                     {
-                        RowNo = row.TryGetValue("RowNo", out var rowNo) && rowNo is int rowNoValue ? rowNoValue : 0,
-                        MaterialName = row.TryGetValue("MaterialName", out var name) ? name as string ?? string.Empty : string.Empty,
-                        Qty = row.TryGetValue("Qty", out var qty) && qty is decimal qtyValue ? qtyValue : 0m,
-                        Unit = row.TryGetValue("Unit", out var unit) ? unit as string ?? string.Empty : string.Empty,
+                        RowNo = row.TryGetValue("行号", out var rowNo) && rowNo is int rowNoValue ? rowNoValue : 0,
+                        MaterialName = row.TryGetValue("物料名称", out var name) ? name as string ?? string.Empty : string.Empty,
+                        Qty = row.TryGetValue("数量", out var qty) && qty is decimal qtyValue ? qtyValue : 0m,
+                        Unit = row.TryGetValue("单位", out var unit) ? unit as string ?? string.Empty : string.Empty,
                     })
                     .ToList()
                 : [],

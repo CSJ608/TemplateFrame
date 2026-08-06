@@ -84,18 +84,18 @@ internal static class Program
     private static DeliveryOrderData CreateDemoOrder()
         => new()
         {
-            Supplier = "科力尔电机",
-            No = "SO-2026-0807-001",
-            QrContent = "https://example.com/delivery/SO-2026-0807-001",
+            Supplier = "华宇精密制造有限公司",
+            No = "DO202608060001",
+            QrContent = "DO|DO202608060001",
             PrintTime = new DateTime(2026, 8, 7, 10, 30, 0),
-            Printer = "张三",
+            Printer = "王芳",
             ArrivalTime = new DateTime(2026, 8, 8, 9, 0, 0),
-            Receiver = "李四",
+            Receiver = "陈磊",
             Lines =
             [
-                new DeliveryOrderLine { RowNo = 1, MaterialName = "伺服电机", Qty = 12m, Unit = "台" },
-                new DeliveryOrderLine { RowNo = 2, MaterialName = "减速机", Qty = 6m, Unit = "台" },
-                new DeliveryOrderLine { RowNo = 3, MaterialName = "联轴器", Qty = 30m, Unit = "个" },
+                new DeliveryOrderLine { RowNo = 1, MaterialName = "铝型材 6063-T5", Qty = 120m, Unit = "支" },
+                new DeliveryOrderLine { RowNo = 2, MaterialName = "不锈钢螺栓 M8×30", Qty = 500m, Unit = "个" },
+                new DeliveryOrderLine { RowNo = 3, MaterialName = "密封圈 Φ25", Qty = 200m, Unit = "只" },
             ],
         };
 
