@@ -1,6 +1,6 @@
 # 打标签 v* 时：构建 + 测试 + 打包，创建 GitHub Release 并附 nupkg/snupkg。
 # Release 正文优先从 CHANGELOG.md 提取当前版本段落；找不到时回退到 GitHub 自动生成。
-# 参考：C:\work\Multiway\product\StreamFrame\.github\workflows\release.yml
+# 参考：StreamFrame 的 .github/workflows/release.yml
 name: release
 
 on:

@@ -2,7 +2,7 @@
 # 前置（一次性，浏览器操作）：
 #   1. nuget.org 注册本仓库为 trusted publisher（见 docs/PUBLISHING.md）
 #   2. GitHub 仓库 Settings → Secrets and variables → Actions → Variables 添加 NUGET_USER
-# 参考：C:\work\Multiway\product\StreamFrame\.github\workflows\publish-nuget.yml
+# 参考：StreamFrame 的 .github/workflows/publish-nuget.yml
 name: publish-nuget
 
 on:

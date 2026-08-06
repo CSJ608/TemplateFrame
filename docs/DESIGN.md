@@ -49,7 +49,7 @@ TemplateFrame 是它的演进：**把契约显式化、把模板从"手写占位
 | **业务场景服务**（业务应用内） | 每个场景一个强类型服务，如 `ReceivingOrderTemplateService : TemplateService<ReceivingOrderData>` | 强类型，声明契约 + 组装版式 + 提供 `Fill` / `Parse` / `Validate` |
 
 ```
-业务应用（Wms4 等）
+业务应用（各业务系统）
   ReceivingOrderTemplateService : TemplateService<ReceivingOrderData>
     DefineContract() / BuildInitialTemplate() / Fill(强类型) / Parse(强类型) / Validate
         │
