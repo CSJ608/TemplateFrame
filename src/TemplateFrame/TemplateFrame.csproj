@@ -1,0 +1,13 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>TemplateFrame</RootNamespace>
+    <AssemblyName>TemplateFrame</AssemblyName>
+    <Description>模板 ⇄ 数据契约引擎：契约元素模型 + 数据形状 + Builder 抽象（格式无关基础包）</Description>
+  </PropertyGroup>
+
+</Project>
