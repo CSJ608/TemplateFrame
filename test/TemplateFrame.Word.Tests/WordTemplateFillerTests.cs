@@ -367,4 +367,15 @@ public sealed class FillTestService : TemplateService<FillTestOrder>
                     .ToList(),
             },
         };
+
+    protected override FillTestOrder MapFromData(FillData data)
+        => new(
+            data.Values.TryGetValue("OrderNo", out var orderNo) ? orderNo as string ?? string.Empty : string.Empty,
+            data.Tables.TryGetValue("Lines", out var lines)
+                ? lines
+                    .Select(row => new FillTestLine(
+                        row.TryGetValue("MC", out var mc) ? mc as string ?? string.Empty : string.Empty,
+                        row.TryGetValue("Qty", out var qty) ? qty as string ?? string.Empty : string.Empty))
+                    .ToList()
+                : []);
 }
