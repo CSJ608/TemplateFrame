@@ -28,18 +28,8 @@ public sealed class WordTemplateEngine : ITemplateEngine
     }
 
     /// <inheritdoc />
-    public Stream BuildInitialTemplate(TemplateContract contract, Action<ITemplateBuilder> compose)
-    {
-        ArgumentNullException.ThrowIfNull(contract);
-        ArgumentNullException.ThrowIfNull(compose);
-
-        using var builder = new WordTemplateBuilder();
-        compose(builder);
-        var stream = new MemoryStream();
-        builder.Save(stream);
-        stream.Position = 0;
-        return stream;
-    }
+    public ITemplateBuilder CreateBuilder()
+        => new WordTemplateBuilder();
 
     /// <inheritdoc />
     public TemplateValidationResult Validate(Stream template, TemplateContract contract)

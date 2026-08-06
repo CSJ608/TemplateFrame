@@ -1,8 +1,21 @@
 namespace TemplateFrame.Builder;
 
+/// <summary>单元格垂直对齐。</summary>
+public enum CellVerticalAlignment
+{
+    /// <summary>顶部对齐。</summary>
+    Top,
+
+    /// <summary>垂直居中。</summary>
+    Middle,
+
+    /// <summary>底部对齐（多栏内容"有底"对齐常用）。</summary>
+    Bottom,
+}
+
 /// <summary>
-/// 表格格式（格式无关）：表头/单元格文本格式、是否有边框、表格整体对齐。
-/// 由支持 <see cref="ITableFormatBuilder"/> 的插件映射到宿主格式。
+/// 表格格式（格式无关）：表头/单元格文本格式、是否有边框、表格整体对齐、单元格垂直对齐、显式列宽。
+/// 由具体插件构建器映射到宿主格式。
 /// </summary>
 public sealed record TableFormat
 {
@@ -20,4 +33,7 @@ public sealed record TableFormat
 
     /// <summary>各列宽度（厘米），null 表示宿主自动分配；显式列宽让表格更整齐。</summary>
     public IReadOnlyList<double?>? ColumnWidthsCm { get; init; }
+
+    /// <summary>单元格垂直对齐，null 表示宿主默认（顶部）。</summary>
+    public CellVerticalAlignment? VerticalAlignment { get; init; }
 }

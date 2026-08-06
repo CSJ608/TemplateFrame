@@ -11,21 +11,12 @@ using TextAlign = TemplateFrame.Builder.TextAlignment;
 namespace TemplateFrame.Word;
 
 /// <summary>
-/// Word 版式组装器：把业务服务声明的版式（标题 / 静态文本 / 元素 / 表格 / 图片占位 / 页眉页脚 / 页面设置）
-/// 翻译成带内容控件（SDT）的 .docx。只支持 MS Office 的 .docx（见设计文档 §1.4）。
-/// tag 全局唯一、每个 SDT 带唯一 w:id。
-/// 能力接口设计：核心 <see cref="ITemplateBuilder"/> 保持极薄，页面/页眉页脚/文本格式/表格格式/布局表/页码
-/// 作为可选能力接口由本类实现，业务服务按需探测（builder is I...）。
+/// Word 版式构建器：业务服务声明 <c>TemplateService&lt;TData, WordTemplateBuilder&gt;</c> 后，
+/// 在无参数 <c>BuildInitialTemplate()</c> 里直接调用本类的全部能力（页面设置 / 页眉页脚 / 布局表 /
+/// 文本格式 / 表格格式 / 图片 / 页码域），自由度最高；框架只认 <see cref="ITemplateBuilder.Save"/>。
+/// tag 全局唯一、每个 SDT 带唯一 w:id（正文/页眉/页脚/单元格共享分配器）。
 /// </summary>
-public sealed class WordTemplateBuilder
-    : ITemplateBuilder,
-        IPageSetupBuilder,
-        IHeaderFooterBuilder,
-        ITextFormatBuilder,
-        ITableFormatBuilder,
-        ILayoutTableBuilder,
-        IPageNumberBuilder,
-        IDisposable
+public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 {
     /// <summary>内置占位图（浅灰棋盘 240x120 PNG，base64）。</summary>
     private const string PlaceholderPngBase64 =
@@ -71,71 +62,15 @@ public sealed class WordTemplateBuilder
         _pageSetup = owner._pageSetup;
     }
 
-    /// <inheritdoc />
-    public ITemplateBuilder AddParagraph(string text, string? style = null)
-    {
-        var paragraph = new Paragraph(CreateRun(text, CreateStyleRunProperties(style)));
-        _container.Append(paragraph);
-        _currentParagraph = paragraph;
-        return this;
-    }
-
-    /// <inheritdoc />
-    public ITemplateBuilder AddText(string text)
-    {
-        EnsureParagraph();
-        _currentParagraph!.Append(CreateRun(text));
-        return this;
-    }
-
-    /// <inheritdoc />
-    public ITemplateBuilder AddElement(string key)
-    {
-        EnsureParagraph();
-        _currentParagraph!.Append(CreateTextSdt(key));
-        return this;
-    }
-
-    /// <inheritdoc />
-    public ITemplateBuilder AddStaticText(string text)
-        => AddParagraph(text);
-
-    /// <inheritdoc />
-    public ITemplateBuilder AddTable(string key, IReadOnlyList<string> columns, string? headerStyle = null)
-    {
-        AddTableCore(key, columns, headerStyle, format: null);
-        return this;
-    }
-
-    /// <inheritdoc />
-    public ITemplateBuilder AddImage(string key, string? placeholderPath = null, double? widthInches = null, double? heightInches = null)
-    {
-        EnsureParagraph();
-
-        var (bytes, extension) = LoadPlaceholder(placeholderPath);
-        var relId = AddImagePart(bytes, extension);
-        var run = new Run(CreateDrawing(relId, widthInches, heightInches, extension));
-
-        var sdt = new SdtRun(
-            new SdtProperties(
-                new SdtId { Val = _ids.Next() },
-                new Tag { Val = key },
-                new SdtAlias { Val = key }),
-            new SdtContentRun(run));
-
-        _currentParagraph!.Append(sdt);
-        return this;
-    }
-
-    /// <inheritdoc />
-    public IPageSetupBuilder SetPageSetup(PageSetup setup)
+    /// <summary>设置页面：纸张规格 + 方向 + 可选边距（A4/A5、横/纵）。</summary>
+    public WordTemplateBuilder SetPageSetup(PageSetup setup)
     {
         _pageSetup = setup ?? throw new ArgumentNullException(nameof(setup));
         return this;
     }
 
-    /// <inheritdoc />
-    public void AddHeader(Action<ITemplateBuilder> compose)
+    /// <summary>添加页眉（每节一个 default 引用），内容用同一构建器能力组装。</summary>
+    public void AddHeader(Action<WordTemplateBuilder> compose)
     {
         ArgumentNullException.ThrowIfNull(compose);
         var headerPart = _mainPart.AddNewPart<HeaderPart>();
@@ -144,8 +79,8 @@ public sealed class WordTemplateBuilder
         AddPartReference(new HeaderReference { Type = HeaderFooterValues.Default, Id = _mainPart.GetIdOfPart(headerPart) });
     }
 
-    /// <inheritdoc />
-    public void AddFooter(Action<ITemplateBuilder> compose)
+    /// <summary>添加页脚（每节一个 default 引用），内容用同一构建器能力组装。</summary>
+    public void AddFooter(Action<WordTemplateBuilder> compose)
     {
         ArgumentNullException.ThrowIfNull(compose);
         var footerPart = _mainPart.AddNewPart<FooterPart>();
@@ -154,8 +89,17 @@ public sealed class WordTemplateBuilder
         AddPartReference(new FooterReference { Type = HeaderFooterValues.Default, Id = _mainPart.GetIdOfPart(footerPart) });
     }
 
-    /// <inheritdoc />
-    public ITextFormatBuilder AddParagraph(string text, TextFormat format)
+    /// <summary>追加一个带样式的段落（style：如 "Title" / "Heading1" / "Normal" 或 null）。</summary>
+    public WordTemplateBuilder AddParagraph(string text, string? style = null)
+    {
+        var paragraph = new Paragraph(CreateRun(text, CreateStyleRunProperties(style)));
+        _container.Append(paragraph);
+        _currentParagraph = paragraph;
+        return this;
+    }
+
+    /// <summary>追加一个带文本格式的段落（字体/字号/加粗/对齐）。</summary>
+    public WordTemplateBuilder AddParagraph(string text, TextFormat format)
     {
         var paragraph = new Paragraph(CreateRun(text, CreateRunProperties(format)));
         ApplyAlignment(paragraph, format.Alignment);
@@ -164,31 +108,97 @@ public sealed class WordTemplateBuilder
         return this;
     }
 
-    /// <inheritdoc />
-    public ITextFormatBuilder AddText(string text, TextFormat format)
+    /// <summary>在当前段落追加静态文本。</summary>
+    public WordTemplateBuilder AddText(string text)
+    {
+        EnsureParagraph();
+        _currentParagraph!.Append(CreateRun(text));
+        return this;
+    }
+
+    /// <summary>在当前段落追加带格式的静态文本。</summary>
+    public WordTemplateBuilder AddText(string text, TextFormat format)
     {
         EnsureParagraph();
         _currentParagraph!.Append(CreateRun(text, CreateRunProperties(format)));
         return this;
     }
 
-    /// <inheritdoc />
-    public ITextFormatBuilder AddElement(string key, TextFormat format)
+    /// <summary>在当前段落追加一个文本元素（内容控件，tag = key）。</summary>
+    public WordTemplateBuilder AddElement(string key)
+    {
+        EnsureParagraph();
+        _currentParagraph!.Append(CreateTextSdt(key));
+        return this;
+    }
+
+    /// <summary>在当前段落追加一个带格式的文本元素（内容控件，tag = key）。</summary>
+    public WordTemplateBuilder AddElement(string key, TextFormat format)
     {
         EnsureParagraph();
         _currentParagraph!.Append(CreateTextSdt(key, format));
         return this;
     }
 
-    /// <inheritdoc />
-    ITableFormatBuilder ITableFormatBuilder.AddTable(string key, IReadOnlyList<string> columns, TableFormat? format)
+    /// <summary>追加一个独立段落，内容为静态文本（如签字行）。</summary>
+    public WordTemplateBuilder AddStaticText(string text)
+        => AddParagraph(text);
+
+    /// <summary>
+    /// 追加表格：首行表头（静态文本），第二行示例行（每格一个内容控件，tag = 列 Key）。
+    /// <paramref name="format"/> 控制表头/单元格格式、有无边框、对齐、列宽、垂直对齐；
+    /// <paramref name="headerStyle"/> 是旧式表头样式（仅当 format.HeaderFormat 为空时生效）。
+    /// </summary>
+    public WordTemplateBuilder AddTable(
+        string key,
+        IReadOnlyList<string> columns,
+        TableFormat? format = null,
+        string? headerStyle = null)
     {
-        AddTableCore(key, columns, headerStyle: null, format: format);
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(columns);
+        if (columns.Count == 0)
+        {
+            throw new ArgumentException("表格至少需要一列。", nameof(columns));
+        }
+
+        var table = new Table();
+        table.Append(CreateTableProperties(format));
+        table.Append(CreateTableGrid(columns.Count, format?.ColumnWidthsCm));
+
+        // 表头行：静态文本
+        var headerRow = new TableRow();
+        for (var i = 0; i < columns.Count; i++)
+        {
+            var column = columns[i];
+            var headerRun = format?.HeaderFormat is null
+                ? CreateRun(column, CreateStyleRunProperties(headerStyle))
+                : CreateRun(column, CreateRunProperties(format.HeaderFormat));
+            headerRow.Append(CreateCell(new Paragraph(headerRun), GetColumnWidth(format, i), format?.VerticalAlignment));
+        }
+
+        table.Append(headerRow);
+
+        // 示例数据行：每格一个内容控件（tag = 列 Key）
+        var dataRow = new TableRow();
+        for (var i = 0; i < columns.Count; i++)
+        {
+            var column = columns[i];
+            dataRow.Append(CreateCell(
+                new Paragraph(CreateTextSdt(column, format?.CellFormat)),
+                GetColumnWidth(format, i),
+                format?.VerticalAlignment));
+        }
+
+        table.Append(dataRow);
+
+        _container.Append(table);
+        _currentParagraph = null;
         return this;
     }
 
-    /// <inheritdoc />
-    public ILayoutTableBuilder AddLayoutTable(int rows, int columns, TableFormat? format = null)
+    /// <summary>开始一个布局表格（如页眉/页脚"左中右"三栏），之后用 <see cref="AddCell"/> 按行优先填充。</summary>
+    public WordTemplateBuilder AddLayoutTable(int rows, int columns, TableFormat? format = null)
     {
         if (rows <= 0 || columns <= 0)
         {
@@ -203,7 +213,7 @@ public sealed class WordTemplateBuilder
             var row = new TableRow();
             for (var c = 0; c < columns; c++)
             {
-                row.Append(CreateCell(new Paragraph(), GetColumnWidth(format, c)));
+                row.Append(CreateCell(new Paragraph(), GetColumnWidth(format, c), format?.VerticalAlignment));
             }
 
             table.Append(row);
@@ -218,8 +228,8 @@ public sealed class WordTemplateBuilder
         return this;
     }
 
-    /// <inheritdoc />
-    public ILayoutTableBuilder AddCell(Action<ITemplateBuilder> compose)
+    /// <summary>填充当前布局表格单元格（从 (0,0) 开始，行优先；到列尾自动换行）。</summary>
+    public WordTemplateBuilder AddCell(Action<WordTemplateBuilder> compose)
     {
         ArgumentNullException.ThrowIfNull(compose);
         if (_layoutTable is null)
@@ -246,20 +256,47 @@ public sealed class WordTemplateBuilder
         return this;
     }
 
-    /// <inheritdoc />
-    public void AddPageNumber(string separator = "/", TextFormat? format = null)
+    /// <summary>追加图片占位：占位图外包内容控件（tag = key）。</summary>
+    public WordTemplateBuilder AddImage(string key, string? placeholderPath = null, double? widthInches = null, double? heightInches = null)
+    {
+        EnsureParagraph();
+
+        var (bytes, extension) = LoadPlaceholder(placeholderPath);
+        var relId = AddImagePart(bytes, extension);
+        var run = new Run(CreateDrawing(relId, widthInches, heightInches, extension));
+
+        var sdt = new SdtRun(
+            new SdtProperties(
+                new SdtId { Val = _ids.Next() },
+                new Tag { Val = key },
+                new SdtAlias { Val = key }),
+            new SdtContentRun(run));
+
+        _currentParagraph!.Append(sdt);
+        return this;
+    }
+
+    /// <summary>
+    /// 在当前段落追加页码域。默认渲染 "第{page}页，总{total}页"（如 第1页，总1页）；
+    /// <paramref name="pattern"/> 支持 {page} / {total} 占位符。
+    /// </summary>
+    public void AddPageNumber(string pattern = "第{page}页，总{total}页", TextFormat? format = null)
     {
         EnsureParagraph();
         var rPr = CreateRunProperties(format);
-        foreach (var run in CreateFieldRuns("PAGE", "1", rPr))
+        foreach (var (text, instruction) in ParsePagePattern(pattern))
         {
-            _currentParagraph!.Append(run);
-        }
-
-        _currentParagraph!.Append(CreateRun(separator, rPr));
-        foreach (var run in CreateFieldRuns("NUMPAGES", "1", rPr))
-        {
-            _currentParagraph!.Append(run);
+            if (instruction is null)
+            {
+                _currentParagraph!.Append(CreateRun(text, rPr?.CloneNode(true) as RunProperties));
+            }
+            else
+            {
+                foreach (var run in CreateFieldRuns(instruction, "1", rPr))
+                {
+                    _currentParagraph!.Append(run);
+                }
+            }
         }
     }
 
@@ -296,52 +333,6 @@ public sealed class WordTemplateBuilder
             _document.Dispose();
             _stream.Dispose();
         }
-    }
-
-    private void AddTableCore(
-        string key,
-        IReadOnlyList<string> columns,
-        string? headerStyle,
-        TableFormat? format)
-    {
-        ArgumentNullException.ThrowIfNull(key);
-        ArgumentNullException.ThrowIfNull(columns);
-        if (columns.Count == 0)
-        {
-            throw new ArgumentException("表格至少需要一列。", nameof(columns));
-        }
-
-        var table = new Table();
-        table.Append(CreateTableProperties(format));
-        table.Append(CreateTableGrid(columns.Count, format?.ColumnWidthsCm));
-
-        // 表头行：静态文本
-        var headerRow = new TableRow();
-        for (var i = 0; i < columns.Count; i++)
-        {
-            var column = columns[i];
-            var width = GetColumnWidth(format, i);
-            var headerRun = format?.HeaderFormat is null
-                ? CreateRun(column, CreateStyleRunProperties(headerStyle))
-                : CreateRun(column, CreateRunProperties(format.HeaderFormat));
-            headerRow.Append(CreateCell(new Paragraph(headerRun), width));
-        }
-
-        table.Append(headerRow);
-
-        // 示例数据行：每格一个内容控件（tag = 列 Key）
-        var dataRow = new TableRow();
-        for (var i = 0; i < columns.Count; i++)
-        {
-            var column = columns[i];
-            var width = GetColumnWidth(format, i);
-            dataRow.Append(CreateCell(new Paragraph(CreateTextSdt(column, format?.CellFormat)), width));
-        }
-
-        table.Append(dataRow);
-
-        _container.Append(table);
-        _currentParagraph = null;
     }
 
     private void EnsureParagraph()
@@ -441,6 +432,11 @@ public sealed class WordTemplateBuilder
             rPr.Append(new Bold());
         }
 
+        if (format.Underline == true)
+        {
+            rPr.Append(new Underline { Val = UnderlineValues.Single });
+        }
+
         if (format.SizePt.HasValue)
         {
             rPr.Append(new FontSize { Val = ToHalfPoints(format.SizePt.Value) });
@@ -525,17 +521,32 @@ public sealed class WordTemplateBuilder
         return grid;
     }
 
-    private static TableCell CreateCell(Paragraph paragraph, double? widthCm = null)
+    private static TableCell CreateCell(Paragraph paragraph, double? widthCm = null, CellVerticalAlignment? verticalAlignment = null)
     {
         var cell = new TableCell();
-        cell.Append(new TableCellProperties(new TableCellWidth
+        var cellPr = new TableCellProperties();
+        cellPr.Append(new TableCellWidth
         {
             Width = widthCm.HasValue ? CmToDxaString(widthCm.Value) : "0",
             Type = widthCm.HasValue ? TableWidthUnitValues.Dxa : TableWidthUnitValues.Auto,
-        }));
+        });
+        if (verticalAlignment is { } va)
+        {
+            cellPr.Append(new TableCellVerticalAlignment { Val = ToCellVerticalAlignment(va) });
+        }
+
+        cell.Append(cellPr);
         cell.Append(paragraph);
         return cell;
     }
+
+    private static TableVerticalAlignmentValues ToCellVerticalAlignment(CellVerticalAlignment alignment)
+        => alignment switch
+        {
+            CellVerticalAlignment.Middle => TableVerticalAlignmentValues.Center,
+            CellVerticalAlignment.Bottom => TableVerticalAlignmentValues.Bottom,
+            _ => TableVerticalAlignmentValues.Top,
+        };
 
     private static double? GetColumnWidth(TableFormat? format, int index)
         => format?.ColumnWidthsCm is { } widths && index < widths.Count ? widths[index] : null;
@@ -588,6 +599,46 @@ public sealed class WordTemplateBuilder
         return (
             (uint)Math.Round(widthMm / mmPerInch * twipsPerInch),
             (uint)Math.Round(heightMm / mmPerInch * twipsPerInch));
+    }
+
+    private static IEnumerable<(string Text, string? Instruction)> ParsePagePattern(string pattern)
+    {
+        var sb = new System.Text.StringBuilder();
+        for (var i = 0; i < pattern.Length;)
+        {
+            if (pattern.AsSpan(i).StartsWith("{page}"))
+            {
+                if (sb.Length > 0)
+                {
+                    yield return (sb.ToString(), null);
+                    sb.Clear();
+                }
+
+                yield return (string.Empty, "PAGE");
+                i += "{page}".Length;
+            }
+            else if (pattern.AsSpan(i).StartsWith("{total}"))
+            {
+                if (sb.Length > 0)
+                {
+                    yield return (sb.ToString(), null);
+                    sb.Clear();
+                }
+
+                yield return (string.Empty, "NUMPAGES");
+                i += "{total}".Length;
+            }
+            else
+            {
+                sb.Append(pattern[i]);
+                i++;
+            }
+        }
+
+        if (sb.Length > 0)
+        {
+            yield return (sb.ToString(), null);
+        }
     }
 
     private static IEnumerable<Run> CreateFieldRuns(string instruction, string cached, RunProperties? rPr)

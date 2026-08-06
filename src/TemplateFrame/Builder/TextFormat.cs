@@ -15,7 +15,7 @@ public enum TextAlignment
 
 /// <summary>
 /// 文本格式（格式无关，字体名/字号 pt/加粗/段落对齐）。
-/// 由支持 <see cref="ITextFormatBuilder"/> 的插件映射到宿主格式（如 Word 的 rFonts/FontSize/jc）。
+/// 由具体插件构建器映射到宿主格式（如 Word 的 rFonts/FontSize/jc）。
 /// </summary>
 public sealed record TextFormat
 {
@@ -30,4 +30,7 @@ public sealed record TextFormat
 
     /// <summary>段落对齐，null 表示宿主默认。</summary>
     public TextAlignment? Alignment { get; init; }
+
+    /// <summary>是否下划线（手写留白常用），null 表示宿主默认。</summary>
+    public bool? Underline { get; init; }
 }
