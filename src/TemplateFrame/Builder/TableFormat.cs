@@ -17,4 +17,7 @@ public sealed record TableFormat
 
     /// <summary>表格整体对齐（如居中）。</summary>
     public TextAlignment? Alignment { get; init; }
+
+    /// <summary>各列宽度（厘米），null 表示宿主自动分配；显式列宽让表格更整齐。</summary>
+    public IReadOnlyList<double?>? ColumnWidthsCm { get; init; }
 }

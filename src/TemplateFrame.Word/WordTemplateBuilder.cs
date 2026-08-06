@@ -197,13 +197,13 @@ public sealed class WordTemplateBuilder
 
         var table = new Table();
         table.Append(CreateTableProperties(format));
-        table.Append(CreateTableGrid(columns));
+        table.Append(CreateTableGrid(columns, format?.ColumnWidthsCm));
         for (var r = 0; r < rows; r++)
         {
             var row = new TableRow();
             for (var c = 0; c < columns; c++)
             {
-                row.Append(CreateCell(new Paragraph()));
+                row.Append(CreateCell(new Paragraph(), GetColumnWidth(format, c)));
             }
 
             table.Append(row);
@@ -313,25 +313,29 @@ public sealed class WordTemplateBuilder
 
         var table = new Table();
         table.Append(CreateTableProperties(format));
-        table.Append(CreateTableGrid(columns.Count));
+        table.Append(CreateTableGrid(columns.Count, format?.ColumnWidthsCm));
 
         // 表头行：静态文本
         var headerRow = new TableRow();
-        foreach (var column in columns)
+        for (var i = 0; i < columns.Count; i++)
         {
+            var column = columns[i];
+            var width = GetColumnWidth(format, i);
             var headerRun = format?.HeaderFormat is null
                 ? CreateRun(column, CreateStyleRunProperties(headerStyle))
                 : CreateRun(column, CreateRunProperties(format.HeaderFormat));
-            headerRow.Append(CreateCell(new Paragraph(headerRun)));
+            headerRow.Append(CreateCell(new Paragraph(headerRun), width));
         }
 
         table.Append(headerRow);
 
         // 示例数据行：每格一个内容控件（tag = 列 Key）
         var dataRow = new TableRow();
-        foreach (var column in columns)
+        for (var i = 0; i < columns.Count; i++)
         {
-            dataRow.Append(CreateCell(new Paragraph(CreateTextSdt(column, format?.CellFormat))));
+            var column = columns[i];
+            var width = GetColumnWidth(format, i);
+            dataRow.Append(CreateCell(new Paragraph(CreateTextSdt(column, format?.CellFormat)), width));
         }
 
         table.Append(dataRow);
@@ -462,7 +466,14 @@ public sealed class WordTemplateBuilder
 
     private static TableProperties CreateTableProperties(TableFormat? format)
     {
-        var props = new TableProperties(new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto });
+        var totalDxa = format?.ColumnWidthsCm is { } widths
+            ? (int?)Math.Round(widths.Where(w => w.HasValue).Sum(w => w!.Value) / 2.54 * 1440.0)
+            : null;
+        var props = new TableProperties(new TableWidth
+        {
+            Width = totalDxa.HasValue ? totalDxa.Value.ToString(System.Globalization.CultureInfo.InvariantCulture) : "0",
+            Type = totalDxa.HasValue ? TableWidthUnitValues.Dxa : TableWidthUnitValues.Auto,
+        });
 
         if (format?.Bordered ?? true)
         {
@@ -497,24 +508,40 @@ public sealed class WordTemplateBuilder
             _ => TableRowAlignmentValues.Left,
         };
 
-    private static TableGrid CreateTableGrid(int columnCount)
+    private static TableGrid CreateTableGrid(int columnCount, IReadOnlyList<double?>? widthsCm = null)
     {
         var grid = new TableGrid();
         for (var i = 0; i < columnCount; i++)
         {
-            grid.Append(new GridColumn());
+            var column = new GridColumn();
+            if (widthsCm is not null && i < widthsCm.Count && widthsCm[i] is { } cm)
+            {
+                column.Width = CmToDxaString(cm);
+            }
+
+            grid.Append(column);
         }
 
         return grid;
     }
 
-    private static TableCell CreateCell(Paragraph paragraph)
+    private static TableCell CreateCell(Paragraph paragraph, double? widthCm = null)
     {
         var cell = new TableCell();
-        cell.Append(new TableCellProperties(new TableCellWidth { Width = "0", Type = TableWidthUnitValues.Auto }));
+        cell.Append(new TableCellProperties(new TableCellWidth
+        {
+            Width = widthCm.HasValue ? CmToDxaString(widthCm.Value) : "0",
+            Type = widthCm.HasValue ? TableWidthUnitValues.Dxa : TableWidthUnitValues.Auto,
+        }));
         cell.Append(paragraph);
         return cell;
     }
+
+    private static double? GetColumnWidth(TableFormat? format, int index)
+        => format?.ColumnWidthsCm is { } widths && index < widths.Count ? widths[index] : null;
+
+    private static string CmToDxaString(double cm)
+        => ((int)Math.Round(cm / 2.54 * 1440.0)).ToString(System.Globalization.CultureInfo.InvariantCulture);
 
     private static SectionProperties CreateSectionProperties(PageSetup setup)
     {
