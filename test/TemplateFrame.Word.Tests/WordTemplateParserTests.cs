@@ -63,13 +63,13 @@ public sealed class WordTemplateParserTests
 
         var parsed = new WordTemplateParser().Parse(template, TestDocuments.DemoContract());
 
-        // 未填充模板回读当前状态：SDT 文本即占位内容，示例行原样读回
-        Assert.Equal("OrderNo", parsed.Values["OrderNo"]);
+        // 未填充模板回读当前状态：SDT 文本即占位"待填充"，示例行原样读回
+        Assert.Equal("待填充", parsed.Values["OrderNo"]);
         var rows = Assert.Single(parsed.Tables, t => t.Key == "Lines").Value;
         Assert.Single(rows);
-        Assert.Equal("MC", rows[0]["MC"]);
-        Assert.Equal("MName", rows[0]["MName"]);
-        Assert.Equal("Qty", rows[0]["Qty"]);
+        Assert.Equal("待填充", rows[0]["MC"]);
+        Assert.Equal("待填充", rows[0]["MName"]);
+        Assert.Equal("待填充", rows[0]["Qty"]);
     }
 
     [Fact]
@@ -141,7 +141,7 @@ public sealed class WordTemplateParserTests
 
         var parsed = new WordTemplateParser().Parse(template, contract);
 
-        Assert.Equal("OrderNo", parsed.Values["OrderNo"]);
+        Assert.Equal("待填充", parsed.Values["OrderNo"]);
         Assert.False(parsed.Values.ContainsKey("NotInTemplate"));
     }
 
