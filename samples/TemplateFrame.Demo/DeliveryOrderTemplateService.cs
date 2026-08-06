@@ -226,7 +226,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                 ["计划送货日期"] = data.PlanDeliveryDate,
                 ["实际到货日期"] = data.ActualArrivalDate,
                 ["收货人"] = string.IsNullOrEmpty(data.Receiver) ? null : data.Receiver,
-                ["Logo"] = DemoLogo.CreatePng(),
+                ["Logo"] = File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "assets", "github-mark.png")),
                 ["QRCode"] = string.IsNullOrEmpty(data.QrContent) ? null : QrCodeGenerator.CreatePng(data.QrContent),
             },
             Tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>

@@ -16,6 +16,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="assets\github-mark.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\..\src\TemplateFrame\TemplateFrame.csproj" />
     <ProjectReference Include="..\..\src\TemplateFrame.Word\TemplateFrame.Word.csproj" />
   </ItemGroup>
