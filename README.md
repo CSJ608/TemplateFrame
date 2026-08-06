@@ -116,15 +116,17 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 ## 示例
 
 `samples/TemplateFrame.Demo` 提供**送货单**完整 Demo（`DeliveryOrderTemplateService`，A5 横版）：
-页眉左中右（供应商/单号 | 送货单 | 二维码）、正文明细表（行号/物料名称/数量/单位）、
-页脚左中右（打印时间/打印人 | 第x页，总x页 | 收货时间/收货人手写横线）。依次演示生成 → 校验 → 数据校验 → 填充 → 回读：
+- **双层页眉**：标识层（公司LOGO | 送货单 | 二维码+正下方页码）；单据头信息层（单据编号+供应商各半行 / 制单日期+制单人+单据备注按 1:1:2）
+- **正文明细表**：序号/物料代码/物料名称/单位/计划数量/实收数量/批次号/供应商批次号/仓库（9 列，显式列宽，序号窄列居中）
+- **两行页脚**：计划送货日期 / 实际到货日期+收货人
+- **收货前/收货后两次填充**：收货前 实际到货日期、收货人、实收数量、批次号、仓库为空；收货后补齐
 
 ```bash
 dotnet run --project samples/TemplateFrame.Demo
 ```
 
-产物默认输出到系统临时目录 `%TEMP%\TemplateFrame-Demo`（可用命令行参数指定目录）。
-二维码由 Demo 侧用 QRCoder 生成 PNG，填充进页眉二维码控件（框架负责图片替换，不负责生成）。
+产物默认输出到系统临时目录 `%TEMP%\TemplateFrame-Demo`（可用命令行参数指定目录），生成 模板/收货前/收货后 三份 docx。
+二维码由 Demo 侧用 QRCoder 生成 PNG、公司LOGO 由 Demo 纯代码生成占位 PNG，填充进页眉控件（框架负责图片替换，不负责生成）。
 
 ## 构建与测试
 

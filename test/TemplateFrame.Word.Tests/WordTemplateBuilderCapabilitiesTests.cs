@@ -266,4 +266,41 @@ public sealed class WordTemplateBuilderCapabilitiesTests
         Assert.Equal(((int)Math.Round(2.0 / 2.54 * 1440.0)).ToString(), cols[1].Width!.Value);
         Assert.Equal(TableWidthUnitValues.Dxa, table.GetFirstChild<TableProperties>()!.TableWidth!.Type!.Value);
     }
+
+    [Fact]
+    public void AddLayoutTable_AddCell_WithColumnSpan_MergesGridSpan()
+    {
+        using var stream = TestDocuments.BuildTemplate(b =>
+        {
+            b.AddLayoutTable(1, 4, new TableFormat { Bordered = false, ColumnWidthsCm = [3.0, 3.0, 3.0, 3.0] });
+            b.AddCell(c => c.AddText("A"), columnSpan: 2);
+            b.AddCell(c => c.AddText("B"), columnSpan: 2);
+        });
+
+        using var document = WordprocessingDocument.Open(stream, false);
+        var row = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single().Descendants<TableRow>().Single();
+        var cells = row.Elements<TableCell>().ToList();
+
+        Assert.Equal(2, cells.Count);
+        Assert.Equal(2, cells[0].GetFirstChild<TableCellProperties>()!.GetFirstChild<GridSpan>()!.Val!.Value);
+        Assert.Equal(2, cells[1].GetFirstChild<TableCellProperties>()!.GetFirstChild<GridSpan>()!.Val!.Value);
+        Assert.Contains(cells[0].Descendants<Text>(), t => t.Text == "A");
+        Assert.Contains(cells[1].Descendants<Text>(), t => t.Text == "B");
+    }
+
+    [Fact]
+    public void TableFormat_CellAlignment_AppliesToCellParagraphs()
+    {
+        using var stream = TestDocuments.BuildTemplate(b =>
+            b.AddTable("Lines", ["MC", "Qty"], new TableFormat
+            {
+                HeaderFormat = new TextFormat { Alignment = Builder.TextAlignment.Center },
+                CellFormat = new TextFormat { Alignment = Builder.TextAlignment.Center },
+            }));
+
+        using var document = WordprocessingDocument.Open(stream, false);
+        var paragraphs = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single().Descendants<Paragraph>().ToList();
+        Assert.Equal(4, paragraphs.Count);
+        Assert.All(paragraphs, p => Assert.Equal(JustificationValues.Center, p.ParagraphProperties!.Justification!.Val!.Value));
+    }
 }
