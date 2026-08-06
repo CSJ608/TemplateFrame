@@ -8,7 +8,7 @@ namespace TemplateFrame.Demo;
 
 /// <summary>
 /// Demo 场景服务示例：演示"业务服务 = 声明契约 + 组装版式 + 手写映射"的三层用法。
-/// 迭代 1 只落地 BuildInitialTemplateFile 与 Validate；Fill / Parse 为骨架（迭代 2 / 3）。
+/// 迭代 1 落地 BuildInitialTemplateFile 与 Validate；Fill 在迭代 2 落地，Parse 待迭代 3。
 /// </summary>
 public sealed class DemoOrderTemplateService : TemplateService<DemoOrderData>
 {
