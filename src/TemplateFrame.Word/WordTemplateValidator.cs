@@ -161,7 +161,11 @@ public sealed class WordTemplateValidator
         var found = sdts.Where(i => i.Tag == element.Key).ToList();
         if (found.Count == 0)
         {
-            issues.Add(Missing(element.Key, $"缺少文本元素 \"{element.Key}\"（{element.DisplayName}）对应的内容控件。"));
+            // 可选元素缺失只告警（模板仍有效），必填缺失才失败
+            issues.Add(Missing(
+                element.Key,
+                $"缺少文本元素 \"{element.Key}\"（{element.DisplayName}）对应的内容控件。",
+                element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
         }
         else if (found.Any(i => i.Kind == SdtKind.Image))
         {
@@ -177,7 +181,11 @@ public sealed class WordTemplateValidator
         var found = sdts.Where(i => i.Tag == element.Key).ToList();
         if (found.Count == 0)
         {
-            issues.Add(Missing(element.Key, $"缺少图片元素 \"{element.Key}\"（{element.DisplayName}）对应的占位图内容控件。"));
+            // 可选元素缺失只告警（模板仍有效），必填缺失才失败
+            issues.Add(Missing(
+                element.Key,
+                $"缺少图片元素 \"{element.Key}\"（{element.DisplayName}）对应的占位图内容控件。",
+                element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
         }
         else if (found.All(i => i.Kind != SdtKind.Image))
         {
@@ -205,19 +213,23 @@ public sealed class WordTemplateValidator
             }
         }
 
+        // 行模板只需包含全部必填列；可选列缺失不阻断（模板仍有效）
+        var requiredKeys = element.Columns.Where(c => c.Required).Select(c => c.Key).ToHashSet(StringComparer.Ordinal);
+        var missingRequired = missingColumns.Where(requiredKeys.Contains).ToList();
         var hasCompleteRow = EnumerateTables(document).Any(table =>
             table.Descendants<TableRow>().Any(row =>
-                element.Columns.All(column =>
-                    row.Descendants<SdtElement>().Any(s => SdtLocator.GetTag(s) == column.Key))));
+                requiredKeys.All(key =>
+                    row.Descendants<SdtElement>().Any(s => SdtLocator.GetTag(s) == key))));
 
-        if (missingColumns.Count > 0 || !hasCompleteRow)
+        if (missingRequired.Count > 0 || !hasCompleteRow)
         {
             issues.Add(Missing(
                 element.Key,
                 $"缺少完整表格行模板 \"{element.Key}\"（{element.DisplayName}）：" +
-                (missingColumns.Count > 0
-                    ? $"缺少列 {string.Join(", ", missingColumns)}。"
-                    : "各列未出现在同一表格行内。")));
+                (missingRequired.Count > 0
+                    ? $"缺少必填列 {string.Join(", ", missingRequired)}。"
+                    : "必填列未出现在同一表格行内。"),
+                element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
         }
     }
 
@@ -270,12 +282,16 @@ public sealed class WordTemplateValidator
         }
     }
 
-    private static TemplateValidationIssue Missing(string key, string message)
+    private static TemplateValidationIssue Missing(
+        string key,
+        string message,
+        TemplateValidationSeverity severity = TemplateValidationSeverity.Error)
         => new()
         {
             Code = TemplateValidationIssueCode.Missing,
             Key = key,
             Message = message,
+            Severity = severity,
         };
 
     private static TemplateValidationIssue WrongType(string key, string message)

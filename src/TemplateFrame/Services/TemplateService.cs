@@ -51,6 +51,13 @@ public abstract class TemplateService<TData>
     public TemplateValidationResult Validate(Stream template)
         => _engine.Validate(template, Contract);
 
+    /// <summary>校验数据与契约是否匹配（必填字段/表格缺失、类型不匹配、契约外字段），填充前兜底（迭代 4）。</summary>
+    public TemplateValidationResult ValidateData(TData data)
+    {
+        FillData fillData = MapToData(data);
+        return new TemplateDataValidator().Validate(fillData, Contract);
+    }
+
     /// <summary>填充：模板 + 强类型数据 → 新文件流（迭代 2 已落地，含填充时软校验）。</summary>
     public Stream Fill(Stream template, TData data)
     {
