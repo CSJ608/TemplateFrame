@@ -1,0 +1,33 @@
+namespace TemplateFrame.Builder;
+
+/// <summary>文本对齐。</summary>
+public enum TextAlignment
+{
+    /// <summary>左对齐。</summary>
+    Left,
+
+    /// <summary>居中。</summary>
+    Center,
+
+    /// <summary>右对齐。</summary>
+    Right,
+}
+
+/// <summary>
+/// 文本格式（格式无关，字体名/字号 pt/加粗/段落对齐）。
+/// 由支持 <see cref="ITextFormatBuilder"/> 的插件映射到宿主格式（如 Word 的 rFonts/FontSize/jc）。
+/// </summary>
+public sealed record TextFormat
+{
+    /// <summary>字体名（如 "黑体"），null 表示宿主默认。</summary>
+    public string? FontName { get; init; }
+
+    /// <summary>字号（pt），null 表示宿主默认。</summary>
+    public double? SizePt { get; init; }
+
+    /// <summary>是否加粗，null 表示宿主默认。</summary>
+    public bool? Bold { get; init; }
+
+    /// <summary>段落对齐，null 表示宿主默认。</summary>
+    public TextAlignment? Alignment { get; init; }
+}

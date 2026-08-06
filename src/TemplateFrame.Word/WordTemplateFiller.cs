@@ -232,15 +232,17 @@ public sealed class WordTemplateFiller
         var blip = match.Element.Descendants<A.Blip>().FirstOrDefault()
             ?? throw new InvalidOperationException($"图片控件 \"{tag}\" 内没有 <a:blip>，无法替换图片。");
 
-        var mainPart = document.MainDocumentPart!;
-        var imagePart = mainPart.AddImagePart(ToImagePartType(DetectExtension(bytes)));
+        // 图片 part 归属 SDT 所在宿主（正文=MainDocumentPart；页眉/页脚=对应 Header/FooterPart），
+        // 否则页眉里的 r:embed 在 header 的 rels 里解析不到。
+        var hostPart = FindHostPart(document, match.Element);
+        var imagePart = AddImagePart(hostPart, bytes);
         using (var buffer = new MemoryStream(bytes, writable: false))
         {
             imagePart.FeedData(buffer);
         }
 
         // 尺寸/位置/环绕继承占位图：只换 r:embed
-        blip.Embed = mainPart.GetIdOfPart(imagePart);
+        blip.Embed = hostPart.GetIdOfPart(imagePart);
     }
 
     private static void FillTableRows(
@@ -433,6 +435,37 @@ public sealed class WordTemplateFiller
         => value.Length > 0 && (char.IsWhiteSpace(value[0]) || char.IsWhiteSpace(value[^1]))
             ? SpaceProcessingModeValues.Preserve
             : null;
+
+
+    private static OpenXmlPart FindHostPart(WordprocessingDocument document, SdtElement sdt)
+    {
+        var mainPart = document.MainDocumentPart!;
+        foreach (var headerPart in mainPart.HeaderParts)
+        {
+            if (headerPart.Header is { } header && sdt.Ancestors().Contains(header))
+            {
+                return headerPart;
+            }
+        }
+
+        foreach (var footerPart in mainPart.FooterParts)
+        {
+            if (footerPart.Footer is { } footer && sdt.Ancestors().Contains(footer))
+            {
+                return footerPart;
+            }
+        }
+
+        return mainPart;
+    }
+
+    private static ImagePart AddImagePart(OpenXmlPart hostPart, byte[] bytes)
+        => hostPart switch
+        {
+            HeaderPart headerPart => headerPart.AddImagePart(ToImagePartType(DetectExtension(bytes))),
+            FooterPart footerPart => footerPart.AddImagePart(ToImagePartType(DetectExtension(bytes))),
+            _ => ((MainDocumentPart)hostPart).AddImagePart(ToImagePartType(DetectExtension(bytes))),
+        };
 
     private static byte[]? ToBytes(object? value)
         => value switch

@@ -5,15 +5,27 @@ using TemplateFrame.Builder;
 using A = DocumentFormat.OpenXml.Drawing;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
+using WPageSize = DocumentFormat.OpenXml.Wordprocessing.PageSize;
+using TextAlign = TemplateFrame.Builder.TextAlignment;
 
 namespace TemplateFrame.Word;
 
 /// <summary>
-/// Word 版式组装器：把业务服务声明的版式（标题 / 静态文本 / 元素 / 表格 / 图片占位）
+/// Word 版式组装器：把业务服务声明的版式（标题 / 静态文本 / 元素 / 表格 / 图片占位 / 页眉页脚 / 页面设置）
 /// 翻译成带内容控件（SDT）的 .docx。只支持 MS Office 的 .docx（见设计文档 §1.4）。
 /// tag 全局唯一、每个 SDT 带唯一 w:id。
+/// 能力接口设计：核心 <see cref="ITemplateBuilder"/> 保持极薄，页面/页眉页脚/文本格式/表格格式/布局表/页码
+/// 作为可选能力接口由本类实现，业务服务按需探测（builder is I...）。
 /// </summary>
-public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
+public sealed class WordTemplateBuilder
+    : ITemplateBuilder,
+        IPageSetupBuilder,
+        IHeaderFooterBuilder,
+        ITextFormatBuilder,
+        ITableFormatBuilder,
+        ILayoutTableBuilder,
+        IPageNumberBuilder,
+        IDisposable
 {
     /// <summary>内置占位图（浅灰棋盘 240x120 PNG，base64）。</summary>
     private const string PlaceholderPngBase64 =
@@ -21,27 +33,49 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 
     private readonly MemoryStream _stream = new();
     private readonly WordprocessingDocument _document;
-    private readonly Body _body;
+    private readonly MainDocumentPart _mainPart;
+    private readonly OpenXmlPart _hostPart;
+    private readonly OpenXmlCompositeElement _container;
+    private readonly SdtIdAllocator _ids;
+    private readonly bool _ownsDocument;
+    private PageSetup _pageSetup = new();
     private Paragraph? _currentParagraph;
-    private int _nextSdtId;
+    private Table? _layoutTable;
+    private int _layoutRow;
+    private int _layoutCol;
+    private int _layoutCols;
     private bool _saved;
 
-    /// <summary>创建一个空的 Word 文档构建器。</summary>
+    /// <summary>创建一个空的 Word 文档构建器（正文）。</summary>
     public WordTemplateBuilder()
     {
         _document = WordprocessingDocument.Create(_stream, WordprocessingDocumentType.Document, autoSave: false);
-        var mainPart = _document.AddMainDocumentPart();
-        mainPart.Document = new Document();
-        _body = new Body();
-        mainPart.Document.Append(_body);
+        _ownsDocument = true;
+        _mainPart = _document.AddMainDocumentPart();
+        _mainPart.Document = new Document();
+        _container = new Body();
+        _mainPart.Document.Append(_container);
+        _hostPart = _mainPart;
+        _ids = new SdtIdAllocator();
+    }
+
+    /// <summary>页眉/页脚/单元格子构建器：共享同一文档与全局 w:id 分配器，图片 part 归属所在宿主。</summary>
+    private WordTemplateBuilder(WordTemplateBuilder owner, OpenXmlPart hostPart, OpenXmlCompositeElement container)
+    {
+        _document = owner._document;
+        _mainPart = owner._mainPart;
+        _hostPart = hostPart;
+        _container = container;
+        _ids = owner._ids;
+        _ownsDocument = false;
+        _pageSetup = owner._pageSetup;
     }
 
     /// <inheritdoc />
     public ITemplateBuilder AddParagraph(string text, string? style = null)
     {
-        var paragraph = new Paragraph();
-        paragraph.Append(CreateRun(text, CreateStyleRunProperties(style)));
-        _body.Append(paragraph);
+        var paragraph = new Paragraph(CreateRun(text, CreateStyleRunProperties(style)));
+        _container.Append(paragraph);
         _currentParagraph = paragraph;
         return this;
     }
@@ -69,36 +103,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// <inheritdoc />
     public ITemplateBuilder AddTable(string key, IReadOnlyList<string> columns, string? headerStyle = null)
     {
-        ArgumentNullException.ThrowIfNull(key);
-        ArgumentNullException.ThrowIfNull(columns);
-        if (columns.Count == 0)
-        {
-            throw new ArgumentException("表格至少需要一列。", nameof(columns));
-        }
-
-        var table = new Table();
-        table.Append(CreateTableProperties());
-        table.Append(CreateTableGrid(columns.Count));
-
-        // 表头行：静态文本
-        var headerRow = new TableRow();
-        foreach (var column in columns)
-        {
-            headerRow.Append(CreateCell(new Paragraph(
-                CreateRun(column, headerStyle is null ? null : CreateStyleRunProperties(headerStyle)))));
-        }
-        table.Append(headerRow);
-
-        // 示例数据行：每格一个内容控件（tag = 列 Key）
-        var dataRow = new TableRow();
-        foreach (var column in columns)
-        {
-            dataRow.Append(CreateCell(new Paragraph(CreateTextSdt(column))));
-        }
-        table.Append(dataRow);
-
-        _body.Append(table);
-        _currentParagraph = null;
+        AddTableCore(key, columns, headerStyle, format: null);
         return this;
     }
 
@@ -113,7 +118,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 
         var sdt = new SdtRun(
             new SdtProperties(
-                new SdtId { Val = AllocateSdtId() },
+                new SdtId { Val = _ids.Next() },
                 new Tag { Val = key },
                 new SdtAlias { Val = key }),
             new SdtContentRun(run));
@@ -123,17 +128,158 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     }
 
     /// <inheritdoc />
+    public IPageSetupBuilder SetPageSetup(PageSetup setup)
+    {
+        _pageSetup = setup ?? throw new ArgumentNullException(nameof(setup));
+        return this;
+    }
+
+    /// <inheritdoc />
+    public void AddHeader(Action<ITemplateBuilder> compose)
+    {
+        ArgumentNullException.ThrowIfNull(compose);
+        var headerPart = _mainPart.AddNewPart<HeaderPart>();
+        headerPart.Header = new Header();
+        compose(new WordTemplateBuilder(this, headerPart, headerPart.Header));
+        AddPartReference(new HeaderReference { Type = HeaderFooterValues.Default, Id = _mainPart.GetIdOfPart(headerPart) });
+    }
+
+    /// <inheritdoc />
+    public void AddFooter(Action<ITemplateBuilder> compose)
+    {
+        ArgumentNullException.ThrowIfNull(compose);
+        var footerPart = _mainPart.AddNewPart<FooterPart>();
+        footerPart.Footer = new Footer();
+        compose(new WordTemplateBuilder(this, footerPart, footerPart.Footer));
+        AddPartReference(new FooterReference { Type = HeaderFooterValues.Default, Id = _mainPart.GetIdOfPart(footerPart) });
+    }
+
+    /// <inheritdoc />
+    public ITextFormatBuilder AddParagraph(string text, TextFormat format)
+    {
+        var paragraph = new Paragraph(CreateRun(text, CreateRunProperties(format)));
+        ApplyAlignment(paragraph, format.Alignment);
+        _container.Append(paragraph);
+        _currentParagraph = paragraph;
+        return this;
+    }
+
+    /// <inheritdoc />
+    public ITextFormatBuilder AddText(string text, TextFormat format)
+    {
+        EnsureParagraph();
+        _currentParagraph!.Append(CreateRun(text, CreateRunProperties(format)));
+        return this;
+    }
+
+    /// <inheritdoc />
+    public ITextFormatBuilder AddElement(string key, TextFormat format)
+    {
+        EnsureParagraph();
+        _currentParagraph!.Append(CreateTextSdt(key, format));
+        return this;
+    }
+
+    /// <inheritdoc />
+    ITableFormatBuilder ITableFormatBuilder.AddTable(string key, IReadOnlyList<string> columns, TableFormat? format)
+    {
+        AddTableCore(key, columns, headerStyle: null, format: format);
+        return this;
+    }
+
+    /// <inheritdoc />
+    public ILayoutTableBuilder AddLayoutTable(int rows, int columns, TableFormat? format = null)
+    {
+        if (rows <= 0 || columns <= 0)
+        {
+            throw new ArgumentException("布局表格的行列数必须为正。", nameof(rows));
+        }
+
+        var table = new Table();
+        table.Append(CreateTableProperties(format));
+        table.Append(CreateTableGrid(columns));
+        for (var r = 0; r < rows; r++)
+        {
+            var row = new TableRow();
+            for (var c = 0; c < columns; c++)
+            {
+                row.Append(CreateCell(new Paragraph()));
+            }
+
+            table.Append(row);
+        }
+
+        _container.Append(table);
+        _layoutTable = table;
+        _layoutRow = 0;
+        _layoutCol = 0;
+        _layoutCols = columns;
+        _currentParagraph = null;
+        return this;
+    }
+
+    /// <inheritdoc />
+    public ILayoutTableBuilder AddCell(Action<ITemplateBuilder> compose)
+    {
+        ArgumentNullException.ThrowIfNull(compose);
+        if (_layoutTable is null)
+        {
+            throw new InvalidOperationException("AddCell 需先调用 AddLayoutTable。");
+        }
+
+        var rows = _layoutTable.Elements<TableRow>().ToList();
+        if (_layoutRow >= rows.Count)
+        {
+            throw new InvalidOperationException("布局表格单元格已用完。");
+        }
+
+        var cell = rows[_layoutRow].Elements<TableCell>().ElementAt(_layoutCol);
+        compose(new WordTemplateBuilder(this, _hostPart, cell));
+
+        _layoutCol++;
+        if (_layoutCol >= _layoutCols)
+        {
+            _layoutCol = 0;
+            _layoutRow++;
+        }
+
+        return this;
+    }
+
+    /// <inheritdoc />
+    public void AddPageNumber(string separator = "/", TextFormat? format = null)
+    {
+        EnsureParagraph();
+        var rPr = CreateRunProperties(format);
+        foreach (var run in CreateFieldRuns("PAGE", "1", rPr))
+        {
+            _currentParagraph!.Append(run);
+        }
+
+        _currentParagraph!.Append(CreateRun(separator, rPr));
+        foreach (var run in CreateFieldRuns("NUMPAGES", "1", rPr))
+        {
+            _currentParagraph!.Append(run);
+        }
+    }
+
+    /// <inheritdoc />
     public void Save(Stream target)
     {
         ArgumentNullException.ThrowIfNull(target);
+        if (!_ownsDocument)
+        {
+            throw new InvalidOperationException("页眉/页脚/单元格子构建器不能单独 Save，请由顶层构建器统一保存。");
+        }
+
         if (_saved)
         {
             throw new InvalidOperationException("WordTemplateBuilder 只能 Save 一次。");
         }
 
-        if (!_body.Elements<SectionProperties>().Any())
+        if (!_container.Elements<SectionProperties>().Any())
         {
-            _body.Append(CreateDefaultSectionProperties());
+            _container.Append(CreateSectionProperties(_pageSetup));
         }
 
         _document.Save();
@@ -145,8 +291,53 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        _document.Dispose();
-        _stream.Dispose();
+        if (_ownsDocument)
+        {
+            _document.Dispose();
+            _stream.Dispose();
+        }
+    }
+
+    private void AddTableCore(
+        string key,
+        IReadOnlyList<string> columns,
+        string? headerStyle,
+        TableFormat? format)
+    {
+        ArgumentNullException.ThrowIfNull(key);
+        ArgumentNullException.ThrowIfNull(columns);
+        if (columns.Count == 0)
+        {
+            throw new ArgumentException("表格至少需要一列。", nameof(columns));
+        }
+
+        var table = new Table();
+        table.Append(CreateTableProperties(format));
+        table.Append(CreateTableGrid(columns.Count));
+
+        // 表头行：静态文本
+        var headerRow = new TableRow();
+        foreach (var column in columns)
+        {
+            var headerRun = format?.HeaderFormat is null
+                ? CreateRun(column, CreateStyleRunProperties(headerStyle))
+                : CreateRun(column, CreateRunProperties(format.HeaderFormat));
+            headerRow.Append(CreateCell(new Paragraph(headerRun)));
+        }
+
+        table.Append(headerRow);
+
+        // 示例数据行：每格一个内容控件（tag = 列 Key）
+        var dataRow = new TableRow();
+        foreach (var column in columns)
+        {
+            dataRow.Append(CreateCell(new Paragraph(CreateTextSdt(column, format?.CellFormat))));
+        }
+
+        table.Append(dataRow);
+
+        _container.Append(table);
+        _currentParagraph = null;
     }
 
     private void EnsureParagraph()
@@ -157,16 +348,58 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         }
     }
 
-    private int AllocateSdtId()
-        => _nextSdtId++;
+    private void AddPartReference(OpenXmlElement reference)
+    {
+        var sectionProperties = _container.Elements<SectionProperties>().FirstOrDefault();
+        if (sectionProperties is null)
+        {
+            sectionProperties = CreateSectionProperties(_pageSetup);
+            _container.Append(sectionProperties);
+        }
 
-    private SdtRun CreateTextSdt(string key)
+        // 同一类型（default 页眉/页脚）只保留一个引用
+        var referenceType = reference.GetType();
+        foreach (var existing in sectionProperties.ChildElements
+                     .Where(e => e.GetType() == referenceType)
+                     .ToList())
+        {
+            existing.Remove();
+        }
+
+        sectionProperties.Append(reference);
+    }
+
+    private static void ApplyAlignment(Paragraph paragraph, TextAlign? alignment)
+    {
+        if (alignment is null)
+        {
+            return;
+        }
+
+        var pPr = paragraph.ParagraphProperties ?? new ParagraphProperties();
+        if (paragraph.ParagraphProperties is null)
+        {
+            paragraph.PrependChild(pPr);
+        }
+
+        pPr.Justification = new Justification { Val = ToJustification(alignment.Value) };
+    }
+
+    private static JustificationValues ToJustification(TextAlign alignment)
+        => alignment switch
+        {
+            TextAlign.Center => JustificationValues.Center,
+            TextAlign.Right => JustificationValues.Right,
+            _ => JustificationValues.Left,
+        };
+
+    private SdtRun CreateTextSdt(string key, TextFormat? format = null)
         => new(
             new SdtProperties(
-                new SdtId { Val = AllocateSdtId() },
+                new SdtId { Val = _ids.Next() },
                 new Tag { Val = key },
                 new SdtAlias { Val = key }),
-            new SdtContentRun(CreateRun(key)));
+            new SdtContentRun(CreateRun(key, CreateRunProperties(format))));
 
     private static RunProperties? CreateStyleRunProperties(string? style)
     {
@@ -181,6 +414,40 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         };
     }
 
+    private static RunProperties? CreateRunProperties(TextFormat? format)
+    {
+        if (format is null)
+        {
+            return null;
+        }
+
+        var rPr = new RunProperties();
+        if (!string.IsNullOrEmpty(format.FontName))
+        {
+            rPr.Append(new RunFonts
+            {
+                Ascii = format.FontName,
+                HighAnsi = format.FontName,
+                EastAsia = format.FontName,
+            });
+        }
+
+        if (format.Bold == true)
+        {
+            rPr.Append(new Bold());
+        }
+
+        if (format.SizePt.HasValue)
+        {
+            rPr.Append(new FontSize { Val = ToHalfPoints(format.SizePt.Value) });
+        }
+
+        return rPr.ChildElements.Count == 0 ? null : rPr;
+    }
+
+    private static string ToHalfPoints(double sizePt)
+        => ((int)Math.Round(sizePt * 2)).ToString(System.Globalization.CultureInfo.InvariantCulture);
+
     private static Run CreateRun(string text, RunProperties? properties = null)
     {
         var run = new Run();
@@ -188,25 +455,47 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         {
             run.Append(properties);
         }
+
         run.Append(new Text(text) { Space = SpaceProcessingModeValues.Preserve });
         return run;
     }
 
-    private static TableProperties CreateTableProperties()
-        => new(
-            new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto },
-            new TableBorders(
+    private static TableProperties CreateTableProperties(TableFormat? format)
+    {
+        var props = new TableProperties(new TableWidth { Width = "0", Type = TableWidthUnitValues.Auto });
+
+        if (format?.Bordered ?? true)
+        {
+            props.Append(new TableBorders(
                 new TopBorder { Val = BorderValues.Single, Size = 4U, Color = "000000" },
                 new LeftBorder { Val = BorderValues.Single, Size = 4U, Color = "000000" },
                 new BottomBorder { Val = BorderValues.Single, Size = 4U, Color = "000000" },
                 new RightBorder { Val = BorderValues.Single, Size = 4U, Color = "000000" },
                 new InsideHorizontalBorder { Val = BorderValues.Single, Size = 4U, Color = "000000" },
-                new InsideVerticalBorder { Val = BorderValues.Single, Size = 4U, Color = "000000" }),
-            new TableCellMargin(
-                new TopMargin { Width = "60", Type = TableWidthUnitValues.Dxa },
-                new TableCellLeftMargin { Width = 108, Type = TableWidthValues.Dxa },
-                new BottomMargin { Width = "60", Type = TableWidthUnitValues.Dxa },
-                new TableCellRightMargin { Width = 108, Type = TableWidthValues.Dxa }));
+                new InsideVerticalBorder { Val = BorderValues.Single, Size = 4U, Color = "000000" }));
+        }
+
+        props.Append(new TableCellMargin(
+            new TopMargin { Width = "60", Type = TableWidthUnitValues.Dxa },
+            new TableCellLeftMargin { Width = 108, Type = TableWidthValues.Dxa },
+            new BottomMargin { Width = "60", Type = TableWidthUnitValues.Dxa },
+            new TableCellRightMargin { Width = 108, Type = TableWidthValues.Dxa }));
+
+        if (format?.Alignment is { } alignment)
+        {
+            props.Append(new TableJustification { Val = ToTableAlignment(alignment) });
+        }
+
+        return props;
+    }
+
+    private static TableRowAlignmentValues ToTableAlignment(TextAlign alignment)
+        => alignment switch
+        {
+            TextAlign.Center => TableRowAlignmentValues.Center,
+            TextAlign.Right => TableRowAlignmentValues.Right,
+            _ => TableRowAlignmentValues.Left,
+        };
 
     private static TableGrid CreateTableGrid(int columnCount)
     {
@@ -215,6 +504,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         {
             grid.Append(new GridColumn());
         }
+
         return grid;
     }
 
@@ -226,12 +516,67 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return cell;
     }
 
-    private static SectionProperties CreateDefaultSectionProperties()
-        => new(
-            new PageSize { Width = 12240U, Height = 15840U },
-            new PageMargin { Top = 1440, Right = 1800, Bottom = 1440, Left = 1800, Header = 720, Footer = 720, Gutter = 0 },
-            new Columns { Space = "720" },
-            new DocGrid { LinePitch = 360 });
+    private static SectionProperties CreateSectionProperties(PageSetup setup)
+    {
+        var (width, height) = ToTwips(setup.Size, setup.Orientation);
+        var pageSize = new WPageSize { Width = width, Height = height };
+        if (setup.Orientation == PageOrientation.Landscape)
+        {
+            pageSize.Orient = PageOrientationValues.Landscape;
+        }
+
+        const double mmPerInch = 25.4;
+        const double twipsPerInch = 1440.0;
+        static uint MmToTwips(double mm) => (uint)Math.Round(mm / mmPerInch * twipsPerInch);
+
+        var pageMargin = new PageMargin
+        {
+            Top = (int)MmToTwips(setup.MarginTopMm ?? 12),
+            Right = MmToTwips(setup.MarginRightMm ?? 12),
+            Bottom = (int)MmToTwips(setup.MarginBottomMm ?? 12),
+            Left = MmToTwips(setup.MarginLeftMm ?? 12),
+            Header = 720,
+            Footer = 720,
+            Gutter = 0,
+        };
+
+        return new SectionProperties(pageSize, pageMargin, new Columns { Space = "720" }, new DocGrid { LinePitch = 360 });
+    }
+
+    private static (uint Width, uint Height) ToTwips(Builder.PageSize size, PageOrientation orientation)
+    {
+        var (widthMm, heightMm) = size switch
+        {
+            Builder.PageSize.A5 => (148.0, 210.0),
+            _ => (210.0, 297.0),
+        };
+
+        if (orientation == PageOrientation.Landscape)
+        {
+            (widthMm, heightMm) = (heightMm, widthMm);
+        }
+
+        const double mmPerInch = 25.4;
+        const double twipsPerInch = 1440.0;
+        return (
+            (uint)Math.Round(widthMm / mmPerInch * twipsPerInch),
+            (uint)Math.Round(heightMm / mmPerInch * twipsPerInch));
+    }
+
+    private static IEnumerable<Run> CreateFieldRuns(string instruction, string cached, RunProperties? rPr)
+    {
+        static Run WithRPr(params OpenXmlElement[] children)
+        {
+            var run = new Run();
+            run.Append(children);
+            return run;
+        }
+
+        yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldChar { FieldCharType = FieldCharValues.Begin });
+        yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldCode { Text = instruction });
+        yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldChar { FieldCharType = FieldCharValues.Separate }, new Text(cached) { Space = SpaceProcessingModeValues.Preserve });
+        yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldChar { FieldCharType = FieldCharValues.End });
+    }
 
     private static (byte[] Bytes, string Extension) LoadPlaceholder(string? placeholderPath)
     {
@@ -247,11 +592,16 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 
     private string AddImagePart(byte[] bytes, string extension)
     {
-        var mainPart = _document.MainDocumentPart!;
-        var imagePart = mainPart.AddImagePart(ToImagePartType(extension));
+        var imagePart = _hostPart switch
+        {
+            HeaderPart headerPart => headerPart.AddImagePart(ToImagePartType(extension)),
+            FooterPart footerPart => footerPart.AddImagePart(ToImagePartType(extension)),
+            _ => _mainPart.AddImagePart(ToImagePartType(extension)),
+        };
+
         using var stream = new MemoryStream(bytes, writable: false);
         imagePart.FeedData(stream);
-        return mainPart.GetIdOfPart(imagePart);
+        return _hostPart.GetIdOfPart(imagePart);
     }
 
     private static string ToImagePartType(string extension)
@@ -298,5 +648,13 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         };
 
         return new Drawing(inline);
+    }
+
+    /// <summary>全局 w:id 分配器：正文/页眉/页脚/单元格共用，保证整篇文档唯一。</summary>
+    private sealed class SdtIdAllocator
+    {
+        private int _next;
+
+        public int Next() => _next++;
     }
 }

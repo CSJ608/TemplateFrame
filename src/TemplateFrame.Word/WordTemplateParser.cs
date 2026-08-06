@@ -91,8 +91,8 @@ public sealed class WordTemplateParser
             return null;
         }
 
-        var part = document.MainDocumentPart?.GetPartById(relId);
-        if (part is not ImagePart imagePart)
+        var hostPart = FindHostPart(document, match.Element);
+        if (hostPart.GetPartById(relId) is not ImagePart imagePart)
         {
             return null;
         }
@@ -188,6 +188,29 @@ public sealed class WordTemplateParser
         }
 
         return text;
+    }
+
+
+    private static OpenXmlPart FindHostPart(WordprocessingDocument document, SdtElement sdt)
+    {
+        var mainPart = document.MainDocumentPart!;
+        foreach (var headerPart in mainPart.HeaderParts)
+        {
+            if (headerPart.Header is { } header && sdt.Ancestors().Contains(header))
+            {
+                return headerPart;
+            }
+        }
+
+        foreach (var footerPart in mainPart.FooterParts)
+        {
+            if (footerPart.Footer is { } footer && sdt.Ancestors().Contains(footer))
+            {
+                return footerPart;
+            }
+        }
+
+        return mainPart;
     }
 
     private static IEnumerable<Table> EnumerateTables(WordprocessingDocument document)
