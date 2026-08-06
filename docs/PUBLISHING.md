@@ -1,6 +1,6 @@
 # 发布指南（参考 StreamFrame，暂不启用）
 
-> 本文件内容参考 `C:\work\Multiway\product\StreamFrame\docs\PUBLISHING.md` 移植。
+> 本文件内容参考 StreamFrame 的 docs/PUBLISHING.md 移植。
 > **当前状态：自动化发布在迭代 6 才启用。** 在此之前：
 > - 不推送 `v*` tag，则 `release.yml` / `publish-nuget.yml` 不会触发；
 > - 本地用 `dotnet pack` 验证打包；

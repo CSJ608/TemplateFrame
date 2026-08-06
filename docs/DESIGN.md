@@ -254,7 +254,7 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 
 ## 6. 项目结构（参考 StreamFrame）
 
-参考 `Multiway/product/StreamFrame` 的组织方式：核心库无业务依赖 + 官方插件 + 测试 + 示例。
+参考 StreamFrame 的组织方式：核心库无业务依赖 + 官方插件 + 测试 + 示例。
 
 ```
 TemplateFrame/
@@ -304,7 +304,7 @@ TemplateFrame/
 
 ## 8. CI 与发布（参考 StreamFrame，暂不启用）
 
-工作流文件已按 `Multiway/product/StreamFrame/.github/workflows` 移植并适配：
+工作流文件已按 StreamFrame 的 .github/workflows 移植并适配：
 
 | 文件 | 触发 | 作用 | 状态 |
 |---|---|---|---|

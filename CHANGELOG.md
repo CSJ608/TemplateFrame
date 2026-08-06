@@ -6,7 +6,7 @@
 
 ### 新增
 - 初始化仓库，提交设计文档 `docs/DESIGN.md`（含产品迭代计划）
-- CI / Release / NuGet 发布工作流参考 `Multiway/product/StreamFrame` 提供（发布暂不启用，见 `docs/PUBLISHING.md`）
+- CI / Release / NuGet 发布工作流参考 StreamFrame 提供（发布暂不启用，见 `docs/PUBLISHING.md`）
 
 ### 变更
 - 设计文档重构为三层架构：基础包（通用稳定）/ 插件（`TemplateFrame.Word`）/ 业务场景服务（强类型）
