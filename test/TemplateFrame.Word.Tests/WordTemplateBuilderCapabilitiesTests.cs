@@ -246,4 +246,22 @@ public sealed class WordTemplateBuilderCapabilitiesTests
         stream.ReadExactly(bytes, 0, bytes.Length);
         Assert.Equal(TestDocuments.TinyPng, bytes);
     }
+
+    [Fact]
+    public void TableFormat_ColumnWidthsCm_SetsGridAndCellWidths()
+    {
+        using var stream = TestDocuments.BuildTemplate(b =>
+        {
+            var table = (ITableFormatBuilder)b;
+            table.AddTable("Lines", ["MC", "Qty"], new TableFormat { ColumnWidthsCm = [3.0, 2.0] });
+        });
+
+        using var document = WordprocessingDocument.Open(stream, false);
+        var table = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single();
+        var cols = table.GetFirstChild<TableGrid>()!.Elements<GridColumn>().ToList();
+
+        Assert.Equal(((int)Math.Round(3.0 / 2.54 * 1440.0)).ToString(), cols[0].Width!.Value);
+        Assert.Equal(((int)Math.Round(2.0 / 2.54 * 1440.0)).ToString(), cols[1].Width!.Value);
+        Assert.Equal(TableWidthUnitValues.Dxa, table.GetFirstChild<TableProperties>()!.TableWidth!.Type!.Value);
+    }
 }
