@@ -88,15 +88,44 @@ var parsed = service.Parse(filledStream);
 - 图片填充往包内加图片 part + 关系拿新 `rId`，替换 `<a:blip r:embed>`，尺寸/位置/环绕继承占位图。
 - 填充时软校验：`Drifted`/`Extra` 只记告警继续；Missing 必填元素按策略（默认抛错，可配 `SkipAndWarn`）。
 
+## 能力接口（可选排版能力）
+
+`ITemplateBuilder` 只保留"所有宿主都有的最小集"（段落/文本/元素/表格/图片/保存），
+更丰富的排版能力按**角色接口**拆分，由插件按需实现、业务服务按需探测（不支持的插件优雅跳过）：
+
+| 能力接口 | 说明 | Word 支持 |
+|---|---|---|
+| `IPageSetupBuilder` | 纸张（A4/A5）/ 方向 / 边距 | ✅ |
+| `IHeaderFooterBuilder` | 页眉 / 页脚 | ✅ |
+| `ILayoutTableBuilder` | 布局表格（页眉/页脚"左中右"三栏） | ✅ |
+| `ITextFormatBuilder` | 字体（黑体）/ 字号 / 加粗 / 对齐 | ✅ |
+| `ITableFormatBuilder` | 表头/单元格格式、有无边框、表格对齐 | ✅ |
+| `IPageNumberBuilder` | 页码域（如页脚 1/1） | ✅ |
+
+```csharp
+protected override void BuildInitialTemplate(ITemplateBuilder builder)
+{
+    if (builder is IPageSetupBuilder page)
+        page.SetPageSetup(new PageSetup { Size = PageSize.A5, Orientation = PageOrientation.Landscape });
+    if (builder is IHeaderFooterBuilder hf) { hf.AddHeader(BuildHeader); hf.AddFooter(BuildFooter); }
+    if (builder is ITableFormatBuilder table)
+        table.AddTable("Lines", ["RowNo", "MaterialName", "Qty", "Unit"],
+            new TableFormat { HeaderFormat = ..., CellFormat = ..., Alignment = TextAlignment.Center });
+}
+```
+
 ## 示例
 
-`samples/TemplateFrame.Demo` 提供完整 Demo（`DemoOrderTemplateService`，Demo 单据），依次演示生成 → 校验 → 数据校验 → 填充 → 回读：
+`samples/TemplateFrame.Demo` 提供**送货单**完整 Demo（`DeliveryOrderTemplateService`，A5 横版）：
+页眉左中右（供应商/单号 | 送货单 | 二维码）、正文明细表（行号/物料名称/数量/单位）、
+页脚左中右（打印时间/打印人 | 1/1 | 到货时间/收货人）。依次演示生成 → 校验 → 数据校验 → 填充 → 回读：
 
 ```bash
 dotnet run --project samples/TemplateFrame.Demo
 ```
 
 产物默认输出到系统临时目录 `%TEMP%\TemplateFrame-Demo`（可用命令行参数指定目录）。
+二维码由 Demo 侧用 QRCoder 生成 PNG，填充进页眉二维码控件（框架负责图片替换，不负责生成）。
 
 ## 构建与测试
 
