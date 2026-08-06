@@ -51,7 +51,7 @@ public sealed class DemoOrderTemplateService : TemplateService<DemoOrderData>
                         new TextElement { Key = "Qty", DisplayName = "数量", ValueType = typeof(decimal), Format = "N2" },
                     ],
                 },
-                new ImageElement { Key = "Logo", DisplayName = "单据图片", PictureType = "png" },
+                new ImageElement { Key = "Logo", DisplayName = "单据图片", PictureType = "png", Required = false },
             ],
         };
 
