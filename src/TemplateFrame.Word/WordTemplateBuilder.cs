@@ -254,7 +254,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         }
 
         var width = SumColumnWidths(_layoutFormat, _layoutCol, columnSpan);
-        var cell = CreateCell(new Paragraph(), width, _layoutFormat?.VerticalAlignment);
+        var cell = CreateLayoutCell(width, _layoutFormat?.VerticalAlignment);
         if (columnSpan > 1)
         {
             cell.GetFirstChild<TableCellProperties>()!.Append(new GridSpan { Val = columnSpan });
@@ -262,6 +262,12 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 
         rows[_layoutRow].Append(cell);
         compose(new WordTemplateBuilder(this, _hostPart, cell));
+
+        // 不预置空段落：内容不足时补一个，避免每格顶部空一行
+        if (!cell.Elements<Paragraph>().Any())
+        {
+            cell.Append(new Paragraph());
+        }
 
         _layoutCol += columnSpan;
         if (_layoutCol >= _layoutCols)
@@ -411,7 +417,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
                 new SdtId { Val = _ids.Next() },
                 new Tag { Val = key },
                 new SdtAlias { Val = key }),
-            new SdtContentRun(CreateRun(key, CreateRunProperties(format))));
+            new SdtContentRun(CreateRun("待填充", CreateRunProperties(format))));
 
     private static RunProperties? CreateStyleRunProperties(string? style)
     {
@@ -540,6 +546,13 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 
     private static TableCell CreateCell(Paragraph paragraph, double? widthCm = null, CellVerticalAlignment? verticalAlignment = null)
     {
+        var cell = CreateLayoutCell(widthCm, verticalAlignment);
+        cell.Append(paragraph);
+        return cell;
+    }
+
+    private static TableCell CreateLayoutCell(double? widthCm, CellVerticalAlignment? verticalAlignment)
+    {
         var cell = new TableCell();
         var cellPr = new TableCellProperties();
         cellPr.Append(new TableCellWidth
@@ -553,7 +566,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         }
 
         cell.Append(cellPr);
-        cell.Append(paragraph);
         return cell;
     }
 
