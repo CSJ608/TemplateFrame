@@ -72,7 +72,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                         new TextElement { Key = "计划数量", DisplayName = "计划数量", ValueType = typeof(decimal) },
                         new TextElement { Key = "实收数量", DisplayName = "实收数量", ValueType = typeof(decimal) },
                         new TextElement { Key = "批次号", DisplayName = "批次号" },
-                        new TextElement { Key = "供应商批次号", DisplayName = "供应商批次号" },
+                        new TextElement { Key = "供应商批次", DisplayName = "供应商批次" },
                         new TextElement { Key = "仓库", DisplayName = "仓库" },
                     ],
                 },
@@ -100,13 +100,13 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
         // 正文明细表：9 列，居中，显式列宽（合计 19cm = A5 横版可用宽度）
         Builder.AddTable(
             "Lines",
-            ["序号", "物料代码", "物料名称", "单位", "计划数量", "实收数量", "批次号", "供应商批次号", "仓库"],
+            ["序号", "物料代码", "物料名称", "单位", "计划数量", "实收数量", "批次号", "供应商批次", "仓库"],
             new TableFormat
             {
-                HeaderFormat = new TextFormat { FontName = "宋体", SizePt = 12, Bold = true },
+                HeaderFormat = new TextFormat { FontName = "宋体", SizePt = 12, Bold = true, Alignment = TextAlignment.Center },
                 CellFormat = new TextFormat { FontName = "宋体", SizePt = 12, Alignment = TextAlignment.Center },
                 Alignment = TextAlignment.Center,
-                ColumnWidthsCm = [0.8, 2.5, 4.4, 1.4, 1.8, 1.8, 2.2, 2.2, 1.9],
+                ColumnWidthsCm = [1.2, 2.5, 4.0, 1.4, 1.8, 1.8, 2.2, 2.2, 1.9],
                 VerticalAlignment = CellVerticalAlignment.Middle,
             });
     }
@@ -207,8 +207,8 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
         // 右：收货人
         f.AddCell(c =>
         {
-            c.AddParagraph("收货人：", SmallSongRight);
-            c.AddElement("收货人", SmallSongRight);
+            c.AddParagraph("收货人：", SmallSong);
+            c.AddElement("收货人", SmallSong);
         });
     }
 
@@ -241,7 +241,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                         ["计划数量"] = line.PlanQty,
                         ["实收数量"] = line.ActualQty,
                         ["批次号"] = line.BatchNo,
-                        ["供应商批次号"] = line.SupplierBatchNo,
+                        ["供应商批次"] = line.SupplierBatchNo,
                         ["仓库"] = line.Warehouse,
                     })
                     .ToList(),
@@ -274,7 +274,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
                         PlanQty = GetRowDecimal(row, "计划数量"),
                         ActualQty = GetRowNullableDecimal(row, "实收数量"),
                         BatchNo = GetRowNullableString(row, "批次号"),
-                        SupplierBatchNo = GetRowNullableString(row, "供应商批次号"),
+                        SupplierBatchNo = GetRowNullableString(row, "供应商批次"),
                         Warehouse = GetRowNullableString(row, "仓库"),
                     })
                     .ToList()

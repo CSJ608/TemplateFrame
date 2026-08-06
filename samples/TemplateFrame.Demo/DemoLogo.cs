@@ -9,8 +9,8 @@ namespace TemplateFrame.Demo;
 /// </summary>
 internal static class DemoLogo
 {
-    /// <summary>生成 160×60 的公司 LOGO 占位 PNG 字节。</summary>
-    public static byte[] CreatePng(int width = 160, int height = 60)
+    /// <summary>生成 128×128 的 GitHub 风格猫头 LOGO 占位 PNG 字节。</summary>
+    public static byte[] CreatePng(int width = 128, int height = 128)
     {
         // 每行一个 0x00 filter + RGB 像素
         var raw = new byte[height * (1 + width * 3)];
@@ -38,27 +38,51 @@ internal static class DemoLogo
 
     private static (byte R, byte G, byte B) Pixel(int x, int y, int width, int height)
     {
-        // 深蓝底（#2F5496）
-        const byte bgR = 0x2F;
-        const byte bgG = 0x54;
-        const byte bgB = 0x96;
+        var nx = (double)x / width;
+        var ny = (double)y / height;
 
-        // 左侧白色实心圆（抽象标记）
-        var cx = width / 5;
-        var cy = height / 2;
-        var r = height / 3;
-        if ((x - cx) * (x - cx) + (y - cy) * (y - cy) <= r * r)
+        // GitHub Octocat 风格：两只尖耳朵 + 圆头剪影（黑）
+        if (PointInTriangle(nx, ny, 0.27, 0.03, 0.13, 0.34, 0.42, 0.28))
         {
-            return (255, 255, 255);
+            return (0, 0, 0);
         }
 
-        // 右下白色实心矩形（抽象标记）
-        if (x >= width * 3 / 4 && x < width * 9 / 10 && y >= height / 4 && y < height * 3 / 4)
+        if (PointInTriangle(nx, ny, 0.73, 0.03, 0.87, 0.34, 0.58, 0.28))
         {
-            return (255, 255, 255);
+            return (0, 0, 0);
         }
 
-        return (bgR, bgG, bgB);
+        if (IsEllipse(nx, ny, 0.50, 0.63, 0.37, 0.34))
+        {
+            return (0, 0, 0);
+        }
+
+        return (255, 255, 255);
+    }
+
+    private static bool PointInTriangle(
+        double px,
+        double py,
+        double x1,
+        double y1,
+        double x2,
+        double y2,
+        double x3,
+        double y3)
+    {
+        var d1 = (px - x2) * (y1 - y2) - (x1 - x2) * (py - y2);
+        var d2 = (px - x3) * (y2 - y3) - (x2 - x3) * (py - y3);
+        var d3 = (px - x1) * (y3 - y1) - (x3 - x1) * (py - y1);
+        var hasNegative = d1 < 0 || d2 < 0 || d3 < 0;
+        var hasPositive = d1 > 0 || d2 > 0 || d3 > 0;
+        return !(hasNegative && hasPositive);
+    }
+
+    private static bool IsEllipse(double nx, double ny, double cx, double cy, double rx, double ry)
+    {
+        var dx = (nx - cx) / rx;
+        var dy = (ny - cy) / ry;
+        return dx * dx + dy * dy <= 1.0;
     }
 
     private static byte[] BuildIhdr(int width, int height)

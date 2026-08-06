@@ -115,8 +115,8 @@ internal static class Program
             Lines =
             [
                 new DeliveryOrderLine { RowNo = 1, MaterialCode = "AL-6063", MaterialName = "铝型材 6063-T5", Unit = "支", PlanQty = 120, SupplierBatchNo = "B20260801" },
-                new DeliveryOrderLine { RowNo = 2, MaterialCode = "SS-M8", MaterialName = "不锈钢螺栓 M8×30", Unit = "个", PlanQty = 500, SupplierBatchNo = "B20260802" },
-                new DeliveryOrderLine { RowNo = 3, MaterialCode = "SEAL-25", MaterialName = "密封圈 Φ25", Unit = "只", PlanQty = 200, SupplierBatchNo = "B20260803" },
+                new DeliveryOrderLine { RowNo = 2, MaterialCode = "SS-M8", MaterialName = "不锈钢螺栓 M8×30", Unit = "个", PlanQty = 500 },
+                new DeliveryOrderLine { RowNo = 3, MaterialCode = "SEAL-25", MaterialName = "密封圈 Φ25", Unit = "只", PlanQty = 200 },
             ],
         };
 
@@ -127,9 +127,9 @@ internal static class Program
             Receiver = "陈磊",
             Lines =
             [
-                new DeliveryOrderLine { RowNo = 1, MaterialCode = "AL-6063", MaterialName = "铝型材 6063-T5", Unit = "支", PlanQty = 120, ActualQty = 118, BatchNo = "L-20260808-01", SupplierBatchNo = "B20260801", Warehouse = "原料库A" },
-                new DeliveryOrderLine { RowNo = 2, MaterialCode = "SS-M8", MaterialName = "不锈钢螺栓 M8×30", Unit = "个", PlanQty = 500, ActualQty = 495, BatchNo = "L-20260808-02", SupplierBatchNo = "B20260802", Warehouse = "原料库A" },
-                new DeliveryOrderLine { RowNo = 3, MaterialCode = "SEAL-25", MaterialName = "密封圈 Φ25", Unit = "只", PlanQty = 200, ActualQty = 200, BatchNo = "L-20260808-03", SupplierBatchNo = "B20260803", Warehouse = "原料库B" },
+                new DeliveryOrderLine { RowNo = 1, MaterialCode = "AL-6063", MaterialName = "铝型材 6063-T5", Unit = "支", PlanQty = 120, ActualQty = 118, BatchNo = "2260722001", SupplierBatchNo = "B20260801", Warehouse = "RWA1" },
+                new DeliveryOrderLine { RowNo = 2, MaterialCode = "SS-M8", MaterialName = "不锈钢螺栓 M8×30", Unit = "个", PlanQty = 500, ActualQty = 495, BatchNo = "2260722002", Warehouse = "RWA2" },
+                new DeliveryOrderLine { RowNo = 3, MaterialCode = "SEAL-25", MaterialName = "密封圈 Φ25", Unit = "只", PlanQty = 200, ActualQty = 200, BatchNo = "2260722003", Warehouse = "RWB1" },
             ],
         };
 
