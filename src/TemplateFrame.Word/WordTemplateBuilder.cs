@@ -32,6 +32,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     private PageSetup _pageSetup = new();
     private Paragraph? _currentParagraph;
     private Table? _layoutTable;
+    private TableFormat? _layoutFormat;
     private int _layoutRow;
     private int _layoutCol;
     private int _layoutCols;
@@ -174,7 +175,9 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             var headerRun = format?.HeaderFormat is null
                 ? CreateRun(column, CreateStyleRunProperties(headerStyle))
                 : CreateRun(column, CreateRunProperties(format.HeaderFormat));
-            headerRow.Append(CreateCell(new Paragraph(headerRun), GetColumnWidth(format, i), format?.VerticalAlignment));
+            var headerParagraph = new Paragraph(headerRun);
+            ApplyAlignment(headerParagraph, format?.HeaderFormat?.Alignment);
+            headerRow.Append(CreateCell(headerParagraph, GetColumnWidth(format, i), format?.VerticalAlignment));
         }
 
         table.Append(headerRow);
@@ -184,10 +187,9 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         for (var i = 0; i < columns.Count; i++)
         {
             var column = columns[i];
-            dataRow.Append(CreateCell(
-                new Paragraph(CreateTextSdt(column, format?.CellFormat)),
-                GetColumnWidth(format, i),
-                format?.VerticalAlignment));
+            var dataParagraph = new Paragraph(CreateTextSdt(column, format?.CellFormat));
+            ApplyAlignment(dataParagraph, format?.CellFormat?.Alignment);
+            dataRow.Append(CreateCell(dataParagraph, GetColumnWidth(format, i), format?.VerticalAlignment));
         }
 
         table.Append(dataRow);
@@ -210,17 +212,12 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         table.Append(CreateTableGrid(columns, format?.ColumnWidthsCm));
         for (var r = 0; r < rows; r++)
         {
-            var row = new TableRow();
-            for (var c = 0; c < columns; c++)
-            {
-                row.Append(CreateCell(new Paragraph(), GetColumnWidth(format, c), format?.VerticalAlignment));
-            }
-
-            table.Append(row);
+            table.Append(new TableRow()); // 行先建空，单元格由 AddCell 按需追加（支持跨列 gridSpan）
         }
 
         _container.Append(table);
         _layoutTable = table;
+        _layoutFormat = format;
         _layoutRow = 0;
         _layoutCol = 0;
         _layoutCols = columns;
@@ -228,10 +225,18 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>填充当前布局表格单元格（从 (0,0) 开始，行优先；到列尾自动换行）。</summary>
-    public WordTemplateBuilder AddCell(Action<WordTemplateBuilder> compose)
+    /// <summary>
+    /// 填充当前布局表格单元格（从 (0,0) 开始，行优先；到列尾自动换行）。
+    /// <paramref name="columnSpan"/> 支持跨列（如页眉"平分/四份"布局），跨列单元格宽度为各列之和。
+    /// </summary>
+    public WordTemplateBuilder AddCell(Action<WordTemplateBuilder> compose, int columnSpan = 1)
     {
         ArgumentNullException.ThrowIfNull(compose);
+        if (columnSpan < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(columnSpan), "columnSpan 必须为正。");
+        }
+
         if (_layoutTable is null)
         {
             throw new InvalidOperationException("AddCell 需先调用 AddLayoutTable。");
@@ -240,13 +245,25 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         var rows = _layoutTable.Elements<TableRow>().ToList();
         if (_layoutRow >= rows.Count)
         {
-            throw new InvalidOperationException("布局表格单元格已用完。");
+            throw new InvalidOperationException("布局表格行已用完。");
         }
 
-        var cell = rows[_layoutRow].Elements<TableCell>().ElementAt(_layoutCol);
+        if (_layoutCol + columnSpan > _layoutCols)
+        {
+            throw new InvalidOperationException("布局表格单元格超出列数。");
+        }
+
+        var width = SumColumnWidths(_layoutFormat, _layoutCol, columnSpan);
+        var cell = CreateCell(new Paragraph(), width, _layoutFormat?.VerticalAlignment);
+        if (columnSpan > 1)
+        {
+            cell.GetFirstChild<TableCellProperties>()!.Append(new GridSpan { Val = columnSpan });
+        }
+
+        rows[_layoutRow].Append(cell);
         compose(new WordTemplateBuilder(this, _hostPart, cell));
 
-        _layoutCol++;
+        _layoutCol += columnSpan;
         if (_layoutCol >= _layoutCols)
         {
             _layoutCol = 0;
@@ -550,6 +567,27 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 
     private static double? GetColumnWidth(TableFormat? format, int index)
         => format?.ColumnWidthsCm is { } widths && index < widths.Count ? widths[index] : null;
+
+    private static double? SumColumnWidths(TableFormat? format, int start, int count)
+    {
+        if (format?.ColumnWidthsCm is not { } widths)
+        {
+            return null;
+        }
+
+        double sum = 0;
+        var any = false;
+        for (var i = start; i < start + count && i < widths.Count; i++)
+        {
+            if (widths[i] is { } w)
+            {
+                sum += w;
+                any = true;
+            }
+        }
+
+        return any ? sum : null;
+    }
 
     private static string CmToDxaString(double cm)
         => ((int)Math.Round(cm / 2.54 * 1440.0)).ToString(System.Globalization.CultureInfo.InvariantCulture);
