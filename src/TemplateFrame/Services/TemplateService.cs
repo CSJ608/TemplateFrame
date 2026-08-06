@@ -15,6 +15,7 @@ public abstract class TemplateService<TData>
     private readonly ITemplateEngine _engine;
     private readonly Lazy<TemplateContract> _contract;
 
+    /// <summary>以引擎实现创建服务（业务服务构造函数传入具体插件引擎，如 <c>WordTemplateEngine</c>）。</summary>
     protected TemplateService(ITemplateEngine engine)
     {
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));

@@ -7,8 +7,25 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>TemplateFrame.Word</RootNamespace>
     <AssemblyName>TemplateFrame.Word</AssemblyName>
-    <Description>TemplateFrame 的 MS Word 插件：内容控件（SDT）生成 / 定位 / 校验</Description>
+    <Description>TemplateFrame 的 MS Word 插件：内容控件（SDT）生成 / 定位 / 填充 / 回读 / 校验</Description>
+
+    <!-- 打包准备（迭代 5）：XML doc + NuGet 元数据；版本与 git tag 一致（见 docs/PUBLISHING.md） -->
+    <Version>1.0.0</Version>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>TemplateFrame.Word</PackageId>
+    <Authors>CSJ608</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/CSJ608/TemplateFrame</RepositoryUrl>
+    <PackageTags>template;word;docx;sdt;office</PackageTags>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="DocumentFormat.OpenXml" Version="3.3.0" />
