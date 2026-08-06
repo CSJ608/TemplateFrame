@@ -12,6 +12,7 @@ namespace TemplateFrame.Word;
 public sealed class WordTemplateEngine : ITemplateEngine
 {
     private readonly WordTemplateFiller _filler;
+    private readonly WordTemplateParser _parser;
 
     /// <summary>创建默认引擎（缺失必填元素时填充抛错）。</summary>
     public WordTemplateEngine()
@@ -21,7 +22,10 @@ public sealed class WordTemplateEngine : ITemplateEngine
 
     /// <summary>以指定填充配置创建引擎（可配置缺失必填元素的处理策略，见设计文档 §5.3）。</summary>
     public WordTemplateEngine(WordFillOptions? options)
-        => _filler = new WordTemplateFiller(options ?? new WordFillOptions());
+    {
+        _filler = new WordTemplateFiller(options ?? new WordFillOptions());
+        _parser = new WordTemplateParser();
+    }
 
     /// <inheritdoc />
     public Stream BuildInitialTemplate(TemplateContract contract, Action<ITemplateBuilder> compose)
@@ -47,5 +51,5 @@ public sealed class WordTemplateEngine : ITemplateEngine
 
     /// <inheritdoc />
     public FillData Parse(Stream template, TemplateContract contract)
-        => throw new NotSupportedException("Word 回读（Parse）在迭代 3 提供。");
+        => _parser.Parse(template, contract);
 }

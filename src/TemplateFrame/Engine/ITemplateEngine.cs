@@ -20,6 +20,6 @@ public interface ITemplateEngine
     /// <summary>填充：模板 + FillData → 新文件流（含填充时软校验，见设计文档 §5.3）。</summary>
     Stream Fill(Stream template, TemplateContract contract, FillData data);
 
-    /// <summary>回读：已填充模板 → FillData（迭代 3 提供，当前为骨架）。</summary>
+    /// <summary>回读：已填充模板 → FillData（含表格多行，见设计文档 §5.4）。</summary>
     FillData Parse(Stream template, TemplateContract contract);
 }

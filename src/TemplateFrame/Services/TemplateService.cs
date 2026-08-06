@@ -37,9 +37,11 @@ public abstract class TemplateService<TData>
         => throw new NotSupportedException(
             "迭代 1 要求业务服务手写映射（重写 MapToData）；DataPath 自动映射在迭代 4 提供。");
 
-    /// <summary>反向映射：FillData → TData（Parse 回读在迭代 3 提供）。</summary>
+    /// <summary>
+    /// 手写反向映射：FillData → TData（迭代 3 要求业务服务手写；字典 → POCO 自动映射在迭代 4 提供）。
+    /// </summary>
     protected virtual TData MapFromData(FillData data)
-        => throw new NotSupportedException("Parse 回读在迭代 3 提供，届时请重写 MapFromData。");
+        => throw new NotSupportedException("迭代 3 要求业务服务手写反向映射（重写 MapFromData）；字典 → POCO 自动映射在迭代 4 提供。");
 
     /// <summary>生成初始模板文件流（含内容控件 SDT）。</summary>
     public Stream BuildInitialTemplateFile()
@@ -56,7 +58,7 @@ public abstract class TemplateService<TData>
         return _engine.Fill(template, Contract, fillData);
     }
 
-    /// <summary>回读：已填充模板 → 强类型数据（迭代 3 落地，当前为骨架）。</summary>
+    /// <summary>回读：已填充模板 → 强类型数据（迭代 3 已落地）。</summary>
     public TData Parse(Stream template)
     {
         FillData fillData = _engine.Parse(template, Contract);

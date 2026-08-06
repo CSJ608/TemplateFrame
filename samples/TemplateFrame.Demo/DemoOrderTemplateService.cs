@@ -8,7 +8,7 @@ namespace TemplateFrame.Demo;
 
 /// <summary>
 /// Demo 场景服务示例：演示"业务服务 = 声明契约 + 组装版式 + 手写映射"的三层用法。
-/// 迭代 1 落地 BuildInitialTemplateFile 与 Validate；Fill 在迭代 2 落地，Parse 待迭代 3。
+/// 迭代 1 落地 BuildInitialTemplateFile 与 Validate；Fill 在迭代 2 落地，Parse 在迭代 3 落地。
 /// </summary>
 public sealed class DemoOrderTemplateService : TemplateService<DemoOrderData>
 {
@@ -89,5 +89,33 @@ public sealed class DemoOrderTemplateService : TemplateService<DemoOrderData>
                     })
                     .ToList(),
             },
+        };
+
+    /// <summary>手写反向映射：FillData → TData（字典 → POCO 自动映射在迭代 4 提供）。</summary>
+    protected override DemoOrderData MapFromData(FillData data)
+        => new()
+        {
+            OrderNo = data.Values.TryGetValue("OrderNo", out var orderNo)
+                ? orderNo as string ?? string.Empty
+                : string.Empty,
+            CustomerName = data.Values.TryGetValue("CustomerName", out var customerName)
+                ? customerName as string ?? string.Empty
+                : string.Empty,
+            OrderDate = data.Values.TryGetValue("OrderDate", out var orderDate) && orderDate is DateTime orderDateValue
+                ? orderDateValue
+                : default,
+            TotalAmount = data.Values.TryGetValue("TotalAmount", out var totalAmount) && totalAmount is decimal totalAmountValue
+                ? totalAmountValue
+                : default,
+            Lines = data.Tables.TryGetValue("Lines", out var lines)
+                ? lines
+                    .Select(row => new DemoOrderLine
+                    {
+                        MaterialCode = row.TryGetValue("MC", out var mc) ? mc as string ?? string.Empty : string.Empty,
+                        MaterialName = row.TryGetValue("MName", out var mName) ? mName as string ?? string.Empty : string.Empty,
+                        Quantity = row.TryGetValue("Qty", out var qty) && qty is decimal qtyValue ? qtyValue : default,
+                    })
+                    .ToList()
+                : [],
         };
 }

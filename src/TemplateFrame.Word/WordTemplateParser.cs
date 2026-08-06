@@ -1,0 +1,238 @@
+using System.Globalization;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
+using TemplateFrame.Contract;
+using TemplateFrame.Data;
+using A = DocumentFormat.OpenXml.Drawing;
+
+namespace TemplateFrame.Word;
+
+/// <summary>
+/// Word 回读器（设计文档 §5.4）：对"已填充"的模板按契约回读成 <see cref="FillData"/>。
+/// 与 <see cref="WordTemplateFiller"/> 共享同一套按 tag 定位逻辑（<see cref="SdtLocator"/>），只是方向相反。
+/// Text 读 w:t 文本并按 <see cref="TextElement.ValueType"/> 转换；Table 找到示例行克隆区逐行读出字段；
+/// Image 读回占位/填充后的图片字节（可选能力）。
+/// </summary>
+public sealed class WordTemplateParser
+{
+    /// <summary>回读 .docx：模板 + 契约 → FillData（不改动传入的模板流）。</summary>
+    public FillData Parse(Stream template, TemplateContract contract)
+    {
+        ArgumentNullException.ThrowIfNull(template);
+        ArgumentNullException.ThrowIfNull(contract);
+
+        var bytes = ReadAllBytes(template);
+        using var document = WordprocessingDocument.Open(new MemoryStream(bytes, writable: false), false);
+
+        var values = new Dictionary<string, object?>();
+        var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
+
+        foreach (var element in contract.Elements)
+        {
+            switch (element)
+            {
+                case TextElement text:
+                    var textValue = ReadText(document, text);
+                    if (textValue is not null)
+                    {
+                        values[text.Key] = textValue;
+                    }
+
+                    break;
+
+                case ImageElement image:
+                    var imageBytes = ReadImage(document, image.Key);
+                    if (imageBytes is not null)
+                    {
+                        values[image.Key] = imageBytes;
+                    }
+
+                    break;
+
+                case TableElement table:
+                    var rows = ReadTableRows(document, table);
+                    if (rows is not null)
+                    {
+                        tables[table.Key] = rows;
+                    }
+
+                    break;
+            }
+        }
+
+        return new FillData { Values = values, Tables = tables };
+    }
+
+    /// <summary>读取文本控件：w:t 文本按 ValueType 转换；控件缺失返回 null。</summary>
+    private static object? ReadText(WordprocessingDocument document, TextElement element)
+    {
+        var match = SdtLocator.FindByTag(document, element.Key).FirstOrDefault();
+        if (match is null)
+        {
+            return null;
+        }
+
+        var text = string.Concat(match.Element.Descendants<Text>().Select(t => t.Text ?? string.Empty));
+        return ConvertToValueType(text, element.ValueType);
+    }
+
+    /// <summary>读取图片控件：blip r:embed 指向的图片 part 字节；无 blip 或控件缺失返回 null。</summary>
+    private static byte[]? ReadImage(WordprocessingDocument document, string tag)
+    {
+        var match = SdtLocator.FindByTag(document, tag).FirstOrDefault();
+        if (match is null)
+        {
+            return null;
+        }
+
+        var blip = match.Element.Descendants<A.Blip>().FirstOrDefault();
+        if (blip?.Embed?.Value is not { } relId)
+        {
+            return null;
+        }
+
+        var part = document.MainDocumentPart?.GetPartById(relId);
+        if (part is not ImagePart imagePart)
+        {
+            return null;
+        }
+
+        using var stream = imagePart.GetStream();
+        using var buffer = new MemoryStream();
+        stream.CopyTo(buffer);
+        return buffer.ToArray();
+    }
+
+    /// <summary>
+    /// 读取表格数据：找到包含完整示例行（含全部列 SDT）的表格，逐行读回含列 SDT 的数据行；
+    /// 找不到完整行模板返回 null。
+    /// </summary>
+    private static IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(
+        WordprocessingDocument document,
+        TableElement table)
+    {
+        var columnKeys = table.Columns.Select(c => c.Key).ToHashSet(StringComparer.Ordinal);
+        foreach (var tbl in EnumerateTables(document))
+        {
+            var hasTemplateRow = tbl.Elements<TableRow>().Any(row =>
+                columnKeys.All(key =>
+                    row.Descendants<SdtElement>().Any(s => SdtLocator.GetTag(s) == key)));
+            if (!hasTemplateRow)
+            {
+                continue;
+            }
+
+            var rows = new List<IReadOnlyDictionary<string, object?>>();
+            foreach (var row in tbl.Elements<TableRow>())
+            {
+                var rowSdts = row.Descendants<SdtElement>()
+                    .Where(s => SdtLocator.GetTag(s) is { } tag && columnKeys.Contains(tag))
+                    .ToList();
+                if (rowSdts.Count == 0)
+                {
+                    continue; // 表头等无列 SDT 的行不是数据行
+                }
+
+                var rowValues = new Dictionary<string, object?>();
+                foreach (var column in table.Columns)
+                {
+                    var sdt = rowSdts.FirstOrDefault(s => SdtLocator.GetTag(s) == column.Key);
+                    if (sdt is null)
+                    {
+                        rowValues[column.Key] = null;
+                        continue;
+                    }
+
+                    var text = string.Concat(sdt.Descendants<Text>().Select(t => t.Text ?? string.Empty));
+                    rowValues[column.Key] = ConvertToValueType(text, column.ValueType);
+                }
+
+                rows.Add(rowValues);
+            }
+
+            return rows;
+        }
+
+        return null;
+    }
+
+    /// <summary>按 TextElement.ValueType 把文本转换为目标类型；转换失败或未知类型保留原始文本。</summary>
+    private static object? ConvertToValueType(string text, Type valueType)
+    {
+        if (valueType == typeof(string) || valueType == typeof(object))
+        {
+            return text;
+        }
+
+        if (valueType == typeof(decimal)
+            && decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var decimalValue))
+        {
+            return decimalValue;
+        }
+
+        if (valueType == typeof(int)
+            && int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue))
+        {
+            return intValue;
+        }
+
+        if (valueType == typeof(DateTime)
+            && DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTimeValue))
+        {
+            return dateTimeValue;
+        }
+
+        if (valueType == typeof(bool) && bool.TryParse(text, out var boolValue))
+        {
+            return boolValue;
+        }
+
+        return text;
+    }
+
+    private static IEnumerable<Table> EnumerateTables(WordprocessingDocument document)
+    {
+        var mainPart = document.MainDocumentPart!;
+        if (mainPart.Document?.Body is { } body)
+        {
+            foreach (var table in body.Descendants<Table>())
+            {
+                yield return table;
+            }
+        }
+
+        foreach (var headerPart in mainPart.HeaderParts)
+        {
+            if (headerPart.Header is { } header)
+            {
+                foreach (var table in header.Descendants<Table>())
+                {
+                    yield return table;
+                }
+            }
+        }
+
+        foreach (var footerPart in mainPart.FooterParts)
+        {
+            if (footerPart.Footer is { } footer)
+            {
+                foreach (var table in footer.Descendants<Table>())
+                {
+                    yield return table;
+                }
+            }
+        }
+    }
+
+    private static byte[] ReadAllBytes(Stream stream)
+    {
+        if (stream.CanSeek)
+        {
+            stream.Position = 0;
+        }
+
+        using var buffer = new MemoryStream();
+        stream.CopyTo(buffer);
+        return buffer.ToArray();
+    }
+}
