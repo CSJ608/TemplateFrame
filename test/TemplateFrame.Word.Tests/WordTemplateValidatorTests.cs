@@ -207,4 +207,25 @@ public sealed class WordTemplateValidatorTests
         Assert.False(result.IsValid);
         Assert.Contains(result.Issues, i => i.Code == TemplateValidationIssueCode.Invalid && i.Key == "Dup");
     }
+
+    [Fact]
+    public void Validate_MissingOptionalElement_WarnsButPasses()
+    {
+        using var stream = TestDocuments.BuildTemplate(b => b.AddElement("Known"));
+        var contract = new TemplateContract
+        {
+            Elements =
+            [
+                new TextElement { Key = "Known", Required = true },
+                new TextElement { Key = "Optional", Required = false },
+            ],
+        };
+
+        var result = new WordTemplateValidator().Validate(stream, contract);
+
+        Assert.True(result.IsValid); // 可选元素缺失只告警，模板仍有效
+        var missing = Assert.Single(result.Issues, i => i.Code == TemplateValidationIssueCode.Missing);
+        Assert.Equal("Optional", missing.Key);
+        Assert.Equal(TemplateValidationSeverity.Warning, missing.Severity);
+    }
 }

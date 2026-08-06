@@ -1,3 +1,6 @@
+using DocumentFormat.OpenXml;
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Contract;
 
 namespace TemplateFrame.Word.Tests;
@@ -69,4 +72,71 @@ internal static class TestDocuments
         64, 0, 0, 0, 0, 73, 69, 78,
         68, 174, 66, 96, 130,
     ];
+
+    /// <summary>
+    /// 构造一个含正文/页眉/页脚内容控件的 .docx（用于页眉页脚健壮性测试）。
+    /// 注意：Word 手做模板里控件可出现在页眉/页脚，定位/填充/回读都按 tag 全局生效。
+    /// </summary>
+    public static MemoryStream BuildTemplateWithHeaderFooter(string bodyTag, string headerTag, string footerTag)
+    {
+        var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, autoSave: false))
+        {
+            var mainPart = document.AddMainDocumentPart();
+            mainPart.Document = new Document(new Body(
+                new Paragraph(new Run(new Text("正文"))),
+                new Paragraph(CreateTextSdtRun(bodyTag, 1))));
+
+            var headerPart = mainPart.AddNewPart<HeaderPart>();
+            headerPart.Header = new Header(new Paragraph(CreateTextSdtRun(headerTag, 2)));
+
+            var footerPart = mainPart.AddNewPart<FooterPart>();
+            footerPart.Footer = new Footer(new Paragraph(CreateTextSdtRun(footerTag, 3)));
+
+            document.Save();
+        }
+
+        stream.Position = 0;
+        return stream;
+    }
+
+    private static SdtRun CreateTextSdtRun(string tag, int id)
+        => new(
+            new SdtProperties(
+                new SdtId { Val = id },
+                new Tag { Val = tag },
+                new SdtAlias { Val = tag }),
+            new SdtContentRun(new Run(new Text(tag))));
+
+    /// <summary>构造一个含静态表（无内容控件）+ 明细表（每格一个 SDT）的 .docx，用于多表健壮性测试。</summary>
+    public static MemoryStream BuildTemplateWithStaticTableAndDetailTable()
+    {
+        var stream = new MemoryStream();
+        using (var document = WordprocessingDocument.Create(stream, WordprocessingDocumentType.Document, autoSave: false))
+        {
+            var mainPart = document.AddMainDocumentPart();
+
+            var staticTable = new Table(
+                new TableRow(
+                    new TableCell(new Paragraph(new Run(new Text("备注1")))),
+                    new TableCell(new Paragraph(new Run(new Text("备注2"))))),
+                new TableRow(
+                    new TableCell(new Paragraph(new Run(new Text("静态行")))),
+                    new TableCell(new Paragraph(new Run(new Text("无 SDT"))))));
+
+            var detailTable = new Table(
+                new TableRow(
+                    new TableCell(new Paragraph(new Run(new Text("物料代码")))),
+                    new TableCell(new Paragraph(new Run(new Text("数量"))))),
+                new TableRow(
+                    new TableCell(new Paragraph(CreateTextSdtRun("MC", 1))),
+                    new TableCell(new Paragraph(CreateTextSdtRun("Qty", 2)))));
+
+            mainPart.Document = new Document(new Body(staticTable, detailTable));
+            document.Save();
+        }
+
+        stream.Position = 0;
+        return stream;
+    }
 }
