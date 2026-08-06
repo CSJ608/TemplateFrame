@@ -18,8 +18,6 @@
 > - 导出 = 模板 + 数据 → 文件
 > - 导入 = 文件 → 按契约解析校验 → 数据
 
-因此我们做一个**契约引擎**：用代码定义"模板契约"，然后围绕契约提供四个确定的操作：`CreateTemplate` / `Validate` / `Fill` / `Parse`。
-
 ### 1.3 与 TemplateFiller 的关系
 
 TemplateFiller（`CSJ608/TemplateFiller`）验证了"占位符填充"的思路，但它有三个短板：
@@ -28,55 +26,60 @@ TemplateFiller（`CSJ608/TemplateFiller`）验证了"占位符填充"的思路�
 - 填充是盲填（缺字段静默填空，打印场景危险）；
 - 只有"填充"一个方向，没有"回读"。
 
-TemplateFrame 是它的演进：**把契约显式化、把模板从"手写占位符"变成"程序生成 + 用户改样式"、补上校验与反向导入**。占位符定位机制（尤其 Word run 拆分的处理经验）会吸收进 Word 插件的设计里。
+TemplateFrame 是它的演进：**把契约显式化、把模板从"手写占位符"变成"程序生成 + 用户改样式"、补上校验与反向导入**。
+
+其中 TemplateFiller 的 `ISource`（基于反射 + `:` 路径的鸭子类型数据访问）**在新架构中不再保留为引擎依赖**，由"数据形状 + 服务层映射"取代（见 §3.3）。
 
 ### 1.4 范围约束（当前）
 
 - 第一版只支持 **Microsoft Office**（MS Word 的 `.docx`）。
 - WPS 等通过**独立插件**在未来支持（见 §4）。
-- 自动化发布（GitHub Release / NuGet）**最后做**，先保证本地功能测试（见 §6、§9）。
+- 自动化发布（GitHub Release / NuGet）**最后做**，先保证本地功能测试（见 §6、§7）。
 
 ---
 
-## 2. 核心理念：契约是唯一事实来源
+## 2. 架构总览：三层拆分
 
-系统里只有一份事实来源：**代码定义的契约（`TemplateContract`）**。模板文件只是契约的"实例"。
+`TemplateContract` 早期设计把"元素清单"和"场景服务"揉在一起，定位模糊。现拆成三层：
 
-```
-契约（代码） ──CreateTemplate──▶ 初始模板文件（程序生成，天然匹配）
-契约（代码） ◀──Validate──────── 用户改样式后上传的模板（强校验）
-契约（代码） ──Fill────────────▶ 用声明的数据填充模板 → 输出文档
-契约（代码） ◀──Parse─────────── 从已填充的模板回读数据
-```
-
-- 初始模板由程序生成 → 出生即匹配契约，不再需要人肉手写占位符。
-- 用户只改"样式"（字体、颜色、位置、边框、静态文案），不碰契约元素 → 校验通过。
-- 用户误删了元素、改错了类型 → 校验报 `Missing` / `WrongType`，上传被拒。
-- 契约升级（新增字段）时，存量模板会"漂移" → 填充时做软校验并告警（§5.3）。
-
----
-
-## 3. 契约模型（格式无关核心）
-
-### 3.1 元素类型
-
-| 元素 | 说明 | 未来扩展 |
+| 层 | 内容 | 特征 |
 |---|---|---|
-| `Text` | 一段可替换的文本（单值） | |
-| `Image` | 一张可替换的图片 | |
-| `Table` | 一个明细表，内含"行模板"（若干字段） | |
-| `Label` | 标签模板（由其他工具定义，未来） | 预留 |
+| **基础包** `TemplateFrame` | 契约元素模型、引擎抽象、数据形状、Builder 抽象 | 通用、稳定、弱类型（object / 字典） |
+| **插件** `TemplateFrame.Word` | SDT 定位 / 生成 / 填充 / 回读 / 校验；`WordTemplateBuilder` | 通用（不掺业务），按宿主格式实现 |
+| **业务场景服务**（业务应用内） | 每个场景一个强类型服务，如 `ReceivingOrderTemplateService : TemplateService<ReceivingOrderData>` | 强类型，声明契约 + 组装版式 + 提供 `Fill` / `Parse` / `Validate` |
 
-### 3.2 元素元数据
+```
+业务应用（Wms4 等）
+  ReceivingOrderTemplateService : TemplateService<ReceivingOrderData>
+    DefineContract() / BuildInitialTemplate() / Fill(强类型) / Parse(强类型) / Validate
+        │
+插件 TemplateFrame.Word（通用）
+  WordTemplateBuilder / SdtLocator / Filler / Parser / Validator
+        │
+基础包 TemplateFrame（通用、稳定）
+  TemplateContract（元素清单）/ ITemplateEngine / ITemplateBuilder / FillData（数据形状）
+```
 
-每个元素携带：
+**分工原则**：
+- 基础包"不太会变"，只提供机制；
+- 业务场景很多，每个场景在业务应用里声明一个强类型服务；
+- 库本身**不包含**任何业务场景（如"收货单"），示例场景放在 `samples` 里用 Demo 单据演示。
+
+---
+
+## 3. 核心概念
+
+### 3.1 契约 = 元素清单（不是服务，也不是版式）
+
+`TemplateContract` 只是**这个场景有哪些元素**的运行时描述，可序列化、可版本化。
 
 ```csharp
 public abstract record TemplateElement
 {
-    public string Key { get; init; }          // 全局唯一键（Word 中用内容控件 tag）
-    public string DisplayName { get; init; }  // 展示名（导入列名 / 模板提示）
+    public string Key { get; init; }           // 全局唯一键（Word 内容控件 tag）
+    public string DisplayName { get; init; }   // 展示名（导入列名 / 模板提示）
     public bool Required { get; init; } = true;
+    public string? DataPath { get; init; }     // 可选：从 TData 自动取值的路径（用于自动映射，见 §3.3）
 }
 
 public sealed record TextElement : TemplateElement
@@ -96,27 +99,79 @@ public sealed record TableElement : TemplateElement
 }
 ```
 
-### 3.3 四个操作（对外 API）
+元素类型当前为 `Text` / `Image` / `Table`，预留 `Label`（未来标签模板）。
+
+**契约要版本化**：存模板时连同契约版本一起存；`Validate` / `Fill` / `Parse` 使用模板对应的契约版本（或最新契约 + 漂移检测），这支撑"产品升级加了字段、存量客户模板缺元素"的软校验（§5.3）。
+
+### 3.2 初始模板归业务应用（Builder）
+
+**契约不产出版式**。`contract.CreateTemplate()` 取消，改为：
+
+- 插件提供 `ITemplateBuilder`（Word 实现 `WordTemplateBuilder`），业务应用用它组合版式：标题、静态文案、元素、表格、图片占位、样式；
+- 业务应用也可选择让设计师直接用 Word 手做模板再上传，契约 + `Validate` 统一兜底；
+- 两条路径都成立，`Validate` 保证模板与契约匹配。
 
 ```csharp
-public sealed class TemplateContract
+// 业务服务组装初始模板
+protected override void BuildInitialTemplate(ITemplateBuilder builder)
 {
-    // 1) 生成初始模板（Word 插件：产出含内容控件的 .docx）
-    public Stream CreateTemplate(TemplateKind kind);
-
-    // 2) 校验上传的模板（强校验：缺失 / 类型错 / 多余 / 歧义）
-    public TemplateValidationResult Validate(Stream template);
-
-    // 3) 用声明的数据填充模板
-    public Stream Fill(Stream template, object data);          // data: DTO / 匿名对象 / 字典
-
-    // 4) 从已填充模板回读数据（反向导入）
-    public T Parse<T>(Stream template);
-    public object Parse(Stream template);
+    builder.AddParagraph("示例单据", style: Heading);
+    builder.AddText("单号：").AddElement("OrderNo");
+    builder.AddText("客户：").AddElement("CustomerName");
+    builder.AddTable("Lines", columns: ["MC", "MName", "Qty"], headerStyle: ...);
+    builder.AddImage("Logo", placeholder: ..., size: ...);
+    builder.AddStaticText("签字：____________");
 }
 ```
 
-数据可以是 DTO、匿名对象或 `IDictionary<string, object?>`——核心通过统一的 `ISource` 抽象读取（沿用 TemplateFiller 的 Source 思路，支持 `:` 嵌套路径）。
+### 3.3 数据形状（替代 ISource）
+
+**引擎不依赖路径反射**，只依赖一个与插件无关的数据形状：
+
+```csharp
+public sealed class FillData
+{
+    public IReadOnlyDictionary<string, object?> Values { get; init; } = new Dictionary<string, object?>();
+    public IReadOnlyDictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>> Tables { get; init; }
+        = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
+}
+```
+
+- 不需要 `:` 嵌套路径：Word 内容控件 tag 是扁平键，嵌套对象在服务层映射时展平（如 `Customer.Name` → tag `CustomerName`）；
+- 跨插件（Word / Excel / Label）消费同一形状，天然一致；
+- **类型转换发生在业务服务边界**：
+  - 手写映射：`MapToData(TData)` 返回 `FillData`（显式、可读）；
+  - 自动映射（可选）：契约元素声明 `DataPath`，`TemplateDataMapper.FromObject(dto, contract)` 一次性（可缓存）读取属性生成 `FillData`；
+  - `Parse` 反向：引擎产出 `FillData` 形状，服务层映射回 `TData`（或字典 → POCO 映射器）。
+
+### 3.4 通用基类 TemplateService&lt;TData&gt;
+
+库提供泛型基类，业务服务继承它即可获得强类型 `Fill` / `Parse` / `Validate`：
+
+```csharp
+public abstract class TemplateService<TData>
+{
+    protected abstract TemplateContract DefineContract();
+    protected abstract void BuildInitialTemplate(ITemplateBuilder builder);
+
+    protected virtual FillData MapToData(TData data);    // 默认走 DataPath 自动映射
+    protected virtual TData MapFromData(FillData data);  // 默认走字典 → POCO 映射
+
+    public Stream BuildInitialTemplateFile();
+    public TemplateValidationResult Validate(Stream template);
+    public Stream Fill(Stream template, TData data);
+    public TData Parse(Stream template);
+}
+```
+
+### 3.5 四个操作
+
+| 操作 | 谁负责 | 说明 |
+|---|---|---|
+| `BuildInitialTemplateFile` | 业务服务 + `ITemplateBuilder`（插件实现） | 版式归业务；`Validate` 兜底 |
+| `Validate` | `engine.Validate(template, contract)` | 业务服务持有契约；上传时强校验 |
+| `Fill` | `service.Fill(template, TData)` | 强类型入口；内部 `engine.Fill(template, FillData)` |
+| `Parse` | `service.Parse(template) → TData` | 强类型出口；内部引擎回读 + 映射 |
 
 ---
 
@@ -126,7 +181,7 @@ public sealed class TemplateContract
 
 | 插件 | 目标 | 状态 |
 |---|---|---|
-| `TemplateFrame` | 核心：契约模型 + 四个操作 + 格式无关抽象 | 迭代 1 起 |
+| `TemplateFrame` | 核心：契约元素模型 + 引擎抽象 + 数据形状 + Builder 抽象 | 迭代 1 起 |
 | `TemplateFrame.Word` | MS Word（OpenXML SDK）：内容控件生成/定位/填充/回读 | 迭代 1-3 |
 | `TemplateFrame.Wps` | WPS Word（未来，独立插件） | 未开始 |
 | `TemplateFrame.Excel` | Excel 导入导出（未来） | 未开始 |
@@ -136,7 +191,7 @@ public sealed class TemplateContract
 
 - **Word 插件**：`Text` → 内容控件（SDT）tag；`Image` → 占位图外包 SDT；`Table` → 行模板（每格 SDT）。
 - 定位一律靠 **tag**，不靠位置 → 用户随便移动/改样式都不影响。
-- 未来 **Label 插件**：例如 BarTender/自绘标签，契约元素映射到标签的字段对象。
+- 未来 **Label 插件**：契约元素映射到标签工具的字段对象。
 
 > WPS 单独做插件的原因：WPS 对内容控件（SDT）的支持不完整，直接用 Word 插件可能出现"用户用 WPS 打开另存后 tag 丢失"。WPS 插件内部可以走"文本占位符 + 格式约定"或 WPS 原生字段，核心契约模型不变。
 
@@ -192,6 +247,7 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 
 - 对"已填充"的模板按契约回读：Text 读 `w:t` 文本 → 按 `ValueType` 转换；Table 找到示例行克隆区 → 逐行读出字段；Image 读回图片流（可选）。
 - 与 `Fill` **共享同一套元素定位逻辑**，只是方向相反。
+- 引擎产出 `FillData` 形状，业务服务映射回强类型 `TData`。
 - 用途：把"用户填好并打印过的单据"回读成结构化数据，供导入业务复用；也是未来 Excel 导入（按表头列名解析）的同一个模式。
 
 ---
@@ -203,26 +259,28 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 ```
 TemplateFrame/
 ├─ TemplateFrame.slnx
-├─ src/TemplateFrame/               # 核心：契约模型 + 四个操作抽象（格式无关）
+├─ src/TemplateFrame/               # 基础包：契约模型 + 引擎抽象 + 数据形状（格式无关）
 │  ├─ Contract/                     # TemplateContract, TemplateElement, TextElement, ImageElement, TableElement
-│  ├─ Validation/                   # TemplateValidationResult, ElementIssue
-│  ├─ Filling/                      # ITemplateFiller（插件实现）
-│  ├─ Parsing/                      # ITemplateParser（插件实现）
-│  └─ Source/                       # ISource（DTO/匿名对象/字典统一读取）
+│  ├─ Data/                         # FillData（数据形状）、TemplateDataMapper（DataPath 自动映射）
+│  ├─ Engine/                       # ITemplateEngine（Validate/Fill/Parse 抽象）
+│  ├─ Builder/                      # ITemplateBuilder（版式组合抽象）
+│  └─ Services/                     # TemplateService<TData>（泛型基类）
 ├─ src/TemplateFrame.Word/          # 插件：MS Word（DocumentFormat.OpenXml）
-│  ├─ WordTemplateBuilder.cs        # CreateTemplate：生成带 SDT 的 .docx
+│  ├─ WordTemplateBuilder.cs        # 组装带 SDT 的 .docx（版式由业务服务驱动）
 │  ├─ SdtLocator.cs                 # 按 tag 定位（正文/页眉/页脚）
 │  ├─ WordTemplateValidator.cs      # Validate
 │  ├─ WordTemplateFiller.cs         # Fill：文本/图片/表格行
 │  └─ WordTemplateParser.cs         # Parse：回读
-├─ test/TemplateFrame.Tests/        # 核心单测（契约、数据源）
+├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射）
 ├─ test/TemplateFrame.Word.Tests/   # Word 插件测试：生成→校验→填充→回读→断言
-├─ samples/TemplateFrame.Demo/      # 控制台端到端 demo
+├─ samples/TemplateFrame.Demo/      # 控制台端到端 demo（含 DemoOrderTemplateService 示例场景服务）
 ├─ docs/DESIGN.md                   # 本文档
 ├─ docs/PUBLISHING.md               # 发布指南（参考 StreamFrame，暂不启用）
 ├─ CHANGELOG.md
 └─ .github/workflows/               # ci.yml / release.yml / publish-nuget.yml（参考 StreamFrame）
 ```
+
+示例场景服务放在 `samples`，用 **Demo 单据**（`DemoOrderData` / `DemoOrderTemplateService`）演示，不把业务名带进仓库。
 
 ---
 
@@ -233,11 +291,11 @@ TemplateFrame/
 | 迭代 | 内容 | 验收 |
 |---|---|---|
 | **0** | 仓库骨架：README / DESIGN / CHANGELOG / LICENSE / .gitignore / 工作流文件（参考） | 仓库就绪 |
-| **1** | 契约模型 + `TemplateFrame.Word` 生成初始模板 | `CreateTemplate` 产出含 SDT 的 .docx；单测通过 |
-| **2** | Word 校验 + 填充 | `Validate` 报 Missing/WrongType/Ambiguous；`Fill` 完成文本/图片/表格行；填充时软校验 |
-| **3** | 反向导入 `Parse` | 从填充后的模板回读结构化数据（含表格多行） |
+| **1** | 契约元素模型 + 数据形状 `FillData` + `ITemplateBuilder`（Word 实现）+ `TemplateService<TData>` + Demo 场景服务 | `BuildInitialTemplateFile` 产出含 SDT 的 .docx；`Validate` 兜底；单测通过 |
+| **2** | Word 校验 + 填充 | `Validate` 报 Missing/WrongType/Ambiguous；强类型 `Fill` 完成文本/图片/表格行；填充时软校验 |
+| **3** | 反向导入 `Parse` | 从填充后的模板回读强类型数据（含表格多行） |
 | **4** | 健壮性：页眉页脚、多表、可选字段、批量填充、`ValidateData` | 边界场景单测 |
-| **5** | 示例 + 使用文档 + 打包准备 | `samples/TemplateFrame.Demo`、README 使用说明、XML doc |
+| **5** | 示例完善 + 使用文档 + 打包准备 | `samples/TemplateFrame.Demo`、README 使用说明、XML doc |
 | **6** | 自动化发布（最后） | 启用 release.yml / publish-nuget.yml；按 docs/PUBLISHING.md 完成前置配置 |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
@@ -265,8 +323,10 @@ TemplateFrame/
 
 | 项 | 说明 | 决策 |
 |---|---|---|
+| `ISource` 取舍 | TemplateFiller 的路径反射数据访问不保留为引擎依赖 | 改用数据形状 `FillData` + 服务层映射（显式或 DataPath 自动映射） |
+| 初始模板归属 | 契约不产出版式 | 版式由业务应用通过 `ITemplateBuilder` 组装，或 Word 手做 + `Validate` 兜底 |
+| 契约版本化 | 契约升级后存量模板缺元素 | 契约可序列化 + 版本化；上传强校验、填充软校验（`Drifted`） |
 | WPS 兼容性 | WPS 对 SDT 支持不完整 | 第一版只支持 MS Office；WPS 用独立插件（`TemplateFrame.Wps`）未来支持 |
-| 老模板漂移 | 契约升级后存量模板缺元素 | 填充时软校验 + 告警；上传时引导下载新模板重做样式 |
 | `w:id` 唯一性 | 克隆表格行后 id 会重复 | 克隆时必须重发唯一 `w:id` |
 | 标签模板 | 其他工具定义的标签模板 | 契约模型预留 `Label` 元素，插件化支持 |
 | EPPlus 许可 | Excel 场景不要用 EPPlus（商用收费） | Excel 插件用 NPOI / ClosedXML / MiniExcel（评估中） |
@@ -276,7 +336,7 @@ TemplateFrame/
 
 ## 10. 未决问题
 
-1. 仓库命名是否用 `TemplateFrame`（核心 `TemplateFrame`，插件 `TemplateFrame.Word` / `.Wps` / `.Excel`）。
-2. 契约与模板的"锚点"规则是否允许一个文档里出现多个同结构表格（如多个明细区）。
-3. Excel 插件第一版的范围：仅导出（填充）还是导出+导入（回读）一起。
-4. 标签模板（`Label`）的具体来源工具与格式，等有真实需求再定。
+1. 一个文档里出现多个同结构表格（多个明细区）时，表的锚点规则如何定义。
+2. Excel 插件第一版的范围：仅导出（填充）还是导出+导入（回读）一起。
+3. 标签模板（`Label`）的具体来源工具与格式，等有真实需求再定。
+4. 自动映射器（`DataPath`）是否作为迭代 1 的必做项，还是先手写映射、迭代 4 再补自动映射。
