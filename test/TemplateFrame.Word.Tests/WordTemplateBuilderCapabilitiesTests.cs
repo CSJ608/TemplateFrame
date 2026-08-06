@@ -10,7 +10,7 @@ using WPageSize = DocumentFormat.OpenXml.Wordprocessing.PageSize;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>能力接口测试：页面设置 / 页眉页脚 / 文本格式 / 表格格式 / 页码域（迭代 5 送货单 Demo 的支撑能力）。</summary>
+/// <summary>WordTemplateBuilder 直接能力测试：页面/页眉页脚/布局表/格式/页码/列宽/垂直对齐/下划线。</summary>
 public sealed class WordTemplateBuilderCapabilitiesTests
 {
     [Fact]
@@ -35,11 +35,10 @@ public sealed class WordTemplateBuilderCapabilitiesTests
         {
             b.AddHeader(h =>
             {
-                var word = (WordTemplateBuilder)h;
-                word.AddText("供应商：").AddElement("Supplier");
-                word.AddText("单号：").AddElement("No");
+                h.AddText("供应商：").AddElement("Supplier");
+                h.AddText("单号：").AddElement("No");
             });
-            b.AddFooter(f => ((WordTemplateBuilder)f).AddElement("PrintTime"));
+            b.AddFooter(f => f.AddElement("PrintTime"));
         });
 
         using var document = WordprocessingDocument.Open(stream, false);
@@ -60,7 +59,7 @@ public sealed class WordTemplateBuilderCapabilitiesTests
     public void AddHeader_ImageSdt_HostsPartInHeaderRels()
     {
         using var stream = TestDocuments.BuildTemplate(b =>
-            b.AddHeader(h => ((WordTemplateBuilder)h).AddImage("QRCode", widthInches: 1.0, heightInches: 1.0)));
+            b.AddHeader(h => h.AddImage("QRCode", widthInches: 1.0, heightInches: 1.0)));
 
         using var document = WordprocessingDocument.Open(stream, false);
         var headerPart = document.MainDocumentPart!.HeaderParts.Single();
@@ -109,18 +108,27 @@ public sealed class WordTemplateBuilderCapabilitiesTests
     }
 
     [Fact]
-    public void TableFormat_BorderlessCentered_WithCellFormat()
+    public void TextFormat_Underline_AppliesUnderline()
     {
         using var stream = TestDocuments.BuildTemplate(b =>
-        {
-            var table = (ITableFormatBuilder)b;
-            table.AddTable("Lines", ["MC", "Qty"], new TableFormat
+            b.AddParagraph("____________", new TextFormat { Underline = true }));
+
+        using var document = WordprocessingDocument.Open(stream, false);
+        var rPr = document.MainDocumentPart!.Document.Body!.Descendants<Run>().Single().RunProperties!;
+        Assert.Equal(UnderlineValues.Single, rPr.Underline!.Val!.Value);
+    }
+
+    [Fact]
+    public void TableFormat_BorderlessCentered_WithCellFormat_AndBottomValign()
+    {
+        using var stream = TestDocuments.BuildTemplate(b =>
+            b.AddTable("Lines", ["MC", "Qty"], new TableFormat
             {
                 Bordered = false,
                 Alignment = Builder.TextAlignment.Center,
                 CellFormat = new TextFormat { FontName = "黑体", SizePt = 14 },
-            });
-        });
+                VerticalAlignment = CellVerticalAlignment.Bottom,
+            }));
 
         using var document = WordprocessingDocument.Open(stream, false);
         var table = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single();
@@ -133,68 +141,34 @@ public sealed class WordTemplateBuilderCapabilitiesTests
         var rPr = mcSdt.Descendants<Run>().Single().RunProperties!;
         Assert.Equal("黑体", rPr.RunFonts!.EastAsia!.Value);
         Assert.Equal("28", rPr.FontSize!.Val!.Value); // 四号 = 14pt
+
+        var firstCellPr = table.Descendants<TableCell>().First().GetFirstChild<TableCellProperties>()!;
+        Assert.Equal(TableVerticalAlignmentValues.Bottom, firstCellPr.GetFirstChild<TableCellVerticalAlignment>()!.Val!.Value);
     }
 
     [Fact]
-    public void AddPageNumber_ProducesPageAndNumPagesFields()
+    public void AddPageNumber_ProducesPageAndNumPagesFields_WithPatternText()
     {
         using var stream = TestDocuments.BuildTemplate(b =>
             b.AddFooter(f =>
             {
-                var word = (WordTemplateBuilder)f;
-                word.AddParagraph(string.Empty, new TextFormat { FontName = "黑体", SizePt = 10.5, Alignment = Builder.TextAlignment.Center });
-                word.AddPageNumber("/", new TextFormat { FontName = "黑体", SizePt = 10.5 });
+                f.AddParagraph(string.Empty, new TextFormat { FontName = "黑体", SizePt = 10.5, Alignment = Builder.TextAlignment.Center });
+                f.AddPageNumber(format: new TextFormat { FontName = "黑体", SizePt = 10.5 });
             }));
 
         using var document = WordprocessingDocument.Open(stream, false);
         var footer = document.MainDocumentPart!.FooterParts.Single().Footer!;
 
-        var instructions = footer.Descendants<FieldCode>().Select(f => f.Text).ToList();
+        var instructions = footer.Descendants<FieldCode>().Select(x => x.Text).ToList();
         Assert.Contains("PAGE", instructions);
         Assert.Contains("NUMPAGES", instructions);
-        Assert.Contains(footer.Descendants<Text>(), t => t.Text == "/");
-        Assert.Contains(footer.Descendants<FieldChar>(), f => f.FieldCharType!.Value == FieldCharValues.Begin);
-        Assert.Contains(footer.Descendants<FieldChar>(), f => f.FieldCharType!.Value == FieldCharValues.End);
-    }
 
-    [Fact]
-    public void Build_HeaderFooterTemplate_ValidateFillParse_RoundTrip()
-    {
-        using var template = TestDocuments.BuildTemplate(b =>
-        {
-            b.SetPageSetup(new PageSetup { Size = Builder.PageSize.A5, Orientation = PageOrientation.Landscape });
-            b.AddHeader(h =>
-            {
-                var word = (WordTemplateBuilder)h;
-                word.AddElement("Supplier", new TextFormat { FontName = "黑体", SizePt = 12 });
-            });
-            b.AddFooter(f => ((WordTemplateBuilder)f).AddElement("PrintTime"));
-        });
-        var contract = new TemplateContract
-        {
-            Elements =
-            [
-                new TextElement { Key = "Supplier", Required = true },
-                new TextElement { Key = "PrintTime", Required = true },
-            ],
-        };
-
-        var validation = new WordTemplateValidator().Validate(template, contract);
-        Assert.True(validation.IsValid, string.Join("; ", validation.Issues.Select(i => i.Message)));
-
-        var data = new FillData
-        {
-            Values = new Dictionary<string, object?>
-            {
-                ["Supplier"] = "科力尔电机",
-                ["PrintTime"] = "2026-08-07 10:00",
-            },
-        };
-        using var filled = new WordTemplateFiller().Fill(template, contract, data).Output;
-
-        var parsed = new WordTemplateParser().Parse(filled, contract);
-        Assert.Equal("科力尔电机", parsed.Values["Supplier"]);
-        Assert.Equal("2026-08-07 10:00", parsed.Values["PrintTime"]);
+        var texts = footer.Descendants<Text>().Select(t => t.Text).ToList();
+        Assert.Contains("第", texts);
+        Assert.Contains("页，总", texts);
+        Assert.Contains("页", texts);
+        Assert.Contains(footer.Descendants<FieldChar>(), x => x.FieldCharType!.Value == FieldCharValues.Begin);
+        Assert.Contains(footer.Descendants<FieldChar>(), x => x.FieldCharType!.Value == FieldCharValues.End);
     }
 
     [Fact]
@@ -202,15 +176,10 @@ public sealed class WordTemplateBuilderCapabilitiesTests
     {
         using var stream = TestDocuments.BuildTemplate(b =>
         {
-            var layout = (ILayoutTableBuilder)b;
-            layout.AddLayoutTable(1, 3, new TableFormat { Bordered = false });
-            layout.AddCell(c => ((WordTemplateBuilder)c).AddParagraph(
-                "供应商：",
-                new TextFormat { FontName = "黑体", SizePt = 12 }));
-            layout.AddCell(c => ((WordTemplateBuilder)c).AddParagraph(
-                "送货单",
-                new TextFormat { FontName = "黑体", SizePt = 22, Alignment = Builder.TextAlignment.Center }));
-            layout.AddCell(c => ((WordTemplateBuilder)c).AddImage("QRCode", widthInches: 1.0, heightInches: 1.0));
+            b.AddLayoutTable(1, 3, new TableFormat { Bordered = false });
+            b.AddCell(c => c.AddParagraph("供应商：", new TextFormat { FontName = "黑体", SizePt = 12 }));
+            b.AddCell(c => c.AddParagraph("送货单", new TextFormat { FontName = "黑体", SizePt = 22, Alignment = Builder.TextAlignment.Center }));
+            b.AddCell(c => c.AddImage("QRCode", widthInches: 1.0, heightInches: 1.0));
         });
 
         using var document = WordprocessingDocument.Open(stream, false);
@@ -227,7 +196,7 @@ public sealed class WordTemplateBuilderCapabilitiesTests
     public void Fill_HeaderImageSdt_SwapsBlipWithinHeaderPart()
     {
         using var template = TestDocuments.BuildTemplate(b =>
-            b.AddHeader(h => ((WordTemplateBuilder)h).AddImage("QRCode", widthInches: 1.0, heightInches: 1.0)));
+            b.AddHeader(h => h.AddImage("QRCode", widthInches: 1.0, heightInches: 1.0)));
         var contract = new TemplateContract { Elements = [new ImageElement { Key = "QRCode" }] };
         var data = new FillData { Values = new Dictionary<string, object?> { ["QRCode"] = TestDocuments.TinyPng } };
 
@@ -248,13 +217,46 @@ public sealed class WordTemplateBuilderCapabilitiesTests
     }
 
     [Fact]
+    public void Build_HeaderFooterTemplate_ValidateFillParse_RoundTrip()
+    {
+        using var template = TestDocuments.BuildTemplate(b =>
+        {
+            b.SetPageSetup(new PageSetup { Size = Builder.PageSize.A5, Orientation = PageOrientation.Landscape });
+            b.AddHeader(h => h.AddElement("Supplier", new TextFormat { FontName = "黑体", SizePt = 12 }));
+            b.AddFooter(f => f.AddElement("PrintTime"));
+        });
+        var contract = new TemplateContract
+        {
+            Elements =
+            [
+                new TextElement { Key = "Supplier", Required = true },
+                new TextElement { Key = "PrintTime", Required = true },
+            ],
+        };
+
+        var validation = new WordTemplateValidator().Validate(template, contract);
+        Assert.True(validation.IsValid, string.Join("; ", validation.Issues.Select(i => i.Message)));
+
+        var data = new FillData
+        {
+            Values = new Dictionary<string, object?>
+            {
+                ["Supplier"] = "华宇精密制造",
+                ["PrintTime"] = "2026-08-07 10:00",
+            },
+        };
+        using var filled = new WordTemplateFiller().Fill(template, contract, data).Output;
+
+        var parsed = new WordTemplateParser().Parse(filled, contract);
+        Assert.Equal("华宇精密制造", parsed.Values["Supplier"]);
+        Assert.Equal("2026-08-07 10:00", parsed.Values["PrintTime"]);
+    }
+
+    [Fact]
     public void TableFormat_ColumnWidthsCm_SetsGridAndCellWidths()
     {
         using var stream = TestDocuments.BuildTemplate(b =>
-        {
-            var table = (ITableFormatBuilder)b;
-            table.AddTable("Lines", ["MC", "Qty"], new TableFormat { ColumnWidthsCm = [3.0, 2.0] });
-        });
+            b.AddTable("Lines", ["MC", "Qty"], new TableFormat { ColumnWidthsCm = [3.0, 2.0] }));
 
         using var document = WordprocessingDocument.Open(stream, false);
         var table = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single();

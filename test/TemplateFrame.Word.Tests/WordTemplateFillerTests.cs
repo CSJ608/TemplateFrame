@@ -318,7 +318,7 @@ public sealed record FillTestOrder(string OrderNo, IReadOnlyList<FillTestLine> L
 
 public sealed record FillTestLine(string MC, string Qty);
 
-public sealed class FillTestService : TemplateService<FillTestOrder>
+public sealed class FillTestService : TemplateService<FillTestOrder, WordTemplateBuilder>
 {
     public FillTestService()
         : base(new WordTemplateEngine())
@@ -346,10 +346,10 @@ public sealed class FillTestService : TemplateService<FillTestOrder>
             ],
         };
 
-    protected override void BuildInitialTemplate(ITemplateBuilder builder)
+    protected override void BuildInitialTemplate()
     {
-        builder.AddElement("OrderNo");
-        builder.AddTable("Lines", ["MC", "Qty"]);
+        Builder.AddElement("OrderNo");
+        Builder.AddTable("Lines", ["MC", "Qty"]);
     }
 
     protected override FillData MapToData(FillTestOrder data)
