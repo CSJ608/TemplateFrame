@@ -1,0 +1,14 @@
+# .NET
+bin/
+obj/
+artifacts/
+*.user
+*.suo
+.vs/
+.idea/
+*.nupkg
+*.snupkg
+TestResults/
+coverlet/
+*.trx
+!**/packages/**
