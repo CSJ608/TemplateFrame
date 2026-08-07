@@ -118,17 +118,18 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 
 ## 示例
 
-`samples/TemplateFrame.Demo` 提供**送货单**完整 Demo（`DeliveryOrderTemplateService`，A5 横版）：
+`samples/TemplateFrame.Demo.Word` 提供**送货单**完整 Demo（`DeliveryOrderTemplateService`，A5 横版）：
 - **双层页眉**：标识层（公司LOGO | 送货单 | 二维码+正下方页码）；单据头信息层（单据编号+供应商各半行 / 制单日期+制单人+单据备注按 1:1:2）
 - **正文明细表**：序号/物料代码/物料名称/单位/计划数量/实收数量/批次号/供应商批次号/仓库（9 列，显式列宽，序号窄列居中）
 - **两行页脚**：计划送货日期 / 实际到货日期+收货人
 - **收货前/收货后两次填充**：收货前 实际到货日期、收货人、实收数量、批次号、仓库为空；收货后补齐
+- **完整闭环**：生成 → 校验 → 填充（收货前/收货后）→ 回读——回读步骤读取已填充的 docx（重点收货后）→ `service.Parse` → 打印强类型 `DeliveryOrderData`（含 9 列明细多行、空字段展示）
 
 ```bash
-dotnet run --project samples/TemplateFrame.Demo
+dotnet run --project samples/TemplateFrame.Demo.Word
 ```
 
-产物默认输出到系统临时目录 `%TEMP%\TemplateFrame-Demo`（可用命令行参数指定目录），生成 模板/收货前/收货后 三份 docx。
+产物默认输出到系统临时目录 `%TEMP%\TemplateFrame.Demo.Word`（可用命令行参数指定目录），生成 Word-DeliveryOrder-template / Word-DeliveryOrder-pre / Word-DeliveryOrder-post 三份 docx（输出目录与文件均带 Word 标识，体现这是 Word 插件 Demo）。
 二维码由 Demo 侧用 QRCoder 生成 PNG、公司LOGO 由 Demo 纯代码生成占位 PNG，填充进页眉控件（框架负责图片替换，不负责生成）。
 
 ## 构建与测试

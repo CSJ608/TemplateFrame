@@ -79,10 +79,10 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 
 ## 完整示例
 
-见仓库 `samples/TemplateFrame.Demo` 的**送货单**（双层页眉 + 9 列明细 + 两行页脚 + 收货前/后两次填充）：
+见仓库 `samples/TemplateFrame.Demo.Word` 的**送货单**（双层页眉 + 9 列明细 + 两行页脚 + 收货前/后两次填充）：
 
 ```bash
-dotnet run --project samples/TemplateFrame.Demo
+dotnet run --project samples/TemplateFrame.Demo.Word
 ```
 
 设计文档见 `docs/DESIGN.md`，使用说明见仓库根 `README.md`。

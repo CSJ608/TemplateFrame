@@ -9,14 +9,14 @@
 |---|---|---|
 | 0–6 | 契约引擎 + Word 插件 + 送货单 Demo + 自动化发布 | ✅ 已归档（见下） |
 | v1.0.0 / v1.0.1 | nuget.org + GitHub Release 发布 | ✅ 已完成 |
-| **7** | **Demo 收尾：Word 插件标识 + 回读示例** | ⏳ 下一步 |
-| 8 | Excel 插件 `TemplateFrame.Excel` | ⏳ 规划中 |
+| **7** | **Demo 收尾：Word 插件标识 + 回读示例** | ✅ 已完成（见下） |
+| 8 | Excel 插件 `TemplateFrame.Excel` | ⏳ 下一步 |
 | 9 | PDF 插件 `TemplateFrame.Pdf` | ⏳ 规划中 |
 | 10 | 图片插件 `TemplateFrame.Image` | 🔮 未来 |
 
 ---
 
-## 已归档：迭代 0–6（完成）
+## 已归档：迭代 0–7（完成）
 
 | 迭代 | 内容 | 完成状态 |
 |---|---|---|
@@ -27,12 +27,15 @@
 | 4 | 健壮性：页眉页脚、多表、可选字段、批量填充、`ValidateData` | ✅ |
 | 5 | 示例完善（送货单 Demo：A5 横版 / 双层页眉 / 9 列明细 / 两行页脚 / 收货前后两次填充）+ 使用文档 + 打包准备（XML doc / README / nuspec） | ✅ |
 | 6 | 自动化发布：`release.yml` / `publish-nuget.yml`（OIDC Trusted Publishing） | ✅ v1.0.0 / v1.0.1 已发布；CI 恢复全绿 |
+| 7 | Demo 收尾：重命名 `samples/TemplateFrame.Demo.Word`（目录 / csproj / `RootNamespace` / `AssemblyName` / 命名空间），输出文件 `Word-DeliveryOrder-*.docx`、输出目录 `TemplateFrame.Demo.Word`；显式回读示例（生成 → 校验 → 填充（收货前/收货后）→ 回读闭环，读取收货后 docx → `service.Parse` → 打印强类型 `DeliveryOrderData`，含 9 列明细多行与空字段展示） | ✅ `dotnet build/test` 全绿；`dotnet run --project samples/TemplateFrame.Demo.Word` 依次输出 模板 / 收货前 / 收货后 / 回读数据 |
 
-> 交付物：`src/TemplateFrame`（基础包）、`src/TemplateFrame.Word`（插件）、`samples/TemplateFrame.Demo`、`test/TemplateFrame.Tests`、`test/TemplateFrame.Word.Tests`、技能 `templateframe-demo`。
+> 交付物：`src/TemplateFrame`（基础包）、`src/TemplateFrame.Word`（插件）、`samples/TemplateFrame.Demo.Word`、`test/TemplateFrame.Tests`、`test/TemplateFrame.Word.Tests`、技能 `templateframe-demo`。
 
 ---
 
-## 迭代 7：Demo 收尾（Word 插件标识 + 回读示例）
+## 迭代 7：Demo 收尾（Word 插件标识 + 回读示例）—— 已完成
+
+> **状态**：✅ 已完成。`dotnet build TemplateFrame.slnx && dotnet test` 全绿；`dotnet run --project samples/TemplateFrame.Demo.Word` 依次输出 模板 / 收货前 / 收货后 / 回读数据。
 
 **目标**：让 Demo 明确「这是 Word 插件的 Demo」，并补一个显式的「读取 Word 模板得到数据」示例，与「生成 → 填充」形成完整闭环演示。
 
@@ -123,7 +126,7 @@
 ### 迭代 7 启动命令（复制即用）
 
 ```text
-继续 TemplateFrame 迭代 7（Demo 收尾）。先通读 docs/DESIGN.md（重点 §2 三层架构、§3.3 数据形状、§7 迭代计划）与 docs/ROADMAP.md，并阅读现有代码：src/TemplateFrame/、src/TemplateFrame.Word/、samples/TemplateFrame.Demo/、test/TemplateFrame.Tests、test/TemplateFrame.Word.Tests。严格按设计实现，不要偏离；提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）。
+继续 TemplateFrame 迭代 7（Demo 收尾）。先通读 docs/DESIGN.md（重点 §2 三层架构、§3.3 数据形状、§7 迭代计划）与 docs/ROADMAP.md，并阅读现有代码：src/TemplateFrame/、src/TemplateFrame.Word/、samples/TemplateFrame.Demo.Word/、test/TemplateFrame.Tests、test/TemplateFrame.Word.Tests。严格按设计实现，不要偏离；提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）。
 
 迭代 7 范围：
 1. 将 samples/TemplateFrame.Demo 重命名为 samples/TemplateFrame.Demo.Word（目录 / csproj / RootNamespace / AssemblyName / 命名空间），输出文件与输出目录加 Word 标识（如 Word-DeliveryOrder-*.docx），体现这是 Word 插件 Demo；同步更新 README 与文档中的引用

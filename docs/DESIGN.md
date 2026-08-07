@@ -273,14 +273,14 @@ TemplateFrame/
 │  └─ WordTemplateParser.cs         # Parse：回读
 ├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射）
 ├─ test/TemplateFrame.Word.Tests/   # Word 插件测试：生成→校验→填充→回读→断言
-├─ samples/TemplateFrame.Demo/      # 控制台端到端 demo（含 DemoOrderTemplateService 示例场景服务）
+├─ samples/TemplateFrame.Demo.Word/ # 控制台端到端 demo（Word 插件送货单，含 DeliveryOrderTemplateService 示例场景服务）
 ├─ docs/DESIGN.md                   # 本文档
 ├─ docs/PUBLISHING.md               # 发布指南（参考 StreamFrame，暂不启用）
 ├─ CHANGELOG.md
 └─ .github/workflows/               # ci.yml / release.yml / publish-nuget.yml（参考 StreamFrame）
 ```
 
-示例场景服务放在 `samples`，用 **Demo 单据**（`DemoOrderData` / `DemoOrderTemplateService`）演示，不把业务名带进仓库。
+示例场景服务放在 `samples`，用 **Demo 单据**（`DeliveryOrderData` / `DeliveryOrderTemplateService`）演示，不把业务名带进仓库。
 
 ---
 
@@ -292,8 +292,8 @@ TemplateFrame/
 | 阶段 | 迭代 | 主题 | 状态 |
 |---|---|---|---|
 | 已归档 | 0–6 | 仓库骨架 → 契约引擎 → Word 插件（生成/校验/填充/回读）→ 健壮性 → Demo → 自动化发布 | ✅ 完成（v1.0.0 / v1.0.1 已发布） |
-| 进行中 | **7** | Demo 收尾：Word 插件标识 + 回读示例 | ⏳ 下一步 |
-| 规划中 | **8** | Excel 插件 `TemplateFrame.Excel`（ClosedXML） | ⏳ |
+| 已归档 | **7** | Demo 收尾：Word 插件标识 + 回读示例 | ✅ 完成 |
+| 进行中 | **8** | Excel 插件 `TemplateFrame.Excel`（ClosedXML） | ⏳ 下一步 |
 | 规划中 | **9** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏳ |
 | 未来 | **10** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | 🔮 |
 
