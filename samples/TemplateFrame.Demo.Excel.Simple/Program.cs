@@ -4,9 +4,9 @@ using TemplateFrame.Excel.Simple;
 namespace TemplateFrame.Demo.Excel.Simple;
 
 /// <summary>
-/// TemplateFrame.Excel.Simple 插件 Demo：物料基础数据「契约 + 强类型服务」完整链路。
-/// 服务依赖契约（单个表格），表格与列声明 DataPath 后自动映射——
-/// 生成模板 / 强类型填充 / 强类型回读（service.Parse 直接得到 MaterialsData）。
+/// TemplateFrame.Excel.Simple 插件 Demo（自动映射版）：物料基础数据「契约 + 强类型服务」完整链路。
+/// 服务依赖契约（单个表格），表格与列声明 <see cref="TemplateElement.DataPath"/> 后由框架自动映射——
+/// 无手写 MapToData / MapFromData，即可获得 生成模板 / 强类型填充 / 强类型回读（service.Parse 直接得到 MaterialsData）。
 /// 输出文件带 Simple 标识：Excel-Simple-Materials-template.xlsx（仅表头）与
 /// Excel-Simple-Materials-filled.xlsx（表头 + 数据行），默认输出到 %TEMP%\TemplateFrame.Demo.Excel.Simple。
 /// </summary>
@@ -24,14 +24,19 @@ internal static class Program
         var service = new MaterialsTemplateService();
         var options = new SimpleExcelOptions { SheetName = "物料基础数据" };
 
+        var table = service.Contract.Elements.OfType<TableElement>().Single();
+        Console.WriteLine($"契约：{service.Contract.Name} v{service.Contract.Version}，元素 {service.Contract.Elements.Count} 个（自动映射：表格与列声明 DataPath，无手写 MapToData/MapFromData）");
+        Console.WriteLine($"  - {table.Key}（{table.DisplayName}）（表格 DataPath={table.DataPath}）");
+        Console.WriteLine($"      列：{string.Join(" | ", table.Columns.Select(c => $"{c.DisplayName}（DataPath={c.DataPath}）"))}");
+
         // [1] 模板：仅表头（列结构来自契约列的 DisplayName）
         using (var template = service.BuildTemplate(options))
         {
             File.WriteAllBytes(templatePath, ((MemoryStream)template).ToArray());
         }
 
-        Console.WriteLine($"[1] 模板（仅表头）：{templatePath}");
-        Console.WriteLine($"    表头：{string.Join(" | ", service.Contract.Elements.OfType<TableElement>().Single().Columns.Select(c => c.DisplayName))}");
+        Console.WriteLine($"\n[1] 模板（仅表头）：{templatePath}");
+        Console.WriteLine($"    表头：{string.Join(" | ", table.Columns.Select(c => c.DisplayName))}");
 
         // [2] 填充：强类型数据 → xlsx（表头 + 数据行，列顺序 = 契约列顺序）
         var materials = new MaterialsData
@@ -50,13 +55,13 @@ internal static class Program
             File.WriteAllBytes(filledPath, ((MemoryStream)filled).ToArray());
         }
 
-        Console.WriteLine($"[2] 填充后：{filledPath}  数据行：{materials.Items.Count}");
+        Console.WriteLine($"\n[2] 填充后：{filledPath}  数据行：{materials.Items.Count}");
 
         // [3] 回读：已填充 xlsx → 强类型 MaterialsData（表头 → 契约列 → 自动映射）
         using var input = File.OpenRead(filledPath);
         var loaded = service.Parse(input, options);
 
-        Console.WriteLine($"[3] 回读：{loaded.Items.Count} 行（强类型 MaterialsData）");
+        Console.WriteLine($"\n[3] 回读：{loaded.Items.Count} 行（强类型 MaterialsData）");
         foreach (var item in loaded.Items)
         {
             Console.WriteLine($"    {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");
