@@ -1,16 +1,17 @@
+using TemplateFrame.Contract;
 using TemplateFrame.Excel.Simple;
 
 namespace TemplateFrame.Demo.Excel.Simple;
 
 /// <summary>
-/// TemplateFrame.Excel.Simple 插件 Demo：物料基础数据「模板 → 填充 → 反解析」完整链路。
+/// TemplateFrame.Excel.Simple 插件 Demo：物料基础数据「契约 + 强类型服务」完整链路。
+/// 服务依赖契约（单个表格），表格与列声明 DataPath 后自动映射——
+/// 生成模板 / 强类型填充 / 强类型回读（service.Parse 直接得到 MaterialsData）。
 /// 输出文件带 Simple 标识：Excel-Simple-Materials-template.xlsx（仅表头）与
 /// Excel-Simple-Materials-filled.xlsx（表头 + 数据行），默认输出到 %TEMP%\TemplateFrame.Demo.Excel.Simple。
 /// </summary>
 internal static class Program
 {
-    private static readonly string[] MaterialHeaders = ["编码", "名称", "基本单位", "包装规格", "型号"];
-
     private static void Main(string[] args)
     {
         var dir = args.Length > 0
@@ -20,46 +21,45 @@ internal static class Program
         var templatePath = Path.Combine(dir, "Excel-Simple-Materials-template.xlsx");
         var filledPath = Path.Combine(dir, "Excel-Simple-Materials-filled.xlsx");
 
-        // [1] 模板：只有表头（列结构），没有数据——业务侧拿它定义/核对列
-        var template = new SimpleExcelTable { Headers = MaterialHeaders };
-        using (var stream = File.Create(templatePath))
+        var service = new MaterialsTemplateService();
+        var options = new SimpleExcelOptions { SheetName = "物料基础数据" };
+
+        // [1] 模板：仅表头（列结构来自契约列的 DisplayName）
+        using (var template = service.BuildTemplate(options))
         {
-            SimpleExcel.Write(stream, template, new SimpleExcelOptions { SheetName = "物料基础数据" });
+            File.WriteAllBytes(templatePath, ((MemoryStream)template).ToArray());
         }
 
         Console.WriteLine($"[1] 模板（仅表头）：{templatePath}");
-        Console.WriteLine($"    表头：{string.Join(" | ", template.Headers)}  数据行：{template.Rows.Count}");
+        Console.WriteLine($"    表头：{string.Join(" | ", service.Contract.Elements.OfType<TableElement>().Single().Columns.Select(c => c.DisplayName))}");
 
-        // [2] 填充：模板表头 + 物料数据行 → 填充后文件
-        var materials = template with
+        // [2] 填充：强类型数据 → xlsx（表头 + 数据行，列顺序 = 契约列顺序）
+        var materials = new MaterialsData
         {
-            Rows =
+            Items =
             [
-                ["AL-6063", "铝型材 6063-T5", "支", "6 米/捆", "6063-T5"],
-                ["SS-M8", "不锈钢螺栓 M8×30", "个", "500 个/盒", "304"],
-                ["SEAL-25", "密封圈 Φ25", "只", "200 只/袋", "NBR"],
-                ["CU-BV4", "铜芯电线 BV4mm²", "米", "100 米/卷", "BV"],
-                ["PL-ABS", "ABS 塑料粒子", "千克", "25 千克/袋", "ABS-757"],
+                new MaterialLine { Code = "AL-6063", Name = "铝型材 6063-T5", Unit = "支", Package = "6 米/捆", Model = "6063-T5" },
+                new MaterialLine { Code = "SS-M8", Name = "不锈钢螺栓 M8×30", Unit = "个", Package = "500 个/盒", Model = "304" },
+                new MaterialLine { Code = "SEAL-25", Name = "密封圈 Φ25", Unit = "只", Package = "200 只/袋", Model = "NBR" },
+                new MaterialLine { Code = "CU-BV4", Name = "铜芯电线 BV4mm²", Unit = "米", Package = "100 米/卷", Model = "BV" },
+                new MaterialLine { Code = "PL-ABS", Name = "ABS 塑料粒子", Unit = "千克", Package = "25 千克/袋", Model = "ABS-757" },
             ],
         };
-        using (var stream = File.Create(filledPath))
+        using (var filled = service.Fill(materials, options))
         {
-            SimpleExcel.Write(stream, materials, new SimpleExcelOptions { SheetName = "物料基础数据" });
+            File.WriteAllBytes(filledPath, ((MemoryStream)filled).ToArray());
         }
 
-        Console.WriteLine($"[2] 填充后：{filledPath}  数据行：{materials.Rows.Count}");
+        Console.WriteLine($"[2] 填充后：{filledPath}  数据行：{materials.Items.Count}");
 
-        // [3] 反解析：读回填充后的 xlsx → SimpleExcelTable（第一非空行作标题，其后为数据行）
+        // [3] 回读：已填充 xlsx → 强类型 MaterialsData（表头 → 契约列 → 自动映射）
         using var input = File.OpenRead(filledPath);
-        var loaded = SimpleExcel.Read(input);
+        var loaded = service.Parse(input, options);
 
-        Console.WriteLine($"[3] 反解析：表头 {loaded.Headers.Count} 列，数据 {loaded.Rows.Count} 行");
-        Console.WriteLine($"    表头：{string.Join(" | ", loaded.Headers)}");
-        for (var i = 0; i < loaded.Rows.Count; i++)
+        Console.WriteLine($"[3] 回读：{loaded.Items.Count} 行（强类型 MaterialsData）");
+        foreach (var item in loaded.Items)
         {
-            var row = loaded.Rows[i];
-            Console.WriteLine(
-                $"    #{i + 1} 编码={row[0]}  名称={row[1]}  基本单位={row[2]}  包装规格={row[3]}  型号={row[4]}");
+            Console.WriteLine($"    {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");
         }
     }
 }
