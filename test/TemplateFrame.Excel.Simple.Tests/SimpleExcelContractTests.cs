@@ -194,7 +194,7 @@ public sealed class SimpleExcelContractTests
 
         using var stream = new MemoryStream();
         var ex = Assert.Throws<InvalidOperationException>(() => SimpleExcelContract.Write(stream, new FillData(), contract));
-        Assert.Contains("单个表格", ex.Message);
+        Assert.Contains("TwoTables", ex.Message);
     }
 
     [Fact]

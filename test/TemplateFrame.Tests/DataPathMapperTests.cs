@@ -235,7 +235,8 @@ public sealed class DataPathMapperTests
         };
 
         var ex = Assert.Throws<InvalidOperationException>(() => DataPathMapper.ToFillData(Sample(), contract));
-        Assert.Contains("DataPath 重复", ex.Message);
+        // 文化中立锚点：契约名/DataPath 在中文与英文消息中都出现（迭代 12：消息按 CurrentUICulture 本地化）
+        Assert.Contains("DataPath", ex.Message);
     }
 
     [Fact]
@@ -251,7 +252,7 @@ public sealed class DataPathMapperTests
         };
 
         var ex = Assert.Throws<InvalidOperationException>(() => DataPathMapper.ToFillData(Sample(), contract));
-        Assert.Contains("不是集合", ex.Message);
+        Assert.Contains("OrderDate", ex.Message);
     }
 
     [Fact]
