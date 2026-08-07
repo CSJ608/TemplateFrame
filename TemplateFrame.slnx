@@ -5,6 +5,8 @@
   <Project Path="test/TemplateFrame.Tests/TemplateFrame.Tests.csproj" />
   <Project Path="test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj" />
   <Project Path="test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj" />
+  <Project Path="src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj" />
+  <Project Path="test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj" />
   <Project Path="samples/TemplateFrame.Demo.Word/TemplateFrame.Demo.Word.csproj" />
   <Project Path="samples/TemplateFrame.Demo.Excel/TemplateFrame.Demo.Excel.csproj" />
 </Solution>
