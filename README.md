@@ -143,13 +143,16 @@ dotnet run --project samples/TemplateFrame.Demo.Excel
 `src/TemplateFrame.Excel.Simple` 提供**简化 Excel 插件**：只支持「标题行 + 数据行」的表格导入/导出（`SimpleExcel.Write` / `SimpleExcel.Read`），
 适合大多数列表型数据的导入导出，不需要命名区域 / 合并 / 图片 / 页面设置（详见 [插件 README](src/TemplateFrame.Excel.Simple/README.md)）。
 
-`samples/TemplateFrame.Demo.Excel.Simple` 提供**物料基础数据 Demo**（`SimpleExcel` 导出 → 回读闭环，表头：编码 / 名称 / 基本单位 / 包装规格 / 型号）：
+`samples/TemplateFrame.Demo.Excel.Simple` 提供**物料基础数据 Demo**（`SimpleExcel` 模板 → 填充 → 反解析 完整链路，表头：编码 / 名称 / 基本单位 / 包装规格 / 型号）：
 
 ```bash
 dotnet run --project samples/TemplateFrame.Demo.Excel.Simple
 ```
 
-产物默认输出到系统临时目录 `%TEMP%\TemplateFrame.Demo.Excel.Simple`，生成 `Excel-Simple-Materials.xlsx`。
+产物默认输出到系统临时目录 `%TEMP%\TemplateFrame.Demo.Excel.Simple`：
+- `Excel-Simple-Materials-template.xlsx`：**模板**（仅表头，定义列结构）
+- `Excel-Simple-Materials-filled.xlsx`：**填充后**（表头 + 物料数据行）
+- 控制台输出**反解析**结果（读回填充后文件 → `SimpleExcel.Read` → 打印表头与每行数据）
 
 ## 构建与测试
 

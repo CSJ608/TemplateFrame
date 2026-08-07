@@ -9,7 +9,7 @@
 - 迭代 8：测试 `test/TemplateFrame.Excel.Tests`（20 用例：命名区域清单、类型化值、表格克隆范围重指、下方元素下移、图片替换、未填充占位、软校验策略）
 - 迭代 8：送货单 Excel 版 Demo `samples/TemplateFrame.Demo.Excel`（复用送货单数据与契约，生成 → 校验 → 填充（收货前/收货后）→ 回读完整闭环）
 - 迭代 8 修订：新增简单表格插件 `src/TemplateFrame.Excel.Simple`（`SimpleExcel.Write` / `SimpleExcel.Read`，只支持「标题行 + 数据行」，无命名区域/合并/图片/页面设置）+ 测试 `test/TemplateFrame.Excel.Simple.Tests`（5 用例：写入→回读类型化值、表头检测、空表、Sheet 名、缺列补 null）
-- 迭代 8 修订：新增 Simple 插件 Demo `samples/TemplateFrame.Demo.Excel.Simple`（物料基础数据：编码 / 名称 / 基本单位 / 包装规格 / 型号，`SimpleExcel` 导出 → 回读闭环，输出 `Excel-Simple-Materials.xlsx` 到 `%TEMP%\TemplateFrame.Demo.Excel.Simple`）
+- 迭代 8 修订：新增 Simple 插件 Demo `samples/TemplateFrame.Demo.Excel.Simple`（物料基础数据：编码 / 名称 / 基本单位 / 包装规格 / 型号，`SimpleExcel` 模板 → 填充 → 反解析 完整链路：输出 `Excel-Simple-Materials-template.xlsx`（仅表头）与 `Excel-Simple-Materials-filled.xlsx`（表头 + 数据行）到 `%TEMP%\TemplateFrame.Demo.Excel.Simple`，控制台打印回读结果）
 - 迭代 7：显式「读取 Word 模板得到数据」回读示例——生成 → 校验 → 填充（收货前 / 收货后）→ 回读完整闭环；回读步骤读取已填充的 docx（重点收货后）→ `service.Parse` → 打印强类型 `DeliveryOrderData`（含 9 列明细多行、空字段展示）
 
 ### 变更
