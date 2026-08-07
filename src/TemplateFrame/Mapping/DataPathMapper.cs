@@ -232,13 +232,14 @@ public static class DataPathMapper
     private static void SetValue(PropertyInfo property, object instance, object? value, TextElement? element)
     {
         var targetType = property.PropertyType;
-        if (value is null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) is null)
+        var converted = ConvertValue(value, targetType, element);
+        if (converted is null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) is null)
         {
-            // 非空值类型：保持构造默认值（跳过赋值）
+            // 空值落在非空值类型：保持构造默认值（跳过赋值）
             return;
         }
 
-        property.SetValue(instance, ConvertValue(value, targetType, element));
+        property.SetValue(instance, converted);
     }
 
     /// <summary>把 FillData 值转换为目标属性类型（含数值收敛：SimpleExcel 读回的数字是 double）。</summary>
@@ -249,6 +250,12 @@ public static class DataPathMapper
             return !targetType.IsValueType || Nullable.GetUnderlyingType(targetType) is not null
                 ? null
                 : Activator.CreateInstance(targetType);
+        }
+
+        // 空字符串（如 Word 回读的空日期/数字单元格）视为空值；string 目标保持原样
+        if (value is string emptyText && string.IsNullOrWhiteSpace(emptyText) && targetType != typeof(string))
+        {
+            return null;
         }
 
         if (targetType.IsInstanceOfType(value))

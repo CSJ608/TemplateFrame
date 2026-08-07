@@ -253,4 +253,34 @@ public sealed class DataPathMapperTests
         var ex = Assert.Throws<InvalidOperationException>(() => DataPathMapper.ToFillData(Sample(), contract));
         Assert.Contains("不是集合", ex.Message);
     }
+
+    [Fact]
+    public void FromFillData_EmptyStringBecomesNull()
+    {
+        // Word 回读空日期/数字单元格返回空字符串：应视为空值（可空字段保持 null）
+        var fill = new FillData
+        {
+            Values = new Dictionary<string, object?>
+            {
+                ["单据编号"] = "DO001",
+                ["制单日期"] = "2026-08-07",
+                ["实际到货日期"] = "",
+                ["单据备注"] = "",
+                ["QRCode"] = new byte[] { 1, 2, 3 },
+            },
+            Tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>
+            {
+                ["Lines"] =
+                [
+                    new Dictionary<string, object?> { ["物料代码"] = "AL-6063", ["计划数量"] = 120.5, ["实收数量"] = "" },
+                ],
+            },
+        };
+
+        var data = DataPathMapper.FromFillData<OrderData>(fill, OrderContract());
+
+        Assert.Null(data.ArrivalDate);
+        Assert.Equal("", data.Remark);
+        Assert.Null(data.Lines[0].ActualQty);
+    }
 }
