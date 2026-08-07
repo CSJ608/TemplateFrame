@@ -27,6 +27,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     private readonly List<(string Name, string Reference)> _definedNames = new();
     private readonly List<string> _mergedRanges = new();
     private readonly Dictionary<string, double> _columnWidths = new(StringComparer.OrdinalIgnoreCase);
+    private readonly Dictionary<int, double> _rowHeights = new();
     private readonly List<Xdr.OneCellAnchor> _imageAnchors = new();
     private WorksheetPart? _worksheetPart;
     private SheetData? _sheetData;
@@ -61,6 +62,18 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     public ExcelTemplateBuilder SetColumnWidth(string column, double widthChars)
     {
         _columnWidths[column.Trim().ToUpperInvariant()] = widthChars;
+        return this;
+    }
+
+    /// <summary>设置行高（磅）；写 customHeight，行内文本超出时不再自动增高。</summary>
+    public ExcelTemplateBuilder SetRowHeight(int row, double heightPoints)
+    {
+        if (row < 1)
+        {
+            throw new ArgumentOutOfRangeException(nameof(row));
+        }
+
+        _rowHeights[row] = heightPoints;
         return this;
     }
 
@@ -135,13 +148,18 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>放置图片占位：按单元格锚定（oneCellAnchor），尺寸默认 1.5in × 1.5in；命名区域 <c>TF_&lt;Key&gt;</c> → 锚定格。</summary>
+    /// <summary>
+    /// 放置图片占位：按单元格锚定（oneCellAnchor），尺寸默认 1.5in × 1.5in，
+    /// 可选相对锚定格左上角的偏移（英寸，用于微调图片位置）；命名区域 <c>TF_&lt;Key&gt;</c> → 锚定格。
+    /// </summary>
     public ExcelTemplateBuilder AddImage(
         string key,
         string anchorCell,
         double? widthInches = null,
         double? heightInches = null,
-        string? placeholderPath = null)
+        string? placeholderPath = null,
+        double xOffsetInches = 0,
+        double yOffsetInches = 0)
     {
         ArgumentNullException.ThrowIfNull(key);
         var (row, col) = ExcelAddressHelper.ParseCell(anchorCell);
@@ -159,7 +177,10 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         var relId = _drawingsPart.GetIdOfPart(imagePart);
         var cx = (long)((widthInches ?? 1.5) * 914400);
         var cy = (long)((heightInches ?? 1.5) * 914400);
-        _imageAnchors.Add(ExcelDrawingHelper.CreateAnchor(_imageAnchors.Count + 1, relId, col - 1, row - 1, cx, cy));
+        var colOffset = (long)(xOffsetInches * 914400);
+        var rowOffset = (long)(yOffsetInches * 914400);
+        _imageAnchors.Add(ExcelDrawingHelper.CreateAnchor(
+            _imageAnchors.Count + 1, relId, col - 1, row - 1, cx, cy, colOffset, rowOffset));
         AddDefinedName(ExcelNamedRangeLocator.ElementName(key), anchorCell);
         return this;
     }
@@ -186,6 +207,13 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
 
         var worksheet = _worksheetPart!.Worksheet!;
         var sheetData = _sheetData!;
+
+        foreach (var (rowIndex, heightPoints) in _rowHeights.OrderBy(p => p.Key))
+        {
+            var row = GetOrCreateRow(rowIndex);
+            row.Height = heightPoints;
+            row.CustomHeight = true;
+        }
 
         if (_columnWidths.Count > 0)
         {
@@ -251,7 +279,11 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     private void EnsureWorksheet()
     {
         _worksheetPart = _workbookPart.AddNewPart<WorksheetPart>();
-        _worksheetPart.Worksheet = new Worksheet(new SheetData());
+        // sheetViews 必须存在：缺少时 Excel 打开会重算自定义行高（如 ht=37 变成 24.65），
+        // 与 Excel 自产文件保持一致（迭代 8 修订）。
+        _worksheetPart.Worksheet = new Worksheet(
+            new SheetViews(new SheetView { WorkbookViewId = 0, TabSelected = true }),
+            new SheetData());
         _sheetData = _worksheetPart.Worksheet.GetFirstChild<SheetData>()!;
         _sheet = new Sheet
         {
@@ -275,34 +307,43 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         _definedNames.Add((name, reference));
     }
 
+    private Row GetOrCreateRow(int rowIndex)
+    {
+        var row = _sheetData!.Elements<Row>().FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
+        if (row is not null)
+        {
+            return row;
+        }
+
+        row = new Row { RowIndex = (uint)rowIndex };
+
+        // 行必须按序：找到第一个行号更大的行，插到它前面
+        Row? next = null;
+        foreach (var existing in _sheetData.Elements<Row>())
+        {
+            if (existing.RowIndex?.Value > rowIndex)
+            {
+                next = existing;
+                break;
+            }
+        }
+
+        if (next is null)
+        {
+            _sheetData.Append(row);
+        }
+        else
+        {
+            _sheetData.InsertBefore(row, next);
+        }
+
+        return row;
+    }
+
     private Cell GetOrCreateCell(string cellAddress)
     {
         var (rowIndex, colIndex) = ExcelAddressHelper.ParseCell(cellAddress);
-        var row = _sheetData!.Elements<Row>().FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
-        if (row is null)
-        {
-            row = new Row { RowIndex = (uint)rowIndex };
-
-            // 行必须按序：找到第一个行号更大的行，插到它前面
-            Row? next = null;
-            foreach (var existing in _sheetData.Elements<Row>())
-            {
-                if (existing.RowIndex?.Value > rowIndex)
-                {
-                    next = existing;
-                    break;
-                }
-            }
-
-            if (next is null)
-            {
-                _sheetData.Append(row);
-            }
-            else
-            {
-                _sheetData.InsertBefore(row, next);
-            }
-        }
+        var row = GetOrCreateRow(rowIndex);
 
         var reference = ExcelAddressHelper.CellReference(rowIndex, colIndex);
         var cell = row.Elements<Cell>().FirstOrDefault(c => c.CellReference?.Value == reference);
@@ -351,6 +392,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
             Bordered = bordered,
             Horizontal = horizontal ?? format?.Alignment,
             Vertical = vertical,
+            WrapText = format?.WrapText ?? false,
         };
         cell.StyleIndex = _styles.GetStyleIndex(spec);
     }

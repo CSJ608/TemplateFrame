@@ -16,6 +16,7 @@
 - 迭代 8 修订：修复 Excel drawing 兼容——`cNvPr` 改用 `xdr`（spreadsheetDrawing）命名空间（OpenXML SDK 默认序列化为 `a:cNvPr`，Excel 打开报「有 XML 错误的 /xl/worksheets/sheet1.xml」并移除整张 drawing、图片不可见）；修复后模板/收货前/收货后 三份 xlsx 均可直接打开且 LOGO/二维码可见（本机 Excel COM 实测）
 - 迭代 8 修订：`ExcelTemplateBuilder` 移除 `SetPageSetup`（Excel 不提供页面设置——网格规整型版式，宽度由正文列数决定）；送货单 Excel Demo 版头改 3×9 网格（左 LOGO A1:B3 / 中标题 C1:G3 / 右上二维码 H1:I2 / 右下留空 H3:I3），单据头每行 3 组「标签 + 值」
 - 迭代 8 修订：`TemplateFrame.slnx` 增加 `TemplateFrame.Excel.Simple` / `TemplateFrame.Excel.Simple.Tests`
+- 迭代 8 修订：默认版式对齐用户手工调整版——`ExcelTemplateBuilder` 新增 `SetRowHeight`（行高磅值）、`AddImage` 支持偏移（x/y 英寸）、`TextFormat` 新增 `WrapText`（自动换行，Excel 映射到 alignment wrapText）；工作表补写 `sheetViews`（缺少时 Excel 打开会重算自定义行高，ht=37 会变成 24.65）；送货单 Excel Demo 列宽/行高/图片尺寸位置对齐手工调整版，明细表与单据头值单元格开启自动换行
 - 迭代 7：`samples/TemplateFrame.Demo` 重命名为 `samples/TemplateFrame.Demo.Word`（目录 / csproj / `RootNamespace` / `AssemblyName` / 命名空间）；输出文件改为 `Word-DeliveryOrder-*.docx`、输出目录改为 `TemplateFrame.Demo.Word`，体现 Word 插件 Demo 归属；README / Word 插件 README / DESIGN 引用同步
 
 ### 文档

@@ -33,4 +33,7 @@ public sealed record TextFormat
 
     /// <summary>是否下划线（手写留白常用），null 表示宿主默认。</summary>
     public bool? Underline { get; init; }
+
+    /// <summary>是否自动换行（文本超出列宽/行宽时换行；Word 段落默认换行，Excel 单元格默认不换行）。</summary>
+    public bool WrapText { get; init; }
 }

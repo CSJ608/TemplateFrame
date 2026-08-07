@@ -21,6 +21,8 @@ internal sealed record CellStyleSpec
     public TextAlignment? Horizontal { get; init; }
 
     public CellVerticalAlignment? Vertical { get; init; }
+
+    public bool WrapText { get; init; }
 }
 
 /// <summary>
@@ -98,6 +100,12 @@ internal sealed class ExcelStyleManager
                 CellVerticalAlignment.Bottom => VerticalAlignmentValues.Bottom,
                 _ => VerticalAlignmentValues.Top,
             };
+            hasAlignment = true;
+        }
+
+        if (spec.WrapText)
+        {
+            alignment.WrapText = true;
             hasAlignment = true;
         }
 
@@ -198,7 +206,8 @@ internal sealed class ExcelStyleManager
             spec.Underline?.ToString() ?? string.Empty,
             spec.Bordered.ToString(),
             spec.Horizontal?.ToString() ?? string.Empty,
-            spec.Vertical?.ToString() ?? string.Empty);
+            spec.Vertical?.ToString() ?? string.Empty,
+            spec.WrapText.ToString());
 
     private static Border CreateThinBorder()
         => new(

@@ -76,4 +76,55 @@ public sealed class ExcelTemplateBuilderTests
         Assert.NotNull(anchor);
         Assert.NotNull(ExcelDrawingHelper.GetBlipEmbed(anchor));
     }
+
+    [Fact]
+    public void Build_SetRowHeight_WritesCustomHeight()
+    {
+        using var stream = TestDocuments.BuildTemplate(builder =>
+        {
+            builder.AddText("A1", "x");
+            builder.SetRowHeight(3, 37);
+        });
+        using var document = SpreadsheetDocument.Open(stream, false);
+        var worksheet = document.WorkbookPart!.WorksheetParts.First().Worksheet!;
+
+        var row3 = worksheet.GetFirstChild<SheetData>()!.Elements<Row>().First(r => r.RowIndex?.Value == 3);
+        Assert.Equal(37d, row3.Height!.Value);
+        Assert.True(row3.CustomHeight!.Value);
+    }
+
+    [Fact]
+    public void Build_ImageAnchor_RespectsOffsets()
+    {
+        using var stream = TestDocuments.BuildTemplate(builder =>
+        {
+            builder.AddImage("Logo", "A1", 0.57, 0.57, xOffsetInches: 0.375, yOffsetInches: 0.146);
+        });
+        using var document = SpreadsheetDocument.Open(stream, false);
+        var worksheetPart = document.WorkbookPart!.WorksheetParts.First();
+
+        var anchor = ExcelDrawingHelper.FindAnchor(worksheetPart, 0, 0);
+        Assert.NotNull(anchor);
+        Assert.Equal(((long)(0.375 * 914400)).ToString(), anchor!.FromMarker!.ColumnOffset!.Text);
+        Assert.Equal(((long)(0.146 * 914400)).ToString(), anchor.FromMarker.RowOffset!.Text);
+    }
+
+    [Fact]
+    public void Build_WrapTextFormat_AppliesWrapTextStyle()
+    {
+        using var stream = TestDocuments.BuildTemplate(builder =>
+        {
+            builder.AddElement("OrderNo", "B2", new TemplateFrame.Builder.TextFormat { FontName = "宋体", WrapText = true });
+        });
+        using var document = SpreadsheetDocument.Open(stream, false);
+        var worksheet = document.WorkbookPart!.WorksheetParts.First().Worksheet!;
+        var cell = worksheet.GetFirstChild<SheetData>()!.Elements<Row>().First(r => r.RowIndex?.Value == 2)
+            .Elements<Cell>().First(c => c.CellReference?.Value == "B2");
+
+        var stylesheet = document.WorkbookPart!.WorkbookStylesPart!.Stylesheet!;
+        var cellFormat = stylesheet.GetFirstChild<CellFormats>()!.Elements<CellFormat>().ElementAt((int)cell.StyleIndex!.Value);
+        Assert.NotNull(cellFormat.Alignment);
+        Assert.True(cellFormat.Alignment!.WrapText!.Value);
+    }
 }
+

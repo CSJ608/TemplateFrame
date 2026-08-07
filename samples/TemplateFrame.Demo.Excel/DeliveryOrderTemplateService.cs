@@ -15,9 +15,9 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
 {
     private static readonly TextFormat TitleFormat = new() { FontName = "黑体", SizePt = 16, Bold = true, Alignment = TextAlignment.Center };
     private static readonly TextFormat SmallLabel = new() { FontName = "宋体", SizePt = 10 };
-    private static readonly TextFormat SmallValue = new() { FontName = "宋体", SizePt = 10, Alignment = TextAlignment.Left };
-    private static readonly TextFormat HeaderFormat = new() { FontName = "宋体", SizePt = 10, Bold = true, Alignment = TextAlignment.Center };
-    private static readonly TextFormat CellFormat = new() { FontName = "宋体", SizePt = 10, Alignment = TextAlignment.Center };
+    private static readonly TextFormat SmallValue = new() { FontName = "宋体", SizePt = 10, Alignment = TextAlignment.Left, WrapText = true };
+    private static readonly TextFormat HeaderFormat = new() { FontName = "宋体", SizePt = 10, Bold = true, Alignment = TextAlignment.Center, WrapText = true };
+    private static readonly TextFormat CellFormat = new() { FontName = "宋体", SizePt = 10, Alignment = TextAlignment.Center, WrapText = true };
 
     public DeliveryOrderExcelTemplateService()
         : base(new ExcelTemplateEngine())
@@ -86,18 +86,20 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
     {
         // 无页面设置：Excel 是"网格规整"型版式（与 Word 的纸张/方向/边距不同），
         // 宽度由正文明细列数（9 列）决定，版头用 3×9 网格 + 合并单元格排版（迭代 8 修订）。
+        // 列宽/行高/图片尺寸与位置对齐用户手工调整后的模板（肉眼观察版）。
         Builder.SetSheetName("送货单");
 
         // 版头网格（3 行 × 9 列）：左 LOGO（A1:B3）、中标题（C1:G3 居中）、右上二维码（H1:I2）、右下留空（H3:I3）
         Builder.MergeCells("A1:B3");
-        Builder.AddImage("Logo", "A1", 0.9, 0.9);
+        Builder.AddImage("Logo", "A1", 0.57, 0.57, xOffsetInches: 0.375, yOffsetInches: 0.146);
         Builder.MergeCells("C1:G3");
         Builder.AddText("C1", "送 货 单", TitleFormat);
         Builder.MergeCells("H1:I2");
-        Builder.AddImage("QRCode", "H1", 0.9, 0.9);
+        Builder.AddImage("QRCode", "H1", 0.9, 0.9, xOffsetInches: 0.354);
         Builder.MergeCells("H3:I3");
+        Builder.SetRowHeight(3, 37); // 版头第 3 行加高，容纳 LOGO/二维码
 
-        // 单据头信息（每行 3 组"标签 + 值"，值跨 2 列）
+        // 单据头信息（每行 3 组"标签 + 值"，值跨 2 列；值单元格自动换行）
         Builder.AddText("A4", "单据编号：", SmallLabel);
         Builder.AddElement("单据编号", "B4", SmallValue);
         Builder.MergeCells("B4:C4");
@@ -125,7 +127,7 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
         Builder.AddElement("单据备注", "E6", SmallValue);
         Builder.MergeCells("E6:I6");
 
-        // 正文明细表：9 列（表头 A8，示例行 A9）
+        // 正文明细表：9 列（表头 A8，示例行 A9）；表头与数据单元格自动换行
         Builder.AddTable(
             "Lines",
             ["序号", "物料代码", "物料名称", "单位", "计划数量", "实收数量", "批次号", "供应商批次", "仓库"],
@@ -134,9 +136,19 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
                 HeaderFormat = HeaderFormat,
                 CellFormat = CellFormat,
                 Bordered = true,
-                ColumnWidthsCm = [1.2, 2.5, 4.0, 1.4, 1.8, 1.8, 2.2, 2.2, 1.9],
             },
             "A8");
+
+        // 列宽对齐用户手工调整后的模板（Excel 字符单位）
+        Builder.SetColumnWidth("A", 6);
+        Builder.SetColumnWidth("B", 12.45);
+        Builder.SetColumnWidth("C", 20);
+        Builder.SetColumnWidth("D", 7);
+        Builder.SetColumnWidth("E", 9);
+        Builder.SetColumnWidth("F", 15.36);
+        Builder.SetColumnWidth("G", 14.54);
+        Builder.SetColumnWidth("H", 11);
+        Builder.SetColumnWidth("I", 9.45);
     }
 
     /// <summary>手写映射：TData → FillData（收货前字段传 null，填充为空）。</summary>

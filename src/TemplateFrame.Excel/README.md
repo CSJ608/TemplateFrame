@@ -10,6 +10,8 @@ DocumentFormat.OpenXml（与 Word 插件同族，不引入新第三方依赖）�
 
 - **不提供页面设置**：Excel 是"网格规整"型版式（与 Word 的纸张/方向/边距不同），
   Builder 没有 SetPageSetup；宽度由正文列数决定，用合并单元格排版（Demo 用 3×9 网格版头）。
+- **自动换行**：`TextFormat.WrapText = true`（表格表头/单元格与单据头值已开启，长文本换行不溢出）。
+  **行高**：`SetRowHeight(row, pt)` 写 customHeight（配合 sheetViews，Excel 不再重算行高）。
 - **简单表格请用 TemplateFrame.Excel.Simple**：大多数导入/导出只是"标题行 + 数据行"，
   不需要命名区域/合并/图片，用独立插件 TemplateFrame.Excel.Simple 更直接。
 
@@ -17,7 +19,7 @@ DocumentFormat.OpenXml（与 Word 插件同族，不引入新第三方依赖）�
 
 | 组件 | 职责 |
 |---|---|
-| `ExcelTemplateBuilder` | 组装带命名区域的 .xlsx：列宽、单元格格式、合并单元格、表格（表头 + 示例行）、图片（单元格锚定） |
+| `ExcelTemplateBuilder` | 组装带命名区域的 .xlsx：列宽、行高、单元格格式（含自动换行）、合并单元格、表格（表头 + 示例行）、图片（单元格锚定 + 偏移） |
 | `ExcelNamedRangeLocator` | 按命名区域定位（前缀 `TF_`，全表唯一）：标量 `TF_<Key>` → 单元格；表格列 `TF_<TableKey>_<ColumnKey>` → 示例行 |
 | `ExcelTemplateFiller` | 填充：文本写类型化值 + 数字格式（日期存序列号）、图片换 part + 关系（尺寸继承占位）、表格行克隆后列命名区域重指 + 下方元素整体下移；填充前软校验 |
 | `ExcelTemplateParser` | 回读：按契约把已填充模板读回 `FillData`（文本按 ValueType 转换、表格多行、图片字节） |

@@ -15,15 +15,17 @@ internal static class ExcelDrawingHelper
     public static DrawingsPart? GetDrawingsPart(WorksheetPart worksheetPart)
         => worksheetPart.GetPartsOfType<DrawingsPart>().FirstOrDefault();
 
-    /// <summary>构建一个 oneCellAnchor（锚定格 0 基 + EMU 尺寸）。</summary>
-    public static Xdr.OneCellAnchor CreateAnchor(int id, string relId, int col0, int row0, long cxEmu, long cyEmu)
+    /// <summary>构建一个 oneCellAnchor（锚定格 0 基 + EMU 尺寸 + 相对锚定格左上角的偏移）。</summary>
+    public static Xdr.OneCellAnchor CreateAnchor(
+        int id, string relId, int col0, int row0, long cxEmu, long cyEmu,
+        long colOffsetEmu = 0, long rowOffsetEmu = 0)
     {
         var anchor = new Xdr.OneCellAnchor(
             new Xdr.FromMarker(
                 new Xdr.ColumnId { Text = col0.ToString() },
-                new Xdr.ColumnOffset { Text = "0" },
+                new Xdr.ColumnOffset { Text = colOffsetEmu.ToString() },
                 new Xdr.RowId { Text = row0.ToString() },
-                new Xdr.RowOffset { Text = "0" }),
+                new Xdr.RowOffset { Text = rowOffsetEmu.ToString() }),
             new Xdr.Extent { Cx = cxEmu, Cy = cyEmu });
 
         // 注意：cNvPr 必须用 xdr（spreadsheetDrawing）命名空间。SDK 的 A.NonVisualDrawingProperties
