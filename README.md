@@ -7,7 +7,7 @@
 
 - **三层架构**：基础包 `TemplateFrame`（通用、稳定）+ 插件 `TemplateFrame.Word`（MS Word）/ `TemplateFrame.Excel`（MS Excel，灵活版式）/ `TemplateFrame.Excel.Simple`（MS Excel，简单表格）+ 业务场景服务（强类型，业务应用内声明）
 - **四个操作**：`BuildInitialTemplateFile` / `Validate` / `Fill`（强类型）/ `Parse`（强类型回读）
-- **插件化**：已支持 Word / Excel（灵活版式）/ Excel.Simple（标题行+数据行的简单表格）；未来 WPS Word、标签模板
+- **插件化**：已支持 Word / Excel（灵活版式）/ Excel.Simple（标题行+数据行的简单表格）；Demo 覆盖**手写映射**与**DataPath 自动映射**两种服务写法；未来 WPS Word、标签模板
 
 设计文档见 [docs/DESIGN.md](docs/DESIGN.md)，迭代路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)，发布说明见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
 

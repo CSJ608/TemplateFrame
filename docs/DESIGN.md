@@ -258,7 +258,7 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 
 ```
 TemplateFrame/
-├─ TemplateFrame.slnx
+├─ TemplateFrame.slnx                  # 解决方案（src / test / samples 三组解决方案文件夹）
 ├─ src/TemplateFrame/               # 基础包：契约模型 + 引擎抽象 + 数据形状（格式无关）
 │  ├─ Contract/                     # TemplateContract, TemplateElement, TextElement, ImageElement, TableElement
 │  ├─ Data/                         # FillData（数据形状）
@@ -277,12 +277,13 @@ TemplateFrame/
 │  ├─ ExcelNamedRangeLocator.cs     # 按命名区域定位（TF_ 前缀）
 │  ├─ ExcelTemplateValidator.cs / ExcelTemplateFiller.cs / ExcelTemplateParser.cs
 │  └─ ExcelDrawingHelper.cs         # drawing 强类型操作（xdr:cNvPr 命名空间，兼容 Excel）
-├─ src/TemplateFrame.Excel.Simple/  # 插件：MS Excel 简单表格（标题行 + 数据行，Write/Read）
+├─ src/TemplateFrame.Excel.Simple/  # 插件：MS Excel 简单表格（SimpleExcel Write/Read + SimpleExcelContract / SimpleExcelTemplateService 契约化强类型）
 ├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射）
 ├─ test/TemplateFrame.Word.Tests/   # Word 插件测试：生成→校验→填充→回读→断言
 ├─ test/TemplateFrame.Excel.Tests/  # Excel 灵活版式插件测试
 ├─ test/TemplateFrame.Excel.Simple.Tests/ # Excel 简单表格插件测试
-├─ samples/TemplateFrame.Demo.Word/ # 控制台端到端 demo（Word 插件送货单，含 DeliveryOrderTemplateService 示例场景服务）
+├─ samples/TemplateFrame.Demo.Word/ # 控制台端到端 demo（Word 插件送货单，手写映射版：MapToData / MapFromData）
+├─ samples/TemplateFrame.Demo.Word.AutoMapping/ # 自动映射版 demo（送货单内容一致，契约声明 DataPath，无手写映射；图片字节由数据携带）
 ├─ samples/TemplateFrame.Demo.Excel/# 控制台端到端 demo（Excel 插件送货单：3×9 网格版头 / 9 列明细）
 ├─ docs/DESIGN.md                   # 本文档
 ├─ docs/PUBLISHING.md               # 发布指南（参考 StreamFrame，暂不启用）
