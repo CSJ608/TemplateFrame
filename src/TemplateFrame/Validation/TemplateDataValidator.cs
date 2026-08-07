@@ -1,5 +1,6 @@
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Localization;
 
 namespace TemplateFrame.Validation;
 
@@ -42,13 +43,12 @@ public sealed class TemplateDataValidator
         {
             if (!knownKeys.Contains(key))
             {
-                issues.Add(new TemplateValidationIssue
-                {
-                    Code = TemplateValidationIssueCode.Extra,
-                    Key = key,
-                    Message = $"数据含契约外字段 \"{key}\"。",
-                    Severity = TemplateValidationSeverity.Warning,
-                });
+                issues.Add(Issue(
+                    TemplateValidationIssueCode.Extra,
+                    key,
+                    "Validation.DataExtraField",
+                    [key],
+                    TemplateValidationSeverity.Warning));
             }
         }
 
@@ -67,12 +67,11 @@ public sealed class TemplateDataValidator
         {
             if (required)
             {
-                issues.Add(new TemplateValidationIssue
-                {
-                    Code = TemplateValidationIssueCode.Missing,
-                    Key = key,
-                    Message = $"数据缺少必填字段 \"{key}\"（{displayName}）。",
-                });
+                issues.Add(Issue(
+                    TemplateValidationIssueCode.Missing,
+                    key,
+                    "Validation.DataMissingRequiredField",
+                    [key, displayName]));
             }
 
             return;
@@ -81,13 +80,12 @@ public sealed class TemplateDataValidator
         // 类型不匹配只告警：类型转换收敛在业务服务边界，这里给提示不阻断
         if (value is not null && valueType != typeof(object) && !valueType.IsInstanceOfType(value))
         {
-            issues.Add(new TemplateValidationIssue
-            {
-                Code = TemplateValidationIssueCode.WrongType,
-                Key = key,
-                Message = $"字段 \"{key}\" 期望 {valueType.Name}，实际是 {value.GetType().Name}。",
-                Severity = TemplateValidationSeverity.Warning,
-            });
+            issues.Add(Issue(
+                TemplateValidationIssueCode.WrongType,
+                key,
+                "Validation.DataFieldTypeMismatch",
+                [key, valueType.Name, value.GetType().Name],
+                TemplateValidationSeverity.Warning));
         }
     }
 
@@ -97,12 +95,11 @@ public sealed class TemplateDataValidator
         {
             if (table.Required)
             {
-                issues.Add(new TemplateValidationIssue
-                {
-                    Code = TemplateValidationIssueCode.Missing,
-                    Key = table.Key,
-                    Message = $"数据缺少必填表格 \"{table.Key}\"（{table.DisplayName}）。",
-                });
+                issues.Add(Issue(
+                    TemplateValidationIssueCode.Missing,
+                    table.Key,
+                    "Validation.DataMissingRequiredTable",
+                    [table.Key, table.DisplayName]));
             }
 
             return;
@@ -114,14 +111,29 @@ public sealed class TemplateDataValidator
             {
                 if (column.Required && !rows[rowIndex].ContainsKey(column.Key))
                 {
-                    issues.Add(new TemplateValidationIssue
-                    {
-                        Code = TemplateValidationIssueCode.Missing,
-                        Key = column.Key,
-                        Message = $"表格 \"{table.Key}\" 第 {rowIndex + 1} 行缺少必填列 \"{column.Key}\"。",
-                    });
+                    issues.Add(Issue(
+                        TemplateValidationIssueCode.Missing,
+                        column.Key,
+                        "Validation.DataTableRowMissingColumn",
+                        [table.Key, rowIndex + 1, column.Key]));
                 }
             }
         }
     }
+
+    private static TemplateValidationIssue Issue(
+        TemplateValidationIssueCode code,
+        string key,
+        string messageKey,
+        object?[] args,
+        TemplateValidationSeverity severity = TemplateValidationSeverity.Error)
+        => new()
+        {
+            Code = code,
+            Key = key,
+            Severity = severity,
+            MessageKey = messageKey,
+            MessageArgs = args,
+            Message = Sr.Get(messageKey, args),
+        };
 }

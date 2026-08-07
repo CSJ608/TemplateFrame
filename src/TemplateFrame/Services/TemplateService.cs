@@ -3,6 +3,7 @@ using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Engine;
 using TemplateFrame.Mapping;
+using TemplateFrame.Localization;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Services;
@@ -44,7 +45,7 @@ public abstract class TemplateService<TData, TBuilder>
     public Stream BuildInitialTemplateFile()
     {
         var builder = _engine.CreateBuilder() as TBuilder
-            ?? throw new InvalidOperationException($"引擎 {_engine.GetType().Name} 创建的不是 {typeof(TBuilder).Name} 构建器。");
+            ?? throw new InvalidOperationException(Sr.Get("Service.WrongBuilderType", _engine.GetType().Name, typeof(TBuilder).Name));
         Builder = builder;
         try
         {
@@ -94,7 +95,7 @@ public abstract class TemplateService<TData, TBuilder>
             return DataPathMapper.ToFillData(data, Contract);
         }
 
-        throw new NotSupportedException("业务服务需声明元素 DataPath（自动映射）或重写 MapToData 完成 TData → FillData 映射。");
+        throw new NotSupportedException(Sr.Get("Service.MapToDataNotImplemented"));
     }
 
     /// <summary>FillData → TData：契约元素声明 DataPath 时自动映射；否则需业务服务重写。</summary>
@@ -105,7 +106,7 @@ public abstract class TemplateService<TData, TBuilder>
             return DataPathMapper.FromFillData<TData>(data, Contract);
         }
 
-        throw new NotSupportedException("业务服务需声明元素 DataPath（自动映射）或重写 MapFromData 完成 FillData → TData 映射。");
+        throw new NotSupportedException(Sr.Get("Service.MapFromDataNotImplemented"));
     }
 
     /// <summary>契约是否声明了任一 DataPath（含表格自身）。</summary>

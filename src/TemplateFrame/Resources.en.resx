@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Mapping.ConvertFailed" xml:space="preserve">
+    <value>Auto-mapping cannot convert {0} to target type {1}.</value>
+  </data>
+  <data name="Mapping.CreateInstanceFailed" xml:space="preserve">
+    <value>Auto-mapping cannot create a {0} instance: the type needs a parameterless constructor.</value>
+  </data>
+  <data name="Mapping.DuplicateColumnDataPath" xml:space="preserve">
+    <value>Contract "{0}" table "{1}" has multiple columns mapping to the same property "{2}".</value>
+  </data>
+  <data name="Mapping.DuplicateScalarDataPath" xml:space="preserve">
+    <value>Contract "{0}" has multiple elements mapping to the same property "{1}" (duplicate DataPath).</value>
+  </data>
+  <data name="Mapping.DuplicateTableDataPath" xml:space="preserve">
+    <value>Contract "{0}" has multiple tables mapping to the same property "{1}".</value>
+  </data>
+  <data name="Mapping.PropertyNotFound" xml:space="preserve">
+    <value>Contract "{0}" element "{1}" ({2}) DataPath "{3}" was not found as a property on type {4}.</value>
+  </data>
+  <data name="Mapping.ReadOnlyProperty" xml:space="preserve">
+    <value>Contract "{0}" element "{1}" DataPath "{2}" points to read-only property {3}.{4}; auto-mapping requires a writable property.</value>
+  </data>
+  <data name="Mapping.TablePointsToNonCollection" xml:space="preserve">
+    <value>Contract "{0}" table "{1}" DataPath "{2}" points to type {3}, which is not a collection.</value>
+  </data>
+  <data name="Mapping.TablePointsToNonGenericCollection" xml:space="preserve">
+    <value>Contract "{0}" table "{1}" DataPath "{2}" points to non-generic collection {3}; auto-mapping requires a generic collection (e.g., IReadOnlyList&lt;T&gt;).</value>
+  </data>
+  <data name="Mapping.TablePointsToString" xml:space="preserve">
+    <value>Contract "{0}" table "{1}" DataPath "{2}" points to string, not a row collection.</value>
+  </data>
+  <data name="Service.MapFromDataNotImplemented" xml:space="preserve">
+    <value>The business service must declare DataPath on elements (auto-mapping) or override MapFromData to map FillData to TData.</value>
+  </data>
+  <data name="Service.MapToDataNotImplemented" xml:space="preserve">
+    <value>The business service must declare DataPath on elements (auto-mapping) or override MapToData to map TData to FillData.</value>
+  </data>
+  <data name="Service.WrongBuilderType" xml:space="preserve">
+    <value>Engine {0} did not create a {1} builder.</value>
+  </data>
+  <data name="Validation.DataExtraField" xml:space="preserve">
+    <value>Data contains field "{0}" outside the contract.</value>
+  </data>
+  <data name="Validation.DataFieldTypeMismatch" xml:space="preserve">
+    <value>Field "{0}" expects {1}, but got {2}.</value>
+  </data>
+  <data name="Validation.DataMissingRequiredField" xml:space="preserve">
+    <value>Data is missing required field "{0}" ({1}).</value>
+  </data>
+  <data name="Validation.DataMissingRequiredTable" xml:space="preserve">
+    <value>Data is missing required table "{0}" ({1}).</value>
+  </data>
+  <data name="Validation.DataTableRowMissingColumn" xml:space="preserve">
+    <value>Table "{0}" row {1} is missing required column "{2}".</value>
+  </data>
+</root>

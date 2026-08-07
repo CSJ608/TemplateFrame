@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Reflection;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Localization;
 
 namespace TemplateFrame.Mapping;
 
@@ -49,7 +50,7 @@ public static class DataPathMapper
         ArgumentNullException.ThrowIfNull(contract);
         var mapping = GetMapping(contract, typeof(TData));
         var instance = Activator.CreateInstance(typeof(TData))
-            ?? throw new InvalidOperationException($"自动映射无法创建 {typeof(TData).Name} 实例：类型需要无参构造。");
+            ?? throw new InvalidOperationException(Sr.Get("Mapping.CreateInstanceFailed", typeof(TData).Name));
 
         foreach (var element in contract.Elements)
         {
@@ -88,7 +89,7 @@ public static class DataPathMapper
                     if (!usedScalarProperties.Add(property.Name))
                     {
                         throw new InvalidOperationException(
-                            $"契约 {contract.Name} 中多个元素映射到同一属性 \"{property.Name}\"（DataPath 重复）。");
+                            Sr.Get("Mapping.DuplicateScalarDataPath", contract.Name, property.Name));
                     }
 
                     mapping.Scalars[scalar.Key] = property;
@@ -101,7 +102,7 @@ public static class DataPathMapper
                     if (!usedTableProperties.Add(property.Name))
                     {
                         throw new InvalidOperationException(
-                            $"契约 {contract.Name} 中多个表格映射到同一属性 \"{property.Name}\"。");
+                            Sr.Get("Mapping.DuplicateTableDataPath", contract.Name, property.Name));
                     }
 
                     var elementType = GetCollectionElementType(property.PropertyType, contract, table);
@@ -118,7 +119,7 @@ public static class DataPathMapper
                         if (!usedColumns.Add(columnProperty.Name))
                         {
                             throw new InvalidOperationException(
-                                $"契约 {contract.Name} 的表格 \"{table.Key}\" 中多列映射到同一属性 \"{columnProperty.Name}\"。");
+                                Sr.Get("Mapping.DuplicateColumnDataPath", contract.Name, table.Key, columnProperty.Name));
                         }
 
                         tableMapping.Columns[column.Key] = columnProperty;
@@ -139,13 +140,13 @@ public static class DataPathMapper
         if (property is null)
         {
             throw new InvalidOperationException(
-                $"契约 {contract.Name} 的元素 \"{element.Key}\"（{element.DisplayName}）的 DataPath \"{path}\" 在类型 {type.Name} 上找不到属性。");
+                Sr.Get("Mapping.PropertyNotFound", contract.Name, element.Key, element.DisplayName, path, type.Name));
         }
 
         if (!property.CanWrite)
         {
             throw new InvalidOperationException(
-                $"契约 {contract.Name} 的元素 \"{element.Key}\" 的 DataPath \"{path}\" 指向只读属性 {type.Name}.{property.Name}，自动映射需要可写属性。");
+                Sr.Get("Mapping.ReadOnlyProperty", contract.Name, element.Key, path, type.Name, property.Name));
         }
 
         return property;
@@ -156,7 +157,7 @@ public static class DataPathMapper
         if (propertyType == typeof(string))
         {
             throw new InvalidOperationException(
-                $"契约 {contract.Name} 的表格 \"{table.Key}\" 的 DataPath \"{table.DataPath}\" 指向 string，不是行集合。");
+                Sr.Get("Mapping.TablePointsToString", contract.Name, table.Key, table.DataPath));
         }
 
         if (propertyType.IsArray)
@@ -175,11 +176,11 @@ public static class DataPathMapper
         if (typeof(IEnumerable).IsAssignableFrom(propertyType))
         {
             throw new InvalidOperationException(
-                $"契约 {contract.Name} 的表格 \"{table.Key}\" 的 DataPath \"{table.DataPath}\" 指向非泛型集合 {propertyType.Name}，自动映射需要泛型集合（如 IReadOnlyList&lt;T&gt;）。");
+                Sr.Get("Mapping.TablePointsToNonGenericCollection", contract.Name, table.Key, table.DataPath, propertyType.Name));
         }
 
         throw new InvalidOperationException(
-            $"契约 {contract.Name} 的表格 \"{table.Key}\" 的 DataPath \"{table.DataPath}\" 指向的类型 {propertyType.Name} 不是集合。");
+            Sr.Get("Mapping.TablePointsToNonCollection", contract.Name, table.Key, table.DataPath, propertyType.Name));
     }
 
     private static IReadOnlyList<IReadOnlyDictionary<string, object?>> MapTableToData(
@@ -328,7 +329,7 @@ public static class DataPathMapper
         }
 
         throw new InvalidOperationException(
-            $"自动映射无法把 {value.GetType().Name} 转换为目标类型 {targetType.Name}。");
+            Sr.Get("Mapping.ConvertFailed", value.GetType().Name, targetType.Name));
     }
 
     /// <summary>单个契约（+ 数据类型）解析一次得到的映射模型。</summary>

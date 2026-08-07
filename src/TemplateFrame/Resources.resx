@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Mapping.ConvertFailed" xml:space="preserve">
+    <value>自动映射无法把 {0} 转换为目标类型 {1}。</value>
+  </data>
+  <data name="Mapping.CreateInstanceFailed" xml:space="preserve">
+    <value>自动映射无法创建 {0} 实例：类型需要无参构造。</value>
+  </data>
+  <data name="Mapping.DuplicateColumnDataPath" xml:space="preserve">
+    <value>契约 {0} 的表格 "{1}" 中多列映射到同一属性 "{2}"。</value>
+  </data>
+  <data name="Mapping.DuplicateScalarDataPath" xml:space="preserve">
+    <value>契约 {0} 中多个元素映射到同一属性 "{1}"（DataPath 重复）。</value>
+  </data>
+  <data name="Mapping.DuplicateTableDataPath" xml:space="preserve">
+    <value>契约 {0} 中多个表格映射到同一属性 "{1}"。</value>
+  </data>
+  <data name="Mapping.PropertyNotFound" xml:space="preserve">
+    <value>契约 {0} 的元素 "{1}"（{2}）的 DataPath "{3}" 在类型 {4} 上找不到属性。</value>
+  </data>
+  <data name="Mapping.ReadOnlyProperty" xml:space="preserve">
+    <value>契约 {0} 的元素 "{1}" 的 DataPath "{2}" 指向只读属性 {3}.{4}，自动映射需要可写属性。</value>
+  </data>
+  <data name="Mapping.TablePointsToNonCollection" xml:space="preserve">
+    <value>契约 {0} 的表格 "{1}" 的 DataPath "{2}" 指向的类型 {3} 不是集合。</value>
+  </data>
+  <data name="Mapping.TablePointsToNonGenericCollection" xml:space="preserve">
+    <value>契约 {0} 的表格 "{1}" 的 DataPath "{2}" 指向非泛型集合 {3}，自动映射需要泛型集合（如 IReadOnlyList&lt;T&gt;）。</value>
+  </data>
+  <data name="Mapping.TablePointsToString" xml:space="preserve">
+    <value>契约 {0} 的表格 "{1}" 的 DataPath "{2}" 指向 string，不是行集合。</value>
+  </data>
+  <data name="Service.MapFromDataNotImplemented" xml:space="preserve">
+    <value>业务服务需声明元素 DataPath（自动映射）或重写 MapFromData 完成 FillData → TData 映射。</value>
+  </data>
+  <data name="Service.MapToDataNotImplemented" xml:space="preserve">
+    <value>业务服务需声明元素 DataPath（自动映射）或重写 MapToData 完成 TData → FillData 映射。</value>
+  </data>
+  <data name="Service.WrongBuilderType" xml:space="preserve">
+    <value>引擎 {0} 创建的不是 {1} 构建器。</value>
+  </data>
+  <data name="Validation.DataExtraField" xml:space="preserve">
+    <value>数据含契约外字段 "{0}"。</value>
+  </data>
+  <data name="Validation.DataFieldTypeMismatch" xml:space="preserve">
+    <value>字段 "{0}" 期望 {1}，实际是 {2}。</value>
+  </data>
+  <data name="Validation.DataMissingRequiredField" xml:space="preserve">
+    <value>数据缺少必填字段 "{0}"（{1}）。</value>
+  </data>
+  <data name="Validation.DataMissingRequiredTable" xml:space="preserve">
+    <value>数据缺少必填表格 "{0}"（{1}）。</value>
+  </data>
+  <data name="Validation.DataTableRowMissingColumn" xml:space="preserve">
+    <value>表格 "{0}" 第 {1} 行缺少必填列 "{2}"。</value>
+  </data>
+</root>
