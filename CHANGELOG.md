@@ -11,6 +11,7 @@
 - 迭代 9：Simple Demo 改造为「契约 + 强类型服务」——`service.Parse` 直接返回强类型 `MaterialsData`（含 `Items` 行集合）
 - 迭代 9：新增自动映射版 Word Demo `samples/TemplateFrame.Demo.Word.AutoMapping`——送货单内容与手写映射版一致（A5 横版 / 双层页眉 / 9 列明细 / 两行页脚 / 收货前后两次填充），区别只在映射：契约元素声明 `DataPath`、无手写 `MapToData`/`MapFromData`，图片字节（LOGO/二维码）由数据直接携带；`service.Parse` 直接回读强类型
 - 迭代 9：新增自动映射版 Excel Demo `samples/TemplateFrame.Demo.Excel.AutoMapping`——送货单内容与手写映射版一致（3×9 网格版头 / 9 列明细 / LOGO+二维码锚定），区别只在映射：契约元素声明 `DataPath`、无手写映射，图片字节由数据携带；`service.Parse` 直接回读强类型
+- 迭代 9：Simple Demo 显式标注为**自动映射版**（控制台打印契约/列 DataPath，无手写映射）；新增 `docs/DEMOS.md`——5 个 Demo 的用法说明（插件 × 映射方式对照、运行命令、输出、手写/自动映射选择建议），README 加入口链接
 
 ### 变更
 - 迭代 9：`TemplateFrame.Excel.Simple.csproj` 新增对基础包 `TemplateFrame` 的项目引用
