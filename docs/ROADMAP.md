@@ -17,8 +17,9 @@
 | **9** | **自动映射（DataPath）+ SimpleExcel 强类型** | ✅ 已完成（见下） |
 | 10 | PDF 插件 `TemplateFrame.Pdf` | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | 11 | 图片插件 `TemplateFrame.Image` | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
+| **12** | **国际化（i18n）：运行时消息中英双语（中文默认 + 英文按 CurrentUICulture 自动）** | ⏳ 下一步 |
 
-> 当前无进行中迭代：迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
+> 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
 ---
 
@@ -169,6 +170,33 @@
 ### 风险
 - 位图排版能力弱于文档格式；字体渲染与换行需自实现
 - 回读（`Parse`）对位图不自然，可只做「填充」单方向
+
+## 迭代 12：国际化（i18n）—— 进行中
+
+**目标**：库的运行时消息（校验 Message + 异常 Message）支持中英双语——**中文为中性文化默认（行为不变）**，英文按 `CurrentUICulture` 自动生效；XML doc / README 补英文版；文档内容（待填充 / 页码 / 默认字体）保持中文、不本地化。
+
+### 范围
+1. 资源基础设施：各包新增 `Resources.resx`（中文，中性文化）+ `Resources.en.resx`（英文，en 卫星程序集）+ `Sr` 封装；`dotnet pack` 自动把 en 卫星打进 `lib/<tfm>/en/`
+2. 校验 Message 资源化：`TemplateValidationIssue` 增加 `MessageKey` + `MessageArgs`（公共 API 向后兼容），`Message` 由资源生成（TemplateDataValidator / Word / Excel / SimpleExcelContract）
+3. 异常 Message 资源化：DataPathMapper / TemplateService / Word / Excel Builder+Filler / SimpleExcel（中文默认 + 英文可选）
+4. 测试：既有中文消息断言改为断言 Code/MessageKey 或文化中立锚点；新增英文用例（设 `CurrentUICulture=en` 断言英文消息）
+5. 文档：主 README 保持中文，新增 `README.en.md`；XML doc 中文为主 + 基础包公共 API 补英文摘要
+6. 打包：资源进 nupkg；CI/发布工作流不动
+
+### 不在范围（明确排除）
+- 文档内容（待填充 / 页码 / 默认字体）：保持中文，不配置、不本地化（被回读依赖）
+- 值格式化：继续 `CultureInfo.InvariantCulture`（确定性输出），不加文化参数
+- 契约 Key / DisplayName / 业务数据
+
+### 验收
+- `dotnet build TemplateFrame.slnx && dotnet test` 全绿（中英用例都在）
+- 默认（中文）环境消息为中文；设 `CurrentUICulture=en` 后校验/异常消息为英文
+- `dotnet pack` 出四包，nupkg 内含 en 卫星（`lib/net8.0/en/`）
+
+### 风险
+- 消息本地化是行为变化：依赖中文消息文本的测试/调用方需适配（断言改 Code/MessageKey）
+- CI（ubuntu，en-US）与开发机（zh-CN）文化不同，消息断言必须文化中立，否则 CI 红
+- 中英双份维护成本；en 卫星缺失时回退中文（中性文化兜底）
 
 ---
 
