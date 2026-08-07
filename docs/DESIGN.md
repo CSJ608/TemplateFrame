@@ -284,6 +284,7 @@ TemplateFrame/
 ├─ test/TemplateFrame.Excel.Simple.Tests/ # Excel 简单表格插件测试
 ├─ samples/TemplateFrame.Demo.Word/ # 控制台端到端 demo（Word 插件送货单，手写映射版：MapToData / MapFromData）
 ├─ samples/TemplateFrame.Demo.Word.AutoMapping/ # 自动映射版 demo（送货单内容一致，契约声明 DataPath，无手写映射；图片字节由数据携带）
+├─ samples/TemplateFrame.Demo.Excel.AutoMapping/ # 自动映射版 Excel demo（3×9 网格版头 / 9 列明细，契约声明 DataPath，无手写映射）
 ├─ samples/TemplateFrame.Demo.Excel/# 控制台端到端 demo（Excel 插件送货单：3×9 网格版头 / 9 列明细）
 ├─ docs/DESIGN.md                   # 本文档
 ├─ docs/PUBLISHING.md               # 发布指南（参考 StreamFrame，暂不启用）

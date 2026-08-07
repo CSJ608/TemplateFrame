@@ -10,11 +10,12 @@
 - 迭代 9：`TemplateFrame.Excel.Simple` 新增契约感知静态 API `SimpleExcelContract`（Write / Read / Validate，基于 `FillData`）+ 轻量服务基类 `SimpleExcelTemplateService<TData>`（BuildTemplate / Validate / Fill / Parse，无 Builder/Engine，复用基础包自动映射）；现有 `SimpleExcelTable` API 保留兼容
 - 迭代 9：Simple Demo 改造为「契约 + 强类型服务」——`service.Parse` 直接返回强类型 `MaterialsData`（含 `Items` 行集合）
 - 迭代 9：新增自动映射版 Word Demo `samples/TemplateFrame.Demo.Word.AutoMapping`——送货单内容与手写映射版一致（A5 横版 / 双层页眉 / 9 列明细 / 两行页脚 / 收货前后两次填充），区别只在映射：契约元素声明 `DataPath`、无手写 `MapToData`/`MapFromData`，图片字节（LOGO/二维码）由数据直接携带；`service.Parse` 直接回读强类型
+- 迭代 9：新增自动映射版 Excel Demo `samples/TemplateFrame.Demo.Excel.AutoMapping`——送货单内容与手写映射版一致（3×9 网格版头 / 9 列明细 / LOGO+二维码锚定），区别只在映射：契约元素声明 `DataPath`、无手写映射，图片字节由数据携带；`service.Parse` 直接回读强类型
 
 ### 变更
 - 迭代 9：`TemplateFrame.Excel.Simple.csproj` 新增对基础包 `TemplateFrame` 的项目引用
 - 迭代 9：ROADMAP 迭代 9 完成、PDF 顺延迭代 10、图片顺延迭代 11；DESIGN §7 状态更新、§9 决策补记（自动映射、SimpleExcel 强类型接入）、§10 #4 关闭
-- 迭代 9：`TemplateFrame.slnx` 改为**解决方案文件夹**——`src/` / `test/` / `samples/` 三组（新增 `TemplateFrame.Demo.Word.AutoMapping`）；`DataPathMapper` 反向映射把空字符串视为空值（修复 Word 回读空日期/数字单元格抛 FormatException）
+- 迭代 9：`TemplateFrame.slnx` 改为**解决方案文件夹**——`src/` / `test/` / `samples/` 三组（新增 `TemplateFrame.Demo.Word.AutoMapping` 与 `TemplateFrame.Demo.Excel.AutoMapping`）；`DataPathMapper` 反向映射把空字符串视为空值（修复 Word/Excel 回读空日期/数字单元格抛 FormatException）
 
 ### 文档
 - 迭代 9：`src/TemplateFrame.Excel.Simple/README.md` 补充契约/服务用法；README 核心思想补充 DataPath 自动映射与两种映射写法 Demo
