@@ -2,6 +2,7 @@ using TemplateFrame.Builder;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Engine;
+using TemplateFrame.Mapping;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Services;
@@ -11,6 +12,8 @@ namespace TemplateFrame.Services;
 /// （如 <c>TemplateService&lt;DeliveryOrderData, WordTemplateBuilder&gt;</c>），
 /// 在无参数的 <see cref="BuildInitialTemplate"/> 里直接用类型化的 <see cref="Builder"/> 实例组装版式，
 /// 即可获得强类型 <c>BuildInitialTemplateFile / Validate / ValidateData / Fill / Parse</c>。
+/// 契约元素声明 <see cref="TemplateElement.DataPath"/> 后，<see cref="MapToData"/> / <see cref="MapFromData"/>
+/// 默认走 <see cref="DataPathMapper"/> 自动映射（迭代 9）；未声明 DataPath 时保持"需重写"语义。
 /// </summary>
 public abstract class TemplateService<TData, TBuilder>
     where TBuilder : class, ITemplateBuilder
@@ -83,11 +86,31 @@ public abstract class TemplateService<TData, TBuilder>
         return MapFromData(fillData);
     }
 
-    /// <summary>手写映射：TData → FillData（DataPath 自动映射在迭代 4 提供）。</summary>
+    /// <summary>TData → FillData：契约元素声明 DataPath 时自动映射；否则需业务服务重写。</summary>
     protected virtual FillData MapToData(TData data)
-        => throw new NotSupportedException("业务服务需重写 MapToData 完成 TData → FillData 映射。");
+    {
+        if (ContractHasDataPath)
+        {
+            return DataPathMapper.ToFillData(data, Contract);
+        }
 
-    /// <summary>手写反向映射：FillData → TData（字典 → POCO 自动映射在迭代 4 提供）。</summary>
+        throw new NotSupportedException("业务服务需声明元素 DataPath（自动映射）或重写 MapToData 完成 TData → FillData 映射。");
+    }
+
+    /// <summary>FillData → TData：契约元素声明 DataPath 时自动映射；否则需业务服务重写。</summary>
     protected virtual TData MapFromData(FillData data)
-        => throw new NotSupportedException("业务服务需重写 MapFromData 完成 FillData → TData 映射。");
+    {
+        if (ContractHasDataPath)
+        {
+            return DataPathMapper.FromFillData<TData>(data, Contract);
+        }
+
+        throw new NotSupportedException("业务服务需声明元素 DataPath（自动映射）或重写 MapFromData 完成 FillData → TData 映射。");
+    }
+
+    /// <summary>契约是否声明了任一 DataPath（含表格自身）。</summary>
+    private bool ContractHasDataPath
+        => Contract.Elements.Any(e =>
+            e.DataPath is { Length: > 0 }
+            || e is TableElement table && table.DataPath is { Length: > 0 });
 }
