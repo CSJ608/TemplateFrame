@@ -141,7 +141,7 @@ public sealed class FillData
 - 跨插件（Word / Excel / Label）消费同一形状，天然一致；
 - **类型转换发生在业务服务边界**：
   - 手写映射：`MapToData(TData)` 返回 `FillData`（显式、可读）；
-  - 自动映射（可选）：契约元素声明 `DataPath`，`TemplateDataMapper.FromObject(dto, contract)` 一次性（可缓存）读取属性生成 `FillData`；
+  - 自动映射（可选）：契约元素声明 `DataPath`，`DataPathMapper.ToFillData(data, contract)`（反射 + 按（契约, 数据类型）缓存）读取属性生成 `FillData`；
   - `Parse` 反向：引擎产出 `FillData` 形状，服务层映射回 `TData`（或字典 → POCO 映射器）。
 
 ### 3.4 通用基类 TemplateService&lt;TData&gt;
@@ -261,7 +261,8 @@ TemplateFrame/
 ├─ TemplateFrame.slnx
 ├─ src/TemplateFrame/               # 基础包：契约模型 + 引擎抽象 + 数据形状（格式无关）
 │  ├─ Contract/                     # TemplateContract, TemplateElement, TextElement, ImageElement, TableElement
-│  ├─ Data/                         # FillData（数据形状）、TemplateDataMapper（DataPath 自动映射）
+│  ├─ Data/                         # FillData（数据形状）
+│  ├─ Mapping/                      # DataPathMapper（DataPath 自动映射）
 │  ├─ Engine/                       # ITemplateEngine（Validate/Fill/Parse 抽象）
 │  ├─ Builder/                      # ITemplateBuilder（版式组合抽象）
 │  └─ Services/                     # TemplateService<TData>（泛型基类）
@@ -303,8 +304,9 @@ TemplateFrame/
 | 已归档 | 0–6 | 仓库骨架 → 契约引擎 → Word 插件（生成/校验/填充/回读）→ 健壮性 → Demo → 自动化发布 | ✅ 完成（v1.0.0 / v1.0.1 已发布） |
 | 已归档 | **7** | Demo 收尾：Word 插件标识 + 回读示例 | ✅ 完成 |
 | 已归档 | **8** | Excel 插件 `TemplateFrame.Excel`（OpenXML 直写 + 命名区域定位；修订：不提供页面设置 + drawing 兼容修复 + 拆分 `TemplateFrame.Excel.Simple` 简单表格插件） | ✅ 完成（含修订） |
-| 进行中 | **9** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏳ 下一步 |
-| 未来 | **10** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | 🔮 |
+| 已归档 | **9** | 自动映射（DataPath）+ SimpleExcel 强类型接入 | ✅ 完成 |
+| 进行中 | **10** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏳ 下一步 |
+| 未来 | **11** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | 🔮 |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
@@ -339,12 +341,14 @@ TemplateFrame/
 | 标签模板 | 其他工具定义的标签模板 | 契约模型预留 `Label` 元素，插件化支持 |
 | Excel 渲染库许可 | Excel 场景不要用 EPPlus（商用收费） | Excel 插件用 **DocumentFormat.OpenXml 直写**（与 Word 插件同族，不引入新第三方依赖）（迭代 8 定）；未来如需 MiniExcel，独立插件 `TemplateFrame.Excel.MiniExcel`，许可按 Apache-2.0 |
 | Excel 定位机制 | Excel 无内容控件（SDT），需自定义 tag 定位 | **命名区域（defined names）**：标量 `TF_<Key>` → 单元格；表格列 `TF_<TableKey>_<ColumnKey>` 指向示例行；表格克隆后范围重指到数据块 + 表格下方命名区域/合并区域整体下移（迭代 8 定） |
-| PDF 实现路径 | PDF 无内容控件，表格行复制难 | 迭代 9 内定：倾向 Builder 版式模型 + 整页重排（与 Word/Excel 一致）；AcroForm 仅适用静态字段 |
-| PDF 渲染库许可 | iText 7（AGPL）/ QuestPDF（社区版限制） | PdfSharp 6（MIT）优先（迭代 9 定） |
+| PDF 实现路径 | PDF 无内容控件，表格行复制难 | 迭代 10 内定：倾向 Builder 版式模型 + 整页重排（与 Word/Excel 一致）；AcroForm 仅适用静态字段 |
+| PDF 渲染库许可 | iText 7（AGPL）/ QuestPDF（社区版限制） | PdfSharp 6（MIT）优先（迭代 10 定） |
 | 图片渲染库许可 | System.Drawing.Common 仅 Windows | SkiaSharp（MIT，跨平台）优先（迭代 10 定） |
 | Excel 页面设置 | Word 面向打印（纸张/方向/边距），Excel 是"网格规整"型版式 | Excel 插件**不提供页面设置**；宽度由正文列数决定，用合并单元格排版（迭代 8 修订） |
 | Excel drawing 兼容 | OpenXML SDK 的 `A.NonVisualDrawingProperties` 序列化为 `a:cNvPr`，Excel 打开报"sheet1.xml 有 XML 错误"并移除整张 drawing（图片不可见） | drawing 的 `cNvPr` 必须用 `xdr`（spreadsheetDrawing）命名空间，与 Excel 自产一致；图片 part 归属 DrawingsPart 的 rels（迭代 8 修订） |
 | Excel 插件拆分 | "灵活版式（单据/复杂表）"与"简单表格（标题行+数据行，大多数导入导出）"是两种需求 | `TemplateFrame.Excel` 保留灵活版式；新增 `TemplateFrame.Excel.Simple`（只做 Write/Read，用命名区域（默认 `TF_Table`）标记表格位置，无合并/图片/页面设置）（迭代 8 修订） |
+| 自动映射（`DataPath`） | `DataPath` 属性自迭代 1 声明后一直未参与引擎逻辑；业务服务被迫手写 `MapToData`/`MapFromData` | 基础包新增 `DataPathMapper`（反射 + 按（契约, 数据类型）缓存）：显式 `DataPath` 为主，标量/图片单级路径 + 表格「集合属性 + 列属性」两级路径；不做「无 DataPath 按属性名推断」回退；嵌套路径（`Customer.Name`）本轮不做、列为后续项；`TemplateService` 默认走自动映射并保留虚方法覆盖；路径缺失/重复映射/表格指向非集合 首次即抛清晰错误（迭代 9 定） |
+| SimpleExcel 强类型接入 | Simple 是纯静态工具、不接契约，`Read` 只返回 `object?` 行，无法像 Word 那样 `service.Parse` 出强类型 | Simple 保持最小形态：新增契约感知静态 API `SimpleExcelContract`（Write/Read/Validate，基于 `FillData`）+ 轻量服务基类 `SimpleExcelTemplateService<TData>`（无 Builder/Engine，复用基础包自动映射）；契约 = 单个 `TableElement`；表头按 DisplayName → Key 匹配、缺列 Validate 报 Missing / Parse 补 null；现有 `SimpleExcelTable` API 保留兼容（迭代 9 定） |
 | 渲染验证 | 本机无 Word/LibreOffice 时无法渲染 | 测试以 OOXML 结构断言为主（SDT 清单、行数、blip embed） |
 
 ---
@@ -354,6 +358,6 @@ TemplateFrame/
 1. 一个文档里出现多个同结构表格（多个明细区）时，表的锚点规则如何定义。
 2. ~~Excel 插件第一版的范围（仅填充 or 填充+回读）~~ → **迭代 8 决策：填充 + 回读一起做**（已落地）。
 3. 标签模板（`Label`）的具体来源工具与格式，等有真实需求再定。
-4. 自动映射器（`DataPath`）：目前由业务服务手写 `MapToData` / `MapFromData`；是否补自动映射待定。
-5. PDF 插件实现路径（AcroForm 表单域 vs Builder 版式重排）→ 迭代 9 决策（倾向重排）。
+4. ~~自动映射器（`DataPath`）~~ → **迭代 9 决策：显式 `DataPath` + `DataPathMapper` 自动映射已落地**（嵌套路径 `Customer.Name` 列为后续项）。
+5. PDF 插件实现路径（AcroForm 表单域 vs Builder 版式重排）→ 迭代 10 决策（倾向重排）。
 6. Excel / PDF 的表格行「复制后重新打标」的定位规则 → 随各插件迭代内定并回写本节。

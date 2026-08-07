@@ -15,7 +15,7 @@
 
 - **契约 = 元素清单**：`TemplateContract` 描述一个场景有哪些元素（`TextElement` / `ImageElement` / `TableElement`），可序列化、可版本化。
 - **模板归业务应用**：契约不产出版式；业务服务用具体插件构建器（如 `WordTemplateBuilder`）组装初始模板（标题、静态文案、内容控件、表格、图片占位、页眉页脚）。
-- **数据形状 `FillData`**：与插件无关的弱类型容器（`Values` 标量 + `Tables` 明细行），类型转换收敛在业务服务边界（`MapToData` / `MapFromData` 手写映射）。
+- **数据形状 `FillData`**：与插件无关的弱类型容器（`Values` 标量 + `Tables` 明细行），类型转换收敛在业务服务边界——契约元素声明 `DataPath` 后由 `DataPathMapper` 自动映射（迭代 9），或手写 `MapToData` / `MapFromData`。
 - **导出与导入是同一契约的两个方向**：`Fill`（模板 + 数据 → 文件）与 `Parse`（文件 → 数据）共享同一套按 tag 定位逻辑。
 
 ## 快速开始
@@ -58,8 +58,7 @@ public sealed class ReceivingOrderTemplateService : TemplateService<ReceivingOrd
         Builder.AddImage("Logo", widthInches: 2.0, heightInches: 1.0);
     }
 
-    protected override FillData MapToData(ReceivingOrderData data) => /* 手写映射：TData → FillData */;
-    protected override ReceivingOrderData MapFromData(FillData data) => /* 手写反向映射：FillData → TData */;
+    // 契约元素声明 DataPath 后，MapToData / MapFromData 可省略（基础包 DataPathMapper 自动映射，迭代 9）；
 }
 ```
 

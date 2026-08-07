@@ -12,12 +12,13 @@
 | **v1.0.2** | **发布：迭代 7 + 迭代 8（Excel 插件 + Excel.Simple 插件 + 修订）** | ✅ 已完成 |
 | **7** | **Demo 收尾：Word 插件标识 + 回读示例** | ✅ 已完成（见下） |
 | **8** | **Excel 插件 `TemplateFrame.Excel`** | ✅ 已完成（见下） |
-| 9 | PDF 插件 `TemplateFrame.Pdf` | ⏳ 下一步 |
-| 10 | 图片插件 `TemplateFrame.Image` | 🔮 未来 |
+| **9** | **自动映射（DataPath）+ SimpleExcel 强类型** | ✅ 已完成（见下） |
+| 10 | PDF 插件 `TemplateFrame.Pdf` | ⏳ 下一步 |
+| 11 | 图片插件 `TemplateFrame.Image` | 🔮 未来 |
 
 ---
 
-## 已归档：迭代 0–8（完成）
+## 已归档：迭代 0–9（完成）
 
 | 迭代 | 内容 | 完成状态 |
 |---|---|---|
@@ -31,6 +32,7 @@
 | 7 | Demo 收尾：重命名 `samples/TemplateFrame.Demo.Word`（目录 / csproj / `RootNamespace` / `AssemblyName` / 命名空间），输出文件 `Word-DeliveryOrder-*.docx`、输出目录 `TemplateFrame.Demo.Word`；显式回读示例（生成 → 校验 → 填充（收货前/收货后）→ 回读闭环，读取收货后 docx → `service.Parse` → 打印强类型 `DeliveryOrderData`，含 9 列明细多行与空字段展示） | ✅ `dotnet build/test` 全绿；`dotnet run --project samples/TemplateFrame.Demo.Word` 依次输出 模板 / 收货前 / 收货后 / 回读数据 |
 | 8 | Excel 插件 `TemplateFrame.Excel`：**DocumentFormat.OpenXml 直写**（与 Word 插件同族）；命名区域定位 `TF_<Key>` / `TF_<Table>_<Column>`，表格克隆后范围重指 + 下方命名区域/合并区域/单元格行整体下移；`ExcelTemplateBuilder` / `ExcelTemplateEngine`（Validate / Fill 写类型化值+数字格式 / Parse）；`test/TemplateFrame.Excel.Tests`（20 用例）；打包 `TemplateFrame.Excel.1.0.0.nupkg`；送货单 Excel 版 Demo（复用送货单数据）。**修订**：不提供页面设置（网格规整型版式）、Demo 版头改 3×9 网格、修复 drawing（`xdr:cNvPr` 命名空间，Excel 打开不再报错、图片可见）、新增简单表格插件 `TemplateFrame.Excel.Simple`（标题行+数据行，5 用例） | ✅ `dotnet build/test` 全绿（114 用例）；`dotnet run --project samples/TemplateFrame.Demo.Excel` 依次输出 模板 / 收货前 / 收货后 / 回读数据；`dotnet pack` 出 `TemplateFrame.Excel.1.0.0.nupkg` |
 
+| 9 | 自动映射（`DataPath`）+ SimpleExcel 强类型：基础包新增 `DataPathMapper`（反射 + 按（契约, 数据类型）缓存，TData ⇄ FillData 双向自动映射：标量/图片单级路径 + 表格「集合属性 + 列属性」两级路径，类型转换含 double→decimal/int、字符串日期按 Format 解析、可空字段；路径缺失/重复映射/表格指向非集合 首次即抛清晰错误）；`TemplateService<TData, TBuilder>` 的 `MapToData`/`MapFromData` 默认走自动映射（未声明 DataPath 保持需重写语义）；`TemplateFrame.Excel.Simple` 新增契约感知 `SimpleExcelContract`（Write/Read/Validate，基于 FillData）与轻量服务基类 `SimpleExcelTemplateService<TData>`（BuildTemplate/Validate/Fill/Parse，无 Builder/Engine，复用自动映射）；Simple Demo 改造为契约 + 强类型服务 | ✅ `dotnet build/test` 全绿；`dotnet run --project samples/TemplateFrame.Demo.Excel.Simple` 依次输出 模板 / 填充后 / 回读（强类型 MaterialsData） |
 > 交付物：`src/TemplateFrame`（基础包）、`src/TemplateFrame.Word`（Word 插件）、`src/TemplateFrame.Excel`（Excel 灵活版式插件）、`src/TemplateFrame.Excel.Simple`（Excel 简单表格插件）、`samples/TemplateFrame.Demo.Word`、`samples/TemplateFrame.Demo.Excel`、`samples/TemplateFrame.Demo.Excel.Simple`、`test/TemplateFrame.Tests`、`test/TemplateFrame.Word.Tests`、`test/TemplateFrame.Excel.Tests`、`test/TemplateFrame.Excel.Simple.Tests`、技能 `templateframe-demo`。
 
 ---
@@ -100,7 +102,24 @@
 > **本轮关闭**：迭代 8（含修订）完成，发布 **v1.0.2**（四个包统一版本，GitHub Release + nuget.org）。
 ---
 
-## 迭代 9：PDF 插件 `TemplateFrame.Pdf`
+## 迭代 9：自动映射（DataPath）+ SimpleExcel 强类型 —— 已完成
+
+> **状态**：✅ 已完成。`dotnet build TemplateFrame.slnx && dotnet test` 全绿；`dotnet run --project samples/TemplateFrame.Demo.Excel.Simple` 依次输出 模板 / 填充后 / 回读（强类型）。
+
+**目标**：把「契约 + 强类型服务」体验补齐——落地 DESIGN 里悬空已久的 `DataPath` 自动映射，并让 `TemplateFrame.Excel.Simple` 从"纯静态工具"接入契约体系（像 Word 那样 `service.Parse` 直接出强类型数据）。
+
+### 范围
+1. 基础包 `DataPathMapper`：反射 + 按（契约, 数据类型）缓存；显式 `DataPath` 为主，标量/图片单级路径 + 表格「集合属性 + 列属性」两级路径；不做"无 DataPath 按属性名推断"回退；嵌套路径（`Customer.Name`）本轮不做、列为后续项；路径缺失 / 重复映射 / 表格指向非集合 首次即抛清晰错误
+2. `TemplateService<TData, TBuilder>`：`MapToData` / `MapFromData` 默认走自动映射（声明 DataPath 即免手写映射，保留虚方法可覆盖）；未声明 DataPath 时保持原 NotSupportedException 语义
+3. `TemplateFrame.Excel.Simple` 契约化：`SimpleExcelContract`（Write / Read / Validate，基于 FillData）+ 轻量服务基类 `SimpleExcelTemplateService<TData>`（BuildTemplate / Validate / Fill / Parse，无 Builder/Engine）；契约 = 单个 `TableElement`；表头按 DisplayName → Key 匹配、缺列 Validate 报 Missing / Parse 补 null；现有 `SimpleExcelTable` API 保留兼容
+4. Simple Demo 改造：物料基础数据走「契约 + 强类型服务」，`service.Parse` 直接返回 `MaterialsData`（含 `Items` 行集合）
+
+### 验收
+- `dotnet build TemplateFrame.slnx && dotnet test` 全绿（基础包 36 + Simple 17 用例）；`dotnet run --project samples/TemplateFrame.Demo.Excel.Simple` 依次输出 模板 / 填充后 / 回读（强类型）
+- `dotnet pack` 出 `TemplateFrame.Excel.Simple` nupkg（含对基础包 `TemplateFrame` 的引用）
+
+---
+## 迭代 10：PDF 插件 `TemplateFrame.Pdf`
 
 **目标**：把「生成 → 填充 → 回读」复制到 `.pdf`。
 
@@ -123,7 +142,7 @@
 
 ---
 
-## 迭代 10：图片插件 `TemplateFrame.Image`（未来）
+## 迭代 11：图片插件 `TemplateFrame.Image`（未来）
 
 **目标**：把「生成 → 填充」复制到位图（PNG / JPEG），面向名片、标签、简单卡片。
 

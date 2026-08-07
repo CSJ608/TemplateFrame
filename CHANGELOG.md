@@ -2,6 +2,20 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [Unreleased]
+
+### 新增
+- 迭代 9：基础包自动映射器 `src/TemplateFrame/Mapping/DataPathMapper.cs`——契约元素声明 `DataPath` 后自动完成 TData ⇄ FillData 双向映射（标量/图片单级路径 + 表格「集合属性 + 列属性」两级路径；类型转换含 double→decimal/int、字符串日期按 `Format` 解析、可空字段；按（契约, 数据类型）缓存属性解析，路径缺失/重复映射/表格指向非集合 首次即抛清晰错误）
+- 迭代 9：`TemplateService<TData, TBuilder>` 的 `MapToData` / `MapFromData` 默认走 DataPath 自动映射（声明 DataPath 即免手写映射，保留虚方法可覆盖）；未声明 DataPath 时保持原 NotSupportedException 语义
+- 迭代 9：`TemplateFrame.Excel.Simple` 新增契约感知静态 API `SimpleExcelContract`（Write / Read / Validate，基于 `FillData`）+ 轻量服务基类 `SimpleExcelTemplateService<TData>`（BuildTemplate / Validate / Fill / Parse，无 Builder/Engine，复用基础包自动映射）；现有 `SimpleExcelTable` API 保留兼容
+- 迭代 9：Simple Demo 改造为「契约 + 强类型服务」——`service.Parse` 直接返回强类型 `MaterialsData`（含 `Items` 行集合）
+
+### 变更
+- 迭代 9：`TemplateFrame.Excel.Simple.csproj` 新增对基础包 `TemplateFrame` 的项目引用
+- 迭代 9：ROADMAP 迭代 9 完成、PDF 顺延迭代 10、图片顺延迭代 11；DESIGN §7 状态更新、§9 决策补记（自动映射、SimpleExcel 强类型接入）、§10 #4 关闭
+
+### 文档
+- 迭代 9：`src/TemplateFrame.Excel.Simple/README.md` 补充契约/服务用法；README 核心思想补充 DataPath 自动映射
 ## [1.0.2] - 2026-08-07
 
 ### 新增

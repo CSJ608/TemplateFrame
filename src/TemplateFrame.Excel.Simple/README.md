@@ -39,6 +39,63 @@ var loaded = SimpleExcel.Read(input); // Headers + Rows（string / bool / DateTi
 - 数字按 `double` 返回，日期格式单元格按 `DateTime` 返回；全空行跳过、缺列补 null。
 - 不提供页面设置 / 合并单元格 / 图片——保持"简单表格"的最小形态。
 
+## 契约 + 强类型服务（迭代 9）
+
+简单表格也可以接入 TemplateFrame 契约体系，像 Word 那样 `service.Parse` 直接得到强类型数据：
+
+```csharp
+using TemplateFrame.Contract;
+using TemplateFrame.Excel.Simple;
+
+public sealed record MaterialLine
+{
+    public string Code { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public decimal Qty { get; init; }
+}
+
+public sealed record MaterialsData
+{
+    public IReadOnlyList<MaterialLine> Items { get; init; } = [];
+}
+
+public sealed class MaterialsTemplateService : SimpleExcelTemplateService<MaterialsData>
+{
+    protected override TemplateContract DefineContract()
+        => new()
+        {
+            Name = "Materials",
+            Version = "1.0",
+            Elements =
+            [
+                new TableElement
+                {
+                    Key = "Materials",
+                    DisplayName = "物料清单",
+                    DataPath = "Items",                      // 表格 → 集合属性
+                    Columns =
+                    [
+                        new TextElement { Key = "编码", DisplayName = "编码", DataPath = "Code", Required = true },
+                        new TextElement { Key = "名称", DisplayName = "名称", DataPath = "Name", Required = true },
+                        new TextElement { Key = "数量", DisplayName = "数量", DataPath = "Qty", ValueType = typeof(decimal) },
+                    ],
+                },
+            ],
+        };
+}
+
+// 使用：依赖契约 → 强类型（表格与列声明 DataPath 后自动映射，无需手写 MapToData / MapFromData）
+var service = new MaterialsTemplateService();
+using var template = service.BuildTemplate();          // 仅表头
+var validation = service.Validate(template);           // 表头 ↔ 契约列校验（缺必填列 Error / 多余列 Warning）
+using var filled = service.Fill(data);                 // 强类型数据 → xlsx（表头 + 数据行）
+var parsed = service.Parse(filled);                    // xlsx → 强类型 MaterialsData
+```
+
+- **契约形态**：只支持**单个 `TableElement`**（列 = 表头）；含标量/图片元素或多个表格会抛清晰错误（那是 `TemplateFrame.Excel` 灵活版式的活）。
+- **表头匹配**：读时按 `DisplayName` → `Key` 匹配契约列，多余列忽略、缺列整列补 null；`Validate` 对缺必填列报 `Missing`（Error）、可选列缺失与多余列报 `Warning`。
+- **底层 API**：也可直接用 `SimpleExcelContract.Write / Read / Validate`（基于 `FillData`），再配合基础包 `DataPathMapper` 自行映射。
+- **向后兼容**：原有 `SimpleExcel.Write / Read`（`SimpleExcelTable`）保持不变。
 ## Demo
 
 仓库 `samples/TemplateFrame.Demo.Excel.Simple` 提供**物料基础数据**示例（模板 → 填充 → 反解析 完整链路，表头：编码 / 名称 / 基本单位 / 包装规格 / 型号）：
