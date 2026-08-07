@@ -1,4 +1,5 @@
 using System.Globalization;
+using TemplateFrame.Excel.Simple.Localization;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
@@ -495,7 +496,7 @@ public static class SimpleExcel
 
         if (col <= 0 || !int.TryParse(trimmed[i..], out var row) || row <= 0)
         {
-            throw new ArgumentException("无效的单元格地址：" + address, nameof(address));
+            throw new ArgumentException(Sr.Get("SimpleExcel.InvalidCellAddress", address), nameof(address));
         }
 
         return (row, col);

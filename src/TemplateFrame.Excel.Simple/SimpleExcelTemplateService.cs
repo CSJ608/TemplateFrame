@@ -1,6 +1,7 @@
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Mapping;
+using TemplateFrame.Excel.Simple.Localization;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel.Simple;
@@ -20,12 +21,12 @@ public abstract class SimpleExcelTemplateService<TData>
     {
         _contract = new Lazy<TemplateContract>(() =>
         {
-            var contract = DefineContract() ?? throw new InvalidOperationException("DefineContract() 返回了 null。");
+            var contract = DefineContract() ?? throw new InvalidOperationException(Sr.Get("SimpleExcel.Service.DefineContractNull"));
             var table = SimpleExcelContract.RequireSingleTable(contract);
             if (string.IsNullOrWhiteSpace(table.DataPath))
             {
                 throw new InvalidOperationException(
-                    $"契约 {contract.Name} 的表格 \"{table.Key}\" 未声明 DataPath——SimpleExcelTemplateService 需要 DataPath 才能自动映射强类型数据。");
+                    Sr.Get("SimpleExcel.Service.TableNeedsDataPath", contract.Name, table.Key));
             }
 
             return contract;

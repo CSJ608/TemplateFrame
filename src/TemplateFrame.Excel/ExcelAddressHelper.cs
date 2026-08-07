@@ -1,5 +1,6 @@
 using System.Globalization;
 using System.Text;
+using TemplateFrame.Excel.Localization;
 
 namespace TemplateFrame.Excel;
 
@@ -51,7 +52,7 @@ internal static class ExcelAddressHelper
 
         if (i == 0 || i >= cleaned.Length)
         {
-            throw new FormatException($"无法解析单元格引用：{reference}");
+            throw new FormatException(Sr.Get("Excel.Address.CannotParse", reference));
         }
 
         var col = ColumnIndex(cleaned[..i]);

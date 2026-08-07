@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Word.Builder.AddCellRequiresLayoutTable" xml:space="preserve">
+    <value>AddCell 需先调用 AddLayoutTable。</value>
+  </data>
+  <data name="Word.Builder.ColumnSpanPositive" xml:space="preserve">
+    <value>columnSpan 必须为正。</value>
+  </data>
+  <data name="Word.Builder.LayoutTableCellOverflow" xml:space="preserve">
+    <value>布局表格单元格超出列数。</value>
+  </data>
+  <data name="Word.Builder.LayoutTableRowsExhausted" xml:space="preserve">
+    <value>布局表格行已用完。</value>
+  </data>
+  <data name="Word.Builder.LayoutTableSizePositive" xml:space="preserve">
+    <value>布局表格的行列数必须为正。</value>
+  </data>
+  <data name="Word.Builder.SaveOnce" xml:space="preserve">
+    <value>WordTemplateBuilder 只能 Save 一次。</value>
+  </data>
+  <data name="Word.Builder.SubBuilderCannotSave" xml:space="preserve">
+    <value>页眉/页脚/单元格子构建器不能单独 Save，请由顶层构建器统一保存。</value>
+  </data>
+  <data name="Word.Builder.TableNeedsColumns" xml:space="preserve">
+    <value>表格至少需要一列。</value>
+  </data>
+  <data name="Word.Fill.DriftedSkipped" xml:space="preserve">
+    <value>可选元素 "{0}" 在模板中缺失（Drifted），填充时跳过。</value>
+  </data>
+  <data name="Word.Fill.MissingRequired" xml:space="preserve">
+    <value>填充失败：缺少必填元素 "{0}"（{1}）。可配置 MissingElementPolicy.SkipAndWarn 改为跳过并告警。</value>
+  </data>
+  <data name="Word.Fill.NoBlip" xml:space="preserve">
+    <value>图片控件 "{0}" 内没有 &lt;a:blip&gt;，无法替换图片。</value>
+  </data>
+  <data name="Word.Fill.ValidationFailed" xml:space="preserve">
+    <value>填充失败：模板与契约不匹配（{0}）。{1}</value>
+  </data>
+  <data name="Word.Validation.AmbiguousTag" xml:space="preserve">
+    <value>内容控件 tag "{0}" 在文档中出现 {1} 次（正文/页眉/页脚需全局唯一）。</value>
+  </data>
+  <data name="Word.Validation.CannotOpen" xml:space="preserve">
+    <value>无法打开 .docx（不是有效的 OOXML 包）：{0}</value>
+  </data>
+  <data name="Word.Validation.ContractDuplicateKey" xml:space="preserve">
+    <value>契约内部 Key 重复："{0}"（内容控件 tag 必须全局唯一）。</value>
+  </data>
+  <data name="Word.Validation.ExtraTag" xml:space="preserve">
+    <value>模板含契约外内容控件 tag："{0}"。</value>
+  </data>
+  <data name="Word.Validation.ImageElementNoImage" xml:space="preserve">
+    <value>图片元素 "{0}" 对应的内容控件内没有图片（应外包占位图）。</value>
+  </data>
+  <data name="Word.Validation.MissingImageElement" xml:space="preserve">
+    <value>缺少图片元素 "{0}"（{1}）对应的占位图内容控件。</value>
+  </data>
+  <data name="Word.Validation.MissingMainPart" xml:space="preserve">
+    <value>文档缺少主文档部分（word/document.xml）。</value>
+  </data>
+  <data name="Word.Validation.MissingTableRow" xml:space="preserve">
+    <value>缺少完整表格行模板 "{0}"（{1}）：{2}</value>
+  </data>
+  <data name="Word.Validation.MissingTableRowMissingColumns" xml:space="preserve">
+    <value>缺少必填列 {0}。</value>
+  </data>
+  <data name="Word.Validation.MissingTableRowNoCompleteRow" xml:space="preserve">
+    <value>必填列未出现在同一表格行内。</value>
+  </data>
+  <data name="Word.Validation.MissingTextElement" xml:space="preserve">
+    <value>缺少文本元素 "{0}"（{1}）对应的内容控件。</value>
+  </data>
+  <data name="Word.Validation.TableColumnNotInRow" xml:space="preserve">
+    <value>表格列 "{0}" 的内容控件不在表格行内。</value>
+  </data>
+  <data name="Word.Validation.TextElementIsImage" xml:space="preserve">
+    <value>文本元素 "{0}" 对应的内容控件是图片控件。</value>
+  </data>
+</root>

@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Excel.Localization;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel;
@@ -102,14 +103,14 @@ public sealed class ExcelTemplateFiller
                 case TemplateValidationIssueCode.Missing:
                     if (_options.MissingElementPolicy == MissingElementPolicy.Throw)
                     {
-                        throw new InvalidOperationException("填充前校验失败：" + issue.Message);
+                        throw new InvalidOperationException(Sr.Get("Excel.Fill.ValidationFailed", issue.Message));
                     }
 
                     warnings.Add(issue);
                     break;
 
                 default:
-                    throw new InvalidOperationException("填充前校验失败：" + issue.Message);
+                    throw new InvalidOperationException(Sr.Get("Excel.Fill.ValidationFailed", issue.Message));
             }
         }
 

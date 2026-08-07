@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Contract;
+using TemplateFrame.Word.Localization;
 using TemplateFrame.Validation;
 using A = DocumentFormat.OpenXml.Drawing;
 
@@ -65,14 +66,14 @@ public sealed class WordTemplateValidator
             using var document = WordprocessingDocument.Open(template, false);
             if (document.MainDocumentPart is null)
             {
-                return Invalid("文档缺少主文档部分（word/document.xml）。");
+                return Invalid("Word.Validation.MissingMainPart");
             }
 
             return ValidateCore(document, contract);
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException or FileFormatException)
         {
-            return Invalid($"无法打开 .docx（不是有效的 OOXML 包）：{ex.Message}");
+            return Invalid("Word.Validation.CannotOpen", ex.Message);
         }
     }
 
@@ -102,7 +103,9 @@ public sealed class WordTemplateValidator
             {
                 Code = TemplateValidationIssueCode.Invalid,
                 Key = duplicate.Key,
-                Message = $"契约内部 Key 重复：\"{duplicate.Key}\"（内容控件 tag 必须全局唯一）。",
+                MessageKey = "Word.Validation.ContractDuplicateKey",
+                MessageArgs = [duplicate.Key],
+                Message = Sr.Get("Word.Validation.ContractDuplicateKey", duplicate.Key),
             });
         }
 
@@ -116,7 +119,9 @@ public sealed class WordTemplateValidator
             {
                 Code = TemplateValidationIssueCode.Ambiguous,
                 Key = group.Key,
-                Message = $"内容控件 tag \"{group.Key}\" 在文档中出现 {group.Count()} 次（正文/页眉/页脚需全局唯一）。",
+                MessageKey = "Word.Validation.AmbiguousTag",
+                MessageArgs = [group.Key, group.Count()],
+                Message = Sr.Get("Word.Validation.AmbiguousTag", group.Key, group.Count()),
             });
         }
 
@@ -145,7 +150,9 @@ public sealed class WordTemplateValidator
             {
                 Code = TemplateValidationIssueCode.Extra,
                 Key = sdt.Tag,
-                Message = $"模板含契约外内容控件 tag：\"{sdt.Tag}\"。",
+                MessageKey = "Word.Validation.ExtraTag",
+                MessageArgs = [sdt.Tag],
+                Message = Sr.Get("Word.Validation.ExtraTag", sdt.Tag),
                 Severity = TemplateValidationSeverity.Warning,
             });
         }
@@ -164,12 +171,13 @@ public sealed class WordTemplateValidator
             // 可选元素缺失只告警（模板仍有效），必填缺失才失败
             issues.Add(Missing(
                 element.Key,
-                $"缺少文本元素 \"{element.Key}\"（{element.DisplayName}）对应的内容控件。",
+                "Word.Validation.MissingTextElement",
+                [element.Key, element.DisplayName],
                 element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
         }
         else if (found.Any(i => i.Kind == SdtKind.Image))
         {
-            issues.Add(WrongType(element.Key, $"文本元素 \"{element.Key}\" 对应的内容控件是图片控件。"));
+            issues.Add(WrongType(element.Key, "Word.Validation.TextElementIsImage", [element.Key]));
         }
     }
 
@@ -184,12 +192,13 @@ public sealed class WordTemplateValidator
             // 可选元素缺失只告警（模板仍有效），必填缺失才失败
             issues.Add(Missing(
                 element.Key,
-                $"缺少图片元素 \"{element.Key}\"（{element.DisplayName}）对应的占位图内容控件。",
+                "Word.Validation.MissingImageElement",
+                [element.Key, element.DisplayName],
                 element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
         }
         else if (found.All(i => i.Kind != SdtKind.Image))
         {
-            issues.Add(WrongType(element.Key, $"图片元素 \"{element.Key}\" 对应的内容控件内没有图片（应外包占位图）。"));
+            issues.Add(WrongType(element.Key, "Word.Validation.ImageElementNoImage", [element.Key]));
         }
     }
 
@@ -209,7 +218,7 @@ public sealed class WordTemplateValidator
             }
             else if (found.Any(i => i.Kind != SdtKind.Table))
             {
-                issues.Add(WrongType(column.Key, $"表格列 \"{column.Key}\" 的内容控件不在表格行内。"));
+                issues.Add(WrongType(column.Key, "Word.Validation.TableColumnNotInRow", [column.Key]));
             }
         }
 
@@ -225,10 +234,14 @@ public sealed class WordTemplateValidator
         {
             issues.Add(Missing(
                 element.Key,
-                $"缺少完整表格行模板 \"{element.Key}\"（{element.DisplayName}）：" +
-                (missingRequired.Count > 0
-                    ? $"缺少必填列 {string.Join(", ", missingRequired)}。"
-                    : "必填列未出现在同一表格行内。"),
+                "Word.Validation.MissingTableRow",
+                [
+                    element.Key,
+                    element.DisplayName,
+                    missingRequired.Count > 0
+                        ? Sr.Get("Word.Validation.MissingTableRowMissingColumns", string.Join(", ", missingRequired))
+                        : Sr.Get("Word.Validation.MissingTableRowNoCompleteRow"),
+                ],
                 element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
         }
     }
@@ -284,25 +297,30 @@ public sealed class WordTemplateValidator
 
     private static TemplateValidationIssue Missing(
         string key,
-        string message,
+        string messageKey,
+        object?[] args,
         TemplateValidationSeverity severity = TemplateValidationSeverity.Error)
         => new()
         {
             Code = TemplateValidationIssueCode.Missing,
             Key = key,
-            Message = message,
             Severity = severity,
+            MessageKey = messageKey,
+            MessageArgs = args,
+            Message = Sr.Get(messageKey, args),
         };
 
-    private static TemplateValidationIssue WrongType(string key, string message)
+    private static TemplateValidationIssue WrongType(string key, string messageKey, object?[] args)
         => new()
         {
             Code = TemplateValidationIssueCode.WrongType,
             Key = key,
-            Message = message,
+            MessageKey = messageKey,
+            MessageArgs = args,
+            Message = Sr.Get(messageKey, args),
         };
 
-    private static WordTemplateValidationResult Invalid(string message)
+    private static WordTemplateValidationResult Invalid(string messageKey, params object?[] args)
         => new()
         {
             Issues =
@@ -310,7 +328,9 @@ public sealed class WordTemplateValidator
                 new TemplateValidationIssue
                 {
                     Code = TemplateValidationIssueCode.Invalid,
-                    Message = message,
+                    MessageKey = messageKey,
+                    MessageArgs = args,
+                    Message = Sr.Get(messageKey, args),
                 },
             ],
         };

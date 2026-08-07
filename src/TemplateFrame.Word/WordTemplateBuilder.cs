@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Builder;
+using TemplateFrame.Word.Localization;
 using A = DocumentFormat.OpenXml.Drawing;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
@@ -160,7 +161,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         ArgumentNullException.ThrowIfNull(columns);
         if (columns.Count == 0)
         {
-            throw new ArgumentException("表格至少需要一列。", nameof(columns));
+            throw new ArgumentException(Sr.Get("Word.Builder.TableNeedsColumns"), nameof(columns));
         }
 
         var table = new Table();
@@ -204,7 +205,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     {
         if (rows <= 0 || columns <= 0)
         {
-            throw new ArgumentException("布局表格的行列数必须为正。", nameof(rows));
+            throw new ArgumentException(Sr.Get("Word.Builder.LayoutTableSizePositive"), nameof(rows));
         }
 
         var table = new Table();
@@ -234,23 +235,23 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         ArgumentNullException.ThrowIfNull(compose);
         if (columnSpan < 1)
         {
-            throw new ArgumentOutOfRangeException(nameof(columnSpan), "columnSpan 必须为正。");
+            throw new ArgumentOutOfRangeException(nameof(columnSpan), Sr.Get("Word.Builder.ColumnSpanPositive"));
         }
 
         if (_layoutTable is null)
         {
-            throw new InvalidOperationException("AddCell 需先调用 AddLayoutTable。");
+            throw new InvalidOperationException(Sr.Get("Word.Builder.AddCellRequiresLayoutTable"));
         }
 
         var rows = _layoutTable.Elements<TableRow>().ToList();
         if (_layoutRow >= rows.Count)
         {
-            throw new InvalidOperationException("布局表格行已用完。");
+            throw new InvalidOperationException(Sr.Get("Word.Builder.LayoutTableRowsExhausted"));
         }
 
         if (_layoutCol + columnSpan > _layoutCols)
         {
-            throw new InvalidOperationException("布局表格单元格超出列数。");
+            throw new InvalidOperationException(Sr.Get("Word.Builder.LayoutTableCellOverflow"));
         }
 
         var width = SumColumnWidths(_layoutFormat, _layoutCol, columnSpan);
@@ -329,12 +330,12 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         ArgumentNullException.ThrowIfNull(target);
         if (!_ownsDocument)
         {
-            throw new InvalidOperationException("页眉/页脚/单元格子构建器不能单独 Save，请由顶层构建器统一保存。");
+            throw new InvalidOperationException(Sr.Get("Word.Builder.SubBuilderCannotSave"));
         }
 
         if (_saved)
         {
-            throw new InvalidOperationException("WordTemplateBuilder 只能 Save 一次。");
+            throw new InvalidOperationException(Sr.Get("Word.Builder.SaveOnce"));
         }
 
         if (!_container.Elements<SectionProperties>().Any())

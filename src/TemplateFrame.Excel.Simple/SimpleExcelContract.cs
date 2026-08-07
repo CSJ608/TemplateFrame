@@ -1,6 +1,7 @@
 using DocumentFormat.OpenXml.Packaging;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Excel.Simple.Localization;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel.Simple;
@@ -20,19 +21,19 @@ public static class SimpleExcelContract
         if (tables.Count == 0)
         {
             throw new InvalidOperationException(
-                $"契约 {contract.Name} 不含表格元素——SimpleExcel 只支持「标题行 + 数据行」的单个表格契约。");
+                Sr.Get("SimpleExcel.Contract.NoTable", contract.Name));
         }
 
         if (tables.Count > 1)
         {
             throw new InvalidOperationException(
-                $"契约 {contract.Name} 含 {tables.Count} 个表格元素——SimpleExcel 只支持单个表格（多表请用 TemplateFrame.Excel 灵活版式）。");
+                Sr.Get("SimpleExcel.Contract.MultipleTables", contract.Name, tables.Count));
         }
 
         if (contract.Elements.Count != 1)
         {
             throw new InvalidOperationException(
-                $"契约 {contract.Name} 除表格外还含其他元素（标量/图片）——SimpleExcel 只支持单个表格契约（多字段单据请用 TemplateFrame.Excel 灵活版式）。");
+                Sr.Get("SimpleExcel.Contract.NonTableElements", contract.Name));
         }
 
         return tables[0];
@@ -119,7 +120,9 @@ public static class SimpleExcelContract
                     new TemplateValidationIssue
                     {
                         Code = TemplateValidationIssueCode.Invalid,
-                        Message = "无法打开 .xlsx（不是有效的 OOXML 包）：" + ex.Message,
+                        MessageKey = "SimpleExcel.Contract.CannotOpen",
+                        MessageArgs = [ex.Message],
+                        Message = Sr.Get("SimpleExcel.Contract.CannotOpen", ex.Message),
                     },
                 ],
             };
@@ -144,7 +147,9 @@ public static class SimpleExcelContract
             {
                 Code = TemplateValidationIssueCode.Missing,
                 Key = column.Key,
-                Message = $"表格 \"{table.Key}\"（{table.DisplayName}）缺少列 \"{column.DisplayName ?? column.Key}\"。",
+                MessageKey = "SimpleExcel.Contract.MissingColumn",
+                MessageArgs = [table.Key, table.DisplayName, column.DisplayName ?? column.Key],
+                Message = Sr.Get("SimpleExcel.Contract.MissingColumn", table.Key, table.DisplayName, column.DisplayName ?? column.Key),
                 Severity = column.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning,
             });
         }
@@ -157,7 +162,9 @@ public static class SimpleExcelContract
                 {
                     Code = TemplateValidationIssueCode.Extra,
                     Key = header,
-                    Message = $"表格包含契约外列 \"{header}\"。",
+                    MessageKey = "SimpleExcel.Contract.ExtraColumn",
+                MessageArgs = [header],
+                Message = Sr.Get("SimpleExcel.Contract.ExtraColumn", header),
                     Severity = TemplateValidationSeverity.Warning,
                 });
             }

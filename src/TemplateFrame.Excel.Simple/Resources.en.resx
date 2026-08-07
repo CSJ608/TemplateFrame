@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="SimpleExcel.Contract.CannotOpen" xml:space="preserve">
+    <value>Cannot open the .xlsx (not a valid OOXML package): {0}</value>
+  </data>
+  <data name="SimpleExcel.Contract.ExtraColumn" xml:space="preserve">
+    <value>The table contains a column outside the contract: "{0}".</value>
+  </data>
+  <data name="SimpleExcel.Contract.MissingColumn" xml:space="preserve">
+    <value>Table "{0}" ({1}) is missing column "{2}".</value>
+  </data>
+  <data name="SimpleExcel.Contract.MultipleTables" xml:space="preserve">
+    <value>Contract {0} contains {1} table elements — SimpleExcel supports only a single table (use TemplateFrame.Excel for multiple tables).</value>
+  </data>
+  <data name="SimpleExcel.Contract.NonTableElements" xml:space="preserve">
+    <value>Contract {0} contains elements other than a table (scalars/images) — SimpleExcel supports only a single-table contract (use TemplateFrame.Excel for multi-field forms).</value>
+  </data>
+  <data name="SimpleExcel.Contract.NoTable" xml:space="preserve">
+    <value>Contract {0} contains no table element — SimpleExcel supports only a single "header row + data rows" table contract.</value>
+  </data>
+  <data name="SimpleExcel.InvalidCellAddress" xml:space="preserve">
+    <value>Invalid cell address: {0}</value>
+  </data>
+  <data name="SimpleExcel.Service.DefineContractNull" xml:space="preserve">
+    <value>DefineContract() returned null.</value>
+  </data>
+  <data name="SimpleExcel.Service.TableNeedsDataPath" xml:space="preserve">
+    <value>Contract {0} table "{1}" does not declare DataPath — SimpleExcelTemplateService requires DataPath for strong-typed auto-mapping.</value>
+  </data>
+</root>

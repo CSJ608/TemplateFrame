@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Builder;
+using TemplateFrame.Excel.Localization;
 using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
 
 namespace TemplateFrame.Excel;
@@ -111,7 +112,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         ArgumentNullException.ThrowIfNull(columns);
         if (columns.Count == 0)
         {
-            throw new ArgumentException("表格至少需要一列。", nameof(columns));
+            throw new ArgumentException(Sr.Get("Excel.Builder.TableNeedsColumns"), nameof(columns));
         }
 
         var (startRow, startCol) = ExcelAddressHelper.ParseCell(startCell);
@@ -202,7 +203,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         ArgumentNullException.ThrowIfNull(target);
         if (_saved)
         {
-            throw new InvalidOperationException("ExcelTemplateBuilder 只能 Save 一次。");
+            throw new InvalidOperationException(Sr.Get("Excel.Builder.SaveOnce"));
         }
 
         var worksheet = _worksheetPart!.Worksheet!;
@@ -298,7 +299,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     {
         if (_definedNames.Any(n => n.Name == name))
         {
-            throw new InvalidOperationException("命名区域重复：" + name);
+            throw new InvalidOperationException(Sr.Get("Excel.Builder.DuplicateNamedRange", name));
         }
 
         var reference = ExcelNamedRangeLocator.QuoteSheet(_sheetName)

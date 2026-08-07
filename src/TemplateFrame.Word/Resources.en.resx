@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Word.Builder.AddCellRequiresLayoutTable" xml:space="preserve">
+    <value>AddCell requires a prior call to AddLayoutTable.</value>
+  </data>
+  <data name="Word.Builder.ColumnSpanPositive" xml:space="preserve">
+    <value>columnSpan must be positive.</value>
+  </data>
+  <data name="Word.Builder.LayoutTableCellOverflow" xml:space="preserve">
+    <value>Layout table cell exceeds the column count.</value>
+  </data>
+  <data name="Word.Builder.LayoutTableRowsExhausted" xml:space="preserve">
+    <value>Layout table rows are exhausted.</value>
+  </data>
+  <data name="Word.Builder.LayoutTableSizePositive" xml:space="preserve">
+    <value>Layout table rows and columns must be positive.</value>
+  </data>
+  <data name="Word.Builder.SaveOnce" xml:space="preserve">
+    <value>WordTemplateBuilder can only Save once.</value>
+  </data>
+  <data name="Word.Builder.SubBuilderCannotSave" xml:space="preserve">
+    <value>Header/footer/cell sub-builders cannot Save on their own; use the top-level builder.</value>
+  </data>
+  <data name="Word.Builder.TableNeedsColumns" xml:space="preserve">
+    <value>A table requires at least one column.</value>
+  </data>
+  <data name="Word.Fill.DriftedSkipped" xml:space="preserve">
+    <value>Optional element "{0}" is missing in the template (Drifted); skipped during fill.</value>
+  </data>
+  <data name="Word.Fill.MissingRequired" xml:space="preserve">
+    <value>Fill failed: required element "{0}" is missing ({1}). Configure MissingElementPolicy.SkipAndWarn to skip and warn instead.</value>
+  </data>
+  <data name="Word.Fill.NoBlip" xml:space="preserve">
+    <value>The image control "{0}" contains no &lt;a:blip&gt;; the image cannot be replaced.</value>
+  </data>
+  <data name="Word.Fill.ValidationFailed" xml:space="preserve">
+    <value>Fill failed: the template does not match the contract ({0}). {1}</value>
+  </data>
+  <data name="Word.Validation.AmbiguousTag" xml:space="preserve">
+    <value>Content control tag "{0}" appears {1} times in the document (must be unique across body/header/footer).</value>
+  </data>
+  <data name="Word.Validation.CannotOpen" xml:space="preserve">
+    <value>Cannot open the .docx (not a valid OOXML package): {0}</value>
+  </data>
+  <data name="Word.Validation.ContractDuplicateKey" xml:space="preserve">
+    <value>Duplicate Key in contract: "{0}" (content control tags must be unique).</value>
+  </data>
+  <data name="Word.Validation.ExtraTag" xml:space="preserve">
+    <value>The template contains a content control tag outside the contract: "{0}".</value>
+  </data>
+  <data name="Word.Validation.ImageElementNoImage" xml:space="preserve">
+    <value>The content control for image element "{0}" contains no image (a placeholder image is expected).</value>
+  </data>
+  <data name="Word.Validation.MissingImageElement" xml:space="preserve">
+    <value>Missing the placeholder image content control for image element "{0}" ({1}).</value>
+  </data>
+  <data name="Word.Validation.MissingMainPart" xml:space="preserve">
+    <value>The document is missing the main document part (word/document.xml).</value>
+  </data>
+  <data name="Word.Validation.MissingTableRow" xml:space="preserve">
+    <value>Missing a complete table row template for "{0}" ({1}): {2}</value>
+  </data>
+  <data name="Word.Validation.MissingTableRowMissingColumns" xml:space="preserve">
+    <value>Missing required column(s): {0}.</value>
+  </data>
+  <data name="Word.Validation.MissingTableRowNoCompleteRow" xml:space="preserve">
+    <value>Required columns do not appear in the same table row.</value>
+  </data>
+  <data name="Word.Validation.MissingTextElement" xml:space="preserve">
+    <value>Missing the content control for text element "{0}" ({1}).</value>
+  </data>
+  <data name="Word.Validation.TableColumnNotInRow" xml:space="preserve">
+    <value>The content control for table column "{0}" is not inside a table row.</value>
+  </data>
+  <data name="Word.Validation.TextElementIsImage" xml:space="preserve">
+    <value>The content control for text element "{0}" is an image control.</value>
+  </data>
+</root>

@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Contract;
+using TemplateFrame.Excel.Localization;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel;
@@ -27,14 +28,14 @@ public sealed class ExcelTemplateValidator
             using var document = SpreadsheetDocument.Open(template, false);
             if (document.WorkbookPart is null)
             {
-                return Invalid("文档缺少工作簿部分（xl/workbook.xml）。");
+                return Invalid("Excel.Validation.MissingWorkbookPart");
             }
 
             return ValidateCore(document.WorkbookPart, contract);
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException or FileFormatException)
         {
-            return Invalid("无法打开 .xlsx（不是有效的 OOXML 包）：" + ex.Message);
+            return Invalid("Excel.Validation.CannotOpen", ex.Message);
         }
     }
 
@@ -53,7 +54,9 @@ public sealed class ExcelTemplateValidator
             {
                 Code = TemplateValidationIssueCode.Invalid,
                 Key = duplicate.Key,
-                Message = "契约内部 Key 重复：" + duplicate.Key + "（命名区域必须全局唯一）。",
+                MessageKey = "Excel.Validation.ContractDuplicateKey",
+                MessageArgs = [duplicate.Key],
+                Message = Sr.Get("Excel.Validation.ContractDuplicateKey", duplicate.Key),
             });
         }
 
@@ -64,7 +67,9 @@ public sealed class ExcelTemplateValidator
             {
                 Code = TemplateValidationIssueCode.Ambiguous,
                 Key = group.Key,
-                Message = "命名区域 " + group.Key + " 重复出现。",
+                MessageKey = "Excel.Validation.AmbiguousNamedRange",
+                MessageArgs = [group.Key],
+                Message = Sr.Get("Excel.Validation.AmbiguousNamedRange", group.Key),
             });
         }
 
@@ -103,7 +108,9 @@ public sealed class ExcelTemplateValidator
                 {
                     Code = TemplateValidationIssueCode.Extra,
                     Key = match.Name,
-                    Message = "模板含契约外命名区域：" + match.Name,
+                    MessageKey = "Excel.Validation.ExtraNamedRange",
+                MessageArgs = [match.Name],
+                Message = Sr.Get("Excel.Validation.ExtraNamedRange", match.Name),
                     Severity = TemplateValidationSeverity.Warning,
                 });
             }
@@ -123,7 +130,8 @@ public sealed class ExcelTemplateValidator
             // 可选元素缺失只告警（模板仍有效），必填缺失才失败
             issues.Add(Missing(
                 element.Key,
-                "缺少文本元素 " + element.Key + "（" + element.DisplayName + "）对应的命名区域。",
+                "Excel.Validation.MissingTextElement",
+                [element.Key, element.DisplayName],
                 element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
         }
     }
@@ -140,7 +148,8 @@ public sealed class ExcelTemplateValidator
         {
             issues.Add(Missing(
                 element.Key,
-                "缺少图片元素 " + element.Key + "（" + element.DisplayName + "）对应的占位图锚定格。",
+                "Excel.Validation.MissingImageElement",
+                [element.Key, element.DisplayName],
                 element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
             return;
         }
@@ -149,14 +158,14 @@ public sealed class ExcelTemplateValidator
         var worksheetPart = ResolveWorksheetPart(workbookPart, sheet);
         if (worksheetPart is null)
         {
-            issues.Add(WrongType(element.Key, "图片元素 " + element.Key + " 的命名区域指向不存在的工作表 " + sheet + "。"));
+            issues.Add(WrongType(element.Key, "Excel.Validation.ImageElementSheetNotFound", [element.Key, sheet]));
             return;
         }
 
         var hasImage = ExcelDrawingHelper.GetBlipEmbed(ExcelDrawingHelper.FindAnchor(worksheetPart, start.Col - 1, start.Row - 1)) is not null;
         if (!hasImage)
         {
-            issues.Add(WrongType(element.Key, "图片元素 " + element.Key + " 的锚定格内没有图片（应锚定占位图）。"));
+            issues.Add(WrongType(element.Key, "Excel.Validation.ImageElementNoImage", [element.Key]));
         }
     }
 
@@ -191,10 +200,14 @@ public sealed class ExcelTemplateValidator
         {
             issues.Add(Missing(
                 element.Key,
-                "缺少完整表格行模板 " + element.Key + "（" + element.DisplayName + "）："
-                + (missingRequired.Count > 0
-                    ? "缺少必填列 " + string.Join(", ", missingRequired) + "。"
-                    : "必填列未出现在同一示例行内。"),
+                "Excel.Validation.MissingTableRow",
+                [
+                    element.Key,
+                    element.DisplayName,
+                    missingRequired.Count > 0
+                        ? Sr.Get("Excel.Validation.MissingTableRowMissingColumns", string.Join(", ", missingRequired))
+                        : Sr.Get("Excel.Validation.MissingTableRowNoCompleteRow"),
+                ],
                 element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
         }
     }
@@ -220,25 +233,30 @@ public sealed class ExcelTemplateValidator
 
     private static TemplateValidationIssue Missing(
         string key,
-        string message,
+        string messageKey,
+        object?[] args,
         TemplateValidationSeverity severity = TemplateValidationSeverity.Error)
         => new()
         {
             Code = TemplateValidationIssueCode.Missing,
             Key = key,
-            Message = message,
             Severity = severity,
+            MessageKey = messageKey,
+            MessageArgs = args,
+            Message = Sr.Get(messageKey, args),
         };
 
-    private static TemplateValidationIssue WrongType(string key, string message)
+    private static TemplateValidationIssue WrongType(string key, string messageKey, object?[] args)
         => new()
         {
             Code = TemplateValidationIssueCode.WrongType,
             Key = key,
-            Message = message,
+            MessageKey = messageKey,
+            MessageArgs = args,
+            Message = Sr.Get(messageKey, args),
         };
 
-    private static TemplateValidationResult Invalid(string message)
+    private static TemplateValidationResult Invalid(string messageKey, params object?[] args)
         => new()
         {
             Issues =
@@ -246,7 +264,9 @@ public sealed class ExcelTemplateValidator
                 new TemplateValidationIssue
                 {
                     Code = TemplateValidationIssueCode.Invalid,
-                    Message = message,
+                    MessageKey = messageKey,
+                    MessageArgs = args,
+                    Message = Sr.Get(messageKey, args),
                 },
             ],
         };

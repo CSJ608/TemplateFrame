@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Word.Localization;
 using TemplateFrame.Validation;
 using A = DocumentFormat.OpenXml.Drawing;
 
@@ -114,7 +115,9 @@ public sealed class WordTemplateFiller
                         {
                             Code = TemplateValidationIssueCode.Drifted,
                             Severity = TemplateValidationSeverity.Warning,
-                            Message = $"可选元素 \"{issue.Key}\" 在模板中缺失（Drifted），填充时跳过。",
+                            MessageKey = "Word.Fill.DriftedSkipped",
+                           MessageArgs = [issue.Key],
+                           Message = Sr.Get("Word.Fill.DriftedSkipped", issue.Key),
                         });
                     }
                     else if (_options.MissingElementPolicy == MissingElementPolicy.SkipAndWarn)
@@ -124,8 +127,7 @@ public sealed class WordTemplateFiller
                     else
                     {
                         throw new InvalidOperationException(
-                            $"填充失败：缺少必填元素 \"{issue.Key}\"（{issue.Message}）。" +
-                            "可配置 MissingElementPolicy.SkipAndWarn 改为跳过并告警。");
+                            Sr.Get("Word.Fill.MissingRequired", issue.Key, issue.Message));
                     }
 
                     break;
@@ -133,7 +135,7 @@ public sealed class WordTemplateFiller
                 default:
                     // WrongType / Ambiguous / Invalid：模板与契约不匹配，无法安全填充
                     throw new InvalidOperationException(
-                        $"填充失败：模板与契约不匹配（{issue.Code}）。{issue.Message}");
+                        Sr.Get("Word.Fill.ValidationFailed", issue.Code, issue.Message));
             }
         }
 
@@ -230,7 +232,7 @@ public sealed class WordTemplateFiller
         }
 
         var blip = match.Element.Descendants<A.Blip>().FirstOrDefault()
-            ?? throw new InvalidOperationException($"图片控件 \"{tag}\" 内没有 <a:blip>，无法替换图片。");
+            ?? throw new InvalidOperationException(Sr.Get("Word.Fill.NoBlip", tag));
 
         // 图片 part 归属 SDT 所在宿主（正文=MainDocumentPart；页眉/页脚=对应 Header/FooterPart），
         // 否则页眉里的 r:embed 在 header 的 rels 里解析不到。

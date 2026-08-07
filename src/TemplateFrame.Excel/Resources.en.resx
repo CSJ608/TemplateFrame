@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<root>
+  <resheader name="resmimetype"><value>text/microsoft-resx</value></resheader>
+  <resheader name="version"><value>2.0</value></resheader>
+  <resheader name="reader"><value>System.Resources.ResXResourceReader, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <resheader name="writer"><value>System.Resources.ResXResourceWriter, System.Windows.Forms, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089</value></resheader>
+  <data name="Excel.Address.CannotParse" xml:space="preserve">
+    <value>Cannot parse cell reference: {0}</value>
+  </data>
+  <data name="Excel.Builder.DuplicateNamedRange" xml:space="preserve">
+    <value>Duplicate defined name: {0}</value>
+  </data>
+  <data name="Excel.Builder.SaveOnce" xml:space="preserve">
+    <value>ExcelTemplateBuilder can only Save once.</value>
+  </data>
+  <data name="Excel.Builder.TableNeedsColumns" xml:space="preserve">
+    <value>A table requires at least one column.</value>
+  </data>
+  <data name="Excel.Fill.ValidationFailed" xml:space="preserve">
+    <value>Fill failed during pre-validation: {0}</value>
+  </data>
+  <data name="Excel.Validation.AmbiguousNamedRange" xml:space="preserve">
+    <value>Defined name {0} appears more than once.</value>
+  </data>
+  <data name="Excel.Validation.CannotOpen" xml:space="preserve">
+    <value>Cannot open the .xlsx (not a valid OOXML package): {0}</value>
+  </data>
+  <data name="Excel.Validation.ContractDuplicateKey" xml:space="preserve">
+    <value>Duplicate Key in contract: {0} (defined names must be unique).</value>
+  </data>
+  <data name="Excel.Validation.ExtraNamedRange" xml:space="preserve">
+    <value>The template contains a defined name outside the contract: {0}</value>
+  </data>
+  <data name="Excel.Validation.ImageElementNoImage" xml:space="preserve">
+    <value>The anchor cell for image element {0} contains no image (a placeholder image is expected).</value>
+  </data>
+  <data name="Excel.Validation.ImageElementSheetNotFound" xml:space="preserve">
+    <value>The defined name for image element {0} points to a non-existent worksheet {1}.</value>
+  </data>
+  <data name="Excel.Validation.MissingImageElement" xml:space="preserve">
+    <value>Missing the placeholder anchor cell for image element {0} ({1}).</value>
+  </data>
+  <data name="Excel.Validation.MissingTableRow" xml:space="preserve">
+    <value>Missing a complete table row template for {0} ({1}): {2}</value>
+  </data>
+  <data name="Excel.Validation.MissingTableRowMissingColumns" xml:space="preserve">
+    <value>Missing required column(s): {0}.</value>
+  </data>
+  <data name="Excel.Validation.MissingTableRowNoCompleteRow" xml:space="preserve">
+    <value>Required columns do not appear in the same sample row.</value>
+  </data>
+  <data name="Excel.Validation.MissingTextElement" xml:space="preserve">
+    <value>Missing the defined name for text element {0} ({1}).</value>
+  </data>
+  <data name="Excel.Validation.MissingWorkbookPart" xml:space="preserve">
+    <value>The workbook part (xl/workbook.xml) is missing.</value>
+  </data>
+</root>
