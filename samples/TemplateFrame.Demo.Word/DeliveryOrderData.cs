@@ -1,4 +1,4 @@
-namespace TemplateFrame.Demo;
+namespace TemplateFrame.Demo.Word;
 
 /// <summary>送货单明细行（序号由业务侧填写；实收数量/批次号/仓库在收货前为空）。</summary>
 public sealed record DeliveryOrderLine

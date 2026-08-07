@@ -1,6 +1,6 @@
 using QRCoder;
 
-namespace TemplateFrame.Demo;
+namespace TemplateFrame.Demo.Word;
 
 /// <summary>Demo 侧二维码生成（QRCoder，属于业务侧能力，不进框架）。</summary>
 internal static class QrCodeGenerator

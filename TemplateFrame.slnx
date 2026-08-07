@@ -3,5 +3,5 @@
   <Project Path="src/TemplateFrame.Word/TemplateFrame.Word.csproj" />
   <Project Path="test/TemplateFrame.Tests/TemplateFrame.Tests.csproj" />
   <Project Path="test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj" />
-  <Project Path="samples/TemplateFrame.Demo/TemplateFrame.Demo.csproj" />
+  <Project Path="samples/TemplateFrame.Demo.Word/TemplateFrame.Demo.Word.csproj" />
 </Solution>

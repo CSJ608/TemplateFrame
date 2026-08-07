@@ -4,7 +4,7 @@ using TemplateFrame.Data;
 using TemplateFrame.Services;
 using TemplateFrame.Word;
 
-namespace TemplateFrame.Demo;
+namespace TemplateFrame.Demo.Word;
 
 /// <summary>
 /// 送货单示例场景服务：双层页眉（标识层 LOGO/单据名/二维码+页码；单据头信息层 编号+供应商 / 制单日期+制单人+备注）、

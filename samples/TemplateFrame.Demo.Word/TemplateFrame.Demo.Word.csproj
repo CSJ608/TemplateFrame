@@ -6,8 +6,8 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <RootNamespace>TemplateFrame.Demo</RootNamespace>
-    <AssemblyName>TemplateFrame.Demo</AssemblyName>
+    <RootNamespace>TemplateFrame.Demo.Word</RootNamespace>
+    <AssemblyName>TemplateFrame.Demo.Word</AssemblyName>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 

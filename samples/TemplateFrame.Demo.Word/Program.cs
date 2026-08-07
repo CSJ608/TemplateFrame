@@ -1,8 +1,12 @@
 using TemplateFrame.Validation;
 using TemplateFrame.Word;
 
-namespace TemplateFrame.Demo;
+namespace TemplateFrame.Demo.Word;
 
+/// <summary>
+/// TemplateFrame.Word 插件 Demo：送货单「生成 → 校验 → 填充（收货前/收货后）→ 回读」完整闭环。
+/// 输出文件带 Word 标识（Word-DeliveryOrder-*.docx），默认输出到 %TEMP%\TemplateFrame.Demo.Word。
+/// </summary>
 internal static class Program
 {
     private static void Main(string[] args)
@@ -17,21 +21,21 @@ internal static class Program
 
         var dir = args.Length > 0
             ? args[0]
-            : Path.Combine(Path.GetTempPath(), "TemplateFrame-Demo");
+            : Path.Combine(Path.GetTempPath(), "TemplateFrame.Demo.Word");
         Directory.CreateDirectory(dir);
-        var templatePath = Path.Combine(dir, "DeliveryOrder-template.docx");
-        var prePath = Path.Combine(dir, "DeliveryOrder-pre.docx");
-        var postPath = Path.Combine(dir, "DeliveryOrder-post.docx");
+        var templatePath = Path.Combine(dir, "Word-DeliveryOrder-template.docx");
+        var prePath = Path.Combine(dir, "Word-DeliveryOrder-pre.docx");
+        var postPath = Path.Combine(dir, "Word-DeliveryOrder-post.docx");
 
-        // 1) 生成初始模板（A5 横版，双层页眉 + 9 列明细 + 两行页脚）
+        // [1] 生成初始模板（A5 横版，双层页眉 + 9 列明细 + 两行页脚）
         using (var template = service.BuildInitialTemplateFile())
         {
             File.WriteAllBytes(templatePath, ReadAllBytes(template));
         }
 
-        Console.WriteLine($"\n[1] 已生成初始模板：{templatePath}");
+        Console.WriteLine($"\n[1] 生成模板：{templatePath}");
 
-        // 2) Validate：模板 vs 契约
+        // [2] Validate：模板 vs 契约
         using (var templateStream = File.OpenRead(templatePath))
         {
             var result = service.Validate(templateStream);
@@ -52,17 +56,22 @@ internal static class Program
             }
         }
 
-        // 3) 收货前：实际到货日期/收货人/实收数量/批次号/仓库为空
+        // [3] 收货前：实际到货日期/收货人/实收数量/批次号/仓库为空
         var preOrder = CreatePreOrder();
         Console.WriteLine($"\n[3] 收货前填充：{preOrder.No}");
         PrintDataValidation(service, preOrder);
         FillAndPrint(service, templatePath, prePath, preOrder, "收货前");
 
-        // 4) 收货后：补齐上述字段
+        // [4] 收货后：补齐上述字段
         var postOrder = CreatePostOrder();
         Console.WriteLine($"\n[4] 收货后填充：{postOrder.No}");
         PrintDataValidation(service, postOrder);
         FillAndPrint(service, templatePath, postPath, postOrder, "收货后");
+
+        // [5] 回读数据：读取已填充的 Word 模板 → service.Parse → 强类型 DeliveryOrderData
+        Console.WriteLine("\n[5] 回读数据：读取已填充的 Word 模板 → service.Parse → 强类型 DeliveryOrderData");
+        PrintReadBack(service, postPath, "收货后（重点）");
+        PrintReadBack(service, prePath, "收货前（空字段展示）");
     }
 
     private static void PrintDataValidation(DeliveryOrderTemplateService service, DeliveryOrderData order)
@@ -93,12 +102,25 @@ internal static class Program
         using (var filledStream = File.OpenRead(filledPath))
         {
             var parsed = service.Parse(filledStream);
-            Console.WriteLine($"    Parse 回读（{label}）：单号={parsed.No} 供应商={parsed.Supplier} 制单={parsed.OrderDate:yyyy-MM-dd} {parsed.OrderBy} 备注={parsed.Remark}");
-            Console.WriteLine($"    计划送货={parsed.PlanDeliveryDate:yyyy-MM-dd} 实际到货={(parsed.ActualArrivalDate.HasValue ? parsed.ActualArrivalDate.Value.ToString("yyyy-MM-dd") : "(空)")} 收货人={(string.IsNullOrEmpty(parsed.Receiver) ? "(空)" : parsed.Receiver)}");
-            foreach (var line in parsed.Lines)
-            {
-                Console.WriteLine($"      - {line.RowNo} {line.MaterialCode} {line.MaterialName} {line.Unit} 计划={line.PlanQty} 实收={(line.ActualQty.HasValue ? line.ActualQty.Value.ToString() : "(空)")} 批次={(line.BatchNo ?? "(空)")} 供应商批次={(line.SupplierBatchNo ?? "(空)")} 仓库={(line.Warehouse ?? "(空)")}");
-            }
+            Console.WriteLine($"    Parse 回读（{label}）：单号={parsed.No} 供应商={parsed.Supplier} 制单={parsed.OrderDate:yyyy-MM-dd} {parsed.OrderBy} 明细 {parsed.Lines.Count} 行");
+        }
+    }
+
+    /// <summary>显式回读示例：读取已填充 docx → service.Parse → 打印强类型 DeliveryOrderData（含 9 列明细多行、空字段展示）。</summary>
+    private static void PrintReadBack(DeliveryOrderTemplateService service, string filledPath, string label)
+    {
+        using var filledStream = File.OpenRead(filledPath);
+        var parsed = service.Parse(filledStream);
+
+        Console.WriteLine($"  ▸ {label}：{filledPath}");
+        Console.WriteLine($"    单据编号={parsed.No}  供应商={parsed.Supplier}");
+        Console.WriteLine($"    制单日期={parsed.OrderDate:yyyy-MM-dd}  制单人={parsed.OrderBy}");
+        Console.WriteLine($"    计划送货日期={parsed.PlanDeliveryDate:yyyy-MM-dd}  实际到货日期={(parsed.ActualArrivalDate.HasValue ? parsed.ActualArrivalDate.Value.ToString("yyyy-MM-dd") : "(空)")}  收货人={(string.IsNullOrEmpty(parsed.Receiver) ? "(空)" : parsed.Receiver)}");
+        Console.WriteLine($"    备注={(string.IsNullOrEmpty(parsed.Remark) ? "(空)" : parsed.Remark)}  二维码={parsed.QrContent}");
+        Console.WriteLine($"    明细行（{parsed.Lines.Count} 行 × 9 列）：");
+        foreach (var line in parsed.Lines)
+        {
+            Console.WriteLine($"      #{line.RowNo} 序号={line.RowNo} 物料代码={line.MaterialCode} 物料名称={line.MaterialName} 单位={line.Unit} 计划数量={line.PlanQty} 实收数量={(line.ActualQty.HasValue ? line.ActualQty.Value.ToString() : "(空)")} 批次号={(line.BatchNo ?? "(空)")} 供应商批次={(line.SupplierBatchNo ?? "(空)")} 仓库={(line.Warehouse ?? "(空)")}");
         }
     }
 
