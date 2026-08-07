@@ -8,7 +8,8 @@
 | 迭代 | 主题 | 状态 |
 |---|---|---|
 | 0–6 | 契约引擎 + Word 插件 + 送货单 Demo + 自动化发布 | ✅ 已归档（见下） |
-| v1.0.0 / v1.0.1 | nuget.org + GitHub Release 发布 | ✅ 已完成 |
+| v1.0.0 / v1.0.1 | nuget.org + GitHub Release 发布（契约引擎 + Word 插件） | ✅ 已完成 |
+| **v1.0.2** | **发布：迭代 7 + 迭代 8（Excel 插件 + Excel.Simple 插件 + 修订）** | ✅ 已完成 |
 | **7** | **Demo 收尾：Word 插件标识 + 回读示例** | ✅ 已完成（见下） |
 | **8** | **Excel 插件 `TemplateFrame.Excel`** | ✅ 已完成（见下） |
 | 9 | PDF 插件 `TemplateFrame.Pdf` | ⏳ 下一步 |
@@ -92,7 +93,11 @@
 3. **Demo 版头改 3×9 网格**：左 LOGO（A1:B3）/ 中标题（C1:G3 居中）/ 右上二维码（H1:I2）/ 右下留空（H3:I3），
    单据头信息每行 3 组"标签 + 值"（值跨 2 列），正文明细表 9 列，整体对齐更板正。
 4. **新增简化插件 `TemplateFrame.Excel.Simple`**：只支持「标题行 + 数据行」的表格导入/导出（`SimpleExcel.Write` / `Read`），
-   把"灵活版式（单据）"与"简单表格（列表）"两种需求拆成两个插件。
+   用命名区域（默认 `TF_Table`）标记表格位置，把"灵活版式（单据）"与"简单表格（列表）"两种需求拆成两个插件。
+5. **Simple 用命名区域定位**：`SimpleExcel` 写时把表格区域写成命名区域（默认 `TF_Table` + `StartCell`），
+   `Read` 优先按区域定位、无区域回退"第一个非空行"。
+
+> **本轮关闭**：迭代 8（含修订）完成，发布 **v1.0.2**（四个包统一版本，GitHub Release + nuget.org）。
 ---
 
 ## 迭代 9：PDF 插件 `TemplateFrame.Pdf`
