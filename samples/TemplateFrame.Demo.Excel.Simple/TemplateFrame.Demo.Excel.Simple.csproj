@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>TemplateFrame.Demo.Excel.Simple</RootNamespace>
+    <AssemblyName>TemplateFrame.Demo.Excel.Simple</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TemplateFrame.Excel.Simple\TemplateFrame.Excel.Simple.csproj" />
+  </ItemGroup>
+
+</Project>

@@ -37,3 +37,13 @@ var loaded = SimpleExcel.Read(input); // Headers + Rows（string / bool / DateTi
 - 单元格值支持：`string` / `bool` / `DateTime`（写为日期序列号 + `yyyy-mm-dd`）/ 数值 / `null`。
 - 导入时第一非空行视为标题行，其后为数据行；全空行跳过；数字按 `double` 返回，日期格式单元格按 `DateTime` 返回。
 - 不提供页面设置 / 命名区域 / 合并单元格 / 图片——保持"简单表格"的最小形态。
+
+## Demo
+
+仓库 `samples/TemplateFrame.Demo.Excel.Simple` 提供**物料基础数据**示例（导出 → 回读闭环，表头：编码 / 名称 / 基本单位 / 包装规格 / 型号）：
+
+```bash
+dotnet run --project samples/TemplateFrame.Demo.Excel.Simple
+```
+
+产物默认输出到系统临时目录 `%TEMP%\TemplateFrame.Demo.Excel.Simple`，生成 `Excel-Simple-Materials.xlsx`。
