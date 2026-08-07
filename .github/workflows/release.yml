@@ -34,6 +34,8 @@ jobs:
         run: |
           dotnet pack src/TemplateFrame/TemplateFrame.csproj -c Release --no-build -o artifacts
           dotnet pack src/TemplateFrame.Word/TemplateFrame.Word.csproj -c Release --no-build -o artifacts
+          dotnet pack src/TemplateFrame.Excel/TemplateFrame.Excel.csproj -c Release --no-build -o artifacts
+          dotnet pack src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj -c Release --no-build -o artifacts
 
       - name: Extract tag version
         id: tag

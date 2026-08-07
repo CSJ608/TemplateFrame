@@ -2,6 +2,11 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [1.0.4] - 2026-08-07
+
+### 修复
+- 发布工作流（elease.yml / publish-nuget.yml）Pack 步骤补齐 TemplateFrame.Excel 与 TemplateFrame.Excel.Simple——此前仅打包 TemplateFrame / TemplateFrame.Word，导致 Excel 系列包从未进入 nuget.org 与 GitHub Release；v1.0.4 起四个包全部打包发布（版本统一 1.0.4）
+
 ## [1.0.3] - 2026-08-07
 
 ### 新增

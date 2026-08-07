@@ -11,6 +11,7 @@
 | v1.0.0 / v1.0.1 | nuget.org + GitHub Release 发布（契约引擎 + Word 插件） | ✅ 已完成 |
 | **v1.0.2** | **发布：迭代 7 + 迭代 8（Excel 插件 + Excel.Simple 插件 + 修订）** | ✅ 已完成 |
 | **v1.0.3** | **发布：迭代 9（自动映射 + SimpleExcel 强类型 + 自动映射 Demo + DEMOS.md）** | ✅ 已完成 |
+| **v1.0.4** | **发布：修复工作流补齐 Excel / Excel.Simple 打包推送（四包全部进 nuget.org 与 GitHub Release）** | ✅ 已完成 |
 | **7** | **Demo 收尾：Word 插件标识 + 回读示例** | ✅ 已完成（见下） |
 | **8** | **Excel 插件 `TemplateFrame.Excel`** | ✅ 已完成（见下） |
 | **9** | **自动映射（DataPath）+ SimpleExcel 强类型** | ✅ 已完成（见下） |
