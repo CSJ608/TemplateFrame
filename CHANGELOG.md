@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+### 变更
+- README 徽章按包拆分：主 README 保留 `TemplateFrame` 版本号/下载量徽章，`TemplateFrame.Word` 徽章移到插件自身 README
+- Word 包改为打包自身 README（`src/TemplateFrame.Word/README.md`），下一次发布（v1.0.1+）生效
+
 ## [1.0.0] - 2026-08-07
 
 ### 新增
