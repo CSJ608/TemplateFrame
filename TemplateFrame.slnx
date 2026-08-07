@@ -1,13 +1,20 @@
 <Solution>
-  <Project Path="src/TemplateFrame/TemplateFrame.csproj" />
-  <Project Path="src/TemplateFrame.Word/TemplateFrame.Word.csproj" />
-  <Project Path="src/TemplateFrame.Excel/TemplateFrame.Excel.csproj" />
-  <Project Path="test/TemplateFrame.Tests/TemplateFrame.Tests.csproj" />
-  <Project Path="test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj" />
-  <Project Path="test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj" />
-  <Project Path="src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj" />
-  <Project Path="test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj" />
-  <Project Path="samples/TemplateFrame.Demo.Word/TemplateFrame.Demo.Word.csproj" />
-  <Project Path="samples/TemplateFrame.Demo.Excel/TemplateFrame.Demo.Excel.csproj" />
-  <Project Path="samples/TemplateFrame.Demo.Excel.Simple/TemplateFrame.Demo.Excel.Simple.csproj" />
+  <Folder Name="/src/">
+    <Project Path="src/TemplateFrame/TemplateFrame.csproj" />
+    <Project Path="src/TemplateFrame.Word/TemplateFrame.Word.csproj" />
+    <Project Path="src/TemplateFrame.Excel/TemplateFrame.Excel.csproj" />
+    <Project Path="src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj" />
+  </Folder>
+  <Folder Name="/test/">
+    <Project Path="test/TemplateFrame.Tests/TemplateFrame.Tests.csproj" />
+    <Project Path="test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj" />
+    <Project Path="test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj" />
+    <Project Path="test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj" />
+  </Folder>
+  <Folder Name="/samples/">
+    <Project Path="samples/TemplateFrame.Demo.Word/TemplateFrame.Demo.Word.csproj" />
+    <Project Path="samples/TemplateFrame.Demo.Word.AutoMapping/TemplateFrame.Demo.Word.AutoMapping.csproj" />
+    <Project Path="samples/TemplateFrame.Demo.Excel/TemplateFrame.Demo.Excel.csproj" />
+    <Project Path="samples/TemplateFrame.Demo.Excel.Simple/TemplateFrame.Demo.Excel.Simple.csproj" />
+  </Folder>
 </Solution>
