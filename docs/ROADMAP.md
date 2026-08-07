@@ -60,16 +60,17 @@
 **目标**：把「契约 → 生成 → 定位 → 填充 → 回读 → 校验」复制到 `.xlsx`。
 
 ### 范围
-1. 选型（决策补记 DESIGN §9）：**ClosedXML（MIT，基于 DocumentFormat.OpenXml，与 Word 插件同族）**；备选 NPOI；不用 EPPlus（商用收费）
-2. 定位机制（本迭代内定，补记 DESIGN §9）：候选 A）命名区域（defined names）`tag → cell`；B）单元格批注；C）隐藏映射 Sheet。**推荐 A**：对用户无感、标准机制
-3. `ExcelTemplateBuilder`：页面设置 / 列宽 / 单元格格式 / 合并单元格 / 图片 / 表格（表头 + 示例行）
-4. `ExcelTemplateEngine`：生成 / `Validate` / `Fill`（文本写单元格保留格式、图片按单元格锚定、表格行复制后重新打标）/ `Parse`（含表格多行回读）
-5. `test/TemplateFrame.Excel.Tests` + `src/TemplateFrame.Excel/README.md`（能力说明）+ 打包准备（XML doc / nuspec）
-6. Demo（可后置）：Excel 版单据示例，复用送货单数据
+1. 选型（决策补记 DESIGN §9）：**DocumentFormat.OpenXml 直写**（与 Word 插件同族，不引入新第三方依赖）；不用 EPPlus（商用收费）；未来如需 MiniExcel，另建独立插件 `TemplateFrame.Excel.MiniExcel`（许可按 Apache-2.0）
+2. 定位机制（本迭代内定，补记 DESIGN §9）：**命名区域（defined names）**：标量 `TF_<Key>` → 单元格；表格每列 `TF_<TableKey>_<ColumnKey>` 指向示例行；表格克隆后**范围重指**到数据块（如 `$C$5:$C$9`）+ 表格下方命名区域/合并区域整体下移 (N-1) 行
+3. `ExcelTemplateBuilder`：页面设置（A4/A5、横/纵、毫米边距）/ 列宽 / 单元格格式（字体/边框/对齐/数字格式）/ 合并单元格 / 图片（单元格锚定）/ 表格（表头 + 示例行）/ 命名区域写入
+4. `ExcelTemplateEngine`：`Validate`（Missing/WrongType/Ambiguous/Extra）/ `Fill`（文本写**类型化值 + 数字格式**，日期存序列号；图片按锚定格替换 part + 关系，尺寸继承占位；表格行克隆后范围重指）/ `Parse`（标量 + 表格多行 + 图片字节）
+5. `test/TemplateFrame.Excel.Tests` + `src/TemplateFrame.Excel/README.md`（能力说明）+ 打包准备（XML doc / nuspec，版本 1.0.0）
+6. Demo：送货单 Excel 版（复用 `DeliveryOrderData`，**本轮一起做**；拆两个提交：先引擎 + 单测，后 Demo）
 
 ### 验收
-- 生成 → 填充 → 回读闭环；表格行复制后 tag 定位唯一
+- 生成 → 填充 → 回读闭环；表格行复制后命名区域范围唯一且下方元素整体下移
 - `dotnet build TemplateFrame.slnx && dotnet test` 全绿；`dotnet pack` 出 `TemplateFrame.Excel.1.0.0.nupkg`
+- `dotnet run --project samples/TemplateFrame.Demo.Excel` 依次输出：模板 / 收货前 / 收货后 / 回读数据
 
 ### 风险
 - Excel 无内容控件（SDT），定位机制需自定并写进设计文档

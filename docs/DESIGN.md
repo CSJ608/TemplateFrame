@@ -328,8 +328,8 @@ TemplateFrame/
 | WPS 兼容性 | WPS 对 SDT 支持不完整 | 第一版只支持 MS Office；WPS 用独立插件（`TemplateFrame.Wps`）未来支持 |
 | `w:id` 唯一性 | 克隆表格行后 id 会重复 | 克隆时必须重发唯一 `w:id` |
 | 标签模板 | 其他工具定义的标签模板 | 契约模型预留 `Label` 元素，插件化支持 |
-| Excel 渲染库许可 | Excel 场景不要用 EPPlus（商用收费） | Excel 插件用 ClosedXML（MIT，优先）/ NPOI（备选）（迭代 8 定） |
-| Excel 定位机制 | Excel 无内容控件（SDT），需自定义 tag 定位 | 迭代 8 内定：候选 命名区域（推荐）/ 批注 / 隐藏映射 Sheet |
+| Excel 渲染库许可 | Excel 场景不要用 EPPlus（商用收费） | Excel 插件用 **DocumentFormat.OpenXml 直写**（与 Word 插件同族，不引入新第三方依赖）（迭代 8 定）；未来如需 MiniExcel，独立插件 `TemplateFrame.Excel.MiniExcel`，许可按 Apache-2.0 |
+| Excel 定位机制 | Excel 无内容控件（SDT），需自定义 tag 定位 | **命名区域（defined names）**：标量 `TF_<Key>` → 单元格；表格列 `TF_<TableKey>_<ColumnKey>` 指向示例行；表格克隆后范围重指到数据块 + 表格下方命名区域/合并区域整体下移（迭代 8 定） |
 | PDF 实现路径 | PDF 无内容控件，表格行复制难 | 迭代 9 内定：倾向 Builder 版式模型 + 整页重排（与 Word/Excel 一致）；AcroForm 仅适用静态字段 |
 | PDF 渲染库许可 | iText 7（AGPL）/ QuestPDF（社区版限制） | PdfSharp 6（MIT）优先（迭代 9 定） |
 | 图片渲染库许可 | System.Drawing.Common 仅 Windows | SkiaSharp（MIT，跨平台）优先（迭代 10 定） |
@@ -340,7 +340,7 @@ TemplateFrame/
 ## 10. 未决问题
 
 1. 一个文档里出现多个同结构表格（多个明细区）时，表的锚点规则如何定义。
-2. Excel 插件第一版的范围（仅填充 or 填充+回读）→ 迭代 8 决策（倾向一起）。
+2. ~~Excel 插件第一版的范围（仅填充 or 填充+回读）~~ → **迭代 8 决策：填充 + 回读一起做**（已落地）。
 3. 标签模板（`Label`）的具体来源工具与格式，等有真实需求再定。
 4. 自动映射器（`DataPath`）：目前由业务服务手写 `MapToData` / `MapFromData`；是否补自动映射待定。
 5. PDF 插件实现路径（AcroForm 表单域 vs Builder 版式重排）→ 迭代 9 决策（倾向重排）。
