@@ -2,7 +2,7 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
-## [Unreleased]
+## [1.0.3] - 2026-08-07
 
 ### 新增
 - 迭代 9：基础包自动映射器 `src/TemplateFrame/Mapping/DataPathMapper.cs`——契约元素声明 `DataPath` 后自动完成 TData ⇄ FillData 双向映射（标量/图片单级路径 + 表格「集合属性 + 列属性」两级路径；类型转换含 double→decimal/int、字符串日期按 `Format` 解析、可空字段；按（契约, 数据类型）缓存属性解析，路径缺失/重复映射/表格指向非集合 首次即抛清晰错误）

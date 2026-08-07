@@ -327,7 +327,7 @@ TemplateFrame/
 **发布说明**：
 - 推送 `v*` tag 即触发 `release.yml`（GitHub Release）与 `publish-nuget.yml`（OIDC 推送 nuget.org）；
 - NuGet 发布依赖一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
-- 已发布版本：v1.0.0 / v1.0.1 / v1.0.2（v1.0.2 含迭代 7 + 迭代 8：Excel 插件 / Excel.Simple 插件与修订）。
+- 已发布版本：v1.0.0 / v1.0.1 / v1.0.2 / v1.0.3（v1.0.3 含迭代 9：自动映射 + SimpleExcel 强类型 + 各插件自动映射 Demo + DEMOS.md；v1.0.2 含迭代 7 + 迭代 8：Excel 插件 / Excel.Simple 插件与修订）。
 
 ---
 
