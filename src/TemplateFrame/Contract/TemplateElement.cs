@@ -2,6 +2,7 @@ namespace TemplateFrame.Contract;
 
 /// <summary>
 /// 契约元素基类：描述"这个场景有哪些元素"（运行时描述，可序列化、可版本化）。
+/// <para>English: Base class of contract elements — a runtime description of the elements of a scene.</para>
 /// <see cref="Key"/> 是全局唯一键，对应 Word 内容控件的 tag。
 /// </summary>
 public abstract record TemplateElement

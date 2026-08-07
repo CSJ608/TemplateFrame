@@ -7,6 +7,7 @@ namespace TemplateFrame.Engine;
 
 /// <summary>
 /// 引擎抽象：把"契约 + 数据形状"翻译成具体宿主格式（如 .docx）的操作。
+/// <para>English: Engine abstraction — translates a contract + data shape into a host format (e.g., .docx).</para>
 /// 由插件（如 TemplateFrame.Word）实现，业务场景服务通过泛型基类调用。
 /// 构建（BuildInitialTemplate）不再由引擎托管：业务服务声明 `TemplateService&lt;TData, TBuilder&gt;`，
 /// 用 <see cref="CreateBuilder"/> 拿到具体插件构建器实例后自行组装并 Save。

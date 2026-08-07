@@ -10,6 +10,7 @@ namespace TemplateFrame.Mapping;
 
 /// <summary>
 /// 自动映射器（迭代 9）：按契约元素的 <see cref="TemplateElement.DataPath"/> 反射完成 TData ⇄ FillData 双向映射。
+/// <para>English: Auto-mapper — reflects TData ⇄ FillData by the DataPath declared on contract elements.</para>
 /// 显式 DataPath 为主：标量 / 图片用单级属性路径，表格用「集合属性 + 列属性」两级路径。
 /// 未声明 DataPath 的元素不参与自动映射（可对个别字段手写映射，或重写业务服务的映射方法）。
 /// 属性解析按（契约, 数据类型）缓存，只在首次映射时反射一次。

@@ -10,7 +10,7 @@ public enum TemplateValidationSeverity
     Warning,
 }
 
-/// <summary>单条校验问题。</summary>
+/// <summary>单条校验问题。<para>English: A single validation issue.</para></summary>
 public sealed record TemplateValidationIssue
 {
     /// <summary>问题类别。</summary>

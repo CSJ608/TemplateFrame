@@ -10,6 +10,7 @@ namespace TemplateFrame.Services;
 
 /// <summary>
 /// 业务场景服务的泛型基类：业务服务继承它并声明所用的具体插件构建器类型
+/// <para>English: Generic base class for business scene services — provides strongly-typed Build / Validate / Fill / Parse.</para>
 /// （如 <c>TemplateService&lt;DeliveryOrderData, WordTemplateBuilder&gt;</c>），
 /// 在无参数的 <see cref="BuildInitialTemplate"/> 里直接用类型化的 <see cref="Builder"/> 实例组装版式，
 /// 即可获得强类型 <c>BuildInitialTemplateFile / Validate / ValidateData / Fill / Parse</c>。

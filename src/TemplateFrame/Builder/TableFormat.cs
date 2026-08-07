@@ -15,6 +15,7 @@ public enum CellVerticalAlignment
 
 /// <summary>
 /// 表格格式（格式无关）：表头/单元格文本格式、是否有边框、表格整体对齐、单元格垂直对齐、显式列宽。
+/// <para>English: Format-agnostic table format — header/cell text, borders, alignment, column widths.</para>
 /// 由具体插件构建器映射到宿主格式。
 /// </summary>
 public sealed record TableFormat

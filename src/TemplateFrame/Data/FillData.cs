@@ -2,6 +2,7 @@ namespace TemplateFrame.Data;
 
 /// <summary>
 /// 数据形状：与插件无关的弱类型数据容器，替代 TemplateFiller 的 ISource 路径反射。
+/// <para>English: The plugin-agnostic weakly-typed data shape (scalars + table rows).</para>
 /// Word 内容控件 tag 是扁平键，嵌套对象在业务服务映射时展平（如 Customer.Name → tag CustomerName）。
 /// </summary>
 public sealed class FillData

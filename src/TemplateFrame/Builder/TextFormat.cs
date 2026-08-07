@@ -15,6 +15,7 @@ public enum TextAlignment
 
 /// <summary>
 /// 文本格式（格式无关，字体名/字号 pt/加粗/段落对齐）。
+/// <para>English: Format-agnostic text format (font name / size pt / bold / paragraph alignment).</para>
 /// 由具体插件构建器映射到宿主格式（如 Word 的 rFonts/FontSize/jc）。
 /// </summary>
 public sealed record TextFormat

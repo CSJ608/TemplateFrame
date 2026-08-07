@@ -3,6 +3,7 @@ namespace TemplateFrame.Contract;
 /// <summary>
 /// 契约 = 元素清单（不是服务，也不是版式）。可序列化、可版本化；
 /// 存模板时连同契约版本一起存，支撑存量模板的软校验（Drifted）。
+/// <para>English: A contract is the element list of a scene (runtime, serializable, versionable).</para>
 /// </summary>
 public sealed record TemplateContract
 {

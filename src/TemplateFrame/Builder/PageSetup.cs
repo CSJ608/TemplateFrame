@@ -22,6 +22,7 @@ public enum PageOrientation
 
 /// <summary>
 /// 页面设置（格式无关）：纸张规格 + 方向 + 可选边距（毫米）。
+/// <para>English: Format-agnostic page setup — paper size, orientation, optional margins (mm).</para>
 /// 由具体插件构建器映射到宿主单位（如 Word 的 twips）。
 /// </summary>
 public sealed record PageSetup

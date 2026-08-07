@@ -1,6 +1,6 @@
 namespace TemplateFrame.Contract;
 
-/// <summary>文本元素：单个标量字段。</summary>
+/// <summary>文本元素：单个标量字段。<para>English: A text element — a single scalar field.</para></summary>
 public sealed record TextElement : TemplateElement
 {
     /// <summary>值类型：string / decimal / DateTime / bool 等（填充时按此转换并格式化）。</summary>
