@@ -4,7 +4,14 @@
 
 ## [Unreleased]
 
+### 新增
+- 迭代 12：**国际化（i18n）**——运行时消息资源化（中文中性默认 + en 卫星按 CurrentUICulture 自动）：基础包与 Word / Excel / Excel.Simple 的校验消息 + 异常消息全部迁移到资源；`TemplateValidationIssue` 增加 `MessageKey` / `MessageArgs`（公共 API 向后兼容），`Message` 由资源生成
+
+### 变更
+- 迭代 12：测试断言从中文消息文本改为文化中立锚点（Code/MessageKey/标识符）；新增中英双语用例（LocalizationTests × 4，共 151 用例）
+
 ### 文档
+- 迭代 12：新增 `README.en.md`（英文版，主 README 保持中文并加语言入口）；基础包公共 API 补英文摘要（XML doc 双语）
 - 迭代 10（PDF 插件 `TemplateFrame.Pdf`）/ 迭代 11（图片插件 `TemplateFrame.Image`）**搁置**（2026-08-07 用户决定暂时放弃）；docs/ROADMAP.md 状态总览与对应小节、docs/DESIGN.md §7 迭代计划与 §10 未决问题同步标记
 - 迭代 12 规划：**国际化（i18n）**——运行时消息（校验 + 异常）中英双语：中文为中性文化默认（行为不变）、英文作 en 卫星资源按 `CurrentUICulture` 自动生效；`TemplateValidationIssue` 增加 `MessageKey`/`MessageArgs`；文档内容（待填充/页码/默认字体）保持中文、不本地化；值格式化继续 `InvariantCulture`（ROADMAP/DESIGN/CHANGELOG 同步）
 

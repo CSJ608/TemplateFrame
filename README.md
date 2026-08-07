@@ -3,6 +3,8 @@
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.svg)](https://www.nuget.org/packages/TemplateFrame)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame)](https://www.nuget.org/stats/packages/TemplateFrame?groupby=Version)
 
+> 中文 · [English](README.en.md)
+
 一个"模板 ⇄ 数据"契约引擎：用代码声明模板契约（元素清单），业务服务声明所用的具体插件构建器后组装初始模板；用户按规则修改样式后上传，包负责校验是否匹配契约；随后用强类型数据填充，或从已填充的模板回读数据。
 
 - **三层架构**：基础包 `TemplateFrame`（通用、稳定）+ 插件 `TemplateFrame.Word`（MS Word）/ `TemplateFrame.Excel`（MS Excel，灵活版式）/ `TemplateFrame.Excel.Simple`（MS Excel，简单表格）+ 业务场景服务（强类型，业务应用内声明）

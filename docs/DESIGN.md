@@ -309,7 +309,7 @@ TemplateFrame/
 | 已归档 | **9** | 自动映射（DataPath）+ SimpleExcel 强类型接入 | ✅ 完成 |
 | 搁置 | **10** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | 搁置 | **11** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
-| 进行中 | **12** | 国际化（i18n）：运行时消息中英双语（中文默认 + en 卫星按 CurrentUICulture 自动） | ⏳ 下一步 |
+| 已归档 | **12** | 国际化（i18n）：运行时消息中英双语（中文默认 + en 卫星按 CurrentUICulture 自动） | ✅ 完成（2026-08-08） |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
@@ -353,7 +353,7 @@ TemplateFrame/
 | 自动映射（`DataPath`） | `DataPath` 属性自迭代 1 声明后一直未参与引擎逻辑；业务服务被迫手写 `MapToData`/`MapFromData` | 基础包新增 `DataPathMapper`（反射 + 按（契约, 数据类型）缓存）：显式 `DataPath` 为主，标量/图片单级路径 + 表格「集合属性 + 列属性」两级路径；不做「无 DataPath 按属性名推断」回退；嵌套路径（`Customer.Name`）本轮不做、列为后续项；`TemplateService` 默认走自动映射并保留虚方法覆盖；路径缺失/重复映射/表格指向非集合 首次即抛清晰错误（迭代 9 定） |
 | SimpleExcel 强类型接入 | Simple 是纯静态工具、不接契约，`Read` 只返回 `object?` 行，无法像 Word 那样 `service.Parse` 出强类型 | Simple 保持最小形态：新增契约感知静态 API `SimpleExcelContract`（Write/Read/Validate，基于 `FillData`）+ 轻量服务基类 `SimpleExcelTemplateService<TData>`（无 Builder/Engine，复用基础包自动映射）；契约 = 单个 `TableElement`；表头按 DisplayName → Key 匹配、缺列 Validate 报 Missing / Parse 补 null；现有 `SimpleExcelTable` API 保留兼容（迭代 9 定） |
 | 渲染验证 | 本机无 Word/LibreOffice 时无法渲染 | 测试以 OOXML 结构断言为主（SDT 清单、行数、blip embed） |
-| 国际化（i18n） | 库的运行时消息（校验 + 异常）是中文硬编码，无法适配英文用户；文档内容（待填充/页码/默认字体）是生成文档的一部分、被回读依赖，不能跟随文化变化 | **中文为中性文化（默认，行为不变）**；英文作 en 卫星资源，按 `CurrentUICulture` 自动生效、回退中文；`TemplateValidationIssue` 增加 `MessageKey`/`MessageArgs`（公共 API 不变），`Message` 由资源生成；异常消息一并迁移；文档内容保持中文、不配置、不本地化；值格式化继续 `InvariantCulture`（确定性输出）（迭代 12 定） |
+| 国际化（i18n） | 库的运行时消息（校验 + 异常）是中文硬编码，无法适配英文用户；文档内容（待填充/页码/默认字体）是生成文档的一部分、被回读依赖，不能跟随文化变化 | **中文为中性文化（默认，行为不变）**；英文作 en 卫星资源，按 `CurrentUICulture` 自动生效、回退中文；`TemplateValidationIssue` 增加 `MessageKey`/`MessageArgs`（公共 API 不变），`Message` 由资源生成；异常消息一并迁移；文档内容保持中文、不配置、不本地化；值格式化继续 `InvariantCulture`（确定性输出）（迭代 12 定，已落地） |
 
 ---
 
