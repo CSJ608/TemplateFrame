@@ -141,7 +141,7 @@ dotnet run --project samples/TemplateFrame.Demo.Excel
 产物默认输出到系统临时目录 `%TEMP%\TemplateFrame.Demo.Excel`，生成 Excel-DeliveryOrder-template / -pre / -post 三份 xlsx，同样演示 生成 → 校验 → 填充（收货前/收货后）→ 回读 完整闭环。
 
 `src/TemplateFrame.Excel.Simple` 提供**简化 Excel 插件**：只支持「标题行 + 数据行」的表格导入/导出（`SimpleExcel.Write` / `SimpleExcel.Read`），
-适合大多数列表型数据的导入导出，不需要命名区域 / 合并 / 图片 / 页面设置（详见 [插件 README](src/TemplateFrame.Excel.Simple/README.md)）。
+用命名区域（默认 `TF_Table`）标记表格位置，适合大多数列表型数据的导入导出；不涉及合并 / 图片 / 页面设置（详见 [插件 README](src/TemplateFrame.Excel.Simple/README.md)）。
 
 `samples/TemplateFrame.Demo.Excel.Simple` 提供**物料基础数据 Demo**（`SimpleExcel` 模板 → 填充 → 反解析 完整链路，表头：编码 / 名称 / 基本单位 / 包装规格 / 型号）：
 

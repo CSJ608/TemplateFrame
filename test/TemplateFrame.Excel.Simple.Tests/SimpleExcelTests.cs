@@ -112,4 +112,98 @@ public sealed class SimpleExcelTests
         Assert.Equal("2", loaded.Rows[0][1]);
         Assert.Null(loaded.Rows[0][2]);
     }
+
+    [Fact]
+    public void Write_DefinesTableNamedRange()
+    {
+        var table = new SimpleExcelTable { Headers = ["A", "B"], Rows = [["1", "x"], ["2", "y"]] };
+        using var stream = new MemoryStream();
+        SimpleExcel.Write(stream, table, new SimpleExcelOptions { SheetName = "物料清单" });
+        stream.Position = 0;
+
+        using var document = DocumentFormat.OpenXml.Packaging.SpreadsheetDocument.Open(stream, false);
+        var definedName = document.WorkbookPart!.Workbook!.DefinedNames!
+            .Elements<DocumentFormat.OpenXml.Spreadsheet.DefinedName>().First();
+        Assert.Equal(SimpleExcel.DefaultTableName, definedName.Name!.Value);
+        Assert.Equal("'物料清单'!$A$1:$B$3", definedName.Text);
+    }
+
+    [Fact]
+    public void Read_LocatesTableByNamedRange_NotAtA1()
+    {
+        var table = new SimpleExcelTable { Headers = ["编码", "名称"], Rows = [["M1", "物料一"], ["M2", "物料二"]] };
+        using var stream = new MemoryStream();
+        SimpleExcel.Write(stream, table, new SimpleExcelOptions { SheetName = "物料", StartCell = "C5" });
+        stream.Position = 0;
+
+        var loaded = SimpleExcel.Read(stream);
+
+        Assert.Equal(["编码", "名称"], loaded.Headers);
+        Assert.Equal(2, loaded.Rows.Count);
+        Assert.Equal("M1", loaded.Rows[0][0]);
+        Assert.Equal("物料一", loaded.Rows[0][1]);
+        Assert.Equal("M2", loaded.Rows[1][0]);
+    }
+
+    [Fact]
+    public void Read_WithCustomTableName()
+    {
+        var table = new SimpleExcelTable { Headers = ["A"], Rows = [["1"]] };
+        using var stream = new MemoryStream();
+        SimpleExcel.Write(stream, table, new SimpleExcelOptions { SheetName = "物料", StartCell = "B2", TableName = "TF_Materials" });
+        stream.Position = 0;
+
+        var loaded = SimpleExcel.Read(stream, "TF_Materials");
+
+        Assert.Equal(["A"], loaded.Headers);
+        Assert.Equal("1", loaded.Rows[0][0]);
+    }
+
+    [Fact]
+    public void Read_FallsBackToFirstNonEmptyRow_WithoutNamedRange()
+    {
+        // 模拟无命名区域的外部文件：前两行空白，第 3 行起是表头 + 数据
+        using var stream = new MemoryStream();
+        using (var document = DocumentFormat.OpenXml.Packaging.SpreadsheetDocument.Create(
+            stream, DocumentFormat.OpenXml.SpreadsheetDocumentType.Workbook))
+        {
+            var wbp = document.AddWorkbookPart();
+            wbp.Workbook = new DocumentFormat.OpenXml.Spreadsheet.Workbook(new DocumentFormat.OpenXml.Spreadsheet.Sheets());
+            var wsp = wbp.AddNewPart<DocumentFormat.OpenXml.Packaging.WorksheetPart>();
+            wsp.Worksheet = new DocumentFormat.OpenXml.Spreadsheet.Worksheet(new DocumentFormat.OpenXml.Spreadsheet.SheetData());
+            wbp.Workbook.Sheets!.Append(new DocumentFormat.OpenXml.Spreadsheet.Sheet
+            {
+                Id = wbp.GetIdOfPart(wsp),
+                SheetId = 1,
+                Name = "Sheet1",
+            });
+            var sd = wsp.Worksheet.GetFirstChild<DocumentFormat.OpenXml.Spreadsheet.SheetData>()!;
+            for (var r = 1; r <= 4; r++)
+            {
+                var row = new DocumentFormat.OpenXml.Spreadsheet.Row { RowIndex = (uint)r };
+                var cols = r == 3 ? new[] { "编码", "名称" } : r == 4 ? new[] { "M1", "物料一" } : Array.Empty<string>();
+                foreach (var (text, c) in cols.Select((t, i) => (t, i)))
+                {
+                    row.Append(new DocumentFormat.OpenXml.Spreadsheet.Cell
+                    {
+                        CellReference = ((char)('A' + c)) + r.ToString(),
+                        DataType = DocumentFormat.OpenXml.Spreadsheet.CellValues.InlineString,
+                        InlineString = new DocumentFormat.OpenXml.Spreadsheet.InlineString(
+                            new DocumentFormat.OpenXml.Spreadsheet.Text(text)),
+                    });
+                }
+                sd.Append(row);
+            }
+            document.Save();
+            stream.Position = 0;
+        }
+
+        var loaded = SimpleExcel.Read(stream);
+
+        Assert.Equal(["编码", "名称"], loaded.Headers);
+        Assert.Single(loaded.Rows);
+        Assert.Equal("M1", loaded.Rows[0][0]);
+        Assert.Equal("物料一", loaded.Rows[0][1]);
+    }
 }
+

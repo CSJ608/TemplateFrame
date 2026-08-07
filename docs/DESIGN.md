@@ -344,7 +344,7 @@ TemplateFrame/
 | 图片渲染库许可 | System.Drawing.Common 仅 Windows | SkiaSharp（MIT，跨平台）优先（迭代 10 定） |
 | Excel 页面设置 | Word 面向打印（纸张/方向/边距），Excel 是"网格规整"型版式 | Excel 插件**不提供页面设置**；宽度由正文列数决定，用合并单元格排版（迭代 8 修订） |
 | Excel drawing 兼容 | OpenXML SDK 的 `A.NonVisualDrawingProperties` 序列化为 `a:cNvPr`，Excel 打开报"sheet1.xml 有 XML 错误"并移除整张 drawing（图片不可见） | drawing 的 `cNvPr` 必须用 `xdr`（spreadsheetDrawing）命名空间，与 Excel 自产一致；图片 part 归属 DrawingsPart 的 rels（迭代 8 修订） |
-| Excel 插件拆分 | "灵活版式（单据/复杂表）"与"简单表格（标题行+数据行，大多数导入导出）"是两种需求 | `TemplateFrame.Excel` 保留灵活版式；新增 `TemplateFrame.Excel.Simple`（只做 Write/Read，无命名区域/合并/图片/页面设置）（迭代 8 修订） |
+| Excel 插件拆分 | "灵活版式（单据/复杂表）"与"简单表格（标题行+数据行，大多数导入导出）"是两种需求 | `TemplateFrame.Excel` 保留灵活版式；新增 `TemplateFrame.Excel.Simple`（只做 Write/Read，用命名区域（默认 `TF_Table`）标记表格位置，无合并/图片/页面设置）（迭代 8 修订） |
 | 渲染验证 | 本机无 Word/LibreOffice 时无法渲染 | 测试以 OOXML 结构断言为主（SDT 清单、行数、blip embed） |
 
 ---

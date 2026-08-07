@@ -3,20 +3,20 @@
 TemplateFrame 的**简化 Excel 插件**：只支持「标题行 + 数据行」的表格导入/导出。
 
 大多数 Excel 导入/导出的形态就是"标题行，然后一列一路下去"。对这种简单需求，不需要
-[TemplateFrame.Excel](../TemplateFrame.Excel/README.md) 的命名区域 / 合并单元格 / 图片 / 版式能力——
+[TemplateFrame.Excel](../TemplateFrame.Excel/README.md) 的合并单元格 / 图片 / 版式能力——
 两个插件把两种不同的需求拆开（迭代 8 修订）：
 
 | 插件 | 定位 | 能力 |
 |---|---|---|
 | `TemplateFrame.Excel` | 灵活版式（单据 / 复杂表） | 命名区域定位、合并、图片、表格克隆、Validate/Fill/Parse |
-| `TemplateFrame.Excel.Simple` | 简单表格（标题行 + 数据行） | 仅 Write / Read，无页面设置、无合并、无图片 |
+| `TemplateFrame.Excel.Simple` | 简单表格（标题行 + 数据行） | Write / Read，命名区域标记表格位置（默认 `TF_Table`），无页面设置、无合并、无图片 |
 
 ## 使用
 
 ```csharp
 using TemplateFrame.Excel.Simple;
 
-// 导出
+// 导出（默认从 A1 写、命名区域 TF_Table 标记表格区域；可用 StartCell / TableName 自定义）
 var table = new SimpleExcelTable
 {
     Headers = ["物料代码", "物料名称", "数量"],
@@ -29,14 +29,15 @@ var table = new SimpleExcelTable
 using var stream = File.Create("items.xlsx");
 SimpleExcel.Write(stream, table, new SimpleExcelOptions { SheetName = "物料清单" });
 
-// 导入
+// 导入（优先按命名区域 TF_Table 定位表头；无命名区域时回退"第一个非空行"）
 using var input = File.OpenRead("items.xlsx");
 var loaded = SimpleExcel.Read(input); // Headers + Rows（string / bool / DateTime / double / null）
 ```
 
 - 单元格值支持：`string` / `bool` / `DateTime`（写为日期序列号 + `yyyy-mm-dd`）/ 数值 / `null`。
-- 导入时第一非空行视为标题行，其后为数据行；全空行跳过；数字按 `double` 返回，日期格式单元格按 `DateTime` 返回。
-- 不提供页面设置 / 命名区域 / 合并单元格 / 图片——保持"简单表格"的最小形态。
+- **命名区域定位**：`Write` 把表格区域写成一个命名区域（默认 `TF_Table` → `'物料清单'!$A$1:$C$3`，可用 `TableName` 自定义、`StartCell` 指定起始格）；`Read` 优先按它定位表头，找不到再回退"第一个非空行"。
+- 数字按 `double` 返回，日期格式单元格按 `DateTime` 返回；全空行跳过、缺列补 null。
+- 不提供页面设置 / 合并单元格 / 图片——保持"简单表格"的最小形态。
 
 ## Demo
 
