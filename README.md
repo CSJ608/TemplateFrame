@@ -5,9 +5,9 @@
 
 一个"模板 ⇄ 数据"契约引擎：用代码声明模板契约（元素清单），业务服务声明所用的具体插件构建器后组装初始模板；用户按规则修改样式后上传，包负责校验是否匹配契约；随后用强类型数据填充，或从已填充的模板回读数据。
 
-- **三层架构**：基础包 `TemplateFrame`（通用、稳定）+ 插件 `TemplateFrame.Word`（MS Word）/ `TemplateFrame.Excel`（MS Excel）+ 业务场景服务（强类型，业务应用内声明）
+- **三层架构**：基础包 `TemplateFrame`（通用、稳定）+ 插件 `TemplateFrame.Word`（MS Word）/ `TemplateFrame.Excel`（MS Excel，灵活版式）/ `TemplateFrame.Excel.Simple`（MS Excel，简单表格）+ 业务场景服务（强类型，业务应用内声明）
 - **四个操作**：`BuildInitialTemplateFile` / `Validate` / `Fill`（强类型）/ `Parse`（强类型回读）
-- **插件化**：已支持 Word / Excel；未来 WPS Word、标签模板
+- **插件化**：已支持 Word / Excel（灵活版式）/ Excel.Simple（标题行+数据行的简单表格）；未来 WPS Word、标签模板
 
 设计文档见 [docs/DESIGN.md](docs/DESIGN.md)，迭代路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)，发布说明见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
 
@@ -132,13 +132,16 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 产物默认输出到系统临时目录 `%TEMP%\TemplateFrame.Demo.Word`（可用命令行参数指定目录），生成 Word-DeliveryOrder-template / Word-DeliveryOrder-pre / Word-DeliveryOrder-post 三份 docx（输出目录与文件均带 Word 标识，体现这是 Word 插件 Demo）。
 二维码由 Demo 侧用 QRCoder 生成 PNG、公司LOGO 由 Demo 纯代码生成占位 PNG，填充进页眉控件（框架负责图片替换，不负责生成）。
 
-`samples/TemplateFrame.Demo.Excel` 提供**送货单 Excel 版**（`DeliveryOrderExcelTemplateService`，复用同一契约与 `FillData` 映射，A5 横版 / 命名区域定位 / 标题合并 / 9 列明细 / LOGO+二维码单元格锚定）：
+`samples/TemplateFrame.Demo.Excel` 提供**送货单 Excel 版**（`DeliveryOrderExcelTemplateService`，复用同一契约与 `FillData` 映射，无页面设置：3×9 网格版头（左 LOGO / 中标题 / 右二维码）/ 9 列明细 / 命名区域定位）：
 
 ```bash
 dotnet run --project samples/TemplateFrame.Demo.Excel
 ```
 
 产物默认输出到系统临时目录 `%TEMP%\TemplateFrame.Demo.Excel`，生成 Excel-DeliveryOrder-template / -pre / -post 三份 xlsx，同样演示 生成 → 校验 → 填充（收货前/收货后）→ 回读 完整闭环。
+
+`src/TemplateFrame.Excel.Simple` 提供**简化 Excel 插件**：只支持「标题行 + 数据行」的表格导入/导出（`SimpleExcel.Write` / `SimpleExcel.Read`），
+适合大多数列表型数据的导入导出，不需要命名区域 / 合并 / 图片 / 页面设置（详见 [插件 README](src/TemplateFrame.Excel.Simple/README.md)）。
 
 ## 构建与测试
 
@@ -152,6 +155,8 @@ dotnet test  TemplateFrame.slnx
 ```bash
 dotnet pack src/TemplateFrame/TemplateFrame.csproj -c Release -o artifacts
 dotnet pack src/TemplateFrame.Word/TemplateFrame.Word.csproj -c Release -o artifacts
+dotnet pack src/TemplateFrame.Excel/TemplateFrame.Excel.csproj -c Release -o artifacts
+dotnet pack src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj -c Release -o artifacts
 ```
 
 包内置 XML 文档与 README，符号包（snupkg）一并输出；版本号约定与发布流程见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。

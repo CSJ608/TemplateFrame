@@ -271,9 +271,18 @@ TemplateFrame/
 │  ├─ WordTemplateValidator.cs      # Validate
 │  ├─ WordTemplateFiller.cs         # Fill：文本/图片/表格行
 │  └─ WordTemplateParser.cs         # Parse：回读
+├─ src/TemplateFrame.Excel/         # 插件：MS Excel 灵活版式（命名区域定位；不提供页面设置）
+│  ├─ ExcelTemplateBuilder.cs       # 组装带命名区域的 .xlsx（列宽/格式/合并/表格/图片锚定）
+│  ├─ ExcelNamedRangeLocator.cs     # 按命名区域定位（TF_ 前缀）
+│  ├─ ExcelTemplateValidator.cs / ExcelTemplateFiller.cs / ExcelTemplateParser.cs
+│  └─ ExcelDrawingHelper.cs         # drawing 强类型操作（xdr:cNvPr 命名空间，兼容 Excel）
+├─ src/TemplateFrame.Excel.Simple/  # 插件：MS Excel 简单表格（标题行 + 数据行，Write/Read）
 ├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射）
 ├─ test/TemplateFrame.Word.Tests/   # Word 插件测试：生成→校验→填充→回读→断言
+├─ test/TemplateFrame.Excel.Tests/  # Excel 灵活版式插件测试
+├─ test/TemplateFrame.Excel.Simple.Tests/ # Excel 简单表格插件测试
 ├─ samples/TemplateFrame.Demo.Word/ # 控制台端到端 demo（Word 插件送货单，含 DeliveryOrderTemplateService 示例场景服务）
+├─ samples/TemplateFrame.Demo.Excel/# 控制台端到端 demo（Excel 插件送货单：3×9 网格版头 / 9 列明细）
 ├─ docs/DESIGN.md                   # 本文档
 ├─ docs/PUBLISHING.md               # 发布指南（参考 StreamFrame，暂不启用）
 ├─ CHANGELOG.md
@@ -293,7 +302,7 @@ TemplateFrame/
 |---|---|---|---|
 | 已归档 | 0–6 | 仓库骨架 → 契约引擎 → Word 插件（生成/校验/填充/回读）→ 健壮性 → Demo → 自动化发布 | ✅ 完成（v1.0.0 / v1.0.1 已发布） |
 | 已归档 | **7** | Demo 收尾：Word 插件标识 + 回读示例 | ✅ 完成 |
-| 已归档 | **8** | Excel 插件 `TemplateFrame.Excel`（OpenXML 直写 + 命名区域定位） | ✅ 完成 |
+| 已归档 | **8** | Excel 插件 `TemplateFrame.Excel`（OpenXML 直写 + 命名区域定位；修订：不提供页面设置 + drawing 兼容修复 + 拆分 `TemplateFrame.Excel.Simple` 简单表格插件） | ✅ 完成（含修订） |
 | 进行中 | **9** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏳ 下一步 |
 | 未来 | **10** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | 🔮 |
 
@@ -333,6 +342,9 @@ TemplateFrame/
 | PDF 实现路径 | PDF 无内容控件，表格行复制难 | 迭代 9 内定：倾向 Builder 版式模型 + 整页重排（与 Word/Excel 一致）；AcroForm 仅适用静态字段 |
 | PDF 渲染库许可 | iText 7（AGPL）/ QuestPDF（社区版限制） | PdfSharp 6（MIT）优先（迭代 9 定） |
 | 图片渲染库许可 | System.Drawing.Common 仅 Windows | SkiaSharp（MIT，跨平台）优先（迭代 10 定） |
+| Excel 页面设置 | Word 面向打印（纸张/方向/边距），Excel 是"网格规整"型版式 | Excel 插件**不提供页面设置**；宽度由正文列数决定，用合并单元格排版（迭代 8 修订） |
+| Excel drawing 兼容 | OpenXML SDK 的 `A.NonVisualDrawingProperties` 序列化为 `a:cNvPr`，Excel 打开报"sheet1.xml 有 XML 错误"并移除整张 drawing（图片不可见） | drawing 的 `cNvPr` 必须用 `xdr`（spreadsheetDrawing）命名空间，与 Excel 自产一致；图片 part 归属 DrawingsPart 的 rels（迭代 8 修订） |
+| Excel 插件拆分 | "灵活版式（单据/复杂表）"与"简单表格（标题行+数据行，大多数导入导出）"是两种需求 | `TemplateFrame.Excel` 保留灵活版式；新增 `TemplateFrame.Excel.Simple`（只做 Write/Read，无命名区域/合并/图片/页面设置）（迭代 8 修订） |
 | 渲染验证 | 本机无 Word/LibreOffice 时无法渲染 | 测试以 OOXML 结构断言为主（SDT 清单、行数、blip embed） |
 
 ---

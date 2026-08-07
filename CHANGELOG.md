@@ -8,15 +8,20 @@
 - 迭代 8：Excel 插件 `src/TemplateFrame.Excel`（net8.0，DocumentFormat.OpenXml 直写）——`ExcelTemplateBuilder`（命名区域写入 / 页面设置 / 列宽 / 单元格格式 / 合并单元格 / 表格（表头 + 示例行）/ 图片单元格锚定）、`ExcelNamedRangeLocator`（`TF_` 前缀定位）、`ExcelTemplateValidator`（Missing/WrongType/Ambiguous/Extra）、`ExcelTemplateFiller`（写类型化值 + 数字格式、日期存序列号、表格行克隆后列命名区域重指 + 下方行整体下移）、`ExcelTemplateParser`（标量 / 表格多行 / 图片回读）、`ExcelTemplateEngine`
 - 迭代 8：测试 `test/TemplateFrame.Excel.Tests`（20 用例：命名区域清单、类型化值、表格克隆范围重指、下方元素下移、图片替换、未填充占位、软校验策略）
 - 迭代 8：送货单 Excel 版 Demo `samples/TemplateFrame.Demo.Excel`（复用送货单数据与契约，生成 → 校验 → 填充（收货前/收货后）→ 回读完整闭环）
+- 迭代 8 修订：新增简单表格插件 `src/TemplateFrame.Excel.Simple`（`SimpleExcel.Write` / `SimpleExcel.Read`，只支持「标题行 + 数据行」，无命名区域/合并/图片/页面设置）+ 测试 `test/TemplateFrame.Excel.Simple.Tests`（5 用例：写入→回读类型化值、表头检测、空表、Sheet 名、缺列补 null）
 - 迭代 7：显式「读取 Word 模板得到数据」回读示例——生成 → 校验 → 填充（收货前 / 收货后）→ 回读完整闭环；回读步骤读取已填充的 docx（重点收货后）→ `service.Parse` → 打印强类型 `DeliveryOrderData`（含 9 列明细多行、空字段展示）
 
 ### 变更
 - 迭代 8：`TemplateFrame.slnx` 增加 `TemplateFrame.Excel` / `TemplateFrame.Excel.Tests` / `TemplateFrame.Demo.Excel`
+- 迭代 8 修订：修复 Excel drawing 兼容——`cNvPr` 改用 `xdr`（spreadsheetDrawing）命名空间（OpenXML SDK 默认序列化为 `a:cNvPr`，Excel 打开报「有 XML 错误的 /xl/worksheets/sheet1.xml」并移除整张 drawing、图片不可见）；修复后模板/收货前/收货后 三份 xlsx 均可直接打开且 LOGO/二维码可见（本机 Excel COM 实测）
+- 迭代 8 修订：`ExcelTemplateBuilder` 移除 `SetPageSetup`（Excel 不提供页面设置——网格规整型版式，宽度由正文列数决定）；送货单 Excel Demo 版头改 3×9 网格（左 LOGO A1:B3 / 中标题 C1:G3 / 右上二维码 H1:I2 / 右下留空 H3:I3），单据头每行 3 组「标签 + 值」
+- 迭代 8 修订：`TemplateFrame.slnx` 增加 `TemplateFrame.Excel.Simple` / `TemplateFrame.Excel.Simple.Tests`
 - 迭代 7：`samples/TemplateFrame.Demo` 重命名为 `samples/TemplateFrame.Demo.Word`（目录 / csproj / `RootNamespace` / `AssemblyName` / 命名空间）；输出文件改为 `Word-DeliveryOrder-*.docx`、输出目录改为 `TemplateFrame.Demo.Word`，体现 Word 插件 Demo 归属；README / Word 插件 README / DESIGN 引用同步
 
 ### 文档
 - 迭代 8：`docs/ROADMAP.md` 勾选迭代 8 完成（归档 0–8），`docs/DESIGN.md` §7 状态更新；§9 决策补记（OpenXML 直写、命名区域定位、MiniExcel 未来独立插件 `TemplateFrame.Excel.MiniExcel` 许可按 Apache-2.0）；§10 #2 关闭
 - 迭代 8：README 补充 Excel 插件与 Demo；新增 `src/TemplateFrame.Excel/README.md`（能力说明 + 打包准备）
+- 迭代 8 修订：ROADMAP 补记修订说明（drawing 根因 / 不提供页面设置 / 3×9 网格 / 插件拆分）；DESIGN §6 项目结构补 Excel 与 Excel.Simple、§9 决策补记（页面设置、drawing 命名空间坑、插件拆分）；README 与 Excel 插件 README 同步（含新增 `src/TemplateFrame.Excel.Simple/README.md`）
 - 迭代 7：`docs/ROADMAP.md` 勾选迭代 7 完成（状态总览 ✅、归档表扩为 0–7），`docs/DESIGN.md` §7 状态更新为已完成
 - 新建 `docs/ROADMAP.md`：归档迭代 0–6（含 v1.0.0 / v1.0.1 发布），规划迭代 7（Demo 收尾）/ 8（Excel 插件）/ 9（PDF 插件）/ 10（图片插件），并提供每轮启动命令
 - `docs/DESIGN.md`：§7 迭代计划改为「归档 + 规划」表并指向 ROADMAP；§8 CI/发布标记已启用（v1.0.0 起）；§9 补充 Excel / PDF / 图片选型与定位决策；§10 未决问题更新

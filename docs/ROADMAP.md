@@ -28,9 +28,9 @@
 | 5 | 示例完善（送货单 Demo：A5 横版 / 双层页眉 / 9 列明细 / 两行页脚 / 收货前后两次填充）+ 使用文档 + 打包准备（XML doc / README / nuspec） | ✅ |
 | 6 | 自动化发布：`release.yml` / `publish-nuget.yml`（OIDC Trusted Publishing） | ✅ v1.0.0 / v1.0.1 已发布；CI 恢复全绿 |
 | 7 | Demo 收尾：重命名 `samples/TemplateFrame.Demo.Word`（目录 / csproj / `RootNamespace` / `AssemblyName` / 命名空间），输出文件 `Word-DeliveryOrder-*.docx`、输出目录 `TemplateFrame.Demo.Word`；显式回读示例（生成 → 校验 → 填充（收货前/收货后）→ 回读闭环，读取收货后 docx → `service.Parse` → 打印强类型 `DeliveryOrderData`，含 9 列明细多行与空字段展示） | ✅ `dotnet build/test` 全绿；`dotnet run --project samples/TemplateFrame.Demo.Word` 依次输出 模板 / 收货前 / 收货后 / 回读数据 |
-| 8 | Excel 插件 `TemplateFrame.Excel`：**DocumentFormat.OpenXml 直写**（与 Word 插件同族）；命名区域定位 `TF_<Key>` / `TF_<Table>_<Column>`，表格克隆后范围重指 + 下方命名区域/合并区域/单元格行整体下移；`ExcelTemplateBuilder` / `ExcelTemplateEngine`（Validate / Fill 写类型化值+数字格式 / Parse）；`test/TemplateFrame.Excel.Tests`（20 用例）；打包 `TemplateFrame.Excel.1.0.0.nupkg`；送货单 Excel 版 Demo（复用送货单数据） | ✅ `dotnet build/test` 全绿（109 用例）；`dotnet run --project samples/TemplateFrame.Demo.Excel` 依次输出 模板 / 收货前 / 收货后 / 回读数据；`dotnet pack` 出 `TemplateFrame.Excel.1.0.0.nupkg` |
+| 8 | Excel 插件 `TemplateFrame.Excel`：**DocumentFormat.OpenXml 直写**（与 Word 插件同族）；命名区域定位 `TF_<Key>` / `TF_<Table>_<Column>`，表格克隆后范围重指 + 下方命名区域/合并区域/单元格行整体下移；`ExcelTemplateBuilder` / `ExcelTemplateEngine`（Validate / Fill 写类型化值+数字格式 / Parse）；`test/TemplateFrame.Excel.Tests`（20 用例）；打包 `TemplateFrame.Excel.1.0.0.nupkg`；送货单 Excel 版 Demo（复用送货单数据）。**修订**：不提供页面设置（网格规整型版式）、Demo 版头改 3×9 网格、修复 drawing（`xdr:cNvPr` 命名空间，Excel 打开不再报错、图片可见）、新增简单表格插件 `TemplateFrame.Excel.Simple`（标题行+数据行，5 用例） | ✅ `dotnet build/test` 全绿（114 用例）；`dotnet run --project samples/TemplateFrame.Demo.Excel` 依次输出 模板 / 收货前 / 收货后 / 回读数据；`dotnet pack` 出 `TemplateFrame.Excel.1.0.0.nupkg` |
 
-> 交付物：`src/TemplateFrame`（基础包）、`src/TemplateFrame.Word`（Word 插件）、`src/TemplateFrame.Excel`（Excel 插件）、`samples/TemplateFrame.Demo.Word`、`samples/TemplateFrame.Demo.Excel`、`test/TemplateFrame.Tests`、`test/TemplateFrame.Word.Tests`、`test/TemplateFrame.Excel.Tests`、技能 `templateframe-demo`。
+> 交付物：`src/TemplateFrame`（基础包）、`src/TemplateFrame.Word`（Word 插件）、`src/TemplateFrame.Excel`（Excel 灵活版式插件）、`src/TemplateFrame.Excel.Simple`（Excel 简单表格插件）、`samples/TemplateFrame.Demo.Word`、`samples/TemplateFrame.Demo.Excel`、`test/TemplateFrame.Tests`、`test/TemplateFrame.Word.Tests`、`test/TemplateFrame.Excel.Tests`、`test/TemplateFrame.Excel.Simple.Tests`、技能 `templateframe-demo`。
 
 ---
 
@@ -80,6 +80,19 @@
 - 表格行复制后命名区域 / 批注需重发，保证全局唯一
 - 图片按单元格锚定（Anchor 单元格 + 偏移），尺寸继承占位
 
+
+### 迭代 8 修订（Excel 打开报错 + 图片不可见 修复）
+
+用户反馈：生成的 xlsx 在 Excel 打开报"有 XML 错误的 /xl/worksheets/sheet1.xml"（自动修复后图片全部消失）。
+定位结论与处理：
+1. **drawing 部件根因**：OpenXML SDK 的 `A.NonVisualDrawingProperties` 序列化为 `a:cNvPr`，
+   Excel 打开会移除整张 drawing（图片不可见并触发修复）；改为 `xdr:cNvPr`（spreadsheetDrawing 命名空间，与 Excel 自产一致）后
+   模板/收货前/收货后 三份 xlsx 均可直接打开、图片（LOGO+二维码）可见（本机 Excel COM 实测，Shapes=2）。
+2. **不提供页面设置**：Excel 是"网格规整"型版式，`ExcelTemplateBuilder` 移除 `SetPageSetup`（不再写 pageMargins/pageSetup）。
+3. **Demo 版头改 3×9 网格**：左 LOGO（A1:B3）/ 中标题（C1:G3 居中）/ 右上二维码（H1:I2）/ 右下留空（H3:I3），
+   单据头信息每行 3 组"标签 + 值"（值跨 2 列），正文明细表 9 列，整体对齐更板正。
+4. **新增简化插件 `TemplateFrame.Excel.Simple`**：只支持「标题行 + 数据行」的表格导入/导出（`SimpleExcel.Write` / `Read`），
+   把"灵活版式（单据）"与"简单表格（列表）"两种需求拆成两个插件。
 ---
 
 ## 迭代 9：PDF 插件 `TemplateFrame.Pdf`
