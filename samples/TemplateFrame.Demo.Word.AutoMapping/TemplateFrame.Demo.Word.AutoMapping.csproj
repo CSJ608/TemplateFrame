@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <LangVersion>latest</LangVersion>
+    <RootNamespace>TemplateFrame.Demo.Word.AutoMapping</RootNamespace>
+    <AssemblyName>TemplateFrame.Demo.Word.AutoMapping</AssemblyName>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="QRCoder" Version="1.6.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="assets\github-mark.png" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\TemplateFrame\TemplateFrame.csproj" />
+    <ProjectReference Include="..\..\src\TemplateFrame.Word\TemplateFrame.Word.csproj" />
+  </ItemGroup>
+
+</Project>
