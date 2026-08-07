@@ -1,9 +1,6 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
-using TemplateFrame.Builder;
 using Xunit;
-using TPageSetup = TemplateFrame.Builder.PageSetup;
-using XPageSetup = DocumentFormat.OpenXml.Spreadsheet.PageSetup;
 
 namespace TemplateFrame.Excel.Tests;
 
@@ -48,31 +45,19 @@ public sealed class ExcelTemplateBuilderTests
     }
 
     [Fact]
-    public void Build_AppliesPageSetup()
+    public void Build_DoesNotEmitPageSetup()
     {
+        // 迭代 8 修订：Excel 插件不提供页面设置（纸张/方向/边距），版式由网格 + 合并单元格决定
         using var stream = TestDocuments.BuildTemplate(builder =>
         {
             builder.SetSheetName("送货单");
-            builder.SetPageSetup(new TPageSetup
-            {
-                Size = PageSize.A5,
-                Orientation = PageOrientation.Landscape,
-                MarginTopMm = 8,
-                MarginLeftMm = 10,
-            });
+            builder.AddText("A1", "示例单据");
         });
         using var document = SpreadsheetDocument.Open(stream, false);
         var worksheet = document.WorkbookPart!.WorksheetParts.First().Worksheet!;
 
-        var pageSetup = worksheet.GetFirstChild<XPageSetup>();
-        Assert.NotNull(pageSetup);
-        Assert.Equal(11u, pageSetup!.PaperSize!.Value); // A5
-        Assert.Equal(OrientationValues.Landscape, pageSetup.Orientation!.Value);
-
-        var margins = worksheet.GetFirstChild<PageMargins>();
-        Assert.NotNull(margins);
-        Assert.Equal(8.0 / 25.4, margins!.Top!.Value, 3);
-        Assert.Equal(10.0 / 25.4, margins.Left!.Value, 3);
+        Assert.Null(worksheet.GetFirstChild<DocumentFormat.OpenXml.Spreadsheet.PageSetup>());
+        Assert.Null(worksheet.GetFirstChild<DocumentFormat.OpenXml.Spreadsheet.PageMargins>());
     }
 
     [Fact]

@@ -8,7 +8,7 @@ namespace TemplateFrame.Demo.Excel;
 
 /// <summary>
 /// 送货单 Excel 版示例场景服务：与 Word 版共用同一份契约与 FillData 映射（数据形状与插件无关），
-/// 版式用 ExcelTemplateBuilder 组装（A5 横版 / 标题合并 / 9 列明细表 / 页脚信息 / LOGO+二维码单元格锚定）。
+/// 版式用 ExcelTemplateBuilder 组装（无页面设置：3×9 网格版头 / 9 列明细表 / LOGO+二维码单元格锚定）。
 /// 演示"收货前/收货后"两次填充：收货前 实际到货日期、收货人、实收数量、批次号、仓库为空；收货后补齐。
 /// </summary>
 public sealed class DeliveryOrderExcelTemplateService : TemplateService<DeliveryOrderData, ExcelTemplateBuilder>
@@ -84,39 +84,48 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
 
     protected override void BuildInitialTemplate()
     {
-        // A5 横版（与 Word 版同尺寸约定）
+        // 无页面设置：Excel 是"网格规整"型版式（与 Word 的纸张/方向/边距不同），
+        // 宽度由正文明细列数（9 列）决定，版头用 3×9 网格 + 合并单元格排版（迭代 8 修订）。
         Builder.SetSheetName("送货单");
-        Builder.SetPageSetup(new PageSetup
-        {
-            Size = PageSize.A5,
-            Orientation = PageOrientation.Landscape,
-            MarginTopMm = 8,
-            MarginBottomMm = 8,
-            MarginLeftMm = 10,
-            MarginRightMm = 10,
-        });
 
-        // 标题（合并 A1:I1，居中）
-        Builder.MergeCells("A1:I1");
-        Builder.AddText("A1", "送 货 单", TitleFormat);
+        // 版头网格（3 行 × 9 列）：左 LOGO（A1:B3）、中标题（C1:G3 居中）、右上二维码（H1:I2）、右下留空（H3:I3）
+        Builder.MergeCells("A1:B3");
+        Builder.AddImage("Logo", "A1", 0.9, 0.9);
+        Builder.MergeCells("C1:G3");
+        Builder.AddText("C1", "送 货 单", TitleFormat);
+        Builder.MergeCells("H1:I2");
+        Builder.AddImage("QRCode", "H1", 0.9, 0.9);
+        Builder.MergeCells("H3:I3");
 
-        // 单据头信息层：编号+供应商 / 日期+制单人 / 备注
-        Builder.AddText("A2", "单据编号：", SmallLabel);
-        Builder.AddElement("单据编号", "B2", SmallValue);
-        Builder.AddText("D2", "供应商：", SmallLabel);
-        Builder.AddElement("供应商", "E2", SmallValue);
-        Builder.MergeCells("E2:F2");
+        // 单据头信息（每行 3 组"标签 + 值"，值跨 2 列）
+        Builder.AddText("A4", "单据编号：", SmallLabel);
+        Builder.AddElement("单据编号", "B4", SmallValue);
+        Builder.MergeCells("B4:C4");
+        Builder.AddText("D4", "供应商：", SmallLabel);
+        Builder.AddElement("供应商", "E4", SmallValue);
+        Builder.MergeCells("E4:F4");
+        Builder.AddText("G4", "计划送货日期：", SmallLabel);
+        Builder.AddElement("计划送货日期", "H4", SmallValue);
+        Builder.MergeCells("H4:I4");
 
-        Builder.AddText("A3", "制单日期：", SmallLabel);
-        Builder.AddElement("制单日期", "B3", SmallValue);
-        Builder.AddText("D3", "制单人：", SmallLabel);
-        Builder.AddElement("制单人", "E3", SmallValue);
+        Builder.AddText("A5", "制单日期：", SmallLabel);
+        Builder.AddElement("制单日期", "B5", SmallValue);
+        Builder.MergeCells("B5:C5");
+        Builder.AddText("D5", "制单人：", SmallLabel);
+        Builder.AddElement("制单人", "E5", SmallValue);
+        Builder.MergeCells("E5:F5");
+        Builder.AddText("G5", "实际到货日期：", SmallLabel);
+        Builder.AddElement("实际到货日期", "H5", SmallValue);
+        Builder.MergeCells("H5:I5");
 
-        Builder.AddText("A4", "备注：", SmallLabel);
-        Builder.AddElement("单据备注", "B4", SmallValue);
-        Builder.MergeCells("B4:I4");
+        Builder.AddText("A6", "收货人：", SmallLabel);
+        Builder.AddElement("收货人", "B6", SmallValue);
+        Builder.MergeCells("B6:C6");
+        Builder.AddText("D6", "备注：", SmallLabel);
+        Builder.AddElement("单据备注", "E6", SmallValue);
+        Builder.MergeCells("E6:I6");
 
-        // 正文明细表：9 列（表头 A6，示例行 A7）
+        // 正文明细表：9 列（表头 A8，示例行 A9）
         Builder.AddTable(
             "Lines",
             ["序号", "物料代码", "物料名称", "单位", "计划数量", "实收数量", "批次号", "供应商批次", "仓库"],
@@ -127,20 +136,7 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
                 Bordered = true,
                 ColumnWidthsCm = [1.2, 2.5, 4.0, 1.4, 1.8, 1.8, 2.2, 2.2, 1.9],
             },
-            "A6");
-
-        // 两行页脚信息：计划送货日期 / 实际到货日期+收货人
-        Builder.AddText("A9", "计划送货日期：", SmallLabel);
-        Builder.AddElement("计划送货日期", "B9", SmallValue);
-        Builder.AddText("D9", "实际到货日期：", SmallLabel);
-        Builder.AddElement("实际到货日期", "E9", SmallValue);
-
-        Builder.AddText("A10", "收货人：", SmallLabel);
-        Builder.AddElement("收货人", "B10", SmallValue);
-
-        // 图片：LOGO / 二维码按单元格锚定（右上角）
-        Builder.AddImage("Logo", "H2", 0.8, 0.8);
-        Builder.AddImage("QRCode", "H3", 0.8, 0.8);
+            "A8");
     }
 
     /// <summary>手写映射：TData → FillData（收货前字段传 null，填充为空）。</summary>

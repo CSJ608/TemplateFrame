@@ -27,7 +27,7 @@ internal static class Program
         var prePath = Path.Combine(dir, "Excel-DeliveryOrder-pre.xlsx");
         var postPath = Path.Combine(dir, "Excel-DeliveryOrder-post.xlsx");
 
-        // [1] 生成初始模板（A5 横版，标题 + 单据头 + 9 列明细 + 页脚信息 + LOGO/二维码锚定）
+        // [1] 生成初始模板（无页面设置：3×9 网格版头 + 单据头 + 9 列明细 + LOGO/二维码锚定）
         using (var template = service.BuildInitialTemplateFile())
         {
             File.WriteAllBytes(templatePath, ReadAllBytes(template));

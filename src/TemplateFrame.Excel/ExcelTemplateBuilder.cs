@@ -1,18 +1,18 @@
-using System.Text;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Builder;
-using TPageSetup = TemplateFrame.Builder.PageSetup;
-using XPageSetup = DocumentFormat.OpenXml.Spreadsheet.PageSetup;
+using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
 
 namespace TemplateFrame.Excel;
 
 /// <summary>
 /// Excel 版式构建器：业务服务声明 <c>TemplateService&lt;TData, ExcelTemplateBuilder&gt;</c> 后，
-/// 在无参数 <c>BuildInitialTemplate()</c> 里直接调用本类的全部能力（页面设置 / 列宽 / 单元格文本 /
+/// 在无参数 <c>BuildInitialTemplate()</c> 里直接调用本类的全部能力（列宽 / 单元格文本 /
 /// 文本元素（命名区域）/ 表格（表头 + 示例行）/ 图片（单元格锚定）/ 合并单元格）。
 /// 命名区域统一前缀 <c>TF_</c>，全表唯一；框架只认 <see cref="ITemplateBuilder.Save"/>。
+/// 与 Word 不同，Excel 是"网格规整"型版式，本插件不提供页面设置（纸张/方向/边距）——
+/// 由 Demo/业务侧按内容列数评估宽度、用合并单元格排版（迭代 8 修订）。
 /// </summary>
 public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
 {
@@ -27,14 +27,12 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     private readonly List<(string Name, string Reference)> _definedNames = new();
     private readonly List<string> _mergedRanges = new();
     private readonly Dictionary<string, double> _columnWidths = new(StringComparer.OrdinalIgnoreCase);
+    private readonly List<Xdr.OneCellAnchor> _imageAnchors = new();
     private WorksheetPart? _worksheetPart;
     private SheetData? _sheetData;
     private Sheet? _sheet;
     private string _sheetName = "Sheet1";
-    private TPageSetup _pageSetup = new();
     private DrawingsPart? _drawingsPart;
-    private readonly StringBuilder _drawingXml = new();
-    private int _nextImageId = 1;
     private bool _saved;
 
     /// <summary>创建一个空的工作簿构建器（单 Sheet，默认名 Sheet1）。</summary>
@@ -56,13 +54,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
             _sheet.Name = _sheetName;
         }
 
-        return this;
-    }
-
-    /// <summary>设置页面：纸张规格 + 方向 + 可选边距（毫米），映射到 Excel pageSetup/pageMargins。</summary>
-    public ExcelTemplateBuilder SetPageSetup(TPageSetup setup)
-    {
-        _pageSetup = setup ?? throw new ArgumentNullException(nameof(setup));
         return this;
     }
 
@@ -168,7 +159,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         var relId = _drawingsPart.GetIdOfPart(imagePart);
         var cx = (long)((widthInches ?? 1.5) * 914400);
         var cy = (long)((heightInches ?? 1.5) * 914400);
-        AppendDrawingAnchor(_drawingXml, _nextImageId++, relId, col - 1, row - 1, cx, cy);
+        _imageAnchors.Add(ExcelDrawingHelper.CreateAnchor(_imageAnchors.Count + 1, relId, col - 1, row - 1, cx, cy));
         AddDefinedName(ExcelNamedRangeLocator.ElementName(key), anchorCell);
         return this;
     }
@@ -219,12 +210,15 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
             worksheet.Append(mergeCells);
         }
 
-        worksheet.Append(CreatePageMargins(_pageSetup));
-        worksheet.Append(CreatePageSetupElement(_pageSetup));
-
         if (_drawingsPart is not null)
         {
-            WriteDrawingPart(_drawingsPart, _drawingXml.ToString());
+            var drawing = new Xdr.WorksheetDrawing();
+            foreach (var anchor in _imageAnchors)
+            {
+                drawing.Append(anchor);
+            }
+
+            _drawingsPart.WorksheetDrawing = drawing;
             worksheet.Append(new Drawing { Id = _worksheetPart.GetIdOfPart(_drawingsPart) });
         }
 
@@ -369,44 +363,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         cell.AppendChild(new InlineString(new Text(text) { Space = SpaceProcessingModeValues.Preserve }));
     }
 
-    private static PageMargins CreatePageMargins(TPageSetup setup)
-    {
-        var margins = new PageMargins();
-        if (setup.MarginTopMm is { } top)
-        {
-            margins.Top = MmToInches(top);
-        }
-
-        if (setup.MarginBottomMm is { } bottom)
-        {
-            margins.Bottom = MmToInches(bottom);
-        }
-
-        if (setup.MarginLeftMm is { } left)
-        {
-            margins.Left = MmToInches(left);
-        }
-
-        if (setup.MarginRightMm is { } right)
-        {
-            margins.Right = MmToInches(right);
-        }
-
-        return margins;
-    }
-
-    private static XPageSetup CreatePageSetupElement(TPageSetup setup)
-        => new()
-        {
-            PaperSize = setup.Size == PageSize.A5 ? 11u : 9u,
-            Orientation = setup.Orientation == PageOrientation.Landscape
-                ? OrientationValues.Landscape
-                : OrientationValues.Portrait,
-        };
-
-    private static double MmToInches(double mm)
-        => mm / 25.4;
-
     private static (byte[] Bytes, string Extension) LoadPlaceholder(string? placeholderPath)
     {
         if (!string.IsNullOrEmpty(placeholderPath) && File.Exists(placeholderPath))
@@ -416,39 +372,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         }
 
         return (Convert.FromBase64String(PlaceholderPngBase64), "png");
-    }
-
-    private static void AppendDrawingAnchor(
-        StringBuilder sb,
-        int id,
-        string relId,
-        int col0,
-        int row0,
-        long cx,
-        long cy)
-    {
-        sb.Append("<xdr:oneCellAnchor>")
-            .Append("<xdr:from><xdr:col>").Append(col0).Append("</xdr:col><xdr:colOff>0</xdr:colOff>")
-            .Append("<xdr:row>").Append(row0).Append("</xdr:row><xdr:rowOff>0</xdr:rowOff></xdr:from>")
-            .Append("<xdr:ext cx=\"").Append(cx).Append("\" cy=\"").Append(cy).Append("\"/>")
-            .Append("<xdr:pic>")
-            .Append("<xdr:nvPicPr><xdr:cNvPr id=\"").Append(id).Append("\" name=\"image").Append(id).Append("\"/><xdr:cNvPicPr><a:picLocks noChangeAspect=\"1\"/></xdr:cNvPicPr></xdr:nvPicPr>")
-            .Append("<xdr:blipFill><a:blip r:embed=\"").Append(relId).Append("\"/><a:stretch><a:fillRect/></a:stretch></xdr:blipFill>")
-            .Append("<xdr:spPr><a:xfrm><a:off x=\"0\" y=\"0\"/><a:ext cx=\"").Append(cx).Append("\" cy=\"").Append(cy).Append("\"/></a:xfrm><a:prstGeom prst=\"rect\"><a:avLst/></a:prstGeom></xdr:spPr>")
-            .Append("</xdr:pic><xdr:clientData/></xdr:oneCellAnchor>");
-    }
-
-    private static void WriteDrawingPart(DrawingsPart part, string body)
-    {
-        var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-                  + "<xdr:wsDr xmlns:xdr=\"http://schemas.openxmlformats.org/drawingml/2006/spreadsheetDrawing\" "
-                  + "xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" "
-                  + "xmlns:r=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships\">"
-                  + body
-                  + "</xdr:wsDr>";
-        var bytes = Encoding.UTF8.GetBytes(xml);
-        using var stream = part.GetStream(FileMode.Create);
-        stream.Write(bytes, 0, bytes.Length);
     }
 
     private static string DetectExtension(byte[] bytes)
