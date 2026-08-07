@@ -286,36 +286,35 @@ TemplateFrame/
 
 ## 7. 迭代计划
 
-> 目标：先把本地功能测试做扎实；自动化发布放最后。
+> 目标：先把本地功能测试做扎实；自动化发布已启用（v1.0.0 / v1.0.1）。
+> 详细路线图（已归档 + 规划）见 [docs/ROADMAP.md](ROADMAP.md)。
 
-| 迭代 | 内容 | 验收 |
-|---|---|---|
-| **0** | 仓库骨架：README / DESIGN / CHANGELOG / LICENSE / .gitignore / 工作流文件（参考） | 仓库就绪 |
-| **1** | 契约元素模型 + 数据形状 `FillData` + `ITemplateBuilder`（Word 实现）+ `TemplateService<TData>` + Demo 场景服务 | `BuildInitialTemplateFile` 产出含 SDT 的 .docx；`Validate` 兜底；单测通过 |
-| **2** | Word 校验 + 填充 | `Validate` 报 Missing/WrongType/Ambiguous；强类型 `Fill` 完成文本/图片/表格行；填充时软校验 |
-| **3** | 反向导入 `Parse` | 从填充后的模板回读强类型数据（含表格多行） |
-| **4** | 健壮性：页眉页脚、多表、可选字段、批量填充、`ValidateData` | 边界场景单测 |
-| **5** | 示例完善 + 使用文档 + 打包准备 | `samples/TemplateFrame.Demo`、README 使用说明、XML doc |
-| **6** | 自动化发布（最后） | 启用 release.yml / publish-nuget.yml；按 docs/PUBLISHING.md 完成前置配置 |
+| 阶段 | 迭代 | 主题 | 状态 |
+|---|---|---|---|
+| 已归档 | 0–6 | 仓库骨架 → 契约引擎 → Word 插件（生成/校验/填充/回读）→ 健壮性 → Demo → 自动化发布 | ✅ 完成（v1.0.0 / v1.0.1 已发布） |
+| 进行中 | **7** | Demo 收尾：Word 插件标识 + 回读示例 | ⏳ 下一步 |
+| 规划中 | **8** | Excel 插件 `TemplateFrame.Excel`（ClosedXML） | ⏳ |
+| 规划中 | **9** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏳ |
+| 未来 | **10** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | 🔮 |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
 ---
 
-## 8. CI 与发布（参考 StreamFrame，暂不启用）
+## 8. CI 与发布（已启用）
 
 工作流文件已按 StreamFrame 的 .github/workflows 移植并适配：
 
 | 文件 | 触发 | 作用 | 状态 |
 |---|---|---|---|
-| `ci.yml` | push / PR（main） | build + test | 可启用 |
-| `release.yml` | tag `v*` | build + test + pack → GitHub Release（附 nupkg/snupkg） | 迭代 6 启用 |
-| `publish-nuget.yml` | tag `v*` | OIDC Trusted Publishing → nuget.org | 迭代 6 启用 |
+| `ci.yml` | push / PR（main） | build + test | 已启用 |
+| `release.yml` | tag `v*` | build + test + pack → GitHub Release（附 nupkg/snupkg） | 已启用（v1.0.0 起） |
+| `publish-nuget.yml` | tag `v*` | OIDC Trusted Publishing → nuget.org | 已启用（v1.0.0 起） |
 
-**迭代 6 之前**：
-- 不推送 `v*` tag，则两个发布工作流不会触发；
-- NuGet 发布需要一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
-- 本地用 `dotnet pack` 验证打包即可。
+**发布说明**：
+- 推送 `v*` tag 即触发 `release.yml`（GitHub Release）与 `publish-nuget.yml`（OIDC 推送 nuget.org）；
+- NuGet 发布依赖一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
+- 已发布版本：v1.0.0 / v1.0.1。
 
 ---
 
@@ -329,7 +328,11 @@ TemplateFrame/
 | WPS 兼容性 | WPS 对 SDT 支持不完整 | 第一版只支持 MS Office；WPS 用独立插件（`TemplateFrame.Wps`）未来支持 |
 | `w:id` 唯一性 | 克隆表格行后 id 会重复 | 克隆时必须重发唯一 `w:id` |
 | 标签模板 | 其他工具定义的标签模板 | 契约模型预留 `Label` 元素，插件化支持 |
-| EPPlus 许可 | Excel 场景不要用 EPPlus（商用收费） | Excel 插件用 NPOI / ClosedXML / MiniExcel（评估中） |
+| Excel 渲染库许可 | Excel 场景不要用 EPPlus（商用收费） | Excel 插件用 ClosedXML（MIT，优先）/ NPOI（备选）（迭代 8 定） |
+| Excel 定位机制 | Excel 无内容控件（SDT），需自定义 tag 定位 | 迭代 8 内定：候选 命名区域（推荐）/ 批注 / 隐藏映射 Sheet |
+| PDF 实现路径 | PDF 无内容控件，表格行复制难 | 迭代 9 内定：倾向 Builder 版式模型 + 整页重排（与 Word/Excel 一致）；AcroForm 仅适用静态字段 |
+| PDF 渲染库许可 | iText 7（AGPL）/ QuestPDF（社区版限制） | PdfSharp 6（MIT）优先（迭代 9 定） |
+| 图片渲染库许可 | System.Drawing.Common 仅 Windows | SkiaSharp（MIT，跨平台）优先（迭代 10 定） |
 | 渲染验证 | 本机无 Word/LibreOffice 时无法渲染 | 测试以 OOXML 结构断言为主（SDT 清单、行数、blip embed） |
 
 ---
@@ -337,6 +340,8 @@ TemplateFrame/
 ## 10. 未决问题
 
 1. 一个文档里出现多个同结构表格（多个明细区）时，表的锚点规则如何定义。
-2. Excel 插件第一版的范围：仅导出（填充）还是导出+导入（回读）一起。
+2. Excel 插件第一版的范围（仅填充 or 填充+回读）→ 迭代 8 决策（倾向一起）。
 3. 标签模板（`Label`）的具体来源工具与格式，等有真实需求再定。
-4. 自动映射器（`DataPath`）是否作为迭代 1 的必做项，还是先手写映射、迭代 4 再补自动映射。
+4. 自动映射器（`DataPath`）：目前由业务服务手写 `MapToData` / `MapFromData`；是否补自动映射待定。
+5. PDF 插件实现路径（AcroForm 表单域 vs Builder 版式重排）→ 迭代 9 决策（倾向重排）。
+6. Excel / PDF 的表格行「复制后重新打标」的定位规则 → 随各插件迭代内定并回写本节。

@@ -9,7 +9,7 @@
 - **四个操作**：`BuildInitialTemplateFile` / `Validate` / `Fill`（强类型）/ `Parse`（强类型回读）
 - **插件化**：未来支持 WPS Word、Excel、标签模板
 
-设计文档见 [docs/DESIGN.md](docs/DESIGN.md)，发布说明见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
+设计文档见 [docs/DESIGN.md](docs/DESIGN.md)，迭代路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)，发布说明见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
 
 ## 核心思想
 
