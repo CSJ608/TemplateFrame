@@ -10,13 +10,13 @@
 | 0–6 | 契约引擎 + Word 插件 + 送货单 Demo + 自动化发布 | ✅ 已归档（见下） |
 | v1.0.0 / v1.0.1 | nuget.org + GitHub Release 发布 | ✅ 已完成 |
 | **7** | **Demo 收尾：Word 插件标识 + 回读示例** | ✅ 已完成（见下） |
-| 8 | Excel 插件 `TemplateFrame.Excel` | ⏳ 下一步 |
-| 9 | PDF 插件 `TemplateFrame.Pdf` | ⏳ 规划中 |
+| **8** | **Excel 插件 `TemplateFrame.Excel`** | ✅ 已完成（见下） |
+| 9 | PDF 插件 `TemplateFrame.Pdf` | ⏳ 下一步 |
 | 10 | 图片插件 `TemplateFrame.Image` | 🔮 未来 |
 
 ---
 
-## 已归档：迭代 0–7（完成）
+## 已归档：迭代 0–8（完成）
 
 | 迭代 | 内容 | 完成状态 |
 |---|---|---|
@@ -28,8 +28,9 @@
 | 5 | 示例完善（送货单 Demo：A5 横版 / 双层页眉 / 9 列明细 / 两行页脚 / 收货前后两次填充）+ 使用文档 + 打包准备（XML doc / README / nuspec） | ✅ |
 | 6 | 自动化发布：`release.yml` / `publish-nuget.yml`（OIDC Trusted Publishing） | ✅ v1.0.0 / v1.0.1 已发布；CI 恢复全绿 |
 | 7 | Demo 收尾：重命名 `samples/TemplateFrame.Demo.Word`（目录 / csproj / `RootNamespace` / `AssemblyName` / 命名空间），输出文件 `Word-DeliveryOrder-*.docx`、输出目录 `TemplateFrame.Demo.Word`；显式回读示例（生成 → 校验 → 填充（收货前/收货后）→ 回读闭环，读取收货后 docx → `service.Parse` → 打印强类型 `DeliveryOrderData`，含 9 列明细多行与空字段展示） | ✅ `dotnet build/test` 全绿；`dotnet run --project samples/TemplateFrame.Demo.Word` 依次输出 模板 / 收货前 / 收货后 / 回读数据 |
+| 8 | Excel 插件 `TemplateFrame.Excel`：**DocumentFormat.OpenXml 直写**（与 Word 插件同族）；命名区域定位 `TF_<Key>` / `TF_<Table>_<Column>`，表格克隆后范围重指 + 下方命名区域/合并区域/单元格行整体下移；`ExcelTemplateBuilder` / `ExcelTemplateEngine`（Validate / Fill 写类型化值+数字格式 / Parse）；`test/TemplateFrame.Excel.Tests`（20 用例）；打包 `TemplateFrame.Excel.1.0.0.nupkg`；送货单 Excel 版 Demo（复用送货单数据） | ✅ `dotnet build/test` 全绿（109 用例）；`dotnet run --project samples/TemplateFrame.Demo.Excel` 依次输出 模板 / 收货前 / 收货后 / 回读数据；`dotnet pack` 出 `TemplateFrame.Excel.1.0.0.nupkg` |
 
-> 交付物：`src/TemplateFrame`（基础包）、`src/TemplateFrame.Word`（插件）、`samples/TemplateFrame.Demo.Word`、`test/TemplateFrame.Tests`、`test/TemplateFrame.Word.Tests`、技能 `templateframe-demo`。
+> 交付物：`src/TemplateFrame`（基础包）、`src/TemplateFrame.Word`（Word 插件）、`src/TemplateFrame.Excel`（Excel 插件）、`samples/TemplateFrame.Demo.Word`、`samples/TemplateFrame.Demo.Excel`、`test/TemplateFrame.Tests`、`test/TemplateFrame.Word.Tests`、`test/TemplateFrame.Excel.Tests`、技能 `templateframe-demo`。
 
 ---
 
@@ -55,7 +56,9 @@
 
 ---
 
-## 迭代 8：Excel 插件 `TemplateFrame.Excel`
+## 迭代 8：Excel 插件 `TemplateFrame.Excel` —— 已完成
+
+> **状态**：✅ 已完成。`dotnet build TemplateFrame.slnx && dotnet test` 全绿（109 用例）；`dotnet run --project samples/TemplateFrame.Demo.Excel` 依次输出 模板 / 收货前 / 收货后 / 回读数据；`dotnet pack` 出 `TemplateFrame.Excel.1.0.0.nupkg`。
 
 **目标**：把「契约 → 生成 → 定位 → 填充 → 回读 → 校验」复制到 `.xlsx`。
 

@@ -293,8 +293,8 @@ TemplateFrame/
 |---|---|---|---|
 | 已归档 | 0–6 | 仓库骨架 → 契约引擎 → Word 插件（生成/校验/填充/回读）→ 健壮性 → Demo → 自动化发布 | ✅ 完成（v1.0.0 / v1.0.1 已发布） |
 | 已归档 | **7** | Demo 收尾：Word 插件标识 + 回读示例 | ✅ 完成 |
-| 进行中 | **8** | Excel 插件 `TemplateFrame.Excel`（ClosedXML） | ⏳ 下一步 |
-| 规划中 | **9** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏳ |
+| 已归档 | **8** | Excel 插件 `TemplateFrame.Excel`（OpenXML 直写 + 命名区域定位） | ✅ 完成 |
+| 进行中 | **9** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏳ 下一步 |
 | 未来 | **10** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | 🔮 |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
