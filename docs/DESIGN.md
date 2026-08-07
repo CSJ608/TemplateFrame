@@ -307,8 +307,8 @@ TemplateFrame/
 | 已归档 | **7** | Demo 收尾：Word 插件标识 + 回读示例 | ✅ 完成 |
 | 已归档 | **8** | Excel 插件 `TemplateFrame.Excel`（OpenXML 直写 + 命名区域定位；修订：不提供页面设置 + drawing 兼容修复 + 拆分 `TemplateFrame.Excel.Simple` 简单表格插件） | ✅ 完成（含修订） |
 | 已归档 | **9** | 自动映射（DataPath）+ SimpleExcel 强类型接入 | ✅ 完成 |
-| 进行中 | **10** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏳ 下一步 |
-| 未来 | **11** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | 🔮 |
+| 搁置 | **10** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
+| 搁置 | **11** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
@@ -361,5 +361,5 @@ TemplateFrame/
 2. ~~Excel 插件第一版的范围（仅填充 or 填充+回读）~~ → **迭代 8 决策：填充 + 回读一起做**（已落地）。
 3. 标签模板（`Label`）的具体来源工具与格式，等有真实需求再定。
 4. ~~自动映射器（`DataPath`）~~ → **迭代 9 决策：显式 `DataPath` + `DataPathMapper` 自动映射已落地**（嵌套路径 `Customer.Name` 列为后续项）。
-5. PDF 插件实现路径（AcroForm 表单域 vs Builder 版式重排）→ 迭代 10 决策（倾向重排）。
-6. Excel / PDF 的表格行「复制后重新打标」的定位规则 → 随各插件迭代内定并回写本节。
+5. PDF 插件实现路径（AcroForm 表单域 vs Builder 版式重排）→ 迭代 10 决策（倾向重排；迭代 10 已搁置，重启时再定）。
+6. Excel / PDF 的表格行「复制后重新打标」的定位规则 → Excel 已随迭代 8 内定；PDF 随迭代 10 重启时再定（迭代 10 已搁置）。

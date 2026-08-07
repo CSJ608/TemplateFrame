@@ -15,8 +15,10 @@
 | **7** | **Demo 收尾：Word 插件标识 + 回读示例** | ✅ 已完成（见下） |
 | **8** | **Excel 插件 `TemplateFrame.Excel`** | ✅ 已完成（见下） |
 | **9** | **自动映射（DataPath）+ SimpleExcel 强类型** | ✅ 已完成（见下） |
-| 10 | PDF 插件 `TemplateFrame.Pdf` | ⏳ 下一步 |
-| 11 | 图片插件 `TemplateFrame.Image` | 🔮 未来 |
+| 10 | PDF 插件 `TemplateFrame.Pdf` | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
+| 11 | 图片插件 `TemplateFrame.Image` | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
+
+> 当前无进行中迭代：迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
 ---
 
@@ -123,7 +125,9 @@
 - `dotnet pack` 出 `TemplateFrame.Excel.Simple` nupkg（含对基础包 `TemplateFrame` 的引用）
 
 ---
-## 迭代 10：PDF 插件 `TemplateFrame.Pdf`
+## 迭代 10：PDF 插件 `TemplateFrame.Pdf` —— 已搁置（2026-08-07）
+
+> **状态**：⏸ 已搁置（2026-08-07，用户决定暂时放弃；如需重启按本小节范围继续）。
 
 **目标**：把「生成 → 填充 → 回读」复制到 `.pdf`。
 
@@ -146,7 +150,9 @@
 
 ---
 
-## 迭代 11：图片插件 `TemplateFrame.Image`（未来）
+## 迭代 11：图片插件 `TemplateFrame.Image` —— 已搁置（2026-08-07）
+
+> **状态**：⏸ 已搁置（2026-08-07，用户决定暂时放弃；如需重启按本小节范围继续）。
 
 **目标**：把「生成 → 填充」复制到位图（PNG / JPEG），面向名片、标签、简单卡片。
 

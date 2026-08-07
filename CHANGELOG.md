@@ -2,6 +2,11 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [Unreleased]
+
+### 文档
+- 迭代 10（PDF 插件 `TemplateFrame.Pdf`）/ 迭代 11（图片插件 `TemplateFrame.Image`）**搁置**（2026-08-07 用户决定暂时放弃）；docs/ROADMAP.md 状态总览与对应小节、docs/DESIGN.md §7 迭代计划与 §10 未决问题同步标记
+
 ## [1.0.4] - 2026-08-07
 
 ### 修复
