@@ -9,11 +9,12 @@
 - 迭代 14：SimpleExcel 契约 `Read`/`Validate` 列定位**分级回退**（每列定义名 → TF_Table 区域 + 表头文本 → 首非空行 + 表头文本）——框架产物回读**语言无关**；重复列定义名 `Validate` 报 `Ambiguous`
 ——基础包新增 `ITemplateLocalizer` 抽象 + `DefaultTemplateLocalizer` 默认实现：占位符 / 页码默认 pattern / 版式 i18n 键按语言解析（查找顺序 **业务注入优先（文化限定 `"en:Key"` 祖先链回退 + 文化中立兜底）→ 框架 .resx（中文中性 + en 卫星）→ 键本身**）；占位符一等语义 `PlaceholderText(culture)` / `IsPlaceholderText(text)`（默认 zh "待填充" / en "To be filled"，业务可注册扩展占位符）
 - 迭代 13：`TemplateService.BuildInitialTemplateFile(CultureInfo? culture)`（null = 中文默认，向后兼容）；Word Builder 新增 i18n 键方法 `AddParagraphKey` / `AddTextKey` / `AddStaticTextKey` / `AddTableKeys`（版式文本 / 表头按语言解析，内容控件 tag 不本地化保证 Fill/Parse 匹配）；Word / Excel Builder 占位符与 Word 页码默认 pattern 统一走本地化器
-- 迭代 13：升级 `samples/TemplateFrame.Demo.Word.I18n`——新增"文档内容中英模板"部分：同一版式代码输出 zh/en 两份模板（语言由文件名承载，如 `Word-I18n-DeliveryOrder-en-template.docx`）+ 填充 + 回读（未填充占位符 → null）
+- 迭代 13：新增独立 Demo `samples/TemplateFrame.Demo.Word.ContentI18n`——文档内容中英模板：同一版式代码输出 zh/en 两份模板（语言由文件名承载，如 `Word-ContentI18n-DeliveryOrder-en-template.docx`）+ 填充 + 回读（未填充占位符 → null）；`samples/TemplateFrame.Demo.Word.I18n` 保持消息层 i18n 单一演示（2026-08-08 拆分）
 - 迭代 12：**国际化（i18n）**——运行时消息资源化（中文中性默认 + en 卫星按 CurrentUICulture 自动）：基础包与 Word / Excel / Excel.Simple 的校验消息 + 异常消息全部迁移到资源；`TemplateValidationIssue` 增加 `MessageKey` / `MessageArgs`（公共 API 向后兼容），`Message` 由资源生成
 - 迭代 12 补充：新增 i18n 演示 Demo `samples/TemplateFrame.Demo.Word.I18n`（Word 插件，zh-CN / en 两种文化下 Validate / Fill 消息自动中英切换，输出 MessageKey / MessageArgs）
 
 ### 变更
+- Demo 拆分（2026-08-08）：`samples/TemplateFrame.Demo.Word.I18n` 回归**消息层 i18n** 单一演示（迭代 12）；文档内容 i18n 独立为 `samples/TemplateFrame.Demo.Word.ContentI18n`（迭代 13，中英模板 + 填充 + 回读；仓库 Demo 由 6 个变 7 个）
 - 迭代 14：`SimpleExcelContract.Write` 产物新增每列定义名（回读语言无关）；`Read`/`Validate` 改为定义名优先 + 文本匹配回退（旧文件无定义名 → 走回退，行为向后兼容）
 ——Word / Excel 回读器把已知占位符规范化为 null（null=未填充、""=有意留空，不依赖模板语言）；既有 "待填充" 断言全部改 `Assert.Null`；`AddPageNumber()` 无参默认 pattern 改为本地化默认（zh 行为不变）
 - 迭代 12：测试断言从中文消息文本改为文化中立锚点（Code/MessageKey/标识符）；新增中英双语用例（LocalizationTests × 4，共 151 用例）
