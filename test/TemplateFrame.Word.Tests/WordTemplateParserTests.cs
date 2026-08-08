@@ -57,19 +57,20 @@ public sealed class WordTemplateParserTests
     }
 
     [Fact]
-    public void Parse_UnfilledTemplate_ReadsCurrentPlaceholderState()
+    public void Parse_UnfilledTemplate_NormalizesPlaceholdersToNull()
     {
         using var template = TestDocuments.BuildDemoTemplate();
 
         var parsed = new WordTemplateParser().Parse(template, TestDocuments.DemoContract());
 
-        // 未填充模板回读当前状态：SDT 文本即占位"待填充"，示例行原样读回
-        Assert.Equal("待填充", parsed.Values["OrderNo"]);
+        // 迭代 13（Parse 规范化，方案 3）：已知占位符 → null（null=未填充）；示例行原样读回但列值也是 null
+        Assert.Null(parsed.Values["OrderNo"]);
+        Assert.Null(parsed.Values["CustomerName"]);
         var rows = Assert.Single(parsed.Tables, t => t.Key == "Lines").Value;
         Assert.Single(rows);
-        Assert.Equal("待填充", rows[0]["MC"]);
-        Assert.Equal("待填充", rows[0]["MName"]);
-        Assert.Equal("待填充", rows[0]["Qty"]);
+        Assert.Null(rows[0]["MC"]);
+        Assert.Null(rows[0]["MName"]);
+        Assert.Null(rows[0]["Qty"]);
     }
 
     [Fact]
@@ -141,7 +142,8 @@ public sealed class WordTemplateParserTests
 
         var parsed = new WordTemplateParser().Parse(template, contract);
 
-        Assert.Equal("待填充", parsed.Values["OrderNo"]);
+        // 控件存在但内容是占位符 → null；控件缺失 → 键省略
+        Assert.Null(parsed.Values["OrderNo"]);
         Assert.False(parsed.Values.ContainsKey("NotInTemplate"));
     }
 

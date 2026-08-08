@@ -7,17 +7,18 @@ namespace TemplateFrame.Excel.Tests;
 public sealed class ExcelTemplateParserTests
 {
     [Fact]
-    public void Parse_UnfilledTemplate_ReturnsPlaceholders()
+    public void Parse_UnfilledTemplate_NormalizesPlaceholdersToNull()
     {
         using var template = TestDocuments.BuildDemoTemplate();
         var parsed = new ExcelTemplateParser().Parse(template, TestDocuments.DemoContract());
 
-        Assert.Equal("待填充", parsed.Values["OrderNo"]);
-        Assert.Equal("待填充", parsed.Values["CustomerName"]);
+        // 迭代 13（Parse 规范化，方案 3）：已知占位符 → null（null=未填充）
+        Assert.Null(parsed.Values["OrderNo"]);
+        Assert.Null(parsed.Values["CustomerName"]);
 
         var lines = parsed.Tables["Lines"];
         Assert.Single(lines); // 未填充只有示例行 1 行
-        Assert.Equal("待填充", lines[0]["MC"]);
+        Assert.Null(lines[0]["MC"]);
     }
 
     [Fact]
