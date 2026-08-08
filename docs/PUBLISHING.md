@@ -65,7 +65,7 @@ gh run list --workflow publish-nuget.yml
    - nuget.org → Account → API Keys → **Trusted Publishers** → Register Publisher（仓库 `CSJ608/TemplateFrame`，subject `repo:CSJ608/TemplateFrame:ref:refs/tags/v*`）；
    - GitHub 仓库 → Settings → Secrets and variables → Actions → **Variables** → 新建 `NUGET_USER`（你的 nuget.org 用户名）。
 3. **CHANGELOG**：把 `## [Unreleased]` 改为 `## [1.0.0]`（release.yml 提取该段作为 Release 正文）。
-4. **版本号一致**：csproj `<Version>` 与 git tag 一致（当前 `1.0.0` ↔ `v1.0.0`）。
+4. **版本号一致**：csproj `<Version>` 与 git tag 一致（当前 `1.0.5` ↔ `v1.0.5`）。
 5. **本地兜底**：`dotnet build TemplateFrame.slnx` + `dotnet test TemplateFrame.slnx` + `dotnet pack` 均通过。
 6. **打 tag 发布**：`git tag -a v1.0.0 -m "..." && git push origin v1.0.0`（触发 release + publish-nuget；push 前请确认前置配置已完成）。
 

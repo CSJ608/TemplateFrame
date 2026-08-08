@@ -311,7 +311,7 @@ TemplateFrame/
 | 搁置 | **11** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | 已归档 | **12** | 国际化（i18n）：运行时消息中英双语（中文默认 + en 卫星按 CurrentUICulture 自动） | ✅ 完成（2026-08-08） |
 | 已归档 | **13** | 文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化） | ✅ 完成（2026-08-08） |
-| 进行中 | **14** | Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退） | 🔄 进行中（2026-08-08） |
+| 已归档 | **14** | Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退） | ✅ 完成（2026-08-08） |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
@@ -330,7 +330,7 @@ TemplateFrame/
 **发布说明**：
 - 推送 `v*` tag 即触发 `release.yml`（GitHub Release）与 `publish-nuget.yml`（OIDC 推送 nuget.org）；
 - NuGet 发布依赖一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
-- 已发布版本：v1.0.0 / v1.0.1 / v1.0.2 / v1.0.3 / v1.0.4（v1.0.4 修复发布工作流补齐 Excel / Excel.Simple 打包推送；v1.0.3 含迭代 9：自动映射 + SimpleExcel 强类型 + 各插件自动映射 Demo + DEMOS.md；v1.0.2 含迭代 7 + 迭代 8：Excel 插件 / Excel.Simple 插件与修订）。
+- 已发布版本：v1.0.0 / v1.0.1 / v1.0.2 / v1.0.3 / v1.0.4（v1.0.4 修复发布工作流补齐 Excel / Excel.Simple 打包推送；v1.0.3 含迭代 9：自动映射 + SimpleExcel 强类型 + 各插件自动映射 Demo + DEMOS.md；v1.0.2 含迭代 7 + 迭代 8：Excel 插件 / Excel.Simple 插件与修订；v1.0.5 含迭代 12 + 13 + 14：消息 i18n + 文档内容模板多语言（Parse 占位符→null）+ Excel 版式 i18n 键 + SimpleExcel 列定义名定位）。
 
 ---
 
@@ -356,8 +356,8 @@ TemplateFrame/
 | SimpleExcel 强类型接入 | Simple 是纯静态工具、不接契约，`Read` 只返回 `object?` 行，无法像 Word 那样 `service.Parse` 出强类型 | Simple 保持最小形态：新增契约感知静态 API `SimpleExcelContract`（Write/Read/Validate，基于 `FillData`）+ 轻量服务基类 `SimpleExcelTemplateService<TData>`（无 Builder/Engine，复用基础包自动映射）；契约 = 单个 `TableElement`；表头按 DisplayName → Key 匹配、缺列 Validate 报 Missing / Parse 补 null；现有 `SimpleExcelTable` API 保留兼容（迭代 9 定） |
 | 渲染验证 | 本机无 Word/LibreOffice 时无法渲染 | 测试以 OOXML 结构断言为主（SDT 清单、行数、blip embed） |
 | 国际化（i18n） | 库的运行时消息（校验 + 异常）是中文硬编码，无法适配英文用户；文档内容（待填充/页码/默认字体）是生成文档的一部分、被回读依赖，不能跟随文化变化 | **中文为中性文化（默认，行为不变）**；英文作 en 卫星资源，按 `CurrentUICulture` 自动生效、回退中文；`TemplateValidationIssue` 增加 `MessageKey`/`MessageArgs`（公共 API 不变），`Message` 由资源生成；异常消息一并迁移；文档内容当时保持中文、不配置、不本地化（迭代 13 起改为按语言生成：占位符 / 页码 / 版式文本 / 表头经 `ITemplateLocalizer` 解析，见下条）；值格式化继续 `InvariantCulture`（确定性输出）（迭代 12 定，已落地） |
-| 文档内容 i18n（模板多语言） | 文档内容（占位符 "待填充" / 页码默认 pattern）硬编码中文，无法输出英文模板；回读"未填充"依赖占位符文本，无法与"有意留空"区分 | **迭代 13 定**：① 基础包 `ITemplateLocalizer` 抽象 + `DefaultTemplateLocalizer` 默认实现，查找顺序 **业务注入优先 → 框架 .resx（中文中性 + en 卫星）→ 键本身**；占位符一等语义 `PlaceholderText(culture)` / `IsPlaceholderText(text)`（默认 zh/en，业务可注册扩展）；② Builder 文本支持 i18n 键（键方法 `AddParagraphKey`/`AddTextKey`/`AddStaticTextKey`/`AddTableKeys` vs 字面量方法区分）；`TemplateService.BuildInitialTemplateFile(CultureInfo?)`（null=中文默认，向后兼容）；③ 占位符（Word+Excel Builder 统一走 localizer）+ 页码默认 pattern 按语言（zh "第{page}页，总{total}页" / en "Page {page} of {total}"），样式名/字体不本地化；④ **Parse 规范化（方案 3）**：Word/Excel 回读器把已知占位符规范化为 null（null=未填充、""=有意留空），不依赖模板语言；⑤ 数据值不翻译、值格式化继续 `InvariantCulture`；⑥ **语言承载 v1**：文件名/目录约定（如 `Word-DeliveryOrder-en-template.docx`），不往 docx 塞元数据；⑦ 不在范围：数据值按语言、DisplayName/表头本地化回读匹配（SimpleExcel 表头按语言匹配需语言元数据，列后续）、Excel 版式文本键（本迭代只做 Word）、同一 docx 运行时多语言（路径 B）、值格式按语言（`FormatCulture`）（迭代 13 定，进行中） |
-| SimpleExcel 列定位（迭代 14） | SimpleExcel 契约路径回读靠"表头文本 → 列"匹配，表头随语言变则无法匹配；需要语言元数据 | **迭代 14 定（列定义名定位）**：① 契约 Write 写每列定义名 `TF_<TableName>_<ColumnKey>` → 表头单元格（单格引用，数据行增删不影响，Excel 自动调整引用）；Read/Validate 列定位**分级回退**——定义名 → `TF_Table` 区域 + 表头文本匹配 → 第一个非空行 + 文本匹配，定义名指向与表头行不一致时整体回退文本匹配，重复定义名 Validate 报 Ambiguous；② 框架产物回读**语言无关**（不再需要语言元数据）；手改文件（无定义名）回退仍按中文 DisplayName → Key，表头按语言匹配继续搁置（需语言元数据，列后续）；③ Excel 灵活版式同轮补 i18n 键 `AddTextKey`/`AddTableKeys`（命名区域定位，表头本地化不影响回读）；④ 原始 `SimpleExcelTable` 静态 API 不改（迭代 14 定，进行中） |
+| 文档内容 i18n（模板多语言） | 文档内容（占位符 "待填充" / 页码默认 pattern）硬编码中文，无法输出英文模板；回读"未填充"依赖占位符文本，无法与"有意留空"区分 | **迭代 13 定**：① 基础包 `ITemplateLocalizer` 抽象 + `DefaultTemplateLocalizer` 默认实现，查找顺序 **业务注入优先 → 框架 .resx（中文中性 + en 卫星）→ 键本身**；占位符一等语义 `PlaceholderText(culture)` / `IsPlaceholderText(text)`（默认 zh/en，业务可注册扩展）；② Builder 文本支持 i18n 键（键方法 `AddParagraphKey`/`AddTextKey`/`AddStaticTextKey`/`AddTableKeys` vs 字面量方法区分）；`TemplateService.BuildInitialTemplateFile(CultureInfo?)`（null=中文默认，向后兼容）；③ 占位符（Word+Excel Builder 统一走 localizer）+ 页码默认 pattern 按语言（zh "第{page}页，总{total}页" / en "Page {page} of {total}"），样式名/字体不本地化；④ **Parse 规范化（方案 3）**：Word/Excel 回读器把已知占位符规范化为 null（null=未填充、""=有意留空），不依赖模板语言；⑤ 数据值不翻译、值格式化继续 `InvariantCulture`；⑥ **语言承载 v1**：文件名/目录约定（如 `Word-DeliveryOrder-en-template.docx`），不往 docx 塞元数据；⑦ 不在范围：数据值按语言、DisplayName/表头本地化回读匹配（SimpleExcel 表头按语言匹配需语言元数据，列后续）、Excel 版式文本键（本迭代只做 Word）、同一 docx 运行时多语言（路径 B）、值格式按语言（`FormatCulture`）（迭代 13 定，已落地） |
+| SimpleExcel 列定位（迭代 14） | SimpleExcel 契约路径回读靠"表头文本 → 列"匹配，表头随语言变则无法匹配；需要语言元数据 | **迭代 14 定（列定义名定位）**：① 契约 Write 写每列定义名 `TF_<TableName>_<ColumnKey>` → 表头单元格（单格引用，数据行增删不影响，Excel 自动调整引用）；Read/Validate 列定位**分级回退**——定义名 → `TF_Table` 区域 + 表头文本匹配 → 第一个非空行 + 文本匹配，定义名指向与表头行不一致时整体回退文本匹配，重复定义名 Validate 报 Ambiguous；② 框架产物回读**语言无关**（不再需要语言元数据）；手改文件（无定义名）回退仍按中文 DisplayName → Key，表头按语言匹配继续搁置（需语言元数据，列后续）；③ Excel 灵活版式同轮补 i18n 键 `AddTextKey`/`AddTableKeys`（命名区域定位，表头本地化不影响回读）；④ 原始 `SimpleExcelTable` 静态 API 不改（迭代 14 定，已落地） |
 
 ---
 

@@ -2,7 +2,7 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
-## [Unreleased]
+## [1.0.5] - 2026-08-08
 
 ### 新增
 - 迭代 14：**Excel 版式 i18n 键 + SimpleExcel 列定义名定位**——灵活版式新增 `AddTextKey` / `AddTableKeys`（版式文本/表头按语言解析，命名区域仍用列 Key）；`SimpleExcelContract.Write(..., culture, localizer)` 写本地化表头 + 每列定义名 `TF_<TableName>_<ColumnKey>` → 表头单元格；`SimpleExcelTemplateService.BuildTemplate/Fill` 增加 culture/localizer
@@ -20,6 +20,7 @@
 - 迭代 12：测试断言从中文消息文本改为文化中立锚点（Code/MessageKey/标识符）；新增中英双语用例（LocalizationTests × 4，共 151 用例）
 
 ### 文档
+- v1.0.5 发布（2026-08-08）：迭代 12 + 13 + 14 一并发布——消息 i18n（中英双语）+ 文档内容模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null）+ Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关）；四包统一 1.0.5
 - 迭代 14 实现：Excel 灵活版式 `AddTextKey`/`AddTableKeys`、SimpleExcel 列定义名定位 + 分级回退 + Ambiguous（DESIGN §9 决策「SimpleExcel 列定位」已落地）；Demo Excel.Simple.I18n 独立演示中英表头 + 定义名回读（语言无关）；插件 README / DEMOS / CHANGELOG 同步
 - 迭代 14 规划：**Excel 版式 i18n 键 + SimpleExcel 列定义名定位**——灵活版式补 `AddTextKey` / `AddTableKeys`；SimpleExcel 契约路径写每列定义名 `TF_<TableName>_<ColumnKey>`（框架产物回读语言无关），Read/Validate 分级回退（定义名 → TF_Table 区域+文本 → 首非空行+文本），重复定义名 Ambiguous；手改文件表头按语言匹配继续搁置（ROADMAP/DESIGN/CHANGELOG 同步）
 - 迭代 13 完成：ROADMAP 状态总览与迭代 13 小节、DESIGN §7 迭代计划翻 ✅（2026-08-08）；四包 pack 验证 en 卫星 + 业务可覆盖

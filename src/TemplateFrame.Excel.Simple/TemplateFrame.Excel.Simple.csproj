@@ -10,7 +10,7 @@
     <Description>TemplateFrame 的简化 Excel 插件：只支持「标题行 + 数据行」的表格导入/导出（无命名区域/合并/图片/页面设置）</Description>
 
     <!-- 打包准备（迭代 8 修订）：XML doc + NuGet 元数据；版本与 git tag 一致（见 docs/PUBLISHING.md） -->
-    <Version>1.0.4</Version>
+    <Version>1.0.5</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>TemplateFrame.Excel.Simple</PackageId>
     <Authors>CSJ608</Authors>
