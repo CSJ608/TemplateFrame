@@ -58,4 +58,10 @@
   <data name="Validation.DataTableRowMissingColumn" xml:space="preserve">
     <value>Table "{0}" row {1} is missing required column "{2}".</value>
   </data>
+  <data name="Document.Placeholder" xml:space="preserve">
+    <value>To be filled</value>
+  </data>
+  <data name="Document.PageNumberPattern" xml:space="preserve">
+    <value>Page {page} of {total}</value>
+  </data>
 </root>

@@ -1,9 +1,10 @@
+using System.Globalization;
 using TemplateFrame.Builder;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Engine;
-using TemplateFrame.Mapping;
 using TemplateFrame.Localization;
+using TemplateFrame.Mapping;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Services;
@@ -16,22 +17,30 @@ namespace TemplateFrame.Services;
 /// 即可获得强类型 <c>BuildInitialTemplateFile / Validate / ValidateData / Fill / Parse</c>。
 /// 契约元素声明 <see cref="TemplateElement.DataPath"/> 后，<see cref="MapToData"/> / <see cref="MapFromData"/>
 /// 默认走 <see cref="DataPathMapper"/> 自动映射（迭代 9）；未声明 DataPath 时保持"需重写"语义。
+/// 迭代 13：<see cref="BuildInitialTemplateFile(CultureInfo?)"/> 支持按文化生成模板
+/// （null = 中文默认，向后兼容）；<see cref="Localizer"/> 用于版式 i18n 键 / 占位符 / 页码解析。
 /// </summary>
 public abstract class TemplateService<TData, TBuilder>
     where TBuilder : class, ITemplateBuilder
 {
     private readonly ITemplateEngine _engine;
+    private readonly ITemplateLocalizer _localizer;
     private readonly Lazy<TemplateContract> _contract;
 
-    /// <summary>以引擎实现创建服务（业务服务构造函数传入具体插件引擎，如 <c>WordTemplateEngine</c>）。</summary>
-    protected TemplateService(ITemplateEngine engine)
+    /// <summary>以引擎实现创建服务（业务服务构造函数传入具体插件引擎，如 <c>WordTemplateEngine</c>）；
+    /// <paramref name="localizer"/> 为 null 时使用 <see cref="DefaultTemplateLocalizer.Instance"/>。</summary>
+    protected TemplateService(ITemplateEngine engine, ITemplateLocalizer? localizer = null)
     {
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
+        _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
         _contract = new Lazy<TemplateContract>(DefineContract);
     }
 
     /// <summary>当前契约（惰性求值，来自 <see cref="DefineContract"/>）。</summary>
     public TemplateContract Contract => _contract.Value;
+
+    /// <summary>当前本地化器（迭代 13：版式 i18n 键 / 占位符 / 页码解析；业务可注入覆盖）。</summary>
+    protected ITemplateLocalizer Localizer => _localizer;
 
     /// <summary>当前构建用的具体插件构建器（仅在 <see cref="BuildInitialTemplate"/> 内有效，类型即插件类型）。</summary>
     protected TBuilder Builder { get; private set; } = null!;
@@ -42,10 +51,14 @@ public abstract class TemplateService<TData, TBuilder>
     /// <summary>组装初始版式：直接用 <see cref="Builder"/> 的具体实例调用插件全部能力。</summary>
     protected abstract void BuildInitialTemplate();
 
-    /// <summary>生成初始模板文件流（含内容控件 SDT）。</summary>
-    public Stream BuildInitialTemplateFile()
+    /// <summary>
+    /// 生成初始模板文件流（含内容控件 SDT）。
+    /// <paramref name="culture"/>：模板内容语言（占位符 / 页码 / 版式 i18n 键按此解析）；
+    /// null = 中文默认（行为与迭代 12 及之前一致，向后兼容）。
+    /// </summary>
+    public Stream BuildInitialTemplateFile(CultureInfo? culture = null)
     {
-        var builder = _engine.CreateBuilder() as TBuilder
+        var builder = _engine.CreateBuilder(_localizer, culture) as TBuilder
             ?? throw new InvalidOperationException(Sr.Get("Service.WrongBuilderType", _engine.GetType().Name, typeof(TBuilder).Name));
         Builder = builder;
         try

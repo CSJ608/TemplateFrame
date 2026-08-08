@@ -58,4 +58,10 @@
   <data name="Validation.DataTableRowMissingColumn" xml:space="preserve">
     <value>表格 "{0}" 第 {1} 行缺少必填列 "{2}"。</value>
   </data>
+  <data name="Document.Placeholder" xml:space="preserve">
+    <value>待填充</value>
+  </data>
+  <data name="Document.PageNumberPattern" xml:space="preserve">
+    <value>第{page}页，总{total}页</value>
+  </data>
 </root>
