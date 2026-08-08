@@ -6,14 +6,13 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <LangVersion>latest</LangVersion>
-    <RootNamespace>TemplateFrame.Demo.Word.ContentI18n</RootNamespace>
-    <AssemblyName>TemplateFrame.Demo.Word.ContentI18n</AssemblyName>
+    <RootNamespace>TemplateFrame.Demo.Excel.Simple.I18n</RootNamespace>
+    <AssemblyName>TemplateFrame.Demo.Excel.Simple.I18n</AssemblyName>
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\TemplateFrame\TemplateFrame.csproj" />
-    <ProjectReference Include="..\..\src\TemplateFrame.Word\TemplateFrame.Word.csproj" />
+    <ProjectReference Include="..\..\src\TemplateFrame.Excel.Simple\TemplateFrame.Excel.Simple.csproj" />
   </ItemGroup>
 
 </Project>

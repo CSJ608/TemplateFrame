@@ -1,50 +1,50 @@
 using System.Globalization;
-using TemplateFrame.Demo.Word.I18n;
+using TemplateFrame.Demo.Excel.I18n;
 using TemplateFrame.Localization;
 using TemplateFrame.Validation;
 
-// i18n 演示（Word 插件）：
-//   迭代 12 —— 同一套操作在 zh-CN（中文默认）与 en（英文）两种文化下执行，展示库的校验/异常消息随 CurrentUICulture 自动切换；
-//   迭代 13 —— 文档内容中英模板：同一版式代码输出 zh/en 两份模板 + 填充 + 回读（未填充占位符 → null）。
-var service = new I18nWordTemplateService();
+// i18n 演示（Excel 插件，作为一个整体）：
+//   迭代 12 —— 消息层：同一套操作在 zh-CN（中文默认）与 en（英文）两种文化下执行，Validate/Fill 消息随 CurrentUICulture 自动切换；
+//   迭代 13/14 —— 文档内容：同一版式代码输出 zh/en 两份模板（版式文本 / 表头 / 占位符按语言）+ 填充 + 回读（未填充 → null）。
+var messageService = new I18nExcelMessageTemplateService();
 
 var dir = args.Length > 0
     ? args[0]
-    : Path.Combine(Path.GetTempPath(), "TemplateFrame.Demo.Word.I18n");
+    : Path.Combine(Path.GetTempPath(), "TemplateFrame.Demo.Excel.I18n");
 Directory.CreateDirectory(dir);
-var templatePath = Path.Combine(dir, "Word-I18n-DeliveryOrder-template.docx");
+var messageTemplatePath = Path.Combine(dir, "Excel-I18n-DeliveryOrder-template.xlsx");
 
-Console.WriteLine($"契约：{service.Contract.Name} v{service.Contract.Version}，元素 {service.Contract.Elements.Count} 个（DataPath 自动映射）");
-foreach (var element in service.Contract.Elements)
+Console.WriteLine($"契约：{messageService.Contract.Name} v{messageService.Contract.Version}，元素 {messageService.Contract.Elements.Count} 个（DataPath 自动映射）");
+foreach (var element in messageService.Contract.Elements)
 {
     Console.WriteLine($"  - {element.Key}（{element.DisplayName}）DataPath={element.DataPath}");
 }
 
 // [1] 生成模板：故意只含「单据编号」内容控件 → 供应商 / 制单日期 缺失
-using (var template = service.BuildInitialTemplateFile())
+using (var template = messageService.BuildInitialTemplateFile())
 {
-    File.WriteAllBytes(templatePath, ReadAllBytes(template));
+    File.WriteAllBytes(messageTemplatePath, ReadAllBytes(template));
 }
 
-Console.WriteLine($"\n[1] 生成模板（仅含「单据编号」控件，契约还要求 供应商 / 制单日期）：{templatePath}");
+Console.WriteLine($"\n[1] 生成模板（仅含「单据编号」控件，契约还要求 供应商 / 制单日期）：{messageTemplatePath}");
 
 // [2][3] Validate：同一模板，两种文化下的校验消息
 Console.WriteLine("\n[2][3] Validate —— 同一份模板，两种文化的校验消息（MessageKey / MessageArgs 结构化输出）");
-RunValidation("zh-CN", service, templatePath);
-RunValidation("en", service, templatePath);
+RunValidation("zh-CN", messageService, messageTemplatePath);
+RunValidation("en", messageService, messageTemplatePath);
 
 // [4][5] Fill：模板缺必填元素 → 抛异常（默认 MissingElementPolicy.Throw），两种文化的异常消息
-var order = new DeliveryOrderData { No = "DO202608080001", Supplier = "华宇精密制造有限公司", OrderDate = new DateTime(2026, 8, 8) };
+var order = new I18nExcelData { No = "DO202608080001", Supplier = "华宇精密制造有限公司", OrderDate = new DateTime(2026, 8, 8) };
 Console.WriteLine("\n[4][5] Fill —— 缺必填元素抛异常，两种文化的异常消息");
-RunFill("zh-CN", service, templatePath, order);
-RunFill("en", service, templatePath, order);
+RunFill("zh-CN", messageService, messageTemplatePath, order);
+RunFill("en", messageService, messageTemplatePath, order);
 
 Console.WriteLine("\n[6] 结论（消息 i18n）：");
 Console.WriteLine("  - 库消息（校验 + 异常）按 CurrentUICulture 自动中英切换：中文为中性文化默认（行为不变），英文系统/调用方设 en 文化自动出英文；");
 Console.WriteLine("  - MessageKey + MessageArgs 是稳定结构（不随语言变），调用方可用它自行翻译/映射 UI 文案，不依赖库内置语言。");
 
-// ==================== 迭代 13：文档内容中英模板 ====================
-Console.WriteLine("\n════════ 文档内容 i18n：中英模板（迭代 13）════════");
+// ==================== 文档内容 i18n：中英模板 ====================
+Console.WriteLine("\n════════ 文档内容 i18n：中英模板（迭代 13/14）════════");
 
 // 业务注入本地化器：文化限定键（"zh-CN:Doc.Title" / "en:Doc.Title"，按文化祖先链回退）+ 文化中立兜底
 var contentLocalizer = new DefaultTemplateLocalizer(new Dictionary<string, string>
@@ -64,10 +64,10 @@ var contentLocalizer = new DefaultTemplateLocalizer(new Dictionary<string, strin
     ["zh-CN:Qty"] = "数量",
     ["en:Qty"] = "Qty",
 });
-var contentService = new I18nContentTemplateService(contentLocalizer);
+var contentService = new I18nExcelTemplateService(contentLocalizer);
 
-var zhTemplatePath = Path.Combine(dir, "Word-I18n-DeliveryOrder-zh-template.docx");
-var enTemplatePath = Path.Combine(dir, "Word-I18n-DeliveryOrder-en-template.docx");
+var zhTemplatePath = Path.Combine(dir, "Excel-I18n-DeliveryOrder-zh-template.xlsx");
+var enTemplatePath = Path.Combine(dir, "Excel-I18n-DeliveryOrder-en-template.xlsx");
 
 Console.WriteLine("\n[7] 生成中英两份模板（同一版式代码，null 文化 = 中文默认；语言由文件名承载）：");
 using (var zh = contentService.BuildInitialTemplateFile())
@@ -83,24 +83,23 @@ using (var en = contentService.BuildInitialTemplateFile(new CultureInfo("en")))
 Console.WriteLine($"  - zh 模板：{zhTemplatePath}");
 Console.WriteLine($"  - en 模板：{enTemplatePath}");
 Console.WriteLine($"  - 占位符：zh=\"{contentLocalizer.PlaceholderText(new CultureInfo("zh-CN"))}\"  en=\"{contentLocalizer.PlaceholderText(new CultureInfo("en"))}\"");
-Console.WriteLine($"  - 页码 pattern：zh=\"{contentLocalizer.GetString(DefaultTemplateLocalizer.PageNumberPatternKey, new CultureInfo("zh-CN"))}\"  en=\"{contentLocalizer.GetString(DefaultTemplateLocalizer.PageNumberPatternKey, new CultureInfo("en"))}\"");
 Console.WriteLine("  - 版式文本/表头按语言解析（同一版式代码，键不同 → 文案不同）");
 
 // [8] 填充：同一份数据 → 中英模板各一份填充文件
-var content = new DeliveryOrderContentData
+var content = new I18nExcelData
 {
     No = "DO202608080002",
     Supplier = "华宇精密制造有限公司",
     OrderDate = new DateTime(2026, 8, 8),
     Lines =
     [
-        new DeliveryOrderLine { RowNo = 1, MaterialName = "伺服电机", Qty = 12m },
-        new DeliveryOrderLine { RowNo = 2, MaterialName = "减速机", Qty = 6m },
+        new I18nExcelLine { RowNo = 1, MaterialName = "伺服电机", Qty = 12m },
+        new I18nExcelLine { RowNo = 2, MaterialName = "减速机", Qty = 6m },
     ],
 };
 
-var zhFilledPath = Path.Combine(dir, "Word-I18n-DeliveryOrder-zh-filled.docx");
-var enFilledPath = Path.Combine(dir, "Word-I18n-DeliveryOrder-en-filled.docx");
+var zhFilledPath = Path.Combine(dir, "Excel-I18n-DeliveryOrder-zh-filled.xlsx");
+var enFilledPath = Path.Combine(dir, "Excel-I18n-DeliveryOrder-en-filled.xlsx");
 Console.WriteLine("\n[8] 填充（同一份数据 → 中英模板各一份填充文件）：");
 using (var filled = contentService.Fill(File.OpenRead(zhTemplatePath), content))
 {
@@ -117,21 +116,21 @@ Console.WriteLine($"  - {enFilledPath}");
 
 // [9] 回读未填充模板 → 占位符规范化 null（null=未填充、""=有意留空；不依赖模板语言）
 Console.WriteLine("\n[9] 回读未填充模板（Parse 规范化：已知占位符 → null，null=未填充）：");
-var unfilled = contentService.Parse(File.OpenRead(zhTemplatePath));
-PrintContentReadback("zh 未填充", unfilled);
+PrintContentReadback("zh 未填充", contentService.Parse(File.OpenRead(zhTemplatePath)));
+PrintContentReadback("en 未填充", contentService.Parse(File.OpenRead(enTemplatePath)));
 
 // [10] 回读已填充模板 → 数据值原样（值不翻译，值格式化继续 InvariantCulture）
 Console.WriteLine("\n[10] 回读已填充模板（数据值原样、不翻译，值格式化 InvariantCulture）：");
-var readback = contentService.Parse(File.OpenRead(zhFilledPath));
-PrintContentReadback("zh 已填充", readback);
+PrintContentReadback("zh 已填充", contentService.Parse(File.OpenRead(zhFilledPath)));
+PrintContentReadback("en 已填充", contentService.Parse(File.OpenRead(enFilledPath)));
 
 Console.WriteLine("\n[11] 结论（文档内容 i18n）：");
-Console.WriteLine("  - 同一版式代码输出 zh/en 两份模板：占位符/页码/版式文本/表头按语言解析，样式名/字体不本地化；");
+Console.WriteLine("  - 同一版式代码输出 zh/en 两份模板：版式文本/表头/占位符按语言解析，样式名/字体不本地化；");
 Console.WriteLine("  - Parse 把已知占位符规范化为 null（null=未填充、\"\"=有意留空），不依赖模板语言；");
 Console.WriteLine("  - 数据值原样（不翻译），值格式化继续 InvariantCulture；");
-Console.WriteLine("  - 语言承载 v1：文件名/目录约定（Word-I18n-DeliveryOrder-en-template.docx），不往 docx 塞元数据。");
+Console.WriteLine("  - 语言承载 v1：文件名/目录约定（Excel-I18n-DeliveryOrder-en-template.xlsx），不往 xlsx 塞元数据。");
 
-static void RunValidation(string cultureName, I18nWordTemplateService service, string templatePath)
+static void RunValidation(string cultureName, I18nExcelMessageTemplateService service, string templatePath)
 {
     WithCulture(cultureName, () =>
     {
@@ -151,14 +150,14 @@ static void RunValidation(string cultureName, I18nWordTemplateService service, s
     });
 }
 
-static void RunFill(string cultureName, I18nWordTemplateService service, string templatePath, DeliveryOrderData order)
+static void RunFill(string cultureName, I18nExcelMessageTemplateService service, string templatePath, I18nExcelData data)
 {
     WithCulture(cultureName, () =>
     {
         try
         {
             using var stream = File.OpenRead(templatePath);
-            using var filled = service.Fill(stream, order);
+            using var filled = service.Fill(stream, data);
             Console.WriteLine($"\n  [{cultureName}] Fill：成功（不应发生）");
         }
         catch (Exception ex)
@@ -169,7 +168,7 @@ static void RunFill(string cultureName, I18nWordTemplateService service, string 
     });
 }
 
-static void PrintContentReadback(string label, DeliveryOrderContentData data)
+static void PrintContentReadback(string label, I18nExcelData data)
 {
     Console.WriteLine($"  [{label}] No={FormatValue(data.No)}  Supplier={FormatValue(data.Supplier)}  OrderDate={FormatDate(data.OrderDate)}  Lines={data.Lines.Count} 行");
     foreach (var line in data.Lines)
