@@ -16,6 +16,7 @@
 - 迭代 12：测试断言从中文消息文本改为文化中立锚点（Code/MessageKey/标识符）；新增中英双语用例（LocalizationTests × 4，共 151 用例）
 
 ### 文档
+- 迭代 14 规划：**Excel 版式 i18n 键 + SimpleExcel 列定义名定位**——灵活版式补 `AddTextKey` / `AddTableKeys`；SimpleExcel 契约路径写每列定义名 `TF_<TableName>_<ColumnKey>`（框架产物回读语言无关），Read/Validate 分级回退（定义名 → TF_Table 区域+文本 → 首非空行+文本），重复定义名 Ambiguous；手改文件表头按语言匹配继续搁置（ROADMAP/DESIGN/CHANGELOG 同步）
 - 迭代 13 完成：ROADMAP 状态总览与迭代 13 小节、DESIGN §7 迭代计划翻 ✅（2026-08-08）；四包 pack 验证 en 卫星 + 业务可覆盖
 - 迭代 13 规划 / 决策：docs/DESIGN.md §7 迭代计划标记进行中、§9 决策记录新增「文档内容 i18n（模板多语言）」（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化；语言承载 v1 文件名约定；不在范围清单）；docs/ROADMAP.md 状态总览 + 迭代 13 小节（勾选进行中）+ 每轮启动命令；CHANGELOG 注明 Parse 行为变化（占位符→null）
 - 迭代 12：新增 `README.en.md`（英文版，主 README 保持中文并加语言入口）；基础包公共 API 补英文摘要（XML doc 双语）

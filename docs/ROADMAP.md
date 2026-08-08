@@ -19,6 +19,7 @@
 | 11 | 图片插件 `TemplateFrame.Image` | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | **12** | **国际化（i18n）：运行时消息中英双语（中文默认 + 英文按 CurrentUICulture 自动）** | ✅ 已完成 |
 | **13** | **文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化）** | ✅ 已完成（见下） |
+| **14** | **Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退）** | 🔄 进行中（见下） |
 
 > 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
@@ -234,7 +235,37 @@
 
 ---
 
+## 迭代 14：Excel 版式 i18n 键 + SimpleExcel 列定义名定位 —— 进行中
+
+> **状态**：🔄 进行中（2026-08-08）。Excel 灵活版式补 i18n 键方法；SimpleExcel 契约路径用"每列定义名"定位列（框架产物回读语言无关），表头文本匹配作分级回退。
+
+**目标**：补齐 Excel 侧的文档内容 i18n——灵活版式支持版式文本 / 表头键方法（与 Word 迭代 13 同模式）；SimpleExcel 契约路径把"表头文本匹配列"升级为"每列定义名定位 + 分级回退"，让框架产物的回读与表头语言解耦（不再需要语言元数据）。
+
+### 范围
+1. **Excel 灵活版式 i18n 键**（TemplateFrame.Excel）：`AddTextKey(cellAddress, key, format?)` / `AddTableKeys(key, columnKeys, format?, startCell?)`——表头/文本按语言解析，命名区域（`TF_<Table>_<Column>`）仍用列 Key，与 Word 迭代 13 同模式（键方法 vs 字面量方法区分）
+2. **SimpleExcel 契约路径列定义名化**：
+   - `SimpleExcelContract.Write(..., CultureInfo? culture = null, ITemplateLocalizer? localizer = null)`：culture 非空时表头按语言解析（本地化键 = 列 Key，未注册覆盖回退 DisplayName/Key）；同时写每列定义名 `TF_<TableName>_<ColumnKey>` → 表头单元格（单格引用，数据行增删不影响）
+   - `SimpleExcelContract.Read` / `Validate` 列定位**分级回退**：① 每列定义名 → ② `TF_Table` 区域 + 表头文本匹配 → ③ 第一个非空行 + 表头文本匹配；定义名指向与表头行不一致时整体回退文本匹配；重复定义名 Validate 报 Ambiguous
+   - `SimpleExcel.Write` 增加可选 `columnKeys` 参数写每列定义名（默认不写，向后兼容）；`SimpleExcelTemplateService.BuildTemplate/Fill` 增加可选 culture/localizer（模板自描述）
+3. **测试**：Excel 键方法中英断言；SimpleExcel 定义名回读（en 写 → 无语言读 → 值匹配）、删定义名回退中文表头、重复定义名 Ambiguous、缺列补 null；既有 17 用例保持绿
+4. **Demo**：`samples/TemplateFrame.Demo.Excel.Simple` 新增"中英表头 + 定义名回读"部分（同一数据 zh/en 两份填充，en 文件回读语言无关）
+5. **文档**：DESIGN §9 决策记录、ROADMAP 迭代 14 小节（勾选进行中）、CHANGELOG
+
+### 不在范围
+- SimpleExcel 手改文件（无定义名）的表头**按语言匹配**（仍需语言元数据，继续搁置——手改文件回退仍按中文 DisplayName → Key）
+- 值格式按语言（FormatCulture）；数据值翻译；原始 `SimpleExcelTable` 静态 API 与 `SimpleExcel.Read` 行为不改
+
+### 验收
+- `dotnet build TemplateFrame.slnx && dotnet test` 全绿
+- `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple` 输出中英表头两份填充 + 定义名回读（语言无关）
+
+### 约束
+- 提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 v* tag；不改设计文档中未规划内容；CI/发布工作流不手动触发
+
+---
+
 ## 每轮启动命令
+
 
 ### 迭代 7 启动命令（复制即用）
 
@@ -272,7 +303,26 @@
 约束：提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 v* tag；不改设计文档中未规划内容；CI/发布工作流不手动触发。
 `
 
+### 迭代 14 启动命令（复制即用）
+
+```text
+继续 TemplateFrame 迭代 14（Excel 版式 i18n 键 + SimpleExcel 列定义名定位）。先通读 docs/DESIGN.md（§2 三层架构、§9 风险与决策记录）与 docs/ROADMAP.md（迭代 14 小节），阅读 src/TemplateFrame.Excel/、src/TemplateFrame.Excel.Simple/、test/TemplateFrame.Excel.Tests、test/TemplateFrame.Excel.Simple.Tests、samples/TemplateFrame.Demo.Excel.Simple。迭代 13（Word/Excel 占位符 + 页码 + i18n 键 + Parse 占位符→null）为对照基线。
+
+迭代 14 范围（用户已确认，按本指令执行）：
+1. Excel 灵活版式 i18n 键：AddTextKey / AddTableKeys（表头/文本按语言解析，命名区域仍用列 Key，与 Word 同模式）
+2. SimpleExcel 契约路径列定义名化：Write 增加 culture/localizer（表头按语言）+ 每列定义名 TF_<TableName>_<ColumnKey> → 表头单元格；Read/Validate 分级回退（定义名 → TF_Table 区域+文本 → 首非空行+文本）；重复定义名 Ambiguous；SimpleExcel.Write 增加可选 columnKeys；SimpleExcelTemplateService.BuildTemplate/Fill 增加 culture/localizer
+3. 测试：Excel 键方法中英 + SimpleExcel 定义名回读/回退/Ambiguous/缺列补 null；既有用例保持绿
+4. Demo：Excel.Simple 新增"中英表头 + 定义名回读"部分
+5. 文档：DESIGN §9 决策记录、ROADMAP 迭代 14 小节（勾选进行中）、CHANGELOG
+
+不在范围：SimpleExcel 手改文件表头按语言匹配（语言元数据继续搁置）；值格式按语言；数据值翻译；原始 SimpleExcelTable API 不改。
+
+验收：dotnet build TemplateFrame.slnx && dotnet test 全绿；dotnet run --project samples/TemplateFrame.Demo.Excel.Simple 输出中英表头两份填充 + 定义名回读（语言无关）。
+约束：提交用 Conventional Commits；不推 v* tag；不改设计文档中未规划内容；CI/发布工作流不手动触发。
+```
+
 ### 通用模板（后续迭代替换 {N} 与 {主题}）
+
 
 ```text
 继续 TemplateFrame 迭代 {N}（{主题}）。先通读 docs/DESIGN.md（重点 §2 三层架构、§3.3 数据形状、§7 迭代计划）与 docs/ROADMAP.md（迭代 {N} 范围小节），阅读相关现有代码与上一迭代成果。严格按设计实现，不要偏离；提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）。
