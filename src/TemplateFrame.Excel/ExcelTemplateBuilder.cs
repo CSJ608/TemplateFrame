@@ -103,6 +103,10 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
+    /// <summary>写按 i18n 键解析的文本到单元格（迭代 14：版式文本按语言解析；键 → 文案查找见 <see cref="TemplateFrame.Localization.ITemplateLocalizer"/>）。</summary>
+    public ExcelTemplateBuilder AddTextKey(string cellAddress, string key, TextFormat? format = null)
+        => AddText(cellAddress, _localizer.GetString(key, _culture), format);
+
     /// <summary>放置一个文本元素：占位文本按语言（默认 zh "待填充" / en "To be filled"，经本地化器解析）+ 命名区域 <c>TF_&lt;Key&gt;</c> → 单元格。</summary>
     public ExcelTemplateBuilder AddElement(string key, string cellAddress, TextFormat? format = null)
     {
@@ -123,6 +127,25 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         IReadOnlyList<string> columns,
         TableFormat? format = null,
         string startCell = "A1")
+        => AddTableCore(key, columns, format, startCell, localizeHeaders: false);
+
+    /// <summary>
+    /// 追加表格（迭代 14：i18n 键版）——<paramref name="columnKeys"/> 是本地化键，表头按语言解析；
+    /// 但每列命名区域 <c>TF_&lt;TableKey&gt;_&lt;ColumnKey&gt;</c> 仍用列 Key（不本地化，保证 Fill/Parse 按命名区域匹配）。
+    /// </summary>
+    public ExcelTemplateBuilder AddTableKeys(
+        string key,
+        IReadOnlyList<string> columnKeys,
+        TableFormat? format = null,
+        string startCell = "A1")
+        => AddTableCore(key, columnKeys, format, startCell, localizeHeaders: true);
+
+    private ExcelTemplateBuilder AddTableCore(
+        string key,
+        IReadOnlyList<string> columns,
+        TableFormat? format,
+        string startCell,
+        bool localizeHeaders)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(columns);
@@ -148,7 +171,8 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         {
             var address = ExcelAddressHelper.CellReference(startRow, startCol + i);
             var cell = GetOrCreateCell(address);
-            SetInlineString(cell, columns[i]);
+            var headerText = localizeHeaders ? _localizer.GetString(columns[i], _culture) : columns[i];
+            SetInlineString(cell, headerText);
             ApplyStyle(cell, format?.HeaderFormat, format?.Bordered ?? true, format?.Alignment, format?.VerticalAlignment);
         }
 

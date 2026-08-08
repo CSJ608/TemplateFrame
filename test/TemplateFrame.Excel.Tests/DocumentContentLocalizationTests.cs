@@ -153,4 +153,35 @@ public sealed class DocumentContentLocalizationTests
 
         return cell.InlineString?.Text?.Text ?? cell.CellValue?.Text ?? string.Empty;
     }
+
+
+    [Fact]
+    public void Build_English_AddTextKeyAndAddTableKeys_LocalizeCellAndHeaders_KeepNamedRanges()
+    {
+        var localizer = new DefaultTemplateLocalizer(new Dictionary<string, string>
+        {
+            ["en:Doc.Title"] = "Materials",
+            ["en:Code"] = "Code",
+            ["en:Name"] = "Material Name",
+        });
+        using var stream = BuildTemplate(b =>
+        {
+            b.AddTextKey("A1", "Doc.Title", new TextFormat { Bold = true });
+            b.AddTableKeys("Materials", ["Code", "Name"], new TableFormat { Bordered = true }, "A3");
+        }, localizer, En);
+
+        Assert.Equal("Materials", CellText(stream, "A1"));
+        Assert.Equal("Code", CellText(stream, "A3"));       // 表头按语言解析
+        Assert.Equal("Material Name", CellText(stream, "B3"));
+
+        // 命名区域仍用列 Key（不本地化），保证 Fill/Parse 按命名区域匹配
+        using var document = SpreadsheetDocument.Open(stream, false);
+        var names = document.WorkbookPart!.Workbook.DefinedNames!
+            .Elements<DefinedName>()
+            .Select(d => d.Name!.Value!)
+            .ToList();
+        Assert.Contains("TF_Materials_Code", names);
+        Assert.Contains("TF_Materials_Name", names);
+        Assert.DoesNotContain("TF_Materials_Material Name", names);
+    }
 }
