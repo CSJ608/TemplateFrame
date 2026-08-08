@@ -1,5 +1,7 @@
+using System.Globalization;
 using TemplateFrame.Contract;
 using TemplateFrame.Excel.Simple;
+using TemplateFrame.Localization;
 
 namespace TemplateFrame.Demo.Excel.Simple;
 
@@ -63,6 +65,34 @@ internal static class Program
 
         Console.WriteLine($"\n[3] 回读：{loaded.Items.Count} 行（强类型 MaterialsData）");
         foreach (var item in loaded.Items)
+        {
+            Console.WriteLine($"    {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");
+        }
+
+        // [4] 中英表头 + 定义名回读（迭代 14）：同一数据写英文表头（每列定义名 TF_Table_<列Key> → 表头单元格），
+        //     回读不依赖表头语言——按定义名定位列（语言无关，无需知道文件语言）
+        var enLocalizer = new DefaultTemplateLocalizer(new Dictionary<string, string>
+        {
+            ["en:编码"] = "Code",
+            ["en:名称"] = "Name",
+            ["en:基本单位"] = "Unit",
+            ["en:包装规格"] = "Package",
+            ["en:型号"] = "Model",
+        });
+        var enFilledPath = Path.Combine(dir, "Excel-Simple-Materials-filled-en.xlsx");
+        using (var enFilled = service.Fill(materials, options, new CultureInfo("en"), enLocalizer))
+        {
+            File.WriteAllBytes(enFilledPath, ((MemoryStream)enFilled).ToArray());
+        }
+
+        Console.WriteLine($"\n[4] 英文表头填充（表头按语言 + 每列定义名标记表头单元格）：{enFilledPath}");
+        Console.WriteLine($"    英文表头：{string.Join(" | ", table.Columns.Select(c => enLocalizer.GetString(c.Key, new CultureInfo("en"))))}");
+        Console.WriteLine("    → 回读走每列定义名定位（语言无关），不依赖表头文本匹配");
+
+        using var enInput = File.OpenRead(enFilledPath);
+        var enLoaded = service.Parse(enInput, options);
+        Console.WriteLine($"\n[4] 英文文件回读（定义名定位，语言无关）：{enLoaded.Items.Count} 行（强类型 MaterialsData）");
+        foreach (var item in enLoaded.Items)
         {
             Console.WriteLine($"    {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");
         }
