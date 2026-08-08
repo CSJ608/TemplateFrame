@@ -11,7 +11,7 @@
 - **四个操作**：`BuildInitialTemplateFile` / `Validate` / `Fill`（强类型）/ `Parse`（强类型回读）
 - **插件化**：已支持 Word / Excel（灵活版式）/ Excel.Simple（标题行+数据行的简单表格）；Demo 覆盖**手写映射**与**DataPath 自动映射**两种服务写法；未来 WPS Word、标签模板
 
-设计文档见 [docs/DESIGN.md](docs/DESIGN.md)，迭代路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)，**Demo 使用说明见 [docs/DEMOS.md](docs/DEMOS.md)**（7 个 Demo：Word/Excel/Excel.Simple × 手写映射/自动映射 + Word i18n 演示：消息层 + 文档内容中英模板），发布说明见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
+设计文档见 [docs/DESIGN.md](docs/DESIGN.md)，迭代路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)，**Demo 使用说明见 [docs/DEMOS.md](docs/DEMOS.md)**（8 个 Demo：手动映射 Word/Excel + 自动映射 Word/Excel/Excel.Simple + i18n Word/Excel/Excel.Simple 各一（消息层 + 文档内容）），发布说明见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
 
 ## 核心思想
 

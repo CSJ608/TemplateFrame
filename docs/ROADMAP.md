@@ -207,7 +207,7 @@
 
 ## 迭代 13：文档内容 i18n（模板多语言）—— 已完成
 
-> **状态**：✅ 已完成（2026-08-08）。`dotnet build TemplateFrame.slnx && dotnet test` 全绿（170 用例）；`dotnet run --project samples/TemplateFrame.Demo.Word.I18n` 输出消息中英切换、`dotnet run --project samples/TemplateFrame.Demo.Word.ContentI18n` 输出中英两份模板 + 填充 + 回读（未填充→null，独立 Demo）；`dotnet pack` 四包均含 en 卫星、业务可覆盖。
+> **状态**：✅ 已完成（2026-08-08）。`dotnet build TemplateFrame.slnx && dotnet test` 全绿（170 用例）；`dotnet run --project samples/TemplateFrame.Demo.Word.I18n` 输出消息中英切换 + 中英两份模板 + 填充 + 回读（未填充→null，合并整体演示）；新增 `samples/TemplateFrame.Demo.Excel.I18n` / `samples/TemplateFrame.Demo.Excel.Simple.I18n`（Excel 系 i18n，2026-08-08 用户调整）；`dotnet pack` 四包均含 en 卫星、业务可覆盖。
 
 **目标**：文档内容（占位符 / 页码默认 pattern / 版式文本 / 表头）支持多语言——中文为中性文化默认（行为不变），英文按传入文化生成；回读把已知占位符规范化为 null（null=未填充、""=有意留空），不依赖模板语言。
 
@@ -219,7 +219,7 @@
 5. 数据值维持原样（不翻译；值格式化继续 InvariantCulture）
 6. 语言承载 v1：文件名/目录约定（如 Word-DeliveryOrder-en-template.docx），不往 docx 塞元数据
 7. 测试：中英模板生成断言（版式文本/表头/占位符/页码）+ Parse 占位符规范化（未填充→null、留空→""）+ localizer 业务覆盖；**既有 "待填充" 断言全部改 Assert.Null**
-8. Demo：文档内容 i18n **独立为** `samples/TemplateFrame.Demo.Word.ContentI18n`（同一版式代码输出 zh/en 两份模板 + 填充 + 回读，未填充→null）；`samples/TemplateFrame.Demo.Word.I18n` 保持消息层 i18n 单一演示（2026-08-08 拆分）
+8. Demo（2026-08-08 用户调整）：i18n **每插件一个整体演示**——`samples/TemplateFrame.Demo.Word.I18n` 合并消息层 + 文档内容；新增 `samples/TemplateFrame.Demo.Excel.I18n`（AddTextKey/AddTableKeys 中英模板 + 回读）与 `samples/TemplateFrame.Demo.Excel.Simple.I18n`（中英表头 + 定义名回读）；`samples/TemplateFrame.Demo.Excel.Simple` 回归非 i18n
 9. 文档：DESIGN §9 决策记录、ROADMAP 迭代 13 小节（勾选进行中）、CHANGELOG（注明 Parse 行为变化：占位符→null）
 
 ### 不在范围
@@ -227,7 +227,7 @@
 
 ### 验收
 - dotnet build TemplateFrame.slnx && dotnet test 全绿
-- dotnet run --project samples/TemplateFrame.Demo.Word.I18n 输出消息中英切换；dotnet run --project samples/TemplateFrame.Demo.Word.ContentI18n 输出中英两份模板 + 填充 + 回读（未填充→null）
+- dotnet run --project samples/TemplateFrame.Demo.Word.I18n / samples/TemplateFrame.Demo.Excel.I18n / samples/TemplateFrame.Demo.Excel.Simple.I18n 各输出消息中英切换 + 中英模板/表头 + 填充 + 回读（未填充→null；Excel.Simple 回读语言无关）
 - 默认不带语言 = 中文（行为不变）；dotnet pack 四包（en 卫星 + 业务可覆盖）
 
 ### 约束
@@ -248,7 +248,7 @@
    - `SimpleExcelContract.Read` / `Validate` 列定位**分级回退**：① 每列定义名 → ② `TF_Table` 区域 + 表头文本匹配 → ③ 第一个非空行 + 表头文本匹配；定义名指向与表头行不一致时整体回退文本匹配；重复定义名 Validate 报 Ambiguous
    - `SimpleExcel.Write` 增加可选 `columnKeys` 参数写每列定义名（默认不写，向后兼容）；`SimpleExcelTemplateService.BuildTemplate/Fill` 增加可选 culture/localizer（模板自描述）
 3. **测试**：Excel 键方法中英断言；SimpleExcel 定义名回读（en 写 → 无语言读 → 值匹配）、删定义名回退中文表头、重复定义名 Ambiguous、缺列补 null；既有 17 用例保持绿
-4. **Demo**：`samples/TemplateFrame.Demo.Excel.Simple` 新增"中英表头 + 定义名回读"部分（同一数据 zh/en 两份填充，en 文件回读语言无关）
+4. **Demo（2026-08-08 用户调整）**：i18n 独立为 `samples/TemplateFrame.Demo.Excel.Simple.I18n`（中英表头模板/填充 + 定义名回读语言无关 + 消息层 Validate 中英）；`samples/TemplateFrame.Demo.Excel.Simple` 回归非 i18n
 5. **文档**：DESIGN §9 决策记录、ROADMAP 迭代 14 小节（勾选进行中）、CHANGELOG
 
 ### 不在范围
@@ -257,7 +257,7 @@
 
 ### 验收
 - `dotnet build TemplateFrame.slnx && dotnet test` 全绿
-- `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple` 输出中英表头两份填充 + 定义名回读（语言无关）
+- `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple.I18n` 输出中英表头模板/填充 + 定义名回读（语言无关）+ 消息层 Validate 中英
 
 ### 约束
 - 提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 v* tag；不改设计文档中未规划内容；CI/发布工作流不手动触发
@@ -294,7 +294,7 @@
 5. 数据值维持原样（不翻译；值格式化继续 InvariantCulture）
 6. 语言承载 v1：文件名/目录约定（如 Word-DeliveryOrder-en-template.docx），不往 docx 塞元数据
 7. 测试：中英模板生成断言（版式文本/表头/占位符/页码）+ Parse 占位符规范化（未填充→null、留空→""）+ localizer 业务覆盖；既有 "待填充" 断言全部改 Assert.Null
-8. Demo：文档内容 i18n **独立为** `samples/TemplateFrame.Demo.Word.ContentI18n`（同一版式代码输出 zh/en 两份模板 + 填充 + 回读，未填充→null）；`samples/TemplateFrame.Demo.Word.I18n` 保持消息层 i18n 单一演示（2026-08-08 拆分）
+8. Demo（2026-08-08 用户调整）：i18n **每插件一个整体演示**——`samples/TemplateFrame.Demo.Word.I18n` 合并消息层 + 文档内容；新增 `samples/TemplateFrame.Demo.Excel.I18n`（AddTextKey/AddTableKeys 中英模板 + 回读）与 `samples/TemplateFrame.Demo.Excel.Simple.I18n`（中英表头 + 定义名回读）；`samples/TemplateFrame.Demo.Excel.Simple` 回归非 i18n
 9. 文档：DESIGN §9 决策记录、ROADMAP 迭代 13 小节（勾选进行中）、CHANGELOG（注明 Parse 行为变化：占位符→null）
 
 不在范围：数据值按语言；DisplayName/表头本地化的回读匹配（SimpleExcel 表头按语言匹配，需语言元数据，列后续）；Excel 版式文本键（本迭代只做 Word）；样式名/字体；同一 docx 运行时多语言（路径 B）；值格式按语言（FormatCulture）。
