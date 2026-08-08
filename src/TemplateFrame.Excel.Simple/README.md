@@ -93,7 +93,8 @@ var parsed = service.Parse(filled);                    // xlsx → 强类型 Mat
 ```
 
 - **契约形态**：只支持**单个 `TableElement`**（列 = 表头）；含标量/图片元素或多个表格会抛清晰错误（那是 `TemplateFrame.Excel` 灵活版式的活）。
-- **表头匹配**：读时按 `DisplayName` → `Key` 匹配契约列，多余列忽略、缺列整列补 null；`Validate` 对缺必填列报 `Missing`（Error）、可选列缺失与多余列报 `Warning`。
+- **列定位（迭代 14，分级回退）**：读/校验先按**每列定义名**（`TF_<TableName>_<ColumnKey>` → 表头单元格，框架产物写时自动生成）定位列——**回读与表头语言解耦（语言无关）**；定义名不可用时回退表头文本匹配（`DisplayName` → `Key`）。多余列忽略、缺列整列补 null；`Validate` 对缺必填列报 `Missing`（Error）、可选列缺失与多余列报 `Warning`、重复列定义名报 `Ambiguous`（Error）。
+- **按语言表头（迭代 14）**：`SimpleExcelContract.Write(..., culture, localizer)` 或 `service.Fill(data, options, culture, localizer)` 可写本地化表头（本地化键 = 列 Key，未注册覆盖回退 `DisplayName`/`Key`）；回读仍语言无关（定义名定位）。
 - **底层 API**：也可直接用 `SimpleExcelContract.Write / Read / Validate`（基于 `FillData`），再配合基础包 `DataPathMapper` 自行映射。
 - **向后兼容**：原有 `SimpleExcel.Write / Read`（`SimpleExcelTable`）保持不变。
 ## Demo

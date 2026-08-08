@@ -33,6 +33,7 @@ Excel 没有内容控件（SDT），用**命名区域**承担 tag 定位：
 - 表格：每列 `TF_<TableKey>_<ColumnKey>` 指向**示例行**对应格；填充时示例行作为第 1 行数据行，
   克隆第 2..N 行后把每列命名区域**重指到整个数据块**（如 `$C$5:$C$9`），并把表格下方命名区域/合并区域**整体下移 (N-1) 行**；
 - 未填充模板回读示例行得到占位文本（默认 zh "待填充" / en "To be filled"，按语言生成；迭代 13 起 Parse 把已知占位符规范化为 null）。
+- **i18n 键（迭代 14）**：`AddTextKey(cellAddress, key, format?)` / `AddTableKeys(key, columnKeys, format?, startCell?)` 按语言解析版式文本 / 表头（键方法 vs 字面量方法区分；每列命名区域 `TF_<TableKey>_<ColumnKey>` 仍用列 Key，回读不受表头语言影响）。
 
 ## 快速开始
 

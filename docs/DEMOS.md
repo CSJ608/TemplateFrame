@@ -62,6 +62,7 @@ new ImageElement { Key = "QRCode",   DisplayName = "二维码",    DataPath = "Q
 - 唯一（且已是自动映射）的 Simple Demo：契约 = 单个 `TableElement`，列声明 DataPath；
 - `BuildTemplate`（仅表头）→ `Fill`（强类型数据 → xlsx）→ `Parse`（xlsx → 强类型 `MaterialsData`）；
 - 命名区域默认 `TF_Table` 标记表格位置；`Read` 优先按命名区域定位表头。
+- **迭代 14（列定义名定位）**：`[4]` 中英表头 + 定义名回读——同一数据用 `service.Fill(data, options, en, localizer)` 写英文表头（每列定义名 `TF_Table_<列Key>` → 表头单元格），再**无语言回读**（`service.Parse`）即得强类型数据——回读与表头语言解耦（语言无关）。
 
 ### TemplateFrame.Demo.Word.I18n（i18n 演示，迭代 12 + 13）
 - 以 Word 插件为例展示国际化：契约声明 DataPath（自动映射）。
