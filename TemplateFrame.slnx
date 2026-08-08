@@ -17,5 +17,6 @@
     <Project Path="samples/TemplateFrame.Demo.Excel/TemplateFrame.Demo.Excel.csproj" />
     <Project Path="samples/TemplateFrame.Demo.Excel.AutoMapping/TemplateFrame.Demo.Excel.AutoMapping.csproj" />
     <Project Path="samples/TemplateFrame.Demo.Excel.Simple/TemplateFrame.Demo.Excel.Simple.csproj" />
+    <Project Path="samples/TemplateFrame.Demo.Word.I18n/TemplateFrame.Demo.Word.I18n.csproj" />
   </Folder>
 </Solution>

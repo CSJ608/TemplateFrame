@@ -6,6 +6,7 @@
 
 ### 新增
 - 迭代 12：**国际化（i18n）**——运行时消息资源化（中文中性默认 + en 卫星按 CurrentUICulture 自动）：基础包与 Word / Excel / Excel.Simple 的校验消息 + 异常消息全部迁移到资源；`TemplateValidationIssue` 增加 `MessageKey` / `MessageArgs`（公共 API 向后兼容），`Message` 由资源生成
+- 迭代 12 补充：新增 i18n 演示 Demo `samples/TemplateFrame.Demo.Word.I18n`（Word 插件，zh-CN / en 两种文化下 Validate / Fill 消息自动中英切换，输出 MessageKey / MessageArgs）
 
 ### 变更
 - 迭代 12：测试断言从中文消息文本改为文化中立锚点（Code/MessageKey/标识符）；新增中英双语用例（LocalizationTests × 4，共 151 用例）

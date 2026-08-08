@@ -174,6 +174,7 @@
 ## 迭代 12：国际化（i18n）—— 已完成
 
 > **状态**：✅ 已完成（2026-08-08）。dotnet build/test 全绿（151 用例，含中英双语 LocalizationTests × 4）；四包 nupkg 均含 en 卫星（lib/net8.0/en/）；默认中文消息不变，设 CurrentUICulture=en 后校验/异常消息为英文。
+- **补充**：新增 i18n 演示 Demo `samples/TemplateFrame.Demo.Word.I18n`——Word 插件，zh-CN / en 两种文化下 Validate / Fill 消息自动中英切换，并输出 MessageKey / MessageArgs。
 
 **目标**：库的运行时消息（校验 Message + 异常 Message）支持中英双语——**中文为中性文化默认（行为不变）**，英文按 `CurrentUICulture` 自动生效；XML doc / README 补英文版；文档内容（待填充 / 页码 / 默认字体）保持中文、不本地化。
 
