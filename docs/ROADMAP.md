@@ -18,6 +18,7 @@
 | 10 | PDF 插件 `TemplateFrame.Pdf` | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | 11 | 图片插件 `TemplateFrame.Image` | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | **12** | **国际化（i18n）：运行时消息中英双语（中文默认 + 英文按 CurrentUICulture 自动）** | ✅ 已完成 |
+| **13** | **文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化）** | 🔄 进行中（见下） |
 
 > 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
@@ -203,6 +204,36 @@
 
 ---
 
+## 迭代 13：文档内容 i18n（模板多语言）—— 进行中
+
+> **状态**：🔄 进行中（2026-08-08）。同一版式代码按文化输出 zh/en 两份模板；Parse 把已知占位符规范化为 null。
+
+**目标**：文档内容（占位符 / 页码默认 pattern / 版式文本 / 表头）支持多语言——中文为中性文化默认（行为不变），英文按传入文化生成；回读把已知占位符规范化为 null（null=未填充、""=有意留空），不依赖模板语言。
+
+### 范围
+1. 基础包 ITemplateLocalizer 抽象 + DefaultTemplateLocalizer 默认实现（查找顺序：**业务注入优先 → 框架 .resx（中文中性 + en 卫星）→ 键本身**）；占位符一等语义 PlaceholderText(culture) / IsPlaceholderText(text)（默认 zh "待填充" / en "To be filled"，业务可注册扩展占位符）
+2. Builder 文本支持 i18n 键（**键方法 vs 字面量方法区分**：AddParagraphKey / AddTextKey / AddStaticTextKey / AddTableKeys）；TemplateService.BuildInitialTemplateFile(CultureInfo?)（null = 中文默认，向后兼容）；Word 版式文本/表头按语言解析（内容控件 tag 不本地化，保证 Fill/Parse 匹配）
+3. 文档默认文案按语言：占位符（zh "待填充" / en "To be filled"，**Word + Excel Builder 统一走 localizer 解析**）+ 页码默认 pattern（zh "第{page}页，总{total}页" / en "Page {page} of {total}"）；**样式名/字体不本地化**
+4. Parse 规范化（**方案 3**）：Word/Excel 回读器把已知占位符规范化为 null（null=未填充、""=有意留空）；不依赖模板语言
+5. 数据值维持原样（不翻译；值格式化继续 InvariantCulture）
+6. 语言承载 v1：文件名/目录约定（如 Word-DeliveryOrder-en-template.docx），不往 docx 塞元数据
+7. 测试：中英模板生成断言（版式文本/表头/占位符/页码）+ Parse 占位符规范化（未填充→null、留空→""）+ localizer 业务覆盖；**既有 "待填充" 断言全部改 Assert.Null**
+8. Demo：升级 samples/TemplateFrame.Demo.Word.I18n——新增"文档内容中英模板"部分（同一版式代码输出 zh/en 两份模板 + 填充 + 回读，未填充→null）
+9. 文档：DESIGN §9 决策记录、ROADMAP 迭代 13 小节（勾选进行中）、CHANGELOG（注明 Parse 行为变化：占位符→null）
+
+### 不在范围
+- 数据值按语言；DisplayName / 表头本地化的回读匹配（SimpleExcel 表头按语言匹配，需语言元数据，列后续）；Excel 版式文本键（本迭代只做 Word）；样式名/字体；同一 docx 运行时多语言（路径 B）；值格式按语言（FormatCulture）
+
+### 验收
+- dotnet build TemplateFrame.slnx && dotnet test 全绿
+- dotnet run --project samples/TemplateFrame.Demo.Word.I18n 输出消息中英切换 + 中英两份模板 + 填充 + 回读（未填充→null）
+- 默认不带语言 = 中文（行为不变）；dotnet pack 四包（en 卫星 + 业务可覆盖）
+
+### 约束
+- 提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 v* tag；不改设计文档中未规划内容；CI/发布工作流不手动触发
+
+---
+
 ## 每轮启动命令
 
 ### 迭代 7 启动命令（复制即用）
@@ -218,6 +249,28 @@
 验收：dotnet build TemplateFrame.slnx && dotnet test 全绿；dotnet run --project samples/TemplateFrame.Demo.Word 依次输出 模板 / 收货前 / 收货后 / 回读数据。
 约束：不启用/不触发 CI 发布，不推 v* tag；不改设计文档中未规划内容（迭代 8+ 只读）。
 ```
+
+### 迭代 13 启动命令（复制即用）
+
+`	ext
+继续 TemplateFrame 迭代 13（文档内容 i18n：模板多语言）。先通读 docs/DESIGN.md（重点 §2 三层架构、§3.3 数据形状、§7 迭代计划、§9 风险与决策记录）与 docs/ROADMAP.md（每轮启动命令；迭代 13 小节由本迭代按本指令创建），并阅读现有代码：src/TemplateFrame/、src/TemplateFrame.Word/、src/TemplateFrame.Excel/、src/TemplateFrame.Excel.Simple/、test/ 下各测试项目、samples/TemplateFrame.Demo.Word.I18n/。上一轮成果（迭代 12 消息层 i18n）作为对照基线。
+
+迭代 13 范围（用户已确认，按本指令执行）：
+1. 基础包：ITemplateLocalizer 抽象 + 默认实现（查找顺序：业务注入优先 → 框架 .resx（中文中性 + en 卫星）→ 键本身）；占位符一等语义 PlaceholderText(culture) / IsPlaceholderText(text)（默认 zh/en，业务可注册扩展）
+2. Builder 文本支持 i18n 键（键方法 vs 字面量方法区分，避免歧义）；TemplateService.BuildInitialTemplateFile(CultureInfo? culture)（null = 中文默认，向后兼容）；Word 版式文本/表头按语言解析
+3. 文档默认文案按语言：占位符（zh "待填充" / en "To be filled"，Word + Excel Builder 统一走 localizer 解析）+ 页码默认 pattern（zh "第{page}页，总{total}页" / en "Page {page} of {total}"）；样式名/字体不本地化
+4. Parse 规范化（方案 3）：Word/Excel 回读器把已知占位符规范化为 null（null=未填充、""=有意留空）；不依赖模板语言
+5. 数据值维持原样（不翻译；值格式化继续 InvariantCulture）
+6. 语言承载 v1：文件名/目录约定（如 Word-DeliveryOrder-en-template.docx），不往 docx 塞元数据
+7. 测试：中英模板生成断言（版式文本/表头/占位符/页码）+ Parse 占位符规范化（未填充→null、留空→""）+ localizer 业务覆盖；既有 "待填充" 断言全部改 Assert.Null
+8. Demo：升级 samples/TemplateFrame.Demo.Word.I18n——新增"文档内容中英模板"部分（同一版式代码输出 zh/en 两份模板 + 填充 + 回读，未填充→null）
+9. 文档：DESIGN §9 决策记录、ROADMAP 迭代 13 小节（勾选进行中）、CHANGELOG（注明 Parse 行为变化：占位符→null）
+
+不在范围：数据值按语言；DisplayName/表头本地化的回读匹配（SimpleExcel 表头按语言匹配，需语言元数据，列后续）；Excel 版式文本键（本迭代只做 Word）；样式名/字体；同一 docx 运行时多语言（路径 B）；值格式按语言（FormatCulture）。
+
+验收：dotnet build TemplateFrame.slnx && dotnet test 全绿；dotnet run --project samples/TemplateFrame.Demo.Word.I18n 输出消息中英切换 + 中英两份模板 + 填充 + 回读（未填充→null）；默认不带语言 = 中文（行为不变）；dotnet pack 四包（en 卫星 + 业务可覆盖）。
+约束：提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 v* tag；不改设计文档中未规划内容；CI/发布工作流不手动触发。
+`
 
 ### 通用模板（后续迭代替换 {N} 与 {主题}）
 

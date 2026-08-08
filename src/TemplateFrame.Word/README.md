@@ -53,10 +53,10 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - **页面**：`SetPageSetup(PageSetup)` — A4/A5、横/纵、毫米边距
 - **页眉/页脚**：`AddHeader(Action<WordTemplateBuilder>)` / `AddFooter(...)` — 内容与正文同一套能力
 - **布局表**：`AddLayoutTable(rows, cols, TableFormat?)` + `AddCell(compose, columnSpan)` — 页眉"左中右/平分/四份"（gridSpan 跨列）
-- **文本**：`AddParagraph(text[, style|TextFormat])` / `AddText` / `AddElement(key[, TextFormat])`（元素=内容控件，占位文本默认"待填充"）
+- **文本**：`AddParagraph(text[, style|TextFormat])` / `AddText` / `AddElement(key[, TextFormat])`（元素=内容控件，占位文本按语言：默认 zh "待填充" / en "To be filled"，经 `ITemplateLocalizer` 解析，业务可覆盖）
 - **表格**：`AddTable(key, columns, TableFormat?, headerStyle?)` — 表头 + 示例行（每格一个 SDT）；`TableFormat` 支持表头/单元格字体、有无边框、表格对齐、列宽（cm）、垂直对齐
 - **图片**：`AddImage(key, placeholder?, widthIn?, heightIn?)` — 占位图外包 SDT，填充时换 `byte[]`
-- **页码**：`AddPageNumber(pattern = "第{page}页，总{total}页", TextFormat?)` — PAGE/NUMPAGES 域
+- **页码**：`AddPageNumber(pattern? = null, TextFormat?)` — PAGE/NUMPAGES 域；pattern 为 null 时按语言取默认（zh "第{page}页，总{total}页" / en "Page {page} of {total}"）
 - `TextFormat`：`FontName`（黑体/宋体）/ `SizePt` / `Bold` / `Alignment` / `Underline`
 
 ## 填充行为要点
@@ -70,7 +70,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 ## 回读行为要点
 
 - 文本按 `TextElement.ValueType` 转换（string/decimal/int/DateTime/bool）；表格找到示例行克隆区逐行读回；图片读回字节。
-- 未填充模板回读占位文本"待填充"。
+- **Parse 规范化（迭代 13）**：未填充模板回读已知占位符（默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 **null**（null=未填充、""=有意留空）。
 
 ## 依赖与测试
 

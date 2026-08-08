@@ -115,7 +115,10 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 
 `WordTemplateBuilder` 提供的方法：`SetPageSetup` / `AddHeader` / `AddFooter` / `AddLayoutTable` / `AddCell`
 （页眉页脚"左中右"三栏）/ `AddParagraph` / `AddText` / `AddElement` / `AddTable` / `AddImage` / `AddPageNumber`
-（默认渲染"第x页，总x页"）。其他插件定义各自的构建器类即可。
+（无参默认页码按语言：zh "第{page}页，总{total}页" / en "Page {page} of {total}"）。
+**迭代 13（文档内容 i18n）**：版式文本/表头可用 i18n 键方法 `AddParagraphKey` / `AddTextKey` / `AddStaticTextKey` / `AddTableKeys`（按语言解析，tag 不本地化），
+占位符按语言生成（默认 zh "待填充" / en "To be filled"），`BuildInitialTemplateFile(CultureInfo?)`（null = 中文默认）；
+回读把已知占位符规范化为 null（null=未填充、""=有意留空）。其他插件定义各自的构建器类即可。
 
 ## 示例
 

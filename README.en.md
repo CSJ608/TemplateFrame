@@ -116,7 +116,10 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 
 `WordTemplateBuilder` methods: `SetPageSetup` / `AddHeader` / `AddFooter` / `AddLayoutTable` / `AddCell`
 (header/footer "left-center-right" three columns) / `AddParagraph` / `AddText` / `AddElement` / `AddTable` / `AddImage` / `AddPageNumber`
-(default renders "第x页，总x页"). Other plugins define their own builder classes.
+(default page-number pattern per language: zh "第{page}页，总{total}页" / en "Page {page} of {total}").
+**Iteration 13 (document content i18n)**: layout text/headers can use i18n-key methods `AddParagraphKey` / `AddTextKey` / `AddStaticTextKey` / `AddTableKeys` (resolved per language; tags are not localized),
+placeholders per language (default zh "待填充" / en "To be filled"), `BuildInitialTemplateFile(CultureInfo?)` (null = Chinese default);
+read-back normalizes known placeholders to null (null = unfilled, "" = intentionally blank). Other plugins define their own builder classes.
 
 ## Samples
 

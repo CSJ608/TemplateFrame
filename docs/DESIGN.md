@@ -310,6 +310,7 @@ TemplateFrame/
 | 搁置 | **10** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | 搁置 | **11** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | 已归档 | **12** | 国际化（i18n）：运行时消息中英双语（中文默认 + en 卫星按 CurrentUICulture 自动） | ✅ 完成（2026-08-08） |
+| 进行中 | **13** | 文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化） | 🔄 进行中（2026-08-08） |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
@@ -353,7 +354,8 @@ TemplateFrame/
 | 自动映射（`DataPath`） | `DataPath` 属性自迭代 1 声明后一直未参与引擎逻辑；业务服务被迫手写 `MapToData`/`MapFromData` | 基础包新增 `DataPathMapper`（反射 + 按（契约, 数据类型）缓存）：显式 `DataPath` 为主，标量/图片单级路径 + 表格「集合属性 + 列属性」两级路径；不做「无 DataPath 按属性名推断」回退；嵌套路径（`Customer.Name`）本轮不做、列为后续项；`TemplateService` 默认走自动映射并保留虚方法覆盖；路径缺失/重复映射/表格指向非集合 首次即抛清晰错误（迭代 9 定） |
 | SimpleExcel 强类型接入 | Simple 是纯静态工具、不接契约，`Read` 只返回 `object?` 行，无法像 Word 那样 `service.Parse` 出强类型 | Simple 保持最小形态：新增契约感知静态 API `SimpleExcelContract`（Write/Read/Validate，基于 `FillData`）+ 轻量服务基类 `SimpleExcelTemplateService<TData>`（无 Builder/Engine，复用基础包自动映射）；契约 = 单个 `TableElement`；表头按 DisplayName → Key 匹配、缺列 Validate 报 Missing / Parse 补 null；现有 `SimpleExcelTable` API 保留兼容（迭代 9 定） |
 | 渲染验证 | 本机无 Word/LibreOffice 时无法渲染 | 测试以 OOXML 结构断言为主（SDT 清单、行数、blip embed） |
-| 国际化（i18n） | 库的运行时消息（校验 + 异常）是中文硬编码，无法适配英文用户；文档内容（待填充/页码/默认字体）是生成文档的一部分、被回读依赖，不能跟随文化变化 | **中文为中性文化（默认，行为不变）**；英文作 en 卫星资源，按 `CurrentUICulture` 自动生效、回退中文；`TemplateValidationIssue` 增加 `MessageKey`/`MessageArgs`（公共 API 不变），`Message` 由资源生成；异常消息一并迁移；文档内容保持中文、不配置、不本地化；值格式化继续 `InvariantCulture`（确定性输出）（迭代 12 定，已落地） |
+| 国际化（i18n） | 库的运行时消息（校验 + 异常）是中文硬编码，无法适配英文用户；文档内容（待填充/页码/默认字体）是生成文档的一部分、被回读依赖，不能跟随文化变化 | **中文为中性文化（默认，行为不变）**；英文作 en 卫星资源，按 `CurrentUICulture` 自动生效、回退中文；`TemplateValidationIssue` 增加 `MessageKey`/`MessageArgs`（公共 API 不变），`Message` 由资源生成；异常消息一并迁移；文档内容当时保持中文、不配置、不本地化（迭代 13 起改为按语言生成：占位符 / 页码 / 版式文本 / 表头经 `ITemplateLocalizer` 解析，见下条）；值格式化继续 `InvariantCulture`（确定性输出）（迭代 12 定，已落地） |
+| 文档内容 i18n（模板多语言） | 文档内容（占位符 "待填充" / 页码默认 pattern）硬编码中文，无法输出英文模板；回读"未填充"依赖占位符文本，无法与"有意留空"区分 | **迭代 13 定**：① 基础包 `ITemplateLocalizer` 抽象 + `DefaultTemplateLocalizer` 默认实现，查找顺序 **业务注入优先 → 框架 .resx（中文中性 + en 卫星）→ 键本身**；占位符一等语义 `PlaceholderText(culture)` / `IsPlaceholderText(text)`（默认 zh/en，业务可注册扩展）；② Builder 文本支持 i18n 键（键方法 `AddParagraphKey`/`AddTextKey`/`AddStaticTextKey`/`AddTableKeys` vs 字面量方法区分）；`TemplateService.BuildInitialTemplateFile(CultureInfo?)`（null=中文默认，向后兼容）；③ 占位符（Word+Excel Builder 统一走 localizer）+ 页码默认 pattern 按语言（zh "第{page}页，总{total}页" / en "Page {page} of {total}"），样式名/字体不本地化；④ **Parse 规范化（方案 3）**：Word/Excel 回读器把已知占位符规范化为 null（null=未填充、""=有意留空），不依赖模板语言；⑤ 数据值不翻译、值格式化继续 `InvariantCulture`；⑥ **语言承载 v1**：文件名/目录约定（如 `Word-DeliveryOrder-en-template.docx`），不往 docx 塞元数据；⑦ 不在范围：数据值按语言、DisplayName/表头本地化回读匹配（SimpleExcel 表头按语言匹配需语言元数据，列后续）、Excel 版式文本键（本迭代只做 Word）、同一 docx 运行时多语言（路径 B）、值格式按语言（`FormatCulture`）（迭代 13 定，进行中） |
 
 ---
 

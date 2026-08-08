@@ -1,6 +1,6 @@
 # TemplateFrame Demo 使用说明
 
-仓库提供 6 个控制台 Demo：前 5 个覆盖 **Word / Excel / Excel.Simple 三个插件** × **手写映射 / 自动映射（DataPath）两种服务写法**，演示完整的「生成模板 → 校验 → 填充 → 回读」闭环；第 6 个 **`TemplateFrame.Demo.Word.I18n`** 以 Word 为例演示**国际化（i18n，迭代 12）**——同一操作在 `zh-CN`（中文默认）与 `en`（英文）两种文化下，库的校验消息 / 异常消息自动切换。
+仓库提供 6 个控制台 Demo：前 5 个覆盖 **Word / Excel / Excel.Simple 三个插件** × **手写映射 / 自动映射（DataPath）两种服务写法**，演示完整的「生成模板 → 校验 → 填充 → 回读」闭环；第 6 个 **`TemplateFrame.Demo.Word.I18n`** 以 Word 为例演示**国际化（i18n）**：迭代 12 —— 同一操作在 `zh-CN`（中文默认）与 `en`（英文）两种文化下，库的校验消息 / 异常消息自动切换；迭代 13 —— 文档内容中英模板（同一版式代码输出 zh/en 两份模板 + 填充 + 回读，未填充占位符 → null）。
 
 ## 总览
 
@@ -11,7 +11,7 @@
 | `samples/TemplateFrame.Demo.Excel` | Excel（灵活版式） | **手写映射** | 送货单：3×9 网格版头 / 9 列明细 / LOGO+二维码锚定 | `dotnet run --project samples/TemplateFrame.Demo.Excel` |
 | `samples/TemplateFrame.Demo.Excel.AutoMapping` | Excel（灵活版式） | **自动映射** | 送货单：内容与手写映射版**完全一致**，仅映射方式不同 | `dotnet run --project samples/TemplateFrame.Demo.Excel.AutoMapping` |
 | `samples/TemplateFrame.Demo.Excel.Simple` | Excel.Simple（简单表格） | **自动映射**（Simple 无手写版，直接就是自动映射） | 物料基础数据：标题行 + 数据行（编码 / 名称 / 基本单位 / 包装规格 / 型号） | `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple` |
-| `samples/TemplateFrame.Demo.Word.I18n` | Word | 自动映射 | **i18n 演示**：同一模板在 zh-CN / en 两种文化下 Validate 与 Fill 消息自动中英切换，输出 MessageKey / MessageArgs | `dotnet run --project samples/TemplateFrame.Demo.Word.I18n` |
+| `samples/TemplateFrame.Demo.Word.I18n` | Word | 自动映射 | **i18n 演示**：迭代 12 消息中英切换（Validate/Fill 消息 + MessageKey/MessageArgs）；迭代 13 文档内容中英模板（同一版式代码输出 zh/en 两份模板 + 填充 + 回读，未填充→null） | `dotnet run --project samples/TemplateFrame.Demo.Word.I18n` |
 
 > 所有 Demo 默认输出到 `%TEMP%\<Demo 项目名>`，也可用第一个参数指定输出目录，例如：
 > `dotnet run --project samples/TemplateFrame.Demo.Word.AutoMapping -- "D:\out"`。
@@ -63,13 +63,13 @@ new ImageElement { Key = "QRCode",   DisplayName = "二维码",    DataPath = "Q
 - `BuildTemplate`（仅表头）→ `Fill`（强类型数据 → xlsx）→ `Parse`（xlsx → 强类型 `MaterialsData`）；
 - 命名区域默认 `TF_Table` 标记表格位置；`Read` 优先按命名区域定位表头。
 
-### TemplateFrame.Demo.Word.I18n（i18n 演示，迭代 12）
-- 以 Word 插件为例展示国际化：契约声明 DataPath（自动映射），生成模板**故意只放「单据编号」内容控件**，让 供应商 / 制单日期 缺失；
-- 同一份模板在 `zh-CN`（中文中性默认）与 `en`（英文卫星）两种文化下分别执行 `Validate` 与 `Fill`——校验消息、缺必填元素异常消息随 `CurrentUICulture` **自动中英切换**；
-- 每条校验问题打印 `MessageKey` / `MessageArgs`（稳定结构，不随语言变），说明调用方可用它自行翻译 / 映射 UI 文案，不依赖库内置语言。
+### TemplateFrame.Demo.Word.I18n（i18n 演示，迭代 12 + 13）
+- 以 Word 插件为例展示国际化：契约声明 DataPath（自动映射）。
+- **迭代 12（消息层）**：生成模板**故意只放「单据编号」内容控件**，让 供应商 / 制单日期 缺失；同一份模板在 `zh-CN`（中文中性默认）与 `en`（英文卫星）两种文化下分别执行 `Validate` 与 `Fill`——校验消息、缺必填元素异常消息随 `CurrentUICulture` **自动中英切换**；每条校验问题打印 `MessageKey` / `MessageArgs`（稳定结构，不随语言变）。
+- **迭代 13（文档内容）**：业务注入本地化器（文化限定键 `"zh-CN:Doc.Title"` / `"en:Doc.Title"` + 文化中立兜底），**同一版式代码**（`AddParagraphKey` / `AddTextKey` / `AddTableKeys` + 本地化占位符 / 页码）输出中英两份模板（语言由文件名承载，如 `Word-I18n-DeliveryOrder-en-template.docx`）；填充后再回读——未填充模板的占位符规范化为 **null**（null=未填充、""=有意留空），已填充模板数据值原样（不翻译、`InvariantCulture`）。
 
 ## 关联文档
 
 - 设计：`docs/DESIGN.md`（三层架构 / 契约 = 元素清单 / 数据形状 `FillData` / 自动映射 `DataPathMapper`）
-- 路线图：`docs/ROADMAP.md`（迭代 9：自动映射 + SimpleExcel 强类型；迭代 10/11 搁置；迭代 12：国际化 i18n）
+- 路线图：`docs/ROADMAP.md`（迭代 9：自动映射 + SimpleExcel 强类型；迭代 10/11 搁置；迭代 12：消息 i18n；迭代 13：文档内容 i18n 模板多语言）
 - 插件 README：`src/TemplateFrame.Word/README.md`、`src/TemplateFrame.Excel/README.md`、`src/TemplateFrame.Excel.Simple/README.md`
