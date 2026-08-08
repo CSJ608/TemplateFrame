@@ -1,8 +1,10 @@
+using System.Globalization;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Builder;
 using TemplateFrame.Excel.Localization;
+using TemplateFrame.Localization;
 using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
 
 namespace TemplateFrame.Excel;
@@ -25,6 +27,8 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     private readonly SpreadsheetDocument _document;
     private readonly WorkbookPart _workbookPart;
     private readonly ExcelStyleManager _styles;
+    private readonly ITemplateLocalizer _localizer;
+    private readonly CultureInfo _culture;
     private readonly List<(string Name, string Reference)> _definedNames = new();
     private readonly List<string> _mergedRanges = new();
     private readonly Dictionary<string, double> _columnWidths = new(StringComparer.OrdinalIgnoreCase);
@@ -37,9 +41,21 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     private DrawingsPart? _drawingsPart;
     private bool _saved;
 
-    /// <summary>创建一个空的工作簿构建器（单 Sheet，默认名 Sheet1）。</summary>
+    /// <summary>创建一个空的工作簿构建器（单 Sheet，默认名 Sheet1），默认本地化器 + 中文文化（null = 中文默认）。</summary>
     public ExcelTemplateBuilder()
+        : this(null, null)
     {
+    }
+
+    /// <summary>
+    /// 以本地化器与目标文化创建工作簿构建器（迭代 13：文档内容 i18n，占位符按语言解析）。
+    /// <paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；
+    /// <paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。
+    /// </summary>
+    public ExcelTemplateBuilder(ITemplateLocalizer? localizer, CultureInfo? culture)
+    {
+        _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
+        _culture = culture ?? CultureInfo.GetCultureInfo("zh-CN");
         _document = SpreadsheetDocument.Create(_stream, SpreadsheetDocumentType.Workbook, autoSave: false);
         _workbookPart = _document.AddWorkbookPart();
         _workbookPart.Workbook = new Workbook(new Sheets());
@@ -87,12 +103,12 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>放置一个文本元素：占位文本"待填充" + 命名区域 <c>TF_&lt;Key&gt;</c> → 单元格。</summary>
+    /// <summary>放置一个文本元素：占位文本按语言（默认 zh "待填充" / en "To be filled"，经本地化器解析）+ 命名区域 <c>TF_&lt;Key&gt;</c> → 单元格。</summary>
     public ExcelTemplateBuilder AddElement(string key, string cellAddress, TextFormat? format = null)
     {
         ArgumentNullException.ThrowIfNull(key);
         var cell = GetOrCreateCell(cellAddress);
-        SetInlineString(cell, "待填充");
+        SetInlineString(cell, _localizer.PlaceholderText(_culture));
         ApplyStyle(cell, format, bordered: false, horizontal: null, vertical: null);
         AddDefinedName(ExcelNamedRangeLocator.ElementName(key), cellAddress);
         return this;
@@ -141,7 +157,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         {
             var address = ExcelAddressHelper.CellReference(sampleRow, startCol + i);
             var cell = GetOrCreateCell(address);
-            SetInlineString(cell, "待填充");
+            SetInlineString(cell, _localizer.PlaceholderText(_culture));
             ApplyStyle(cell, format?.CellFormat, format?.Bordered ?? true, format?.Alignment, format?.VerticalAlignment);
             AddDefinedName(ExcelNamedRangeLocator.TableColumnName(key, columns[i]), address);
         }

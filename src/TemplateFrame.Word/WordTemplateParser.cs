@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Localization;
 using A = DocumentFormat.OpenXml.Drawing;
 
 namespace TemplateFrame.Word;
@@ -12,9 +13,18 @@ namespace TemplateFrame.Word;
 /// 与 <see cref="WordTemplateFiller"/> 共享同一套按 tag 定位逻辑（<see cref="SdtLocator"/>），只是方向相反。
 /// Text 读 w:t 文本并按 <see cref="TextElement.ValueType"/> 转换；Table 找到示例行克隆区逐行读出字段；
 /// Image 读回占位/填充后的图片字节（可选能力）。
+/// 迭代 13（Parse 规范化，方案 3）：已知占位符（<see cref="ITemplateLocalizer.IsPlaceholderText"/>，
+/// 默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 null（null=未填充、""=有意留空）；
+/// 控件缺失仍保持"键省略"语义。
 /// </summary>
 public sealed class WordTemplateParser
 {
+    private readonly ITemplateLocalizer _localizer;
+
+    /// <summary>创建回读器（<paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>）。</summary>
+    public WordTemplateParser(ITemplateLocalizer? localizer = null)
+        => _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
+
     /// <summary>回读 .docx：模板 + 契约 → FillData（不改动传入的模板流）。</summary>
     public FillData Parse(Stream template, TemplateContract contract)
     {
@@ -32,10 +42,10 @@ public sealed class WordTemplateParser
             switch (element)
             {
                 case TextElement text:
-                    var textValue = ReadText(document, text);
-                    if (textValue is not null)
+                    var (found, textValue) = ReadText(document, text);
+                    if (found)
                     {
-                        values[text.Key] = textValue;
+                        values[text.Key] = textValue; // 占位符 → null（未填充），控件缺失 → 键省略
                     }
 
                     break;
@@ -63,17 +73,25 @@ public sealed class WordTemplateParser
         return new FillData { Values = values, Tables = tables };
     }
 
-    /// <summary>读取文本控件：w:t 文本按 ValueType 转换；控件缺失返回 null。</summary>
-    private static object? ReadText(WordprocessingDocument document, TextElement element)
+    /// <summary>
+    /// 读取文本控件：w:t 文本按 ValueType 转换；控件缺失返回 (false, null)；
+    /// 已知占位符返回 (true, null)（未填充）；其余返回 (true, 转换值)。
+    /// </summary>
+    private (bool Found, object? Value) ReadText(WordprocessingDocument document, TextElement element)
     {
         var match = SdtLocator.FindByTag(document, element.Key).FirstOrDefault();
         if (match is null)
         {
-            return null;
+            return (false, null);
         }
 
         var text = string.Concat(match.Element.Descendants<Text>().Select(t => t.Text ?? string.Empty));
-        return ConvertToValueType(text, element.ValueType);
+        if (_localizer.IsPlaceholderText(text))
+        {
+            return (true, null);
+        }
+
+        return (true, ConvertToValueType(text, element.ValueType));
     }
 
     /// <summary>读取图片控件：blip r:embed 指向的图片 part 字节；无 blip 或控件缺失返回 null。</summary>
@@ -105,9 +123,9 @@ public sealed class WordTemplateParser
 
     /// <summary>
     /// 读取表格数据：找到包含完整示例行（含全部列 SDT）的表格，逐行读回含列 SDT 的数据行；
-    /// 找不到完整行模板返回 null。
+    /// 已知占位符列值规范化为 null；找不到完整行模板返回 null。
     /// </summary>
-    private static IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(
+    private IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(
         WordprocessingDocument document,
         TableElement table)
     {
@@ -144,7 +162,9 @@ public sealed class WordTemplateParser
                     }
 
                     var text = string.Concat(sdt.Descendants<Text>().Select(t => t.Text ?? string.Empty));
-                    rowValues[column.Key] = ConvertToValueType(text, column.ValueType);
+                    rowValues[column.Key] = _localizer.IsPlaceholderText(text)
+                        ? null
+                        : ConvertToValueType(text, column.ValueType);
                 }
 
                 rows.Add(rowValues);

@@ -1,7 +1,9 @@
+using System.Globalization;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Builder;
+using TemplateFrame.Localization;
 using TemplateFrame.Word.Localization;
 using A = DocumentFormat.OpenXml.Drawing;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
@@ -30,6 +32,8 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     private readonly OpenXmlCompositeElement _container;
     private readonly SdtIdAllocator _ids;
     private readonly bool _ownsDocument;
+    private readonly ITemplateLocalizer _localizer;
+    private readonly CultureInfo _culture;
     private PageSetup _pageSetup = new();
     private Paragraph? _currentParagraph;
     private Table? _layoutTable;
@@ -39,9 +43,21 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     private int _layoutCols;
     private bool _saved;
 
-    /// <summary>创建一个空的 Word 文档构建器（正文）。</summary>
+    /// <summary>创建一个空的 Word 文档构建器（正文），默认本地化器 + 中文文化（null = 中文默认）。</summary>
     public WordTemplateBuilder()
+        : this(null, null)
     {
+    }
+
+    /// <summary>
+    /// 以本地化器与目标文化创建 Word 文档构建器（迭代 13：文档内容 i18n）。
+    /// <paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；
+    /// <paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。
+    /// </summary>
+    public WordTemplateBuilder(ITemplateLocalizer? localizer, CultureInfo? culture)
+    {
+        _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
+        _culture = culture ?? CultureInfo.GetCultureInfo("zh-CN");
         _document = WordprocessingDocument.Create(_stream, WordprocessingDocumentType.Document, autoSave: false);
         _ownsDocument = true;
         _mainPart = _document.AddMainDocumentPart();
@@ -61,6 +77,8 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         _container = container;
         _ids = owner._ids;
         _ownsDocument = false;
+        _localizer = owner._localizer;
+        _culture = owner._culture;
         _pageSetup = owner._pageSetup;
     }
 
@@ -110,6 +128,14 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
+    /// <summary>追加一个按 i18n 键解析文案的段落（迭代 13：版式文本按语言解析；键 → 文案查找见 <see cref="ITemplateLocalizer"/>）。</summary>
+    public WordTemplateBuilder AddParagraphKey(string key, string? style = null)
+        => AddParagraph(_localizer.GetString(key, _culture), style);
+
+    /// <summary>追加一个按 i18n 键解析文案的段落（带文本格式，迭代 13）。</summary>
+    public WordTemplateBuilder AddParagraphKey(string key, TextFormat format)
+        => AddParagraph(_localizer.GetString(key, _culture), format);
+
     /// <summary>在当前段落追加静态文本。</summary>
     public WordTemplateBuilder AddText(string text)
     {
@@ -125,6 +151,14 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         _currentParagraph!.Append(CreateRun(text, CreateRunProperties(format)));
         return this;
     }
+
+    /// <summary>在当前段落追加按 i18n 键解析的静态文本（迭代 13）。</summary>
+    public WordTemplateBuilder AddTextKey(string key)
+        => AddText(_localizer.GetString(key, _culture));
+
+    /// <summary>在当前段落追加按 i18n 键解析的带格式静态文本（迭代 13）。</summary>
+    public WordTemplateBuilder AddTextKey(string key, TextFormat format)
+        => AddText(_localizer.GetString(key, _culture), format);
 
     /// <summary>在当前段落追加一个文本元素（内容控件，tag = key）。</summary>
     public WordTemplateBuilder AddElement(string key)
@@ -146,6 +180,10 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     public WordTemplateBuilder AddStaticText(string text)
         => AddParagraph(text);
 
+    /// <summary>追加一个独立段落，内容为按 i18n 键解析的静态文本（迭代 13）。</summary>
+    public WordTemplateBuilder AddStaticTextKey(string key)
+        => AddParagraphKey(key);
+
     /// <summary>
     /// 追加表格：首行表头（静态文本），第二行示例行（每格一个内容控件，tag = 列 Key）。
     /// <paramref name="format"/> 控制表头/单元格格式、有无边框、对齐、列宽、垂直对齐；
@@ -156,6 +194,25 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         IReadOnlyList<string> columns,
         TableFormat? format = null,
         string? headerStyle = null)
+        => AddTableCore(key, columns, format, headerStyle, localizeHeaders: false);
+
+    /// <summary>
+    /// 追加表格（迭代 13：i18n 键版）——<paramref name="columnKeys"/> 是本地化键，表头按语言解析；
+    /// 但每格内容控件 tag 仍是列 Key（不本地化，保证 Fill/Parse 按 tag 匹配）。
+    /// </summary>
+    public WordTemplateBuilder AddTableKeys(
+        string key,
+        IReadOnlyList<string> columnKeys,
+        TableFormat? format = null,
+        string? headerStyle = null)
+        => AddTableCore(key, columnKeys, format, headerStyle, localizeHeaders: true);
+
+    private WordTemplateBuilder AddTableCore(
+        string key,
+        IReadOnlyList<string> columns,
+        TableFormat? format,
+        string? headerStyle,
+        bool localizeHeaders)
     {
         ArgumentNullException.ThrowIfNull(key);
         ArgumentNullException.ThrowIfNull(columns);
@@ -168,14 +225,15 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         table.Append(CreateTableProperties(format));
         table.Append(CreateTableGrid(columns.Count, format?.ColumnWidthsCm));
 
-        // 表头行：静态文本
+        // 表头行：静态文本（i18n 键版按本地化器解析表头，tag 仍用列 Key）
         var headerRow = new TableRow();
         for (var i = 0; i < columns.Count; i++)
         {
             var column = columns[i];
+            var headerText = localizeHeaders ? _localizer.GetString(column, _culture) : column;
             var headerRun = format?.HeaderFormat is null
-                ? CreateRun(column, CreateStyleRunProperties(headerStyle))
-                : CreateRun(column, CreateRunProperties(format.HeaderFormat));
+                ? CreateRun(headerText, CreateStyleRunProperties(headerStyle))
+                : CreateRun(headerText, CreateRunProperties(format.HeaderFormat));
             var headerParagraph = new Paragraph(headerRun);
             ApplyAlignment(headerParagraph, format?.HeaderFormat?.Alignment);
             headerRow.Append(CreateCell(headerParagraph, GetColumnWidth(format, i), format?.VerticalAlignment));
@@ -301,14 +359,16 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     }
 
     /// <summary>
-    /// 在当前段落追加页码域。默认渲染 "第{page}页，总{total}页"（如 第1页，总1页）；
-    /// <paramref name="pattern"/> 支持 {page} / {total} 占位符。
+    /// 在当前段落追加页码域。默认 pattern 按语言解析（迭代 13：zh "第{page}页，总{total}页" / en "Page {page} of {total}"，
+    /// 可用 <see cref="DefaultTemplateLocalizer.PageNumberPatternKey"/> 业务覆盖）；
+    /// <paramref name="pattern"/> 为 null 时取本地化默认，显式传入则原样使用（支持 {page} / {total} 占位符）。
     /// </summary>
-    public void AddPageNumber(string pattern = "第{page}页，总{total}页", TextFormat? format = null)
+    public void AddPageNumber(string? pattern = null, TextFormat? format = null)
     {
         EnsureParagraph();
         var rPr = CreateRunProperties(format);
-        foreach (var (text, instruction) in ParsePagePattern(pattern))
+        var resolvedPattern = pattern ?? _localizer.GetString(DefaultTemplateLocalizer.PageNumberPatternKey, _culture);
+        foreach (var (text, instruction) in ParsePagePattern(resolvedPattern))
         {
             if (instruction is null)
             {
@@ -418,7 +478,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
                 new SdtId { Val = _ids.Next() },
                 new Tag { Val = key },
                 new SdtAlias { Val = key }),
-            new SdtContentRun(CreateRun("待填充", CreateRunProperties(format))));
+            new SdtContentRun(CreateRun(_localizer.PlaceholderText(_culture), CreateRunProperties(format))));
 
     private static RunProperties? CreateStyleRunProperties(string? style)
     {

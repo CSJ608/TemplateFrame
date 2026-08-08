@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Localization;
 
 namespace TemplateFrame.Excel;
 
@@ -11,9 +12,18 @@ namespace TemplateFrame.Excel;
 /// 与 <see cref="ExcelTemplateFiller"/> 共享同一套按命名区域定位逻辑（<see cref="ExcelNamedRangeLocator"/>），
 /// 只是方向相反。Text 按 <see cref="TextElement.ValueType"/> 转换（数字/日期序列号）；Table 按列命名区域范围逐行读出；
 /// Image 读回锚定格图片字节（可选能力）。
+/// 迭代 13（Parse 规范化，方案 3）：已知占位符（<see cref="ITemplateLocalizer.IsPlaceholderText"/>，
+/// 默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 null（null=未填充、""=有意留空）；
+/// 元素缺失仍保持"键省略"语义。
 /// </summary>
 public sealed class ExcelTemplateParser
 {
+    private readonly ITemplateLocalizer _localizer;
+
+    /// <summary>创建回读器（<paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>）。</summary>
+    public ExcelTemplateParser(ITemplateLocalizer? localizer = null)
+        => _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
+
     /// <summary>回读 .xlsx：模板 + 契约 → FillData（不改动传入的模板流）。</summary>
     public FillData Parse(Stream template, TemplateContract contract)
     {
@@ -35,10 +45,10 @@ public sealed class ExcelTemplateParser
             switch (element)
             {
                 case TextElement text:
-                    var textValue = ReadText(workbookPart, text);
-                    if (textValue is not null)
+                    var (found, textValue) = ReadText(workbookPart, text);
+                    if (found)
                     {
-                        values[text.Key] = textValue;
+                        values[text.Key] = textValue; // 占位符 → null（未填充），元素缺失 → 键省略
                     }
 
                     break;
@@ -66,19 +76,22 @@ public sealed class ExcelTemplateParser
         return new FillData { Values = values, Tables = tables };
     }
 
-    /// <summary>读取文本元素：按命名区域定位单元格并读值（按 ValueType 转换）；缺失返回 null。</summary>
-    private static object? ReadText(WorkbookPart workbookPart, TextElement element)
+    /// <summary>
+    /// 读取文本元素：按命名区域定位单元格并读值（按 ValueType 转换）；
+    /// 命名区域缺失返回 (false, null)；已知占位符返回 (true, null)（未填充）。
+    /// </summary>
+    private (bool Found, object? Value) ReadText(WorkbookPart workbookPart, TextElement element)
     {
         var match = ExcelNamedRangeLocator.FindByName(workbookPart, ExcelNamedRangeLocator.ElementName(element.Key));
         if (match is null)
         {
-            return null;
+            return (false, null);
         }
 
         var (sheet, start, _) = ExcelNamedRangeLocator.ParseReference(match.Reference);
         var worksheetPart = ExcelTemplateValidator.ResolveWorksheetPart(workbookPart, sheet);
         var cell = FindCell(worksheetPart, start.Row, start.Col);
-        return cell is null ? null : ReadCellValue(workbookPart, cell, element);
+        return cell is null ? (false, null) : (true, ReadCellValue(workbookPart, cell, element));
     }
 
     /// <summary>读取图片元素：锚定格 drawing 的图片字节；无图片或缺失返回 null。</summary>
@@ -102,9 +115,9 @@ public sealed class ExcelTemplateParser
 
     /// <summary>
     /// 读取表格数据：按列命名区域范围逐行读回（各列按行号对齐）；
-    /// 未填充模板范围只有示例行 1 行（读回占位文本）。找不到任何列返回 null。
+    /// 未填充模板范围只有示例行 1 行（占位符列值规范化为 null）。找不到任何列返回 null。
     /// </summary>
-    private static IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(
+    private IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(
         WorkbookPart workbookPart,
         TableElement table)
     {
@@ -170,8 +183,8 @@ public sealed class ExcelTemplateParser
         return row.Elements<Cell>().FirstOrDefault(c => c.CellReference?.Value == reference);
     }
 
-    /// <summary>按单元格数据读值并转换到目标类型：bool/数字（日期序列号）/字符串/共享字符串。</summary>
-    private static object? ReadCellValue(WorkbookPart workbookPart, Cell cell, TextElement element)
+    /// <summary>按单元格数据读值并转换到目标类型：bool/数字（日期序列号）/字符串/共享字符串；已知占位符 → null。</summary>
+    private object? ReadCellValue(WorkbookPart workbookPart, Cell cell, TextElement element)
     {
         var dataType = cell.DataType?.Value;
         if (dataType == CellValues.Boolean)
@@ -208,13 +221,18 @@ public sealed class ExcelTemplateParser
             }
 
             var sharedText = ReadSharedString(workbookPart, sharedIndexText);
-            return sharedText is null ? null : ConvertToValueType(sharedText, element.ValueType);
+            if (sharedText is null)
+            {
+                return null;
+            }
+
+            return _localizer.IsPlaceholderText(sharedText) ? null : ConvertToValueType(sharedText, element.ValueType);
         }
 
         var text = cell.InlineString?.Text?.Text
                    ?? cell.CellValue?.Text
                    ?? string.Empty;
-        return ConvertToValueType(text, element.ValueType);
+        return _localizer.IsPlaceholderText(text) ? null : ConvertToValueType(text, element.ValueType);
     }
 
     private static string? ReadSharedString(WorkbookPart workbookPart, string indexText)
