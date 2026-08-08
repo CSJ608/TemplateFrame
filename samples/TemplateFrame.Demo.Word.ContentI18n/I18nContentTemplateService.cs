@@ -4,7 +4,7 @@ using TemplateFrame.Localization;
 using TemplateFrame.Services;
 using TemplateFrame.Word;
 
-namespace TemplateFrame.Demo.Word.I18n;
+namespace TemplateFrame.Demo.Word.ContentI18n;
 
 /// <summary>送货单数据（文档内容 i18n 演示用，DataPath 自动映射）。</summary>
 public sealed record DeliveryOrderContentData
@@ -29,13 +29,13 @@ public sealed record DeliveryOrderLine
 }
 
 /// <summary>
-/// 文档内容 i18n 演示服务（迭代 13）：**同一份版式代码**输出中英两份模板——
+/// 文档内容 i18n 演示服务（迭代 13，独立 Demo）：**同一份版式代码**输出中英两份模板——
 /// 版式文本 / 表头走 i18n 键（<c>AddParagraphKey / AddTextKey / AddTableKeys</c>），
 /// 占位符 / 页码默认 pattern 走 <see cref="ITemplateLocalizer"/>（zh "待填充" / en "To be filled"；
 /// zh "第{page}页，总{total}页" / en "Page {page} of {total}"）。
 /// 调用 <c>BuildInitialTemplateFile(CultureInfo)</c>（null = 中文默认）按语言生成；
 /// 填充 → 回读：未填充占位符规范化为 null、有意留空为 ""、数据值原样（不翻译、InvariantCulture）。
-/// 语言由文件名/目录约定承载（如 Word-I18n-DeliveryOrder-en-template.docx），不往 docx 塞元数据。
+/// 语言由文件名/目录约定承载（如 Word-ContentI18n-DeliveryOrder-en-template.docx），不往 docx 塞元数据。
 /// </summary>
 public sealed class I18nContentTemplateService : TemplateService<DeliveryOrderContentData, WordTemplateBuilder>
 {
