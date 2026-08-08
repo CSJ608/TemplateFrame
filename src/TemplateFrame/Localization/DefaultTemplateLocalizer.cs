@@ -9,10 +9,10 @@ namespace TemplateFrame.Localization;
 /// business-injected overrides → framework resources (Chinese-neutral + en satellite) → the key itself.</para>
 /// 占位符默认 zh "待填充" / en "To be filled"（框架资源键 <see cref="PlaceholderKey"/>），
 /// 页码默认 pattern 见 <see cref="PageNumberPatternKey"/>。
-/// <para>业务注入 <paramref name="overrides"/>（键 → 文案，对所有文化生效）支持两种键格式：
+/// <para>业务注入覆盖（键 → 文案，对所有文化生效）支持两种键格式：
 /// ① 文化限定 <c>"en:Doc.Title"</c>（按文化的祖先链回退：zh-CN → zh → 中性）；
 /// ② 文化中立 <c>"Doc.Title"</c>（所有文化兜底，优先级低于文化限定）。
-/// 额外占位符用 <paramref name="extraPlaceholders"/> 注册（<see cref="IsPlaceholderText"/> 一并识别）。</para>
+/// 额外占位符由构造函数 <c>extraPlaceholders</c> 注册（<see cref="IsPlaceholderText"/> 一并识别）。</para>
 /// </summary>
 public sealed class DefaultTemplateLocalizer : ITemplateLocalizer
 {
