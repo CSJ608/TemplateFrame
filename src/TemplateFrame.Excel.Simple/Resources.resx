@@ -31,4 +31,7 @@
   <data name="SimpleExcel.Service.TableNeedsDataPath" xml:space="preserve">
     <value>契约 {0} 的表格 "{1}" 未声明 DataPath——SimpleExcelTemplateService 需要 DataPath 才能自动映射强类型数据。</value>
   </data>
+  <data name="SimpleExcel.Contract.AmbiguousColumnName" xml:space="preserve">
+    <value>表格 "{0}" 的列定义名 "{1}" 重复（可能由合并/手工修改导致），无法确定列位置。</value>
+  </data>
 </root>

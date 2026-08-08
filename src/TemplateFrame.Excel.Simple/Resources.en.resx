@@ -31,4 +31,7 @@
   <data name="SimpleExcel.Service.TableNeedsDataPath" xml:space="preserve">
     <value>Contract {0} table "{1}" does not declare DataPath — SimpleExcelTemplateService requires DataPath for strong-typed auto-mapping.</value>
   </data>
+  <data name="SimpleExcel.Contract.AmbiguousColumnName" xml:space="preserve">
+    <value>The defined name "{1}" for table "{0}" is duplicated (possibly from merging/hand-editing); the column position is ambiguous.</value>
+  </data>
 </root>

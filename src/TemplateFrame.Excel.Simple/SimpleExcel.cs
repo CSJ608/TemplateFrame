@@ -47,8 +47,12 @@ public static class SimpleExcel
     /// <summary>默认命名区域名：TF_Table → 表格区域（表头 + 数据行）。</summary>
     public const string DefaultTableName = "TF_Table";
 
-    /// <summary>导出：标题行 + 数据行 → .xlsx 写入 <paramref name="target"/>，并用命名区域标记表格位置。</summary>
-    public static void Write(Stream target, SimpleExcelTable table, SimpleExcelOptions? options = null)
+    /// <summary>
+    /// 导出：标题行 + 数据行 → .xlsx 写入 <paramref name="target"/>，并用命名区域标记表格位置。
+    /// <paramref name="columnKeys"/> 非空时另写每列定义名 <c>TF_&lt;TableName&gt;_&lt;ColumnKey&gt;</c> → 表头单元格（迭代 14：
+    /// 单格引用，数据行增删不影响；契约路径写/读用它做语言无关的列定位）。
+    /// </summary>
+    public static void Write(Stream target, SimpleExcelTable table, SimpleExcelOptions? options = null, IReadOnlyList<string>? columnKeys = null)
     {
         ArgumentNullException.ThrowIfNull(target);
         ArgumentNullException.ThrowIfNull(table);
@@ -132,16 +136,40 @@ public static class SimpleExcel
             worksheetPart.Worksheet.InsertBefore(cols, sheetData);
         }
 
-        // 用命名区域标记表格位置（表头 + 数据行的整块区域），Read 优先按它定位
+        // 用命名区域标记表格位置（表头 + 数据行的整块区域），Read 优先按它定位；
+        // 传入 columnKeys 时另写每列定义名 TF_<TableName>_<ColumnKey> → 表头单元格（单格引用，数据行增删不影响）
         if (!string.IsNullOrWhiteSpace(options.TableName) && headers.Count > 0)
         {
+            var tableName = options.TableName.Trim();
             var endRow = rowIndex - 1;
             var endCol = startCol + headers.Count - 1;
-            var reference = QuoteSheet(sheetName)
-                            + "!$" + ColumnLetter(startCol) + "$" + startRow
-                            + ":$" + ColumnLetter(endCol) + "$" + endRow;
-            workbookPart.Workbook.AppendChild(new DefinedNames(
-                new DefinedName { Name = options.TableName.Trim(), Text = reference }));
+            var regionReference = QuoteSheet(sheetName)
+                                  + "!$" + ColumnLetter(startCol) + "$" + startRow
+                                  + ":$" + ColumnLetter(endCol) + "$" + endRow;
+            var definedNames = new List<DefinedName>
+            {
+                new() { Name = tableName, Text = regionReference },
+            };
+
+            if (columnKeys is { Count: > 0 })
+            {
+                for (var i = 0; i < headers.Count && i < columnKeys.Count; i++)
+                {
+                    var columnKey = columnKeys[i]?.Trim();
+                    if (string.IsNullOrEmpty(columnKey))
+                    {
+                        continue;
+                    }
+
+                    definedNames.Add(new DefinedName
+                    {
+                        Name = ColumnDefinedName(tableName, columnKey),
+                        Text = QuoteSheet(sheetName) + "!$" + ColumnLetter(startCol + i) + "$" + startRow,
+                    });
+                }
+            }
+
+            workbookPart.Workbook.AppendChild(new DefinedNames(definedNames.ToArray()));
         }
 
         styles.WriteTo(workbookPart);
@@ -274,7 +302,7 @@ public static class SimpleExcel
         }
     }
 
-    private static object? ReadCellValue(WorkbookPart workbookPart, Cell cell)
+    internal static object? ReadCellValue(WorkbookPart workbookPart, Cell cell)
     {
         if (cell.DataType?.Value == CellValues.Boolean)
         {
@@ -318,6 +346,24 @@ public static class SimpleExcel
         return cell.InlineString?.Text?.Text ?? cell.CellValue?.Text;
     }
 
+    /// <summary>每列定义名：TF_&lt;TableName&gt;_&lt;ColumnKey&gt; → 表头单元格（迭代 14，契约路径写/读用做语言无关的列定位）。</summary>
+    public static string ColumnDefinedName(string tableName, string columnKey)
+        => tableName.Trim() + "_" + columnKey.Trim();
+
+    /// <summary>按名取定义名引用文本（兼容 Excel 可能写的 "=Sheet!..." 前缀）。</summary>
+    internal static string? FindDefinedNameReference(WorkbookPart workbookPart, string name)
+    {
+        var definedName = workbookPart.Workbook?.DefinedNames
+            ?.Elements<DefinedName>().FirstOrDefault(d => d.Name?.Value == name);
+        var reference = definedName?.Text;
+        return reference is null ? null : reference.TrimStart('=');
+    }
+
+    /// <summary>定义名出现次数（重复 = 合并/手工修改导致，Validate 报 Ambiguous）。</summary>
+    internal static int CountDefinedName(WorkbookPart workbookPart, string name)
+        => workbookPart.Workbook?.DefinedNames
+            ?.Elements<DefinedName>().Count(d => d.Name?.Value == name) ?? 0;
+
     private static bool IsDateCell(WorkbookPart workbookPart, Cell cell)
     {
         if (cell.StyleIndex is not { } styleIndex
@@ -349,7 +395,7 @@ public static class SimpleExcel
                    || formatCode.Contains("dd", StringComparison.OrdinalIgnoreCase));
     }
 
-    private static string? GetCellText(Cell? cell)
+    internal static string? GetCellText(Cell? cell)
     {
         if (cell is null)
         {
@@ -364,7 +410,7 @@ public static class SimpleExcel
         return cell.InlineString?.Text?.Text ?? cell.CellValue?.Text;
     }
 
-    private static Cell? FindCell(IReadOnlyList<Row> rows, int rowIndex, int colIndex)
+    internal static Cell? FindCell(IReadOnlyList<Row> rows, int rowIndex, int colIndex)
     {
         var row = rows.FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
         if (row is null)
@@ -376,9 +422,9 @@ public static class SimpleExcel
         return row.Elements<Cell>().FirstOrDefault(c => c.CellReference?.Value == reference);
     }
 
-    private readonly record struct TableRange(string Sheet, int StartRow, int StartCol, int EndRow, int EndCol);
+    internal readonly record struct TableRange(string Sheet, int StartRow, int StartCol, int EndRow, int EndCol);
 
-    private static TableRange? FindTableRange(WorkbookPart workbookPart, string tableName)
+    internal static TableRange? FindTableRange(WorkbookPart workbookPart, string tableName)
     {
         var definedName = workbookPart.Workbook?.DefinedNames
             ?.Elements<DefinedName>().FirstOrDefault(d => d.Name?.Value == tableName);
@@ -390,7 +436,7 @@ public static class SimpleExcel
         return TryParseReference(reference, out var range) ? range : null;
     }
 
-    private static bool TryParseReference(string reference, out TableRange range)
+    internal static bool TryParseReference(string reference, out TableRange range)
     {
         range = default;
         var exclamation = reference.LastIndexOf('!');
@@ -436,7 +482,7 @@ public static class SimpleExcel
         return col > 0 && int.TryParse(cell[i..], out row) && row > 0;
     }
 
-    private static WorksheetPart? ResolveWorksheetPart(WorkbookPart workbookPart, string sheet)
+    internal static WorksheetPart? ResolveWorksheetPart(WorkbookPart workbookPart, string sheet)
     {
         if (string.IsNullOrEmpty(sheet))
         {

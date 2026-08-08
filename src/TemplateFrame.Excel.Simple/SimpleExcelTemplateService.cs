@@ -1,7 +1,9 @@
+using System.Globalization;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
-using TemplateFrame.Mapping;
 using TemplateFrame.Excel.Simple.Localization;
+using TemplateFrame.Localization;
+using TemplateFrame.Mapping;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel.Simple;
@@ -39,17 +41,13 @@ public abstract class SimpleExcelTemplateService<TData>
     /// <summary>声明契约：单个表格（列 = 表头）。</summary>
     protected abstract TemplateContract DefineContract();
 
-    /// <summary>生成初始模板流（仅表头，列名 = 列 DisplayName，回退 Key）。</summary>
-    public Stream BuildTemplate(SimpleExcelOptions? options = null)
+    /// <summary>
+    /// 生成初始模板流（仅表头；<paramref name="culture"/> 非空时表头按语言解析，并写每列定义名，模板自描述）。
+    /// </summary>
+    public Stream BuildTemplate(SimpleExcelOptions? options = null, CultureInfo? culture = null, ITemplateLocalizer? localizer = null)
     {
-        var table = SimpleExcelContract.RequireSingleTable(Contract);
         var stream = new MemoryStream();
-        SimpleExcel.Write(stream, new SimpleExcelTable
-        {
-            Headers = table.Columns
-                .Select(c => string.IsNullOrWhiteSpace(c.DisplayName) ? c.Key : c.DisplayName)
-                .ToList(),
-        }, options);
+        SimpleExcelContract.Write(stream, new FillData(), Contract, options, culture, localizer);
         stream.Position = 0;
         return stream;
     }
@@ -58,11 +56,11 @@ public abstract class SimpleExcelTemplateService<TData>
     public TemplateValidationResult Validate(Stream template, SimpleExcelOptions? options = null)
         => SimpleExcelContract.Validate(template, Contract, options);
 
-    /// <summary>填充：强类型数据 → .xlsx（表头 + 数据行）。</summary>
-    public Stream Fill(TData data, SimpleExcelOptions? options = null)
+    /// <summary>填充：强类型数据 → .xlsx（表头 + 数据行；<paramref name="culture"/> 非空时表头按语言解析）。</summary>
+    public Stream Fill(TData data, SimpleExcelOptions? options = null, CultureInfo? culture = null, ITemplateLocalizer? localizer = null)
     {
         var stream = new MemoryStream();
-        SimpleExcelContract.Write(stream, MapToData(data), Contract, options);
+        SimpleExcelContract.Write(stream, MapToData(data), Contract, options, culture, localizer);
         stream.Position = 0;
         return stream;
     }
