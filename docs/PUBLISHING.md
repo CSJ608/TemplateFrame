@@ -49,6 +49,7 @@ gh run list --workflow publish-nuget.yml
 
 - csproj 中 `<Version>` 与 git tag 需一致（如 `1.0.0` ↔ `v1.0.0`）。
 - 核心与插件包（`TemplateFrame`、`TemplateFrame.Word`…）当前都发布为同一版本。
+- 迭代 15 起：release.yml / publish-nuget.yml 会在打 `v*` tag 时自动校验四包 `<Version>` 与 tag 一致，不一致直接失败（本地提交前请自行核对）。
 
 ## CHANGELOG 约定
 

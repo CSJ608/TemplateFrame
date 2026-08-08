@@ -27,4 +27,14 @@
     <None Include="..\..\README.md" Pack="true" PackagePath="\" />
   </ItemGroup>
 
+  <!-- 迭代 15：Word / Excel 插件共用基础包 internal 工具（StreamUtil / ImageTypeDetector） -->
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>TemplateFrame.Word</_Parameter1>
+    </AssemblyAttribute>
+    <AssemblyAttribute Include="System.Runtime.CompilerServices.InternalsVisibleTo">
+      <_Parameter1>TemplateFrame.Excel</_Parameter1>
+    </AssemblyAttribute>
+  </ItemGroup>
+
 </Project>

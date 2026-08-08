@@ -83,6 +83,26 @@ public sealed class RecordingEngine : ITemplateEngine
     }
 }
 
+/// <summary>提供带告警 FillDetailed 的假引擎（验证服务层告警出口，迭代 15）。</summary>
+public sealed class WarningEngine : ITemplateEngine
+{
+    public ITemplateBuilder CreateBuilder() => new FakeBuilder();
+
+    public TemplateValidationResult Validate(Stream template, TemplateContract contract) => new();
+
+    public Stream Fill(Stream template, TemplateContract contract, FillData data)
+        => new MemoryStream([7, 8, 9]);
+
+    public FillData Parse(Stream template, TemplateContract contract) => new();
+
+    public TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data)
+        => new()
+        {
+            Output = new MemoryStream([7, 8, 9]),
+            Warnings = [new TemplateValidationIssue { Code = TemplateValidationIssueCode.Extra, Key = "X", Message = "extra" }],
+        };
+}
+
 /// <summary>完整实现的测试服务（含手写映射）。</summary>
 public sealed class MappedTemplateService : TemplateService<TestData, FakeBuilder>
 {
@@ -185,6 +205,20 @@ public sealed class TemplateServiceTests
         Assert.True(engine.FillCalled);
         Assert.Equal("hello", engine.LastFillData!.Values["A"]);
         Assert.Equal(new byte[] { 4, 5, 6 }, ((MemoryStream)result).ToArray());
+    }
+
+    [Fact]
+    public void FillDetailed_ReturnsWarnings_WhenEngineProvidesThem()
+    {
+        var service = new MappedTemplateService(new WarningEngine());
+        using var template = new MemoryStream([1, 2, 3]);
+
+        var result = service.FillDetailed(template, new TestData("hello"));
+
+        Assert.Equal(new byte[] { 7, 8, 9 }, ((MemoryStream)result.Output).ToArray());
+        var warning = Assert.Single(result.Warnings);
+        Assert.Equal(TemplateValidationIssueCode.Extra, warning.Code);
+        Assert.Equal("X", warning.Key);
     }
 
     [Fact]

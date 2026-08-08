@@ -4,7 +4,9 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Engine;
 using TemplateFrame.Excel.Localization;
+using TemplateFrame.Internal;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel;
@@ -19,21 +21,14 @@ public enum MissingElementPolicy
     SkipAndWarn,
 }
 
-/// <summary>Excel 填充配置。</summary>
-public sealed record ExcelFillOptions
+/// <summary>Excel 填充配置（继承基础包通用形状，策略枚举保持 <see cref="MissingElementPolicy"/>，迭代 15 公共下沉）。</summary>
+public sealed record ExcelFillOptions : TemplateFillOptions<MissingElementPolicy>
 {
-    /// <summary>缺失必填元素时的处理策略。</summary>
-    public MissingElementPolicy MissingElementPolicy { get; init; } = MissingElementPolicy.Throw;
 }
 
 /// <summary>一次填充的结果：输出流 + 填充过程中的告警（Extra / Drifted / 按策略跳过的 Missing）。</summary>
-public sealed record ExcelFillResult
+public sealed record ExcelFillResult : TemplateFillResult
 {
-    /// <summary>填充后的 .xlsx 输出流（位置已归零）。</summary>
-    public Stream Output { get; init; } = Stream.Null;
-
-    /// <summary>填充过程中的告警问题清单。</summary>
-    public IReadOnlyList<TemplateValidationIssue> Warnings { get; init; } = [];
 }
 
 /// <summary>
@@ -62,7 +57,7 @@ public sealed class ExcelTemplateFiller
         ArgumentNullException.ThrowIfNull(contract);
         ArgumentNullException.ThrowIfNull(data);
 
-        var bytes = ReadAllBytes(template);
+        var bytes = StreamUtil.ReadAllBytes(template);
 
         // 填充前软校验：先跑一遍 Validate
         var validation = new ExcelTemplateValidator().Validate(new MemoryStream(bytes, writable: false), contract);
@@ -171,7 +166,7 @@ public sealed class ExcelTemplateFiller
 
     private static void FillImageElement(WorkbookPart workbookPart, ImageElement element, object? value)
     {
-        var bytes = ToBytes(value);
+        var bytes = StreamUtil.ToBytes(value);
         if (bytes is null || bytes.Length == 0)
         {
             return; // 不是可识别的图片字节，保留占位图
@@ -190,7 +185,7 @@ public sealed class ExcelTemplateFiller
             return;
         }
 
-        ExcelDrawingHelper.ReplaceImage(worksheetPart, start.Col - 1, start.Row - 1, bytes, DetectContentType(bytes));
+        ExcelDrawingHelper.ReplaceImage(worksheetPart, start.Col - 1, start.Row - 1, bytes, ImageTypeDetector.DetectContentType(bytes));
     }
 
     private static void FillTableRows(
@@ -600,30 +595,6 @@ public sealed class ExcelTemplateFiller
         cell.AppendChild(new InlineString(new Text(text) { Space = SpaceProcessingModeValues.Preserve }));
     }
 
-    private static byte[]? ToBytes(object? value)
-        => value switch
-        {
-            byte[] bytes => bytes,
-            Stream stream => ReadAllBytes(stream),
-            _ => null,
-        };
-
-    private static string DetectContentType(byte[] bytes)
-        => bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF
-            ? "image/jpeg"
-            : "image/png";
-
-    private static byte[] ReadAllBytes(Stream stream)
-    {
-        if (stream.CanSeek)
-        {
-            stream.Position = 0;
-        }
-
-        using var buffer = new MemoryStream();
-        stream.CopyTo(buffer);
-        return buffer.ToArray();
-    }
 }
 
 /// <summary>.NET 风格 Format → Excel 数字格式代码的映射。</summary>

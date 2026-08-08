@@ -8,7 +8,7 @@
 一个"模板 ⇄ 数据"契约引擎：用代码声明模板契约（元素清单），业务服务声明所用的具体插件构建器后组装初始模板；用户按规则修改样式后上传，包负责校验是否匹配契约；随后用强类型数据填充，或从已填充的模板回读数据。
 
 - **三层架构**：基础包 `TemplateFrame`（通用、稳定）+ 插件 `TemplateFrame.Word`（MS Word）/ `TemplateFrame.Excel`（MS Excel，灵活版式）/ `TemplateFrame.Excel.Simple`（MS Excel，简单表格）+ 业务场景服务（强类型，业务应用内声明）
-- **四个操作**：`BuildInitialTemplateFile` / `Validate` / `Fill`（强类型）/ `Parse`（强类型回读）
+- **四个操作**：`BuildInitialTemplateFile` / `Validate` / `Fill`（强类型）/ `Parse`（强类型回读）；`FillDetailed` 可同时返回填充软校验告警（Extra / Drifted / 按策略跳过的 Missing，见设计文档 §5.3）
 - **插件化**：已支持 Word / Excel（灵活版式）/ Excel.Simple（标题行+数据行的简单表格）；Demo 覆盖**手写映射**与**DataPath 自动映射**两种服务写法；未来 WPS Word、标签模板
 
 设计文档见 [docs/DESIGN.md](docs/DESIGN.md)，迭代路线图见 [docs/ROADMAP.md](docs/ROADMAP.md)，**Demo 使用说明见 [docs/DEMOS.md](docs/DEMOS.md)**（8 个 Demo：手动映射 Word/Excel + 自动映射 Word/Excel/Excel.Simple + i18n Word/Excel/Excel.Simple 各一（消息层 + 文档内容）），发布说明见 [docs/PUBLISHING.md](docs/PUBLISHING.md)。
@@ -80,6 +80,9 @@ var dataValidation = service.ValidateData(order);
 
 // 强类型填充（文本/图片/表格行；填充时软校验）
 using var filled = service.Fill(templateStream, order);
+
+// 需要填充软校验告警时用 FillDetailed（输出流 + Warnings；硬错误仍抛异常）
+var fillResult = service.FillDetailed(templateStream, order);
 
 // 从填充后的模板回读强类型数据（含表格多行）
 var parsed = service.Parse(filledStream);

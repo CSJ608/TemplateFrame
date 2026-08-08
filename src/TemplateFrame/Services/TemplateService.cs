@@ -87,11 +87,19 @@ public abstract class TemplateService<TData, TBuilder>
         return new TemplateDataValidator().Validate(fillData, Contract);
     }
 
-    /// <summary>填充：模板 + 强类型数据 → 新文件流（迭代 2 已落地，含填充时软校验）。</summary>
+    /// <summary>填充：模板 + 强类型数据 → 新文件流（向后兼容；软校验告警见 <see cref="FillDetailed"/>）。</summary>
     public Stream Fill(Stream template, TData data)
+        => FillDetailed(template, data).Output;
+
+    /// <summary>
+    /// 填充并返回软校验告警（推荐）：模板 + 强类型数据 → <see cref="TemplateFillResult"/>（输出流 + Warnings）。
+    /// <para>English: Fills and returns the result including soft-validation warnings (Extra / Drifted / skipped Missing).</para>
+    /// 引擎填充器先跑软校验，硬错误照常抛错；告警（Extra / Drifted / 按策略跳过的 Missing）随结果返回（见设计文档 §5.3）。
+    /// </summary>
+    public TemplateFillResult FillDetailed(Stream template, TData data)
     {
         FillData fillData = MapToData(data);
-        return _engine.Fill(template, Contract, fillData);
+        return _engine.FillDetailed(template, Contract, fillData);
     }
 
     /// <summary>回读：已填充模板 → 强类型数据（迭代 3 已落地）。</summary>

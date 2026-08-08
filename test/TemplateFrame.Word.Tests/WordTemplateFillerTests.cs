@@ -274,6 +274,26 @@ public sealed class WordTemplateFillerTests
     }
 
     [Fact]
+    public void WordTemplateEngine_FillDetailed_SurfacesWarnings()
+    {
+        using var template = TestDocuments.BuildTemplate(b =>
+        {
+            b.AddElement("OrderNo");
+            b.AddElement("CustomerName");
+            b.AddTable("Lines", ["MC", "MName", "Qty"]);
+            b.AddImage("Logo");
+            b.AddElement("Unknown");
+        });
+
+        var result = new WordTemplateEngine().FillDetailed(template, TestDocuments.DemoContract(), DemoData());
+
+        var extra = Assert.Single(result.Warnings, w => w.Key == "Unknown");
+        Assert.Equal(TemplateValidationIssueCode.Extra, extra.Code);
+        using var document = WordprocessingDocument.Open(result.Output, false);
+        Assert.Equal("PO-2026-0806-001", GetSdtText(document, "OrderNo"));
+    }
+
+    [Fact]
     public void WordTemplateEngine_Fill_ProducesFilledDocument()
     {
         using var template = TestDocuments.BuildDemoTemplate();

@@ -4,6 +4,8 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Engine;
+using TemplateFrame.Internal;
 using TemplateFrame.Word.Localization;
 using TemplateFrame.Validation;
 using A = DocumentFormat.OpenXml.Drawing;
@@ -20,21 +22,14 @@ public enum MissingElementPolicy
     SkipAndWarn,
 }
 
-/// <summary>Word 填充配置。</summary>
-public sealed record WordFillOptions
+/// <summary>Word 填充配置（继承基础包通用形状，策略枚举保持 <see cref="MissingElementPolicy"/>，迭代 15 公共下沉）。</summary>
+public sealed record WordFillOptions : TemplateFillOptions<MissingElementPolicy>
 {
-    /// <summary>缺失必填元素时的处理策略。</summary>
-    public MissingElementPolicy MissingElementPolicy { get; init; } = MissingElementPolicy.Throw;
 }
 
 /// <summary>一次填充的结果：输出流 + 填充过程中的告警（Extra / Drifted / 按策略跳过的 Missing）。</summary>
-public sealed record WordFillResult
+public sealed record WordFillResult : TemplateFillResult
 {
-    /// <summary>填充后的 .docx 输出流（位置已归零）。</summary>
-    public Stream Output { get; init; } = Stream.Null;
-
-    /// <summary>填充过程中的告警问题清单。</summary>
-    public IReadOnlyList<TemplateValidationIssue> Warnings { get; init; } = [];
 }
 
 /// <summary>
@@ -43,7 +38,7 @@ public sealed record WordFillResult
 /// 图片往包内加图片 part + 关系拿新 rId，替换 SDT 内 &lt;a:blip r:embed&gt;（尺寸/位置/环绕继承占位图）；
 /// 表格行 deepcopy 示例行 N 次，逐行按 tag 填值，克隆后每个 SDT 重发唯一 w:id（设计文档 §9）。
 /// 填充前先跑一遍 <see cref="WordTemplateValidator"/>（软校验）：Drifted/Extra 告警继续，
-/// Missing 必填元素按 <see cref="WordFillOptions.MissingElementPolicy"/> 抛错或跳过并告警。
+/// Missing 必填元素按 <see cref="MissingElementPolicy"/> 抛错或跳过并告警。
 /// </summary>
 public sealed class WordTemplateFiller
 {
@@ -66,7 +61,7 @@ public sealed class WordTemplateFiller
         ArgumentNullException.ThrowIfNull(contract);
         ArgumentNullException.ThrowIfNull(data);
 
-        var bytes = ReadAllBytes(template);
+        var bytes = StreamUtil.ReadAllBytes(template);
 
         // 填充前软校验：先跑一遍 Validate
         var validation = new WordTemplateValidator().Validate(new MemoryStream(bytes, writable: false), contract);
@@ -219,7 +214,7 @@ public sealed class WordTemplateFiller
 
     private static void FillImageElement(WordprocessingDocument document, string tag, object? value)
     {
-        var bytes = ToBytes(value);
+        var bytes = StreamUtil.ToBytes(value);
         if (bytes is null || bytes.Length == 0)
         {
             return; // 不是可识别的图片字节，保留占位图
@@ -464,70 +459,9 @@ public sealed class WordTemplateFiller
     private static ImagePart AddImagePart(OpenXmlPart hostPart, byte[] bytes)
         => hostPart switch
         {
-            HeaderPart headerPart => headerPart.AddImagePart(ToImagePartType(DetectExtension(bytes))),
-            FooterPart footerPart => footerPart.AddImagePart(ToImagePartType(DetectExtension(bytes))),
-            _ => ((MainDocumentPart)hostPart).AddImagePart(ToImagePartType(DetectExtension(bytes))),
+            HeaderPart headerPart => headerPart.AddImagePart(ImageTypeDetector.ToImagePartType(ImageTypeDetector.DetectExtension(bytes))),
+            FooterPart footerPart => footerPart.AddImagePart(ImageTypeDetector.ToImagePartType(ImageTypeDetector.DetectExtension(bytes))),
+            _ => ((MainDocumentPart)hostPart).AddImagePart(ImageTypeDetector.ToImagePartType(ImageTypeDetector.DetectExtension(bytes))),
         };
 
-    private static byte[]? ToBytes(object? value)
-        => value switch
-        {
-            byte[] bytes => bytes,
-            Stream stream => ReadAllBytes(stream),
-            _ => null,
-        };
-
-    private static byte[] ReadAllBytes(Stream stream)
-    {
-        if (stream.CanSeek)
-        {
-            stream.Position = 0;
-        }
-
-        using var buffer = new MemoryStream();
-        stream.CopyTo(buffer);
-        return buffer.ToArray();
-    }
-
-    private static string DetectExtension(byte[] bytes)
-    {
-        if (bytes.Length >= 8 && bytes[0] == 0x89 && bytes[1] == 0x50 && bytes[2] == 0x4E && bytes[3] == 0x47)
-        {
-            return "png";
-        }
-
-        if (bytes.Length >= 3 && bytes[0] == 0xFF && bytes[1] == 0xD8 && bytes[2] == 0xFF)
-        {
-            return "jpg";
-        }
-
-        if (bytes.Length >= 6 && bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46 && bytes[3] == 0x38)
-        {
-            return "gif";
-        }
-
-        if (bytes.Length >= 2 && bytes[0] == 0x42 && bytes[1] == 0x4D)
-        {
-            return "bmp";
-        }
-
-        if (bytes.Length >= 4
-            && ((bytes[0] == 0x49 && bytes[1] == 0x49 && bytes[2] == 0x2A && bytes[3] == 0x00)
-                || (bytes[0] == 0x4D && bytes[1] == 0x4D && bytes[2] == 0x00 && bytes[3] == 0x2A)))
-        {
-            return "tiff";
-        }
-
-        return "png";
-    }
-
-    private static string ToImagePartType(string extension)
-        => extension switch
-        {
-            "jpg" or "jpeg" => "image/jpeg",
-            "gif" => "image/gif",
-            "bmp" => "image/bmp",
-            "tiff" => "image/tiff",
-            _ => "image/png",
-        };
 }

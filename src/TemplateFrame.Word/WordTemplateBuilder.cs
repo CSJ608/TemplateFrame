@@ -3,8 +3,10 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Builder;
+using TemplateFrame.Internal;
 using TemplateFrame.Localization;
 using TemplateFrame.Word.Localization;
+using Sr = TemplateFrame.Word.Localization.Sr;
 using A = DocumentFormat.OpenXml.Drawing;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
@@ -783,25 +785,15 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     {
         var imagePart = _hostPart switch
         {
-            HeaderPart headerPart => headerPart.AddImagePart(ToImagePartType(extension)),
-            FooterPart footerPart => footerPart.AddImagePart(ToImagePartType(extension)),
-            _ => _mainPart.AddImagePart(ToImagePartType(extension)),
+            HeaderPart headerPart => headerPart.AddImagePart(ImageTypeDetector.ToImagePartType(extension)),
+            FooterPart footerPart => footerPart.AddImagePart(ImageTypeDetector.ToImagePartType(extension)),
+            _ => _mainPart.AddImagePart(ImageTypeDetector.ToImagePartType(extension)),
         };
 
         using var stream = new MemoryStream(bytes, writable: false);
         imagePart.FeedData(stream);
         return _hostPart.GetIdOfPart(imagePart);
     }
-
-    private static string ToImagePartType(string extension)
-        => extension switch
-        {
-            "jpg" or "jpeg" => "image/jpeg",
-            "gif" => "image/gif",
-            "bmp" => "image/bmp",
-            "tiff" => "image/tiff",
-            _ => "image/png",
-        };
 
     private static Drawing CreateDrawing(string relId, double? widthInches, double? heightInches, string extension)
     {

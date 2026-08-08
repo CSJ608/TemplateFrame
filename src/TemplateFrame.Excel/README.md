@@ -73,6 +73,7 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
   克隆后列命名区域重指到数据块，表格下方命名区域/合并区域整体下移。
 - **软校验**（填充前跑 Validate）：`Drifted`/`Extra` 只记告警继续；Missing 必填按策略（默认抛错，可配 `SkipAndWarn`）；
   `WrongType`/`Ambiguous`/`Invalid` 视为硬错误。
+- **告警出口**：`ExcelTemplateFiller.Fill` 返回 `ExcelFillResult`（输出流 + Warnings）；引擎/服务层可用 `FillDetailed`（`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`）拿到同样的软校验告警，`Fill` 保持只返回输出流（迭代 15）。
 
 ## 回读行为要点
 

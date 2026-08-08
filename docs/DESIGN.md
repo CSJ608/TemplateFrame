@@ -32,9 +32,9 @@ TemplateFrame 是它的演进：**把契约显式化、把模板从"手写占位
 
 ### 1.4 范围约束（当前）
 
-- 第一版只支持 **Microsoft Office**（MS Word 的 `.docx`）。
-- WPS 等通过**独立插件**在未来支持（见 §4）。
-- 自动化发布（GitHub Release / NuGet）**最后做**，先保证本地功能测试（见 §6、§7）。
+- 已支持 **Microsoft Office**：Word（`.docx`，内容控件 SDT）与 Excel（`.xlsx`，灵活版式 + 简单表格），均基于 DocumentFormat.OpenXml 直写。
+- WPS 等通过**独立插件**在未来支持（见 §4），暂未开始。
+- 自动化发布（GitHub Release / NuGet）**已启用**：打 `v*` tag 即触发（见 §8、docs/PUBLISHING.md）。
 
 ---
 
@@ -46,18 +46,18 @@ TemplateFrame 是它的演进：**把契约显式化、把模板从"手写占位
 |---|---|---|
 | **基础包** `TemplateFrame` | 契约元素模型、引擎抽象、数据形状、Builder 抽象 | 通用、稳定、弱类型（object / 字典） |
 | **插件** `TemplateFrame.Word` | SDT 定位 / 生成 / 填充 / 回读 / 校验；`WordTemplateBuilder` | 通用（不掺业务），按宿主格式实现 |
-| **业务场景服务**（业务应用内） | 每个场景一个强类型服务，如 `ReceivingOrderTemplateService : TemplateService<ReceivingOrderData>` | 强类型，声明契约 + 组装版式 + 提供 `Fill` / `Parse` / `Validate` |
+| **业务场景服务**（业务应用内） | 每个场景一个强类型服务，如 `ReceivingOrderTemplateService : TemplateService<ReceivingOrderData, WordTemplateBuilder>` | 强类型，声明契约 + 组装版式 + 提供 `Fill` / `FillDetailed` / `Parse` / `Validate` |
 
 ```
 业务应用（各业务系统）
-  ReceivingOrderTemplateService : TemplateService<ReceivingOrderData>
-    DefineContract() / BuildInitialTemplate() / Fill(强类型) / Parse(强类型) / Validate
+  ReceivingOrderTemplateService : TemplateService<ReceivingOrderData, WordTemplateBuilder>
+    DefineContract() / BuildInitialTemplate()（无参，用类型化 Builder）/ Fill / FillDetailed / Parse / Validate
         │
 插件 TemplateFrame.Word（通用）
   WordTemplateBuilder / SdtLocator / Filler / Parser / Validator
         │
 基础包 TemplateFrame（通用、稳定）
-  TemplateContract（元素清单）/ ITemplateEngine / ITemplateBuilder / FillData（数据形状）
+  TemplateContract（元素清单）/ ITemplateEngine / ITemplateBuilder / FillData（数据形状）/ TemplateFillResult
 ```
 
 **分工原则**：
@@ -144,22 +144,25 @@ public sealed class FillData
   - 自动映射（可选）：契约元素声明 `DataPath`，`DataPathMapper.ToFillData(data, contract)`（反射 + 按（契约, 数据类型）缓存）读取属性生成 `FillData`；
   - `Parse` 反向：引擎产出 `FillData` 形状，服务层映射回 `TData`（或字典 → POCO 映射器）。
 
-### 3.4 通用基类 TemplateService&lt;TData&gt;
+### 3.4 通用基类 TemplateService&lt;TData, TBuilder&gt;
 
-库提供泛型基类，业务服务继承它即可获得强类型 `Fill` / `Parse` / `Validate`：
+库提供泛型基类，业务服务继承它即可获得强类型 `BuildInitialTemplateFile` / `Validate` / `ValidateData` / `Fill` / `FillDetailed` / `Parse`（TBuilder 是所用插件构建器类型，如 `WordTemplateBuilder` / `ExcelTemplateBuilder`）：
 
 ```csharp
-public abstract class TemplateService<TData>
+public abstract class TemplateService<TData, TBuilder> where TBuilder : class, ITemplateBuilder
 {
     protected abstract TemplateContract DefineContract();
-    protected abstract void BuildInitialTemplate(ITemplateBuilder builder);
+    protected abstract void BuildInitialTemplate();        // 无参：直接用类型化 Builder 组装版式
+    protected TBuilder Builder { get; }                     // 仅在 BuildInitialTemplate 内有效
 
-    protected virtual FillData MapToData(TData data);    // 默认走 DataPath 自动映射
-    protected virtual TData MapFromData(FillData data);  // 默认走字典 → POCO 映射
+    protected virtual FillData MapToData(TData data);       // 默认走 DataPath 自动映射（迭代 9）
+    protected virtual TData MapFromData(FillData data);     // 默认走 DataPath 自动映射
 
-    public Stream BuildInitialTemplateFile();
+    public Stream BuildInitialTemplateFile(CultureInfo? culture = null);
     public TemplateValidationResult Validate(Stream template);
-    public Stream Fill(Stream template, TData data);
+    public TemplateValidationResult ValidateData(TData data);
+    public Stream Fill(Stream template, TData data);        // 向后兼容；软校验告警见 FillDetailed
+    public TemplateFillResult FillDetailed(Stream template, TData data);  // 迭代 15：输出流 + 软校验告警
     public TData Parse(Stream template);
 }
 ```
@@ -182,9 +185,10 @@ public abstract class TemplateService<TData>
 | 插件 | 目标 | 状态 |
 |---|---|---|
 | `TemplateFrame` | 核心：契约元素模型 + 引擎抽象 + 数据形状 + Builder 抽象 | 迭代 1 起 |
-| `TemplateFrame.Word` | MS Word（OpenXML SDK）：内容控件生成/定位/填充/回读 | 迭代 1-3 |
+| `TemplateFrame.Word` | MS Word（OpenXML SDK）：内容控件生成/定位/填充/回读 | 迭代 1-3 ✅ |
+| `TemplateFrame.Excel` | MS Excel 灵活版式（OpenXML SDK 直写 + 命名区域定位；不提供页面设置） | 迭代 8 ✅ |
+| `TemplateFrame.Excel.Simple` | MS Excel 简单表格（标题行 + 数据行，命名区域标记；`SimpleExcel` / `SimpleExcelContract` / `SimpleExcelTemplateService`） | 迭代 8/9 ✅ |
 | `TemplateFrame.Wps` | WPS Word（未来，独立插件） | 未开始 |
-| `TemplateFrame.Excel` | Excel 导入导出（未来） | 未开始 |
 | `TemplateFrame.Label` | 标签模板（未来，其他工具定义模板） | 未开始 |
 
 插件职责：把"契约元素"翻译成具体格式的"可定位元素"。
@@ -263,20 +267,23 @@ TemplateFrame/
 │  ├─ Contract/                     # TemplateContract, TemplateElement, TextElement, ImageElement, TableElement
 │  ├─ Data/                         # FillData（数据形状）
 │  ├─ Mapping/                      # DataPathMapper（DataPath 自动映射）
-│  ├─ Engine/                       # ITemplateEngine（Validate/Fill/Parse 抽象）
+│  ├─ Engine/                       # ITemplateEngine（Validate/Fill/FillDetailed/Parse 抽象）+ TemplateFillResult / TemplateFillOptions<T>
 │  ├─ Builder/                      # ITemplateBuilder（版式组合抽象）
-│  └─ Services/                     # TemplateService<TData>（泛型基类）
+│  ├─ Internal/                     # StreamUtil / ImageTypeDetector（Word/Excel 共用，InternalsVisibleTo）
+│  └─ Services/                     # TemplateService<TData, TBuilder>（泛型基类）
 ├─ src/TemplateFrame.Word/          # 插件：MS Word（DocumentFormat.OpenXml）
 │  ├─ WordTemplateBuilder.cs        # 组装带 SDT 的 .docx（版式由业务服务驱动）
 │  ├─ SdtLocator.cs                 # 按 tag 定位（正文/页眉/页脚）
 │  ├─ WordTemplateValidator.cs      # Validate
-│  ├─ WordTemplateFiller.cs         # Fill：文本/图片/表格行
-│  └─ WordTemplateParser.cs         # Parse：回读
+│  ├─ WordTemplateFiller.cs         # Fill / FillDetailed：文本/图片/表格行
+│  ├─ WordTemplateParser.cs         # Parse：回读
+│  └─ Localization/                 # Sr + Resources*.resx（中英消息）
 ├─ src/TemplateFrame.Excel/         # 插件：MS Excel 灵活版式（命名区域定位；不提供页面设置）
 │  ├─ ExcelTemplateBuilder.cs       # 组装带命名区域的 .xlsx（列宽/格式/合并/表格/图片锚定）
 │  ├─ ExcelNamedRangeLocator.cs     # 按命名区域定位（TF_ 前缀）
 │  ├─ ExcelTemplateValidator.cs / ExcelTemplateFiller.cs / ExcelTemplateParser.cs
-│  └─ ExcelDrawingHelper.cs         # drawing 强类型操作（xdr:cNvPr 命名空间，兼容 Excel）
+│  ├─ ExcelDrawingHelper.cs         # drawing 强类型操作（xdr:cNvPr 命名空间，兼容 Excel）
+│  └─ Localization/                 # Sr + Resources*.resx（中英消息）
 ├─ src/TemplateFrame.Excel.Simple/  # 插件：MS Excel 简单表格（SimpleExcel Write/Read + SimpleExcelContract / SimpleExcelTemplateService 契约化强类型）
 ├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射）
 ├─ test/TemplateFrame.Word.Tests/   # Word 插件测试：生成→校验→填充→回读→断言
@@ -284,10 +291,14 @@ TemplateFrame/
 ├─ test/TemplateFrame.Excel.Simple.Tests/ # Excel 简单表格插件测试
 ├─ samples/TemplateFrame.Demo.Word/ # 控制台端到端 demo（Word 插件送货单，手写映射版：MapToData / MapFromData）
 ├─ samples/TemplateFrame.Demo.Word.AutoMapping/ # 自动映射版 demo（送货单内容一致，契约声明 DataPath，无手写映射；图片字节由数据携带）
+├─ samples/TemplateFrame.Demo.Excel/ # 控制台端到端 demo（Excel 插件送货单：3×9 网格版头 / 9 列明细）
 ├─ samples/TemplateFrame.Demo.Excel.AutoMapping/ # 自动映射版 Excel demo（3×9 网格版头 / 9 列明细，契约声明 DataPath，无手写映射）
-├─ samples/TemplateFrame.Demo.Excel/# 控制台端到端 demo（Excel 插件送货单：3×9 网格版头 / 9 列明细）
+├─ samples/TemplateFrame.Demo.Excel.Simple/ # 物料基础数据 demo（SimpleExcel 模板 → 填充 → 回读）
+├─ samples/TemplateFrame.Demo.Word.I18n/ # i18n 整体演示（Word：消息层中英 + 文档内容 zh/en 模板 + 回读）
+├─ samples/TemplateFrame.Demo.Excel.I18n/ # i18n 整体演示（Excel：AddTextKey/AddTableKeys 中英模板 + 回读）
+├─ samples/TemplateFrame.Demo.Excel.Simple.I18n/ # i18n 整体演示（Excel.Simple：中英表头 + 定义名回读，语言无关）
 ├─ docs/DESIGN.md                   # 本文档
-├─ docs/PUBLISHING.md               # 发布指南（参考 StreamFrame，暂不启用）
+├─ docs/PUBLISHING.md               # 发布指南（已启用：v* tag 触发 release + publish-nuget）
 ├─ CHANGELOG.md
 └─ .github/workflows/               # ci.yml / release.yml / publish-nuget.yml（参考 StreamFrame）
 ```
@@ -312,6 +323,7 @@ TemplateFrame/
 | 已归档 | **12** | 国际化（i18n）：运行时消息中英双语（中文默认 + en 卫星按 CurrentUICulture 自动） | ✅ 完成（2026-08-08） |
 | 已归档 | **13** | 文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化） | ✅ 完成（2026-08-08） |
 | 已归档 | **14** | Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退） | ✅ 完成（2026-08-08） |
+| 已归档 | **15** | 工程化收尾：文档同步 + 公共代码下沉（StreamUtil / ImageTypeDetector / TemplateFillResult）+ 填充告警出口 `FillDetailed` + 发布版本校验 | ✅ 完成（2026-08-08） |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
@@ -358,6 +370,8 @@ TemplateFrame/
 | 国际化（i18n） | 库的运行时消息（校验 + 异常）是中文硬编码，无法适配英文用户；文档内容（待填充/页码/默认字体）是生成文档的一部分、被回读依赖，不能跟随文化变化 | **中文为中性文化（默认，行为不变）**；英文作 en 卫星资源，按 `CurrentUICulture` 自动生效、回退中文；`TemplateValidationIssue` 增加 `MessageKey`/`MessageArgs`（公共 API 不变），`Message` 由资源生成；异常消息一并迁移；文档内容当时保持中文、不配置、不本地化（迭代 13 起改为按语言生成：占位符 / 页码 / 版式文本 / 表头经 `ITemplateLocalizer` 解析，见下条）；值格式化继续 `InvariantCulture`（确定性输出）（迭代 12 定，已落地） |
 | 文档内容 i18n（模板多语言） | 文档内容（占位符 "待填充" / 页码默认 pattern）硬编码中文，无法输出英文模板；回读"未填充"依赖占位符文本，无法与"有意留空"区分 | **迭代 13 定**：① 基础包 `ITemplateLocalizer` 抽象 + `DefaultTemplateLocalizer` 默认实现，查找顺序 **业务注入优先 → 框架 .resx（中文中性 + en 卫星）→ 键本身**；占位符一等语义 `PlaceholderText(culture)` / `IsPlaceholderText(text)`（默认 zh/en，业务可注册扩展）；② Builder 文本支持 i18n 键（键方法 `AddParagraphKey`/`AddTextKey`/`AddStaticTextKey`/`AddTableKeys` vs 字面量方法区分）；`TemplateService.BuildInitialTemplateFile(CultureInfo?)`（null=中文默认，向后兼容）；③ 占位符（Word+Excel Builder 统一走 localizer）+ 页码默认 pattern 按语言（zh "第{page}页，总{total}页" / en "Page {page} of {total}"），样式名/字体不本地化；④ **Parse 规范化（方案 3）**：Word/Excel 回读器把已知占位符规范化为 null（null=未填充、""=有意留空），不依赖模板语言；⑤ 数据值不翻译、值格式化继续 `InvariantCulture`；⑥ **语言承载 v1**：文件名/目录约定（如 `Word-DeliveryOrder-en-template.docx`），不往 docx 塞元数据；⑦ 不在范围：数据值按语言、DisplayName/表头本地化回读匹配（SimpleExcel 表头按语言匹配需语言元数据，列后续）、Excel 版式文本键（本迭代只做 Word）、同一 docx 运行时多语言（路径 B）、值格式按语言（`FormatCulture`）（迭代 13 定，已落地） |
 | SimpleExcel 列定位（迭代 14） | SimpleExcel 契约路径回读靠"表头文本 → 列"匹配，表头随语言变则无法匹配；需要语言元数据 | **迭代 14 定（列定义名定位）**：① 契约 Write 写每列定义名 `TF_<TableName>_<ColumnKey>` → 表头单元格（单格引用，数据行增删不影响，Excel 自动调整引用）；Read/Validate 列定位**分级回退**——定义名 → `TF_Table` 区域 + 表头文本匹配 → 第一个非空行 + 文本匹配，定义名指向与表头行不一致时整体回退文本匹配，重复定义名 Validate 报 Ambiguous；② 框架产物回读**语言无关**（不再需要语言元数据）；手改文件（无定义名）回退仍按中文 DisplayName → Key，表头按语言匹配继续搁置（需语言元数据，列后续）；③ Excel 灵活版式同轮补 i18n 键 `AddTextKey`/`AddTableKeys`（命名区域定位，表头本地化不影响回读）；④ 原始 `SimpleExcelTable` 静态 API 不改（迭代 14 定，已落地） |
+| 填充告警出口（迭代 15） | 填充软校验告警（Extra / Drifted / 按策略跳过的 Missing）在引擎/服务层被 `Fill` 丢弃，调用方拿不到 | **迭代 15 定**：基础包新增 `TemplateFillResult`（Output + Warnings）；`ITemplateEngine.FillDetailed`（默认实现包 `Fill` 输出，Word / Excel 引擎覆盖返回填充器收集的真实告警）与 `TemplateService.FillDetailed` 作为带告警出口；`Fill` 保持只返回输出流（向后兼容）；Word / Excel 的 `WordFillResult` / `ExcelFillResult` 改为继承基础包 `TemplateFillResult`，`WordFillOptions` / `ExcelFillOptions` 继承 `TemplateFillOptions&lt;TMissingPolicy&gt;`（策略枚举类型保持插件各自的公开枚举，向后兼容）（迭代 15 定，已落地） |
+| 公共内部工具下沉（迭代 15） | Word / Excel 插件各自维护流读取与图片魔数探测的私有副本，重复维护 | **迭代 15 定**：基础包新增 internal `StreamUtil` / `ImageTypeDetector`（基础包 `InternalsVisibleTo` 开放给 Word / Excel），两插件删除私有副本并统一调用（迭代 15 定，已落地） |
 
 ---
 

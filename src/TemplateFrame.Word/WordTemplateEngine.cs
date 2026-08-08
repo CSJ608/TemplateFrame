@@ -53,6 +53,13 @@ public sealed class WordTemplateEngine : ITemplateEngine
         => _filler.Fill(template, contract, data).Output;
 
     /// <inheritdoc />
+    public TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data)
+    {
+        var result = _filler.Fill(template, contract, data);
+        return new TemplateFillResult { Output = result.Output, Warnings = result.Warnings };
+    }
+
+    /// <inheritdoc />
     public FillData Parse(Stream template, TemplateContract contract)
         => _parser.Parse(template, contract);
 }

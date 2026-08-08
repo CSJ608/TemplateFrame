@@ -29,6 +29,15 @@ public interface ITemplateEngine
     ITemplateBuilder CreateBuilder(ITemplateLocalizer localizer, CultureInfo? culture)
         => CreateBuilder();
 
+    /// <summary>
+    /// 填充并返回软校验告警（推荐）：模板 + FillData → <see cref="TemplateFillResult"/>（输出流 + Warnings）。
+    /// <para>English: Fills and returns the result including soft-validation warnings.</para>
+    /// 默认实现把 <see cref="Fill"/> 的输出包成无告警结果；插件引擎（Word / Excel）应覆盖此方法返回填充器收集到的告警
+    /// （Extra / Drifted / 按策略跳过的 Missing）。
+    /// </summary>
+    TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data)
+        => new() { Output = Fill(template, contract, data) };
+
     /// <summary>校验模板与契约是否匹配（Missing / WrongType / Ambiguous 等）。</summary>
     TemplateValidationResult Validate(Stream template, TemplateContract contract);
 

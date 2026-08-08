@@ -1,4 +1,5 @@
 using DocumentFormat.OpenXml.Packaging;
+using TemplateFrame.Builder;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Validation;
@@ -124,6 +125,27 @@ public sealed class ExcelTemplateFillerTests
         using var template = TestDocuments.BuildTemplateWithBelowElement(); // 缺 CustomerName/OrderDate/Logo
         Assert.Throws<InvalidOperationException>(() =>
             new ExcelTemplateEngine().Fill(template, TestDocuments.DemoContract(), DemoData()));
+    }
+
+    [Fact]
+    public void ExcelTemplateEngine_FillDetailed_SurfacesWarnings()
+    {
+        using var template = TestDocuments.BuildTemplate(b =>
+        {
+            b.AddElement("OrderNo", "B2");
+            b.AddElement("CustomerName", "B3");
+            b.AddElement("OrderDate", "B4");
+            b.AddTable("Lines", ["MC", "MName", "Qty"], new TableFormat { Bordered = true }, "A6");
+            b.AddImage("Logo", "H1", 1.5, 1.5);
+            b.AddElement("Unknown", "B10");
+        });
+
+        var result = new ExcelTemplateEngine().FillDetailed(template, TestDocuments.DemoContract(), DemoData());
+
+        var extra = Assert.Single(result.Warnings, w => w.Code == TemplateValidationIssueCode.Extra);
+        Assert.Equal("TF_Unknown", extra.Key);
+        var parsed = new ExcelTemplateParser().Parse(result.Output, TestDocuments.DemoContract());
+        Assert.Equal("DO001", parsed.Values["OrderNo"]);
     }
 
     [Fact]

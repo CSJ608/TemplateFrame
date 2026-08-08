@@ -13,6 +13,7 @@
 | **v1.0.3** | **发布：迭代 9（自动映射 + SimpleExcel 强类型 + 自动映射 Demo + DEMOS.md）** | ✅ 已完成 |
 | **v1.0.4** | **发布：修复工作流补齐 Excel / Excel.Simple 打包推送（四包全部进 nuget.org 与 GitHub Release）** | ✅ 已完成 |
 | **v1.0.5** | **发布：迭代 12 + 13 + 14（i18n 消息层 + 文档内容模板多语言 + Excel 版式 i18n 键 + SimpleExcel 列定义名）** | ✅ 已完成 |
+| **15** | **工程化收尾：文档同步 + 公共代码下沉（StreamUtil / ImageTypeDetector / TemplateFillResult）+ 填充告警出口 `FillDetailed` + 发布版本校验** | ✅ 已完成（见下） |
 | **7** | **Demo 收尾：Word 插件标识 + 回读示例** | ✅ 已完成（见下） |
 | **8** | **Excel 插件 `TemplateFrame.Excel`** | ✅ 已完成（见下） |
 | **9** | **自动映射（DataPath）+ SimpleExcel 强类型** | ✅ 已完成（见下） |
@@ -68,7 +69,7 @@
 
 ## 迭代 8：Excel 插件 `TemplateFrame.Excel` —— 已完成
 
-> **状态**：✅ 已完成。`dotnet build TemplateFrame.slnx && dotnet test` 全绿（109 用例）；`dotnet run --project samples/TemplateFrame.Demo.Excel` 依次输出 模板 / 收货前 / 收货后 / 回读数据；`dotnet pack` 出 `TemplateFrame.Excel.1.0.0.nupkg`。
+> **状态**：✅ 已完成。`dotnet build TemplateFrame.slnx && dotnet test` 全绿（114 用例，含迭代 8 修订新增 Excel.Simple 5 用例）；`dotnet run --project samples/TemplateFrame.Demo.Excel` 依次输出 模板 / 收货前 / 收货后 / 回读数据；`dotnet pack` 出 `TemplateFrame.Excel.1.0.0.nupkg`。
 
 **目标**：把「契约 → 生成 → 定位 → 填充 → 回读 → 校验」复制到 `.xlsx`。
 
@@ -265,7 +266,35 @@
 
 ---
 
+## 迭代 15：工程化收尾（文档同步 + 公共代码下沉 + 填充告警出口 + 发布版本校验）—— 已完成
+
+> **状态**：✅ 已完成（2026-08-08）。`dotnet build TemplateFrame.slnx && dotnet test` 全绿（180 用例：基础 50 + Word 73 + Excel 32 + Simple 25）；按上轮评估意见完成四项收尾。
+
+**目标**：把上轮评估提出的改进落地——文档滞后修复、迭代记录补全、跨插件公共代码下沉、填充软校验告警出口、发布流程版本一致性校验。
+
+### 范围
+1. **文档同步**：DESIGN §1.4 / §2 / §3.4 / §4 / §6 / §7 / §9 更新（`TemplateService<TData, TBuilder>`、Excel / Excel.Simple 状态、i18n Demo、PUBLISHING 已启用、迭代 15）；README.en.md 同步 8 个 Demo 三组结构与 i18n 说明；ROADMAP 修复迭代 13 启动命令损坏围栏、迭代 8 用例数（109 → 114）；CHANGELOG 修复两处 "——" 列表项
+2. **启动命令说明**：ROADMAP「每轮启动命令」增加说明——历史迭代以对应小节 + CHANGELOG 为准，后续统一用通用模板
+3. **填充告警出口**：基础包新增 `TemplateFillResult`（Output + Warnings）；`ITemplateEngine.FillDetailed`（默认包 `Fill` 输出）与 `TemplateService.FillDetailed` 返回软校验告警；Word / Excel 引擎覆盖返回真实告警；`Fill` 保持向后兼容
+4. **公共代码下沉**：基础包新增 internal `StreamUtil` / `ImageTypeDetector`（`InternalsVisibleTo` 开放给 Word / Excel）；Word / Excel 的 Filler / Builder 删除私有副本；`WordFillOptions` / `ExcelFillOptions` 继承 `TemplateFillOptions&lt;TMissingPolicy&gt;`，`WordFillResult` / `ExcelFillResult` 继承 `TemplateFillResult`（公共 API 形状不变）
+5. **发布版本校验**：release.yml / publish-nuget.yml 增加「csproj `<Version>` 与 tag 一致」校验步骤，不一致即失败
+
+### 不在范围
+- 统一 `MissingElementPolicy` 枚举到基础包（会破坏 Word / Excel 公开枚举类型的 API，留待 1.1.0 级破坏性变更）
+- SimpleExcel 与 Excel 的单元格地址辅助合并（内部实现，价值低，留待后续）
+
+### 验收
+- `dotnet build TemplateFrame.slnx && dotnet test` 全绿（180 用例：基础 50 + Word 73 + Excel 32 + Simple 25）
+- `FillDetailed` 在基础服务与 Word / Excel 引擎层均返回软校验告警（测试覆盖 Extra）
+
+### 约束
+- 提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 v* tag；不改设计文档中未规划内容；CI/发布工作流不手动触发
+
+---
+
 ## 每轮启动命令
+
+> 说明：仅迭代 7 / 13 / 14 保留了原始启动命令；迭代 8 / 9 / 12 的范围、验收与约束见对应小节，历史细节以 CHANGELOG 为准；后续新迭代统一使用文末「通用模板」替换 {N} 与 {主题}。
 
 
 ### 迭代 7 启动命令（复制即用）
@@ -284,7 +313,7 @@
 
 ### 迭代 13 启动命令（复制即用）
 
-`	ext
+```text
 继续 TemplateFrame 迭代 13（文档内容 i18n：模板多语言）。先通读 docs/DESIGN.md（重点 §2 三层架构、§3.3 数据形状、§7 迭代计划、§9 风险与决策记录）与 docs/ROADMAP.md（每轮启动命令；迭代 13 小节由本迭代按本指令创建），并阅读现有代码：src/TemplateFrame/、src/TemplateFrame.Word/、src/TemplateFrame.Excel/、src/TemplateFrame.Excel.Simple/、test/ 下各测试项目、samples/TemplateFrame.Demo.Word.I18n/。上一轮成果（迭代 12 消息层 i18n）作为对照基线。
 
 迭代 13 范围（用户已确认，按本指令执行）：
@@ -302,7 +331,7 @@
 
 验收：dotnet build TemplateFrame.slnx && dotnet test 全绿；dotnet run --project samples/TemplateFrame.Demo.Word.I18n 输出消息中英切换 + 中英两份模板 + 填充 + 回读（未填充→null）；默认不带语言 = 中文（行为不变）；dotnet pack 四包（en 卫星 + 业务可覆盖）。
 约束：提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 v* tag；不改设计文档中未规划内容；CI/发布工作流不手动触发。
-`
+```
 
 ### 迭代 14 启动命令（复制即用）
 

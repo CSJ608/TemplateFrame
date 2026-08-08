@@ -8,8 +8,8 @@
 A "template ⇄ data" contract engine: declare a template contract (a list of elements) in code, let a business service assemble the initial template with a concrete plugin builder, validate that an uploaded template matches the contract, then fill it with strongly-typed data — or read data back from a filled template.
 
 - **Three-layer architecture**: base package `TemplateFrame` (generic, stable) + plugins `TemplateFrame.Word` (MS Word) / `TemplateFrame.Excel` (MS Excel, flexible layout) / `TemplateFrame.Excel.Simple` (MS Excel, simple tables) + business scene services (strongly-typed, declared inside the business app).
-- **Four operations**: `BuildInitialTemplateFile` / `Validate` / `Fill` (strongly-typed) / `Parse` (strongly-typed read-back).
-- **Plugin-based**: Word / Excel (flexible layout) / Excel.Simple (header row + data rows) are supported; demos cover both **hand-written mapping** and **DataPath auto-mapping** service styles. WPS Word and label templates are future work.
+- **Four operations**: `BuildInitialTemplateFile` / `Validate` / `Fill` (strongly-typed) / `Parse` (strongly-typed read-back). `FillDetailed` also returns the soft-validation warnings (Extra / Drifted / skipped Missing; see DESIGN §5.3).
+- **Plugin-based**: Word / Excel (flexible layout) / Excel.Simple (header row + data rows) are supported. The repo ships **8 demos in three groups** — hand-written mapping (Word / Excel), DataPath auto-mapping (Word / Excel / Excel.Simple) and i18n (Word / Excel / Excel.Simple, one integrated demo per plugin). WPS Word and label templates are future work.
 
 Design document: [docs/DESIGN.md](docs/DESIGN.md) · Roadmap: [docs/ROADMAP.md](docs/ROADMAP.md) · **Demo guide: [docs/DEMOS.md](docs/DEMOS.md)** · Publishing: [docs/PUBLISHING.md](docs/PUBLISHING.md).
 
@@ -84,6 +84,9 @@ var dataValidation = service.ValidateData(order);
 // Strongly-typed fill (text / images / table rows; soft validation during fill)
 using var filled = service.Fill(templateStream, order);
 
+// Use FillDetailed when you need the soft-validation warnings (Output + Warnings; hard errors still throw)
+var fillResult = service.FillDetailed(templateStream, order);
+
 // Read strongly-typed data back from the filled template (including table rows)
 var parsed = service.Parse(filledStream);
 ```
@@ -122,6 +125,21 @@ placeholders per language (default zh "待填充" / en "To be filled"), `BuildIn
 read-back normalizes known placeholders to null (null = unfilled, "" = intentionally blank). Other plugins define their own builder classes.
 
 ## Samples
+
+The repo provides **8 console demos in three groups** (see [docs/DEMOS.md](docs/DEMOS.md)):
+
+| Demo | Plugin | Mapping | Content | Run |
+|---|---|---|---|---|
+| `TemplateFrame.Demo.Word` | Word | hand-written | Delivery order: A5 landscape / two-layer header / 9-column detail / two-line footer / pre- and post-receipt fills | `dotnet run --project samples/TemplateFrame.Demo.Word` |
+| `TemplateFrame.Demo.Excel` | Excel (flexible) | hand-written | Delivery order: 3×9 grid header / 9-column detail / LOGO + QR anchored | `dotnet run --project samples/TemplateFrame.Demo.Excel` |
+| `TemplateFrame.Demo.Word.AutoMapping` | Word | **auto** (DataPath) | Same delivery order as the hand-written version; only the mapping differs | `dotnet run --project samples/TemplateFrame.Demo.Word.AutoMapping` |
+| `TemplateFrame.Demo.Excel.AutoMapping` | Excel (flexible) | **auto** | Same delivery order as the hand-written version; only the mapping differs | `dotnet run --project samples/TemplateFrame.Demo.Excel.AutoMapping` |
+| `TemplateFrame.Demo.Excel.Simple` | Excel.Simple | **auto** | Materials master data: template → fill → parse back | `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple` |
+| `TemplateFrame.Demo.Word.I18n` | Word | auto | **i18n**: runtime messages zh/en + document content zh/en templates + fill + read-back (unfilled → null) | `dotnet run --project samples/TemplateFrame.Demo.Word.I18n` |
+| `TemplateFrame.Demo.Excel.I18n` | Excel (flexible) | auto | **i18n**: messages + `AddTextKey` / `AddTableKeys` zh/en templates + read-back | `dotnet run --project samples/TemplateFrame.Demo.Excel.I18n` |
+| `TemplateFrame.Demo.Excel.Simple.I18n` | Excel.Simple | auto | **i18n**: messages + zh/en headers + defined-name read-back (language-independent) | `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple.I18n` |
+
+All demos write outputs to `%TEMP%\<Demo project name>` by default; pass a directory as the first argument to override, e.g. `dotnet run --project samples/TemplateFrame.Demo.Word.AutoMapping -- "D:\out"`.
 
 `samples/TemplateFrame.Demo.Word` is a full **delivery order** demo (`DeliveryOrderTemplateService`, A5 landscape):
 - **Two-layer header**: brand layer (company LOGO | delivery order title | QR code + page number below); document header layer (order no + supplier per half line / order date + operator + remark at 1:1:2)
