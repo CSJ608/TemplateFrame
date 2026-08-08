@@ -310,7 +310,7 @@ TemplateFrame/
 | 搁置 | **10** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | 搁置 | **11** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
 | 已归档 | **12** | 国际化（i18n）：运行时消息中英双语（中文默认 + en 卫星按 CurrentUICulture 自动） | ✅ 完成（2026-08-08） |
-| 进行中 | **13** | 文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化） | 🔄 进行中（2026-08-08） |
+| 已归档 | **13** | 文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化） | ✅ 完成（2026-08-08） |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
