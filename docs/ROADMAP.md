@@ -13,6 +13,7 @@
 | **v1.0.3** | **发布：迭代 9（自动映射 + SimpleExcel 强类型 + 自动映射 Demo + DEMOS.md）** | ✅ 已完成 |
 | **v1.0.4** | **发布：修复工作流补齐 Excel / Excel.Simple 打包推送（四包全部进 nuget.org 与 GitHub Release）** | ✅ 已完成 |
 | **v1.0.5** | **发布：迭代 12 + 13 + 14（i18n 消息层 + 文档内容模板多语言 + Excel 版式 i18n 键 + SimpleExcel 列定义名）** | ✅ 已完成 |
+| **v1.0.6** | **发布：迭代 15 + 16（工程化收尾 FillDetailed/公共代码下沉 + SimpleExcel 根集合 List<T> + i18n Demo 根集合示例）** | ✅ 已完成 |
 | **15** | **工程化收尾：文档同步 + 公共代码下沉（StreamUtil / ImageTypeDetector / TemplateFillResult）+ 填充告警出口 `FillDetailed` + 发布版本校验** | ✅ 已完成（见下） |
 | **7** | **Demo 收尾：Word 插件标识 + 回读示例** | ✅ 已完成（见下） |
 | **8** | **Excel 插件 `TemplateFrame.Excel`** | ✅ 已完成（见下） |
