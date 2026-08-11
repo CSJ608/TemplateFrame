@@ -136,8 +136,6 @@ public static class SimpleExcel
             worksheetPart.Worksheet.InsertBefore(cols, sheetData);
         }
 
-        // 用命名区域标记表格位置（表头 + 数据行的整块区域），Read 优先按它定位；
-        // 传入 columnKeys 时另写每列定义名 TF_<TableName>_<ColumnKey> → 表头单元格（单格引用，数据行增删不影响）
         if (!string.IsNullOrWhiteSpace(options.TableName) && headers.Count > 0)
         {
             var tableName = options.TableName.Trim();
@@ -233,7 +231,6 @@ public static class SimpleExcel
 
         var rows = targetSheetData.Elements<Row>().ToList();
 
-        // 表头
         var headers = new List<string>();
         for (var c = 0; c < colCount; c++)
         {
@@ -241,7 +238,6 @@ public static class SimpleExcel
             headers.Add(GetCellText(cell) ?? string.Empty);
         }
 
-        // 数据行（表头下一行到 endRow，全空行跳过）
         var result = new List<IReadOnlyList<object?>>();
         for (var r = headerRow + 1; r <= endRow; r++)
         {

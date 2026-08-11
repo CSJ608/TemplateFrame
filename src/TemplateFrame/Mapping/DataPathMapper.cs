@@ -72,7 +72,6 @@ public static class DataPathMapper
                     var collectionProperty = tableMapping.CollectionProperty;
                     if (collectionProperty is null)
                     {
-                        // 根集合：直接返回行集合（缺数据时返回空集合）
                         data.Tables.TryGetValue(table.Key, out var rootRows);
                         return (TData)MapTableFromData(tableMapping, rootRows ?? [], typeof(TData));
                     }
@@ -127,7 +126,6 @@ public static class DataPathMapper
 
                 case TableElement table when table.DataPath is { Length: > 0 } || isCollectionDataType:
                 {
-                    // 根集合模式：TData 本身就是集合（List<T> / IReadOnlyList<T> / 数组），表格 DataPath 留空，行数据直接取根对象
                     var isRootCollection = string.IsNullOrWhiteSpace(table.DataPath);
                     if (isRootCollection)
                     {

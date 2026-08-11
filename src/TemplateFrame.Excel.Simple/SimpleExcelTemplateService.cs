@@ -26,7 +26,6 @@ public abstract class SimpleExcelTemplateService<TData>
         {
             var contract = DefineContract() ?? throw new InvalidOperationException(Sr.Get("SimpleExcel.Service.DefineContractNull"));
             var table = SimpleExcelContract.RequireSingleTable(contract);
-            // 根集合模式：TData 本身是集合（List<T> / IReadOnlyList<T> / 数组）时，表格 DataPath 留空，行数据直接取根对象
             if (string.IsNullOrWhiteSpace(table.DataPath) && !DataPathMapper.IsCollectionDataType(typeof(TData)))
             {
                 throw new InvalidOperationException(
