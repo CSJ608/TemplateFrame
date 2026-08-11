@@ -22,6 +22,12 @@
   <data name="Mapping.PropertyNotFound" xml:space="preserve">
     <value>契约 {0} 的元素 "{1}"（{2}）的 DataPath "{3}" 在类型 {4} 上找不到属性。</value>
   </data>
+  <data name="Mapping.RootCollectionHasDataPath" xml:space="preserve">
+    <value>契约 {0} 的表格 "{1}" 声明了 DataPath "{2}"，但数据对象本身就是集合（根集合模式），表格 DataPath 应留空。</value>
+  </data>
+  <data name="Mapping.RootCollectionMultipleTables" xml:space="preserve">
+    <value>契约 {0} 含多个表格，但数据对象本身就是集合（根集合模式），只能映射一个表格。</value>
+  </data>
   <data name="Mapping.ReadOnlyProperty" xml:space="preserve">
     <value>契约 {0} 的元素 "{1}" 的 DataPath "{2}" 指向只读属性 {3}.{4}，自动映射需要可写属性。</value>
   </data>

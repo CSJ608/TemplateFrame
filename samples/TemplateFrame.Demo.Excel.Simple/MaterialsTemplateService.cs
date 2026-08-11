@@ -34,3 +34,34 @@ public sealed class MaterialsTemplateService : SimpleExcelTemplateService<Materi
             ],
         };
 }
+
+/// <summary>
+/// 根集合版物料场景服务：TData 直接就是 <see cref="List{T}"/>（表格 DataPath 留空），
+/// 无需再包一层容器对象即可 Fill / Parse。
+/// </summary>
+public sealed class MaterialListTemplateService : SimpleExcelTemplateService<List<MaterialLine>>
+{
+    protected override TemplateContract DefineContract()
+        => new()
+        {
+            Name = "Materials",
+            Version = "1.0",
+            Elements =
+            [
+                new TableElement
+                {
+                    Key = "Materials",
+                    DisplayName = "物料清单",
+                    // 根集合：DataPath 留空，TData（List<MaterialLine>）本身就是行集合
+                    Columns =
+                    [
+                        new TextElement { Key = "编码", DisplayName = "编码", DataPath = "Code", Required = true },
+                        new TextElement { Key = "名称", DisplayName = "名称", DataPath = "Name", Required = true },
+                        new TextElement { Key = "基本单位", DisplayName = "基本单位", DataPath = "Unit" },
+                        new TextElement { Key = "包装规格", DisplayName = "包装规格", DataPath = "Package" },
+                        new TextElement { Key = "型号", DisplayName = "型号", DataPath = "Model" },
+                    ],
+                },
+            ],
+        };
+}

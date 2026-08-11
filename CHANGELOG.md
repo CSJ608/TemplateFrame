@@ -5,6 +5,9 @@
 ## [Unreleased]
 
 ### 新增
+- 迭代 16：**SimpleExcel 根集合（List<T> 直接填充 / 解析）**——`DataPathMapper` 支持根集合映射：`TData` 本身为 `List<T>` / `IReadOnlyList<T>` / 数组时，契约表格 `DataPath` 留空即按「根集合」映射（列 `DataPath` 仍指向行元素属性）；`SimpleExcelTemplateService<TData>` 校验放宽（根集合允许表格 DataPath 留空），`service.Fill(list)` / `service.Parse(xlsx)` 直接返回行集合，无需再包一层容器对象；新增 `DataPathMapper.IsCollectionDataType`；顺带修复集合属性为数组时 Parse 创建 `List<T>` 赋给数组属性的潜在问题（现按目标类型创建 `T[]`）。向后兼容：容器对象写法与 `SimpleExcelTable` 底层 API 不变。
+
+### 新增
 - 迭代 15：**填充告警出口**——基础包新增 `TemplateFillResult`（Output + Warnings）与 `ITemplateEngine.FillDetailed`（默认实现包 `Fill` 输出，Word / Excel 引擎覆盖返回填充器收集的真实告警）；`TemplateService<TData, TBuilder>.FillDetailed` 返回软校验告警（Extra / Drifted / 按策略跳过的 Missing）；`Fill` 保持只返回输出流（向后兼容）
 - 迭代 15：**公共代码下沉**——基础包新增 internal `StreamUtil` / `ImageTypeDetector`（`InternalsVisibleTo` 开放给 Word / Excel）；Word / Excel 的 Filler / Builder 删除私有副本；`WordFillOptions` / `ExcelFillOptions` 继承 `TemplateFillOptions<TMissingPolicy>`，`WordFillResult` / `ExcelFillResult` 继承 `TemplateFillResult`（公共 API 形状不变，策略枚举类型保持插件各自公开枚举）
 

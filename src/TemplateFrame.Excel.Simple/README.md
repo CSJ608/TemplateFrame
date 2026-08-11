@@ -97,6 +97,49 @@ var parsed = service.Parse(filled);                    // xlsx → 强类型 Mat
 - **按语言表头（迭代 14）**：`SimpleExcelContract.Write(..., culture, localizer)` 或 `service.Fill(data, options, culture, localizer)` 可写本地化表头（本地化键 = 列 Key，未注册覆盖回退 `DisplayName`/`Key`）；回读仍语言无关（定义名定位）。
 - **底层 API**：也可直接用 `SimpleExcelContract.Write / Read / Validate`（基于 `FillData`），再配合基础包 `DataPathMapper` 自行映射。
 - **向后兼容**：原有 `SimpleExcel.Write / Read`（`SimpleExcelTable`）保持不变。
+## 根集合：List<T> 直接填充 / 解析
+
+如果场景数据就是一个列表（不需要再包一层容器对象），把 `TData` 直接声明为集合类型，表格 `DataPath` 留空即可——行数据自动取根对象本身：
+
+```csharp
+public sealed class MaterialListService : SimpleExcelTemplateService<List<MaterialLine>>
+{
+    protected override TemplateContract DefineContract()
+        => new()
+        {
+            Name = "Materials",
+            Version = "1.0",
+            Elements =
+            [
+                new TableElement
+                {
+                    Key = "Materials",
+                    DisplayName = "物料清单",
+                    // DataPath 留空 = 根集合：TData（List<MaterialLine>）本身就是行集合
+                    Columns =
+                    [
+                        new TextElement { Key = "编码", DisplayName = "编码", DataPath = "Code", Required = true },
+                        new TextElement { Key = "名称", DisplayName = "名称", DataPath = "Name", Required = true },
+                        new TextElement { Key = "数量", DisplayName = "数量", DataPath = "Qty", ValueType = typeof(decimal) },
+                    ],
+                },
+            ],
+        };
+}
+
+var service = new MaterialListService();
+using var filled = service.Fill(
+[
+    new MaterialLine { Code = "AL-6063", Name = "铝型材 6063-T5", Qty = 120.5m },
+    new MaterialLine { Code = "SS-M8", Name = "不锈钢螺栓 M8×30", Qty = 500m },
+]);
+var parsed = service.Parse(filled);      // 直接得到 List<MaterialLine>
+```
+
+- **支持的根集合类型**：`List<T>` / `IReadOnlyList<T>` / `IEnumerable<T>` / 数组 `T[]`（`Parse` 返回与声明一致；接口集合由 `List<T>` 承载）。
+- 根集合时表格 `DataPath` **必须留空**（声明了会抛清晰错误）；列 `DataPath` 仍指向行元素属性。
+- 容器对象写法（`MaterialsData.Items`）与 `SimpleExcelTable` 底层 API 均保持不变，完全向后兼容。
+
 ## Demo
 
 仓库 `samples/TemplateFrame.Demo.Excel.Simple` 提供**物料基础数据**示例（模板 → 填充 → 反解析 完整链路，表头：编码 / 名称 / 基本单位 / 包装规格 / 型号）：

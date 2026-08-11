@@ -8,7 +8,7 @@ namespace TemplateFrame.Demo.Excel.Simple;
 /// 服务依赖契约（单个表格），表格与列声明 <see cref="TemplateElement.DataPath"/> 后由框架自动映射——
 /// 无手写 MapToData / MapFromData，即可获得 生成模板 / 强类型填充 / 强类型回读（service.Parse 直接得到 MaterialsData）。
 /// 输出文件带 Simple 标识：Excel-Simple-Materials-template.xlsx（仅表头）与
-/// Excel-Simple-Materials-filled.xlsx（表头 + 数据行），默认输出到 %TEMP%\TemplateFrame.Demo.Excel.Simple。
+/// Excel-Simple-Materials-filled.xlsx（表头 + 数据行）与 Excel-Simple-Materials-rootlist-filled.xlsx（根集合 List<MaterialLine> 直接填充 / 回读），默认输出到 %TEMP%\TemplateFrame.Demo.Excel.Simple。
 /// i18n（中英表头 + 定义名回读）见独立 Demo：samples/TemplateFrame.Demo.Excel.Simple.I18n。
 /// </summary>
 internal static class Program
@@ -68,6 +68,28 @@ internal static class Program
             Console.WriteLine($"    {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");
         }
 
-        Console.WriteLine("\n[4] 提示：i18n（中英表头 + 定义名回读，语言无关）见独立 Demo：samples/TemplateFrame.Demo.Excel.Simple.I18n。");
+        // [4] 根集合：TData 直接就是 List<MaterialLine>（表格 DataPath 留空），无需再包一层容器对象
+        var listService = new MaterialListTemplateService();
+        var listPath = Path.Combine(dir, "Excel-Simple-Materials-rootlist-filled.xlsx");
+        var listData = new List<MaterialLine>
+        {
+            new() { Code = "AL-6063", Name = "铝型材 6063-T5", Unit = "支", Package = "6 米/捆", Model = "6063-T5" },
+            new() { Code = "SS-M8", Name = "不锈钢螺栓 M8×30", Unit = "个", Package = "500 个/盒", Model = "304" },
+        };
+        using (var filled = listService.Fill(listData, options))
+        {
+            File.WriteAllBytes(listPath, ((MemoryStream)filled).ToArray());
+        }
+
+        using var listInput = File.OpenRead(listPath);
+        var loadedList = listService.Parse(listInput, options);
+
+        Console.WriteLine($"\n[4] 根集合 List<MaterialLine>：{listPath}  数据行：{loadedList.Count}");
+        foreach (var item in loadedList)
+        {
+            Console.WriteLine($"    {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");
+        }
+
+        Console.WriteLine("\n[5] 提示：i18n（中英表头 + 定义名回读，语言无关）见独立 Demo：samples/TemplateFrame.Demo.Excel.Simple.I18n。");
     }
 }

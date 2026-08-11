@@ -12,20 +12,22 @@ namespace TemplateFrame.Excel.Simple;
 /// SimpleExcel 场景服务的轻量基类（迭代 9）：依赖契约（单个表格）获得强类型
 /// <c>BuildTemplate / Validate / Fill / Parse</c>，无需 Builder / Engine。
 /// 契约表格与列声明 <see cref="TemplateElement.DataPath"/> 后，映射走 <see cref="DataPathMapper"/> 自动完成；
+/// TData 本身为 <c>List&lt;T&gt;</c> 等集合时，表格 DataPath 留空即按「根集合」直接填充 / 解析；
 /// 也可重写 <see cref="MapToData"/> / <see cref="MapFromData"/> 手工映射。
 /// </summary>
 public abstract class SimpleExcelTemplateService<TData>
 {
     private readonly Lazy<TemplateContract> _contract;
 
-    /// <summary>以业务服务创建（构造时惰性校验契约：单个表格 + 表格声明 DataPath）。</summary>
+    /// <summary>以业务服务创建（构造时惰性校验契约：单个表格 + 表格声明 DataPath；TData 为根集合时可留空）。</summary>
     protected SimpleExcelTemplateService()
     {
         _contract = new Lazy<TemplateContract>(() =>
         {
             var contract = DefineContract() ?? throw new InvalidOperationException(Sr.Get("SimpleExcel.Service.DefineContractNull"));
             var table = SimpleExcelContract.RequireSingleTable(contract);
-            if (string.IsNullOrWhiteSpace(table.DataPath))
+            // 根集合模式：TData 本身是集合（List<T> / IReadOnlyList<T> / 数组）时，表格 DataPath 留空，行数据直接取根对象
+            if (string.IsNullOrWhiteSpace(table.DataPath) && !DataPathMapper.IsCollectionDataType(typeof(TData)))
             {
                 throw new InvalidOperationException(
                     Sr.Get("SimpleExcel.Service.TableNeedsDataPath", contract.Name, table.Key));

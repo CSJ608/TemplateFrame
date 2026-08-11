@@ -22,6 +22,12 @@
   <data name="Mapping.PropertyNotFound" xml:space="preserve">
     <value>Contract "{0}" element "{1}" ({2}) DataPath "{3}" was not found as a property on type {4}.</value>
   </data>
+  <data name="Mapping.RootCollectionHasDataPath" xml:space="preserve">
+    <value>Contract "{0}" table "{1}" declares DataPath "{2}", but the data object itself is a collection (root-collection mode); leave the table DataPath empty.</value>
+  </data>
+  <data name="Mapping.RootCollectionMultipleTables" xml:space="preserve">
+    <value>Contract "{0}" has multiple tables, but the data object itself is a collection (root-collection mode), which can only map one table.</value>
+  </data>
   <data name="Mapping.ReadOnlyProperty" xml:space="preserve">
     <value>Contract "{0}" element "{1}" DataPath "{2}" points to read-only property {3}.{4}; auto-mapping requires a writable property.</value>
   </data>

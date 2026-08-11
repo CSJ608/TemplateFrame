@@ -284,4 +284,164 @@ public sealed class DataPathMapperTests
         Assert.Equal("", data.Remark);
         Assert.Null(data.Lines[0].ActualQty);
     }
+
+    private static TemplateContract RootLinesContract()
+        => new()
+        {
+            Name = "RootLines",
+            Version = "1.0",
+            Elements =
+            [
+                new TableElement
+                {
+                    Key = "Lines",
+                    DisplayName = "明细行",
+                    // 根集合：DataPath 留空，TData 本身就是集合
+                    Columns =
+                    [
+                        new TextElement { Key = "序号", DisplayName = "序号", DataPath = "RowNo", ValueType = typeof(int) },
+                        new TextElement { Key = "物料代码", DisplayName = "物料代码", DataPath = "MaterialCode" },
+                        new TextElement { Key = "计划数量", DisplayName = "计划数量", DataPath = "PlanQty", ValueType = typeof(decimal) },
+                        new TextElement { Key = "实收数量", DisplayName = "实收数量", DataPath = "ActualQty", ValueType = typeof(decimal) },
+                    ],
+                },
+            ],
+        };
+
+    private static List<OrderLine> SampleLines()
+        =>
+        [
+            new OrderLine { RowNo = 1, MaterialCode = "AL-6063", PlanQty = 120.5m, ActualQty = 120.5m },
+            new OrderLine { RowNo = 2, MaterialCode = "SS-M8", PlanQty = 500m, ActualQty = null },
+        ];
+
+    [Fact]
+    public void ToFillData_RootList_MapsRows()
+    {
+        var fill = DataPathMapper.ToFillData(SampleLines(), RootLinesContract());
+
+        var rows = fill.Tables["Lines"];
+        Assert.Equal(2, rows.Count);
+        Assert.Equal(1, rows[0]["序号"]);
+        Assert.Equal("AL-6063", rows[0]["物料代码"]);
+        Assert.Equal(120.5m, rows[0]["计划数量"]);
+        Assert.Equal(2, rows[1]["序号"]);
+        Assert.Equal("SS-M8", rows[1]["物料代码"]);
+        Assert.Null(rows[1]["实收数量"]);
+    }
+
+    [Fact]
+    public void FromFillData_RootList_RoundTrips()
+    {
+        var fill = DataPathMapper.ToFillData(SampleLines(), RootLinesContract());
+        var lines = DataPathMapper.FromFillData<List<OrderLine>>(fill, RootLinesContract());
+
+        Assert.Equal(2, lines.Count);
+        Assert.Equal("AL-6063", lines[0].MaterialCode);
+        Assert.Equal(120.5m, lines[0].PlanQty);
+        Assert.Equal(120.5m, lines[0].ActualQty);
+        Assert.Equal("SS-M8", lines[1].MaterialCode);
+        Assert.Equal(500m, lines[1].PlanQty);
+        Assert.Null(lines[1].ActualQty);
+    }
+
+    [Fact]
+    public void FromFillData_RootList_InterfaceAndArrayTargets()
+    {
+        var fill = DataPathMapper.ToFillData(SampleLines(), RootLinesContract());
+
+        var asReadOnly = DataPathMapper.FromFillData<IReadOnlyList<OrderLine>>(fill, RootLinesContract());
+        Assert.Equal(2, asReadOnly.Count);
+        Assert.Equal("AL-6063", asReadOnly[0].MaterialCode);
+
+        var asArray = DataPathMapper.FromFillData<OrderLine[]>(fill, RootLinesContract());
+        Assert.Equal(2, asArray.Length);
+        Assert.Equal("SS-M8", asArray[1].MaterialCode);
+    }
+
+    [Fact]
+    public void FromFillData_RootList_EmptyRows_ReturnsEmptyCollection()
+    {
+        var lines = DataPathMapper.FromFillData<List<OrderLine>>(new FillData(), RootLinesContract());
+        Assert.Empty(lines);
+    }
+
+    [Fact]
+    public void RootList_WithTableDataPath_Throws()
+    {
+        var contract = new TemplateContract
+        {
+            Name = "BadRoot",
+            Elements =
+            [
+                new TableElement { Key = "Lines", DisplayName = "明细行", DataPath = "Items", Columns = [] },
+            ],
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => DataPathMapper.ToFillData(SampleLines(), contract));
+        Assert.Contains("DataPath", ex.Message);
+        Assert.Contains("BadRoot", ex.Message);
+    }
+
+    [Fact]
+    public void RootList_MultipleTables_Throws()
+    {
+        var contract = new TemplateContract
+        {
+            Name = "TwoRootTables",
+            Elements =
+            [
+                new TableElement { Key = "A", DisplayName = "A", Columns = [] },
+                new TableElement { Key = "B", DisplayName = "B", Columns = [] },
+            ],
+        };
+
+        var ex = Assert.Throws<InvalidOperationException>(() => DataPathMapper.ToFillData(SampleLines(), contract));
+        Assert.Contains("TwoRootTables", ex.Message);
+    }
+
+    private sealed record ArrayOrderData
+    {
+        public OrderLine[] Lines { get; init; } = [];
+    }
+
+    [Fact]
+    public void FromFillData_ArrayCollectionProperty_CreatesArray()
+    {
+        var contract = new TemplateContract
+        {
+            Name = "ArrayOrder",
+            Elements =
+            [
+                new TableElement
+                {
+                    Key = "Lines",
+                    DisplayName = "明细行",
+                    DataPath = "Lines",
+                    Columns =
+                    [
+                        new TextElement { Key = "物料代码", DisplayName = "物料代码", DataPath = "MaterialCode" },
+                    ],
+                },
+            ],
+        };
+
+        var fill = new FillData
+        {
+            Tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>
+            {
+                ["Lines"] =
+                [
+                    new Dictionary<string, object?> { ["物料代码"] = "AL-6063" },
+                    new Dictionary<string, object?> { ["物料代码"] = "SS-M8" },
+                ],
+            },
+        };
+
+        var data = DataPathMapper.FromFillData<ArrayOrderData>(fill, contract);
+
+        Assert.Equal(2, data.Lines.Length);
+        Assert.Equal("AL-6063", data.Lines[0].MaterialCode);
+        Assert.Equal("SS-M8", data.Lines[1].MaterialCode);
+    }
 }
