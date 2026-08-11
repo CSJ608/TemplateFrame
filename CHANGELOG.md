@@ -5,6 +5,7 @@
 ## [Unreleased]
 
 ### 新增
+- 迭代 16：**Demo Excel.Simple.I18n 追加根集合 i18n 示例**——`MaterialListTemplateService : SimpleExcelTemplateService<List<MaterialLine>>`（表格 DataPath 留空），同一份 `List<MaterialLine>` 中英填充 + 定义名回读（语言无关），`Parse` 直接返回 `List<MaterialLine>`；DEMOS.md / Simple README 同步
 - 迭代 16：**SimpleExcel 根集合（List<T> 直接填充 / 解析）**——`DataPathMapper` 支持根集合映射：`TData` 本身为 `List<T>` / `IReadOnlyList<T>` / 数组时，契约表格 `DataPath` 留空即按「根集合」映射（列 `DataPath` 仍指向行元素属性）；`SimpleExcelTemplateService<TData>` 校验放宽（根集合允许表格 DataPath 留空），`service.Fill(list)` / `service.Parse(xlsx)` 直接返回行集合，无需再包一层容器对象；新增 `DataPathMapper.IsCollectionDataType`；顺带修复集合属性为数组时 Parse 创建 `List<T>` 赋给数组属性的潜在问题（现按目标类型创建 `T[]`）。向后兼容：容器对象写法与 `SimpleExcelTable` 底层 API 不变。
 
 ### 新增

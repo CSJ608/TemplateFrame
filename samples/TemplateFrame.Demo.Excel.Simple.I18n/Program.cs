@@ -10,7 +10,8 @@ namespace TemplateFrame.Demo.Excel.Simple.I18n;
 /// 迭代 12 消息层 —— 缺列模板对完整契约 Validate，Missing 消息随 CurrentUICulture 中英切换；
 /// 迭代 14 文档内容 —— 中英表头模板 + 填充（表头按语言，每列定义名标记表头单元格），
 /// 回读走定义名定位（语言无关，无需知道文件语言）。
-/// 输出文件带 I18n 标识：Excel-Simple-I18n-Materials-{zh,en}-{template,filled}.xlsx，
+/// 输出文件带 I18n 标识：Excel-Simple-I18n-Materials-{zh,en}-{template,filled}.xlsx 与根集合版
+/// Excel-Simple-I18n-Materials-rootlist-{zh,en}-filled.xlsx（TData 直接为 List&lt;MaterialLine&gt;），
 /// 默认输出到 %TEMP%\TemplateFrame.Demo.Excel.Simple.I18n。
 /// </summary>
 internal static class Program
@@ -115,6 +116,39 @@ internal static class Program
         Console.WriteLine("\n[8] 结论（Excel.Simple i18n）：");
         Console.WriteLine("  - 表头按语言（en 表头经本地化器），每列定义名承载列身份 → 框架产物回读语言无关（无需知道文件语言）；");
         Console.WriteLine("  - 手改文件（无定义名）回退按表头文本匹配（中文 DisplayName 匹配契约列）；表头按语言匹配继续搁置（需语言元数据）。");
+
+        // ==================== 根集合 + i18n（迭代 16）：List<T> 直接填充 / 解析 ====================
+        Console.WriteLine("\n════════ 根集合 List<T> + i18n：同一份 List<MaterialLine> 中英填充 + 语言无关回读 ════════");
+
+        var listService = new MaterialListTemplateService();
+        var materialList = materials.Items.ToList(); // 根集合：TData 直接就是 List<MaterialLine>（表格 DataPath 留空）
+
+        var zhRootListPath = Path.Combine(dir, "Excel-Simple-I18n-Materials-rootlist-zh-filled.xlsx");
+        var enRootListPath = Path.Combine(dir, "Excel-Simple-I18n-Materials-rootlist-en-filled.xlsx");
+
+        // [9] 填充：同一份 List<MaterialLine> → 中英两份填充文件（表头按语言，每列定义名标记表头单元格）
+        using (var filled = listService.Fill(materialList, options))
+        {
+            File.WriteAllBytes(zhRootListPath, ((MemoryStream)filled).ToArray());
+        }
+
+        using (var filled = listService.Fill(materialList, options, new CultureInfo("en"), enLocalizer))
+        {
+            File.WriteAllBytes(enRootListPath, ((MemoryStream)filled).ToArray());
+        }
+
+        Console.WriteLine("\n[9] 根集合 List<MaterialLine> 中英填充（表头按语言）：");
+        Console.WriteLine($"  - zh 填充：{zhRootListPath}");
+        Console.WriteLine($"  - en 填充：{enRootListPath}");
+
+        // [10] 回读：直接得到 List<MaterialLine>（定义名定位，语言无关）
+        Console.WriteLine("\n[10] 根集合回读（语言无关，直接 List<MaterialLine>）：");
+        PrintListReadback("zh 文件", listService.Parse(File.OpenRead(zhRootListPath), options));
+        PrintListReadback("en 文件", listService.Parse(File.OpenRead(enRootListPath), options));
+
+        Console.WriteLine("\n[11] 结论（根集合 + i18n）：");
+        Console.WriteLine("  - TData 直接是 List<MaterialLine>（表格 DataPath 留空），无需再包一层容器对象；");
+        Console.WriteLine("  - i18n 能力与容器对象版完全一致：表头按语言（en 经本地化器），每列定义名承载列身份 → 回读语言无关，Parse 直接返回 List<MaterialLine>。");
     }
 
     private static void RunValidation(string cultureName, MaterialsTemplateService service, string templatePath, SimpleExcelOptions options)
@@ -141,6 +175,15 @@ internal static class Program
     {
         Console.WriteLine($"  [{label}] {data.Items.Count} 行（强类型 MaterialsData）");
         foreach (var item in data.Items)
+        {
+            Console.WriteLine($"      {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");
+        }
+    }
+
+    private static void PrintListReadback(string label, List<MaterialLine> items)
+    {
+        Console.WriteLine($"  [{label}] {items.Count} 行（强类型 List<MaterialLine>）");
+        foreach (var item in items)
         {
             Console.WriteLine($"      {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");
         }

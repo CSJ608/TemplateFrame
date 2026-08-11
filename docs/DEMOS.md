@@ -19,7 +19,7 @@
 | `samples/TemplateFrame.Demo.Excel.Simple` | Excel.Simple（简单表格） | **自动映射**（Simple 无手写版） | 物料基础数据：模板（仅表头）→ 填充 → 回读 | `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple` |
 | `samples/TemplateFrame.Demo.Word.I18n` | Word | 自动映射 | **i18n**：消息层（Validate/Fill 中英切换）+ 文档内容（zh/en 模板 + 填充 + 回读，未填充→null） | `dotnet run --project samples/TemplateFrame.Demo.Word.I18n` |
 | `samples/TemplateFrame.Demo.Excel.I18n` | Excel（灵活版式） | 自动映射 | **i18n**：消息层 + 文档内容（`AddTextKey` / `AddTableKeys` 中英模板 + 回读） | `dotnet run --project samples/TemplateFrame.Demo.Excel.I18n` |
-| `samples/TemplateFrame.Demo.Excel.Simple.I18n` | Excel.Simple（简单表格） | 自动映射 | **i18n**：消息层（缺列 Validate 中英）+ 文档内容（中英表头 + 定义名回读，语言无关） | `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple.I18n` |
+| `samples/TemplateFrame.Demo.Excel.Simple.I18n` | Excel.Simple（简单表格） | 自动映射 | **i18n**：消息层（缺列 Validate 中英）+ 文档内容（中英表头 + 定义名回读，语言无关）+ 根集合 `List<T>` 直接填充/解析 | `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple.I18n` |
 
 > 所有 Demo 默认输出到 `%TEMP%\<Demo 项目名>`，也可用第一个参数指定输出目录，例如：
 > `dotnet run --project samples/TemplateFrame.Demo.Word.AutoMapping -- "D:\out"`。
@@ -89,6 +89,7 @@ new ImageElement { Key = "QRCode",   DisplayName = "二维码",    DataPath = "Q
 #### TemplateFrame.Demo.Excel.Simple.I18n
 - **消息层（迭代 12）**：用缺「型号」列的模板对完整契约 `Validate`，Missing 消息随文化中英切换（MessageKey / MessageArgs）。
 - **文档内容（迭代 14）**：中英表头模板 + 填充（en 表头经本地化器，每列定义名 `TF_Table_<列Key>` → 表头单元格），**无语言回读**（`service.Parse` 走定义名定位，不依赖表头文本匹配）——回读与表头语言解耦；zh 文件走表头文本匹配回退。
+- **根集合（迭代 16）**：追加 `MaterialListTemplateService : SimpleExcelTemplateService<List<MaterialLine>>`——表格 DataPath 留空，`TData` 直接是 `List<MaterialLine>`；同一份列表中英填充 + `Parse` 直接回读 `List<MaterialLine>`（表头按语言、定义名回读语言无关，与容器对象版能力一致）。
 
 ## 关联文档
 

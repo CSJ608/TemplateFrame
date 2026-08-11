@@ -139,6 +139,7 @@ var parsed = service.Parse(filled);      // 直接得到 List<MaterialLine>
 - **支持的根集合类型**：`List<T>` / `IReadOnlyList<T>` / `IEnumerable<T>` / 数组 `T[]`（`Parse` 返回与声明一致；接口集合由 `List<T>` 承载）。
 - 根集合时表格 `DataPath` **必须留空**（声明了会抛清晰错误）；列 `DataPath` 仍指向行元素属性。
 - 容器对象写法（`MaterialsData.Items`）与 `SimpleExcelTable` 底层 API 均保持不变，完全向后兼容。
+- i18n 与容器对象版一致：`Fill(..., culture, localizer)` 写本地化表头，定义名回读语言无关（示例见 `samples/TemplateFrame.Demo.Excel.Simple.I18n` 的根集合章节）。
 
 ## Demo
 
