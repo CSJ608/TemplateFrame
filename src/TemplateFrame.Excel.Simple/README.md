@@ -29,13 +29,15 @@ var table = new SimpleExcelTable
 using var stream = File.Create("items.xlsx");
 SimpleExcel.Write(stream, table, new SimpleExcelOptions { SheetName = "物料清单" });
 
-// 导入（优先按命名区域 TF_Table 定位表头；无命名区域时回退"第一个非空行"）
+// 导入（优先按命名区域 TF_Table 定位表头；区域不存在/表头行为空时回退"第一个多单元格非空行"）
 using var input = File.OpenRead("items.xlsx");
 var loaded = SimpleExcel.Read(input); // Headers + Rows（string / bool / DateTime / double / null）
 ```
 
 - 单元格值支持：`string` / `bool` / `DateTime`（写为日期序列号 + `yyyy-mm-dd`）/ 数值 / `null`。
-- **命名区域定位**：`Write` 把表格区域写成一个命名区域（默认 `TF_Table` → `'物料清单'!$A$1:$C$3`，可用 `TableName` 自定义、`StartCell` 指定起始格）；`Read` 优先按它定位表头，找不到再回退"第一个非空行"。
+- **命名区域定位**：`Write` 把表格区域写成一个命名区域（默认 `TF_Table` → `'物料清单'!$A$1:$C$3`，可用 `TableName` 自定义、`StartCell` 指定起始格）；`Read` 优先按它定位表头，区域不存在**或表头行为空（区域错位）**时回退"第一个多单元格非空行"（跳过仅 1 个非空单元格的标题/装饰行）。
+- **数据区容错**：数据行统一顺延到工作表最后一行（全空行跳过）——命名区域只盖住表头、或用户在 Excel 里手工在区域外补数据时，不再静默丢数据。注意：区域下方若有其他非空内容（如下方第二个表格）会被一并读入。
+- 兼容常见外部文件：共享字符串表头（Excel/WPS 默认写法）解析为真实文本；富文本单元格（部分加粗/着色）拼接全部片段文本；行缺 `RowIndex(r)` 属性时按文档顺序推断（单元格缺 `r` 引用的极端写法不支持——Excel/WPS 均恒写单元格引用，实际文件不会出现）。
 - 数字按 `double` 返回，日期格式单元格按 `DateTime` 返回；全空行跳过、缺列补 null。
 - 不提供页面设置 / 合并单元格 / 图片——保持"简单表格"的最小形态。
 

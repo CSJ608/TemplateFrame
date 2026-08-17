@@ -255,6 +255,8 @@ public static class SimpleExcelContract
         }
 
         var rows = sheetData.Elements<Row>().ToList();
+        var sharedStrings = SimpleExcel.MaterializeSharedStrings(workbookPart);
+        var rowLookup = SimpleExcel.BuildRowLookup(rows);
         var columnIndex = new Dictionary<string, int>(StringComparer.Ordinal);
         var ambiguous = new List<string>();
 
@@ -295,8 +297,14 @@ public static class SimpleExcelContract
         var headers = new List<string>();
         for (var c = tableRange.Value.StartCol; c <= tableRange.Value.EndCol; c++)
         {
-            var cell = SimpleExcel.FindCell(rows, tableRange.Value.StartRow, c);
-            headers.Add(SimpleExcel.GetCellText(cell) ?? string.Empty);
+            var cell = SimpleExcel.FindCell(rowLookup, tableRange.Value.StartRow, c);
+            headers.Add(SimpleExcel.GetCellText(sharedStrings, cell) ?? string.Empty);
+        }
+
+        // P1：区域表头行为空（区域错位/指向空处）→ 整体回退文本匹配路径
+        if (headers.All(string.IsNullOrEmpty))
+        {
+            return null;
         }
 
         return new DefinedNameLayout(tableRange.Value, headers, columnIndex, ambiguous);
@@ -312,9 +320,14 @@ public static class SimpleExcelContract
         var workbookPart = document.WorkbookPart!;
         var worksheetPart = SimpleExcel.ResolveWorksheetPart(workbookPart, layout.Range.Sheet);
         var rows = worksheetPart?.Worksheet?.GetFirstChild<SheetData>()?.Elements<Row>().ToList() ?? [];
+        var sharedStrings = SimpleExcel.MaterializeSharedStrings(workbookPart);
+        var rowLookup = SimpleExcel.BuildRowLookup(rows);
+
+        // P1：数据区顺延到工作表最后一行（与 SimpleExcel.Read 一致；全空行跳过）。
+        var endRow = rows.Count > 0 ? Math.Max(layout.Range.EndRow, rowLookup.Keys.Max()) : layout.Range.EndRow;
 
         var dataRows = new List<IReadOnlyDictionary<string, object?>>();
-        for (var r = layout.Range.StartRow + 1; r <= layout.Range.EndRow; r++)
+        for (var r = layout.Range.StartRow + 1; r <= endRow; r++)
         {
             var rowValues = new Dictionary<string, object?>();
             var any = false;
@@ -322,8 +335,8 @@ public static class SimpleExcelContract
             {
                 if (layout.ColumnIndex.TryGetValue(column.Key, out var col))
                 {
-                    var cell = SimpleExcel.FindCell(rows, r, col);
-                    var value = cell is null ? null : SimpleExcel.ReadCellValue(workbookPart, cell);
+                    var cell = SimpleExcel.FindCell(rowLookup, r, col);
+                    var value = cell is null ? null : SimpleExcel.ReadCellValue(workbookPart, sharedStrings, cell);
                     rowValues[column.Key] = value;
                     any |= value is not null;
                 }

@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Text;
 using TemplateFrame.Excel.Simple.Localization;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
@@ -176,7 +177,8 @@ public static class SimpleExcel
 
     /// <summary>
     /// 导入：.xlsx → 标题行 + 数据行。优先按命名区域（<paramref name="tableName"/>，默认 TF_Table）定位表头；
-    /// 找不到命名区域时回退"第一个非空行"。
+    /// 区域不可用（不存在 / 表头行为空）时回退"第一个多单元格非空行"（P5：跳过仅 1 个非空单元格的标题/装饰行）。
+    /// 数据区统一顺延到工作表最后一行，全空行跳过（P1：区域过窄/错位不再静默丢数据）。
     /// </summary>
     public static SimpleExcelTable Read(Stream source, string? tableName = null)
     {
@@ -188,54 +190,56 @@ public static class SimpleExcel
             return new SimpleExcelTable();
         }
 
+        // R1：共享字符串表一次性物化（避免逐单元格 O(n) 查找；P3：富文本项拼 <r> 片段）。
+        var sharedStrings = MaterializeSharedStrings(workbookPart);
+
         var tableRange = FindTableRange(workbookPart, string.IsNullOrWhiteSpace(tableName) ? DefaultTableName : tableName.Trim());
 
-        WorksheetPart? worksheetPart;
+        // 工作表只解析一次；行查找表（P4：行缺 r 属性按文档顺序推断）供表头定位与数据读取共用。
+        var worksheetPart = tableRange.HasValue
+            ? ResolveWorksheetPart(workbookPart, tableRange.Value.Sheet)
+            : workbookPart.WorksheetParts.FirstOrDefault();
+        if (worksheetPart?.Worksheet?.GetFirstChild<SheetData>() is not { } sheetData)
+        {
+            return new SimpleExcelTable();
+        }
+
+        var rows = sheetData.Elements<Row>().ToList();
+        var rowLookup = BuildRowLookup(rows);
+
         int headerRow;
         int colStart;
         int colCount;
-        int endRow;
-        if (tableRange is { } range)
+        if (tableRange is { } range
+            && HasNonEmptyCellInSpan(rowLookup, range.StartRow, range.StartCol, range.EndCol - range.StartCol + 1, sharedStrings))
         {
-            worksheetPart = ResolveWorksheetPart(workbookPart, range.Sheet);
+            // P1：区域表头行有内容 → 按区域行/列跨度定位。
             headerRow = range.StartRow;
             colStart = range.StartCol;
             colCount = range.EndCol - range.StartCol + 1;
-            endRow = range.EndRow;
         }
         else
         {
-            worksheetPart = workbookPart.WorksheetParts.FirstOrDefault();
-            if (worksheetPart?.Worksheet?.GetFirstChild<SheetData>() is not { } sheetData)
-            {
-                return new SimpleExcelTable();
-            }
-
-            var rows0 = sheetData.Elements<Row>().ToList();
-            var headerIndex = rows0.FindIndex(r => r.Elements<Cell>().Any(c => !string.IsNullOrEmpty(GetCellText(c))));
+            // P1：区域不存在/错位/指向空处 → 回退"首非空行"扫描（P5：跳过仅 1 个非空单元格的标题/装饰行）。
+            var headerIndex = FindHeaderRowIndex(rows, sharedStrings);
             if (headerIndex < 0)
             {
                 return new SimpleExcelTable();
             }
 
-            headerRow = (int)rows0[headerIndex].RowIndex!.Value;
+            headerRow = GetRowIndex(rows, headerIndex);
             colStart = 1;
-            colCount = rows0[headerIndex].Elements<Cell>().Count();
-            endRow = rows0.Count > 0 ? (int)rows0[^1].RowIndex!.Value : headerRow;
+            colCount = rows[headerIndex].Elements<Cell>().Count();
         }
 
-        if (worksheetPart?.Worksheet?.GetFirstChild<SheetData>() is not { } targetSheetData)
-        {
-            return new SimpleExcelTable();
-        }
-
-        var rows = targetSheetData.Elements<Row>().ToList();
+        // P1/P1-3：endRow 统一顺延到工作表最后一个行元素（与回退路径一致；全空行在数据循环中被跳过）。
+        var endRow = rows.Count > 0 ? rowLookup.Keys.Max() : headerRow;
 
         var headers = new List<string>();
         for (var c = 0; c < colCount; c++)
         {
-            var cell = FindCell(rows, headerRow, colStart + c);
-            headers.Add(GetCellText(cell) ?? string.Empty);
+            var cell = FindCell(rowLookup, headerRow, colStart + c);
+            headers.Add(GetCellText(sharedStrings, cell) ?? string.Empty);
         }
 
         var result = new List<IReadOnlyList<object?>>();
@@ -244,8 +248,8 @@ public static class SimpleExcel
             var values = new List<object?>();
             for (var c = 0; c < colCount; c++)
             {
-                var cell = FindCell(rows, r, colStart + c);
-                values.Add(cell is null ? null : ReadCellValue(workbookPart, cell));
+                var cell = FindCell(rowLookup, r, colStart + c);
+                values.Add(cell is null ? null : ReadCellValue(workbookPart, sharedStrings, cell));
             }
 
             if (values.All(v => v is null))
@@ -298,7 +302,7 @@ public static class SimpleExcel
         }
     }
 
-    internal static object? ReadCellValue(WorkbookPart workbookPart, Cell cell)
+    internal static object? ReadCellValue(WorkbookPart workbookPart, IReadOnlyList<string> sharedStrings, Cell cell)
     {
         if (cell.DataType?.Value == CellValues.Boolean)
         {
@@ -329,17 +333,14 @@ public static class SimpleExcel
 
         if (cell.DataType?.Value == CellValues.SharedString)
         {
-            if (cell.CellValue?.Text is not { } indexText
-                || !int.TryParse(indexText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index))
-            {
-                return null;
-            }
-
-            return workbookPart.SharedStringTablePart?.SharedStringTable
-                ?.Elements<SharedStringItem>().ElementAtOrDefault(index)?.Text?.Text;
+            return cell.CellValue?.Text is { } indexText
+                   && int.TryParse(indexText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
+                   && index >= 0 && index < sharedStrings.Count
+                ? sharedStrings[index]
+                : null;
         }
 
-        return cell.InlineString?.Text?.Text ?? cell.CellValue?.Text;
+        return GetInlineStringText(cell.InlineString) ?? cell.CellValue?.Text;
     }
 
     /// <summary>每列定义名：TF_&lt;TableName&gt;_&lt;ColumnKey&gt; → 表头单元格（迭代 14，契约路径写/读用做语言无关的列定位）。</summary>
@@ -391,7 +392,7 @@ public static class SimpleExcel
                    || formatCode.Contains("dd", StringComparison.OrdinalIgnoreCase));
     }
 
-    internal static string? GetCellText(Cell? cell)
+    internal static string? GetCellText(IReadOnlyList<string> sharedStrings, Cell? cell)
     {
         if (cell is null)
         {
@@ -400,16 +401,163 @@ public static class SimpleExcel
 
         if (cell.DataType?.Value == CellValues.SharedString)
         {
-            return cell.CellValue?.Text;
+            return cell.CellValue?.Text is { } indexText
+                   && int.TryParse(indexText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
+                   && index >= 0 && index < sharedStrings.Count
+                ? sharedStrings[index]
+                : null;
         }
 
-        return cell.InlineString?.Text?.Text ?? cell.CellValue?.Text;
+        return GetInlineStringText(cell.InlineString) ?? cell.CellValue?.Text;
     }
 
-    internal static Cell? FindCell(IReadOnlyList<Row> rows, int rowIndex, int colIndex)
+    /// <summary>共享字符串表物化：索引 → 文本。直接 &lt;t&gt; 优先；富文本项（多 &lt;r&gt; 片段）拼接所有片段文本（P3）。</summary>
+    internal static IReadOnlyList<string> MaterializeSharedStrings(WorkbookPart workbookPart)
     {
-        var row = rows.FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
-        if (row is null)
+        var sharedStringTable = workbookPart.SharedStringTablePart?.SharedStringTable;
+        if (sharedStringTable is null)
+        {
+            return [];
+        }
+
+        var result = new List<string>();
+        foreach (var item in sharedStringTable.Elements<SharedStringItem>())
+        {
+            result.Add(GetSharedStringText(item));
+        }
+
+        return result;
+    }
+
+    private static string GetSharedStringText(SharedStringItem item)
+    {
+        if (item.Text?.Text is { } direct)
+        {
+            return direct;
+        }
+
+        var sb = new StringBuilder();
+        foreach (var run in item.Elements<Run>())
+        {
+            sb.Append(run.Text?.Text);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>行内字符串文本：直接 &lt;t&gt; 优先；富文本 InlineString（多 &lt;r&gt; 片段）拼接所有片段文本。</summary>
+    private static string? GetInlineStringText(InlineString? inlineString)
+    {
+        if (inlineString is null)
+        {
+            return null;
+        }
+
+        if (inlineString.Text?.Text is { } direct)
+        {
+            return direct;
+        }
+
+        var runs = inlineString.Elements<Run>().ToList();
+        if (runs.Count == 0)
+        {
+            return null;
+        }
+
+        var sb = new StringBuilder();
+        foreach (var run in runs)
+        {
+            sb.Append(run.Text?.Text);
+        }
+
+        return sb.ToString();
+    }
+
+    /// <summary>行索引推断：优先显式 r 属性；缺失按"前一行的下一行"推断（ECMA-376：r 属性可选，P4）。</summary>
+    internal static int GetRowIndex(IReadOnlyList<Row> rows, int index)
+    {
+        var current = 0;
+        for (var i = 0; i <= index; i++)
+        {
+            current = rows[i].RowIndex?.Value is { } explicitIndex ? (int)explicitIndex : current + 1;
+        }
+
+        return current;
+    }
+
+    /// <summary>行索引 → Row 查找表：RowIndex 缺失时按文档顺序推断（P4），行定位不再依赖显式 r 属性。</summary>
+    internal static Dictionary<int, Row> BuildRowLookup(IReadOnlyList<Row> rows)
+    {
+        var lookup = new Dictionary<int, Row>();
+        var current = 0;
+        foreach (var row in rows)
+        {
+            if (row.RowIndex?.Value is { } explicitIndex)
+            {
+                current = (int)explicitIndex;
+            }
+            else
+            {
+                current++;
+            }
+
+            lookup.TryAdd(current, row);
+        }
+
+        return lookup;
+    }
+
+    /// <summary>
+    /// 回退表头定位：第一个"非空单元格 ≥ 2"的行；整表都没有时回退首个非空行。
+    /// P5：跳过仅 1 个非空单元格的前导行（标题/装饰行特征），避免把标题当表头、数据被截断。
+    /// </summary>
+    internal static int FindHeaderRowIndex(IReadOnlyList<Row> rows, IReadOnlyList<string> sharedStrings)
+    {
+        var firstNonEmpty = -1;
+        for (var i = 0; i < rows.Count; i++)
+        {
+            var nonEmptyCount = rows[i].Elements<Cell>().Count(c => !string.IsNullOrEmpty(GetCellText(sharedStrings, c)));
+            if (nonEmptyCount == 0)
+            {
+                continue;
+            }
+
+            if (firstNonEmpty < 0)
+            {
+                firstNonEmpty = i;
+            }
+
+            if (nonEmptyCount >= 2)
+            {
+                return i;
+            }
+        }
+
+        return firstNonEmpty;
+    }
+
+    private static bool HasNonEmptyCellInSpan(
+        IReadOnlyDictionary<int, Row> rowLookup,
+        int headerRow,
+        int colStart,
+        int colCount,
+        IReadOnlyList<string> sharedStrings)
+    {
+        for (var c = 0; c < colCount; c++)
+        {
+            var cell = FindCell(rowLookup, headerRow, colStart + c);
+            if (!string.IsNullOrEmpty(GetCellText(sharedStrings, cell)))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    internal static Cell? FindCell(IReadOnlyDictionary<int, Row> rowsByIndex, int rowIndex, int colIndex)
+    {
+        if (!rowsByIndex.TryGetValue(rowIndex, out var row))
         {
             return null;
         }

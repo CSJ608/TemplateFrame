@@ -2,7 +2,23 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
-## [Unreleased]
+## [1.0.7] - 2026-08-17
+
+### 修复
+- **SimpleExcel 读取容错**（评审计划 P1–P5 + R1–R4）：修复"文件里有数据但 `SimpleExcel.Read` / `SimpleExcelContract.Read` 解析结果为空"的多类场景——
+  - P1：命名区域（`TF_Table`）过窄/错位不再静默丢数据——区域表头行为空时回退"首非空行"扫描；数据区统一顺延到工作表最后一行（与回退路径一致，全空行跳过）；契约路径 `ReadByLayout` / `ResolveColumnLayout` 同步（区域表头为空 → 回退文本匹配）
+  - P2：共享字符串表头不再被读成索引号——`GetCellText` 对 SharedString 单元格解析真实文本（此前返回索引，Excel/WPS 生成文件必中）
+  - P3：富文本共享字符串（多 `<r>` 片段）不再读成 null——直接 `<t>` 优先，无则拼接所有 run 片段
+  - P4：行缺 `RowIndex(r)` 属性不再失败——行定位按"显式 r 属性，缺失按前一行的下一行推断"（ECMA-376 规范行为），回退路径 NRE 消除
+  - P5：回退表头选择跳过"仅 1 个非空单元格"的前导行（标题/装饰行特征），避免标题被当表头、数据被截断
+  - R1：共享字符串表在 `Read()` 入口一次性物化（消除逐单元格 O(n) 索引查找，大文件导入性能）
+  - R2：`GetCellText` / `ReadCellValue` / `FindCell` 签名变更（internal，无公开 API 破坏）
+  - R3：`SimpleExcelContract.Validate` 对缺 RowIndex 文件不再抛未捕获异常
+- 新增 `ReadToleranceTests`（11 个回归测试覆盖 S1–S8 / C1–C3 全部复现场景）；框架自写自读（S0/C0）行为不变
+
+### 变更
+- `SimpleExcel.Read` 数据区由"命名区域 EndRow"改为"顺延到工作表最后一行"（用户可感知的读取容错行为变化）：区域下方若有其他非空内容（如下方第二个表格）会被并入读取，与无命名区域回退路径行为一致
+- 空共享字符串项（`<si/>`）由返回 `null` 改为返回空字符串 `""`（与框架自写的空 InlineString 行为对齐）：整行只有空字符串单元格的行此前被"全空行跳过"、现在会保留；真正的空单元格（无 `<c>` 元素）仍返回 `null`，不受影响
 
 ## [1.0.6] - 2026-08-11
 
