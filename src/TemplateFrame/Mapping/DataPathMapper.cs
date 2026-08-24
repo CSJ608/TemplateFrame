@@ -68,24 +68,24 @@ public static class DataPathMapper
                     break;
 
                 case TableElement table when mapping.Tables.TryGetValue(table.Key, out var tableMapping):
-                {
-                    var collectionProperty = tableMapping.CollectionProperty;
-                    if (collectionProperty is null)
                     {
-                        data.Tables.TryGetValue(table.Key, out var rootRows);
-                        return (TData)MapTableFromData(tableMapping, rootRows ?? [], typeof(TData));
-                    }
+                        var collectionProperty = tableMapping.CollectionProperty;
+                        if (collectionProperty is null)
+                        {
+                            data.Tables.TryGetValue(table.Key, out var rootRows);
+                            return (TData)MapTableFromData(tableMapping, rootRows ?? [], typeof(TData));
+                        }
 
-                    if (data.Tables.TryGetValue(table.Key, out var rows))
-                    {
-                        instance ??= CreateInstance(typeof(TData));
-                        collectionProperty.SetValue(
-                            instance,
-                            MapTableFromData(tableMapping, rows, collectionProperty.PropertyType));
-                    }
+                        if (data.Tables.TryGetValue(table.Key, out var rows))
+                        {
+                            instance ??= CreateInstance(typeof(TData));
+                            collectionProperty.SetValue(
+                                instance,
+                                MapTableFromData(tableMapping, rows, collectionProperty.PropertyType));
+                        }
 
-                    break;
-                }
+                        break;
+                    }
             }
         }
 
@@ -112,56 +112,56 @@ public static class DataPathMapper
             switch (element)
             {
                 case TemplateElement scalar when (scalar is TextElement or ImageElement) && scalar.DataPath is { Length: > 0 }:
-                {
-                    var property = FindProperty(dataType, scalar.DataPath!, contract, scalar);
-                    if (!usedScalarProperties.Add(property.Name))
                     {
-                        throw new InvalidOperationException(
-                            Sr.Get("Mapping.DuplicateScalarDataPath", contract.Name, property.Name));
-                    }
-
-                    mapping.Scalars[scalar.Key] = property;
-                    break;
-                }
-
-                case TableElement table when table.DataPath is { Length: > 0 } || isCollectionDataType:
-                {
-                    var isRootCollection = string.IsNullOrWhiteSpace(table.DataPath);
-                    if (isRootCollection)
-                    {
-                        if (rootTableSeen)
+                        var property = FindProperty(dataType, scalar.DataPath!, contract, scalar);
+                        if (!usedScalarProperties.Add(property.Name))
                         {
                             throw new InvalidOperationException(
-                                Sr.Get("Mapping.RootCollectionMultipleTables", contract.Name));
+                                Sr.Get("Mapping.DuplicateScalarDataPath", contract.Name, property.Name));
                         }
 
-                        rootTableSeen = true;
-                        var rootElementType = GetCollectionElementType(dataType, contract, table);
-                        var rootMapping = new TableMapping { ElementType = rootElementType };
-                        BuildColumns(rootMapping, rootElementType, contract, table);
-                        mapping.Tables[table.Key] = rootMapping;
+                        mapping.Scalars[scalar.Key] = property;
                         break;
                     }
 
-                    if (isCollectionDataType)
+                case TableElement table when table.DataPath is { Length: > 0 } || isCollectionDataType:
                     {
-                        throw new InvalidOperationException(
-                            Sr.Get("Mapping.RootCollectionHasDataPath", contract.Name, table.Key, table.DataPath));
-                    }
+                        var isRootCollection = string.IsNullOrWhiteSpace(table.DataPath);
+                        if (isRootCollection)
+                        {
+                            if (rootTableSeen)
+                            {
+                                throw new InvalidOperationException(
+                                    Sr.Get("Mapping.RootCollectionMultipleTables", contract.Name));
+                            }
 
-                    var property = FindProperty(dataType, table.DataPath!, contract, table);
-                    if (!usedTableProperties.Add(property.Name))
-                    {
-                        throw new InvalidOperationException(
-                            Sr.Get("Mapping.DuplicateTableDataPath", contract.Name, property.Name));
-                    }
+                            rootTableSeen = true;
+                            var rootElementType = GetCollectionElementType(dataType, contract, table);
+                            var rootMapping = new TableMapping { ElementType = rootElementType };
+                            BuildColumns(rootMapping, rootElementType, contract, table);
+                            mapping.Tables[table.Key] = rootMapping;
+                            break;
+                        }
 
-                    var elementType = GetCollectionElementType(property.PropertyType, contract, table);
-                    var tableMapping = new TableMapping { CollectionProperty = property, ElementType = elementType };
-                    BuildColumns(tableMapping, elementType, contract, table);
-                    mapping.Tables[table.Key] = tableMapping;
-                    break;
-                }
+                        if (isCollectionDataType)
+                        {
+                            throw new InvalidOperationException(
+                                Sr.Get("Mapping.RootCollectionHasDataPath", contract.Name, table.Key, table.DataPath));
+                        }
+
+                        var property = FindProperty(dataType, table.DataPath!, contract, table);
+                        if (!usedTableProperties.Add(property.Name))
+                        {
+                            throw new InvalidOperationException(
+                                Sr.Get("Mapping.DuplicateTableDataPath", contract.Name, property.Name));
+                        }
+
+                        var elementType = GetCollectionElementType(property.PropertyType, contract, table);
+                        var tableMapping = new TableMapping { CollectionProperty = property, ElementType = elementType };
+                        BuildColumns(tableMapping, elementType, contract, table);
+                        mapping.Tables[table.Key] = tableMapping;
+                        break;
+                    }
             }
         }
 

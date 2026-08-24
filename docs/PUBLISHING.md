@@ -47,9 +47,9 @@ gh run list --workflow publish-nuget.yml
 
 ## 版本号约定
 
-- csproj 中 `<Version>` 与 git tag 需一致（如 `1.0.0` ↔ `v1.0.0`）。
+- 四包版本统一写在 `src/Directory.Build.props` 的 `<Version>`（2.0.0 起单一来源，各 csproj 不再重复），与 git tag 一致（如 `2.0.0` ↔ `v2.0.0`）。
 - 核心与插件包（`TemplateFrame`、`TemplateFrame.Word`…）当前都发布为同一版本。
-- 迭代 15 起：release.yml / publish-nuget.yml 会在打 `v*` tag 时自动校验四包 `<Version>` 与 tag 一致，不一致直接失败（本地提交前请自行核对）。
+- release.yml / publish-nuget.yml 会在打 `v*` tag 时自动校验 `<Version>` 与 tag 一致，不一致直接失败（本地提交前请自行核对）。
 
 ## CHANGELOG 约定
 
@@ -66,7 +66,7 @@ gh run list --workflow publish-nuget.yml
    - nuget.org → Account → API Keys → **Trusted Publishers** → Register Publisher（仓库 `CSJ608/TemplateFrame`，subject `repo:CSJ608/TemplateFrame:ref:refs/tags/v*`）；
    - GitHub 仓库 → Settings → Secrets and variables → Actions → **Variables** → 新建 `NUGET_USER`（你的 nuget.org 用户名）。
 3. **CHANGELOG**：把 `## [Unreleased]` 改为 `## [1.0.0]`（release.yml 提取该段作为 Release 正文）。
-4. **版本号一致**：csproj `<Version>` 与 git tag 一致（当前 `1.0.7` ↔ `v1.0.7`）。
+4. **版本号一致**：`src/Directory.Build.props` 的 `<Version>` 与 git tag 一致（当前 `2.0.0` ↔ `v2.0.0`）。
 5. **本地兜底**：`dotnet build TemplateFrame.slnx` + `dotnet test TemplateFrame.slnx` + `dotnet pack` 均通过。
 6. **打 tag 发布**：`git tag -a v1.0.0 -m "..." && git push origin v1.0.0`（触发 release + publish-nuget；push 前请确认前置配置已完成）。
 

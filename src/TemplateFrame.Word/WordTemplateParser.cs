@@ -1,7 +1,7 @@
-using System.Globalization;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.Globalization;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Internal;

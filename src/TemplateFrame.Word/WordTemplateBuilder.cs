@@ -1,17 +1,17 @@
-using System.Globalization;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.Globalization;
 using TemplateFrame.Builder;
 using TemplateFrame.Internal;
 using TemplateFrame.Localization;
 using TemplateFrame.Word.Localization;
-using Sr = TemplateFrame.Word.Localization.Sr;
 using A = DocumentFormat.OpenXml.Drawing;
 using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 using PIC = DocumentFormat.OpenXml.Drawing.Pictures;
-using WPageSize = DocumentFormat.OpenXml.Wordprocessing.PageSize;
+using Sr = TemplateFrame.Word.Localization.Sr;
 using TextAlign = TemplateFrame.Builder.TextAlignment;
+using WPageSize = DocumentFormat.OpenXml.Wordprocessing.PageSize;
 
 namespace TemplateFrame.Word;
 

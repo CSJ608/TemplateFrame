@@ -109,8 +109,8 @@ public sealed class ExcelTemplateValidator
                     Code = TemplateValidationIssueCode.Extra,
                     Key = match.Name,
                     MessageKey = "Excel.Validation.ExtraNamedRange",
-                MessageArgs = [match.Name],
-                Message = Sr.Get("Excel.Validation.ExtraNamedRange", match.Name),
+                    MessageArgs = [match.Name],
+                    Message = Sr.Get("Excel.Validation.ExtraNamedRange", match.Name),
                     Severity = TemplateValidationSeverity.Warning,
                 });
             }

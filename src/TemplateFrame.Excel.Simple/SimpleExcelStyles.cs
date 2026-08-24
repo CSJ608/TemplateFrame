@@ -22,7 +22,8 @@ internal sealed class SimpleExcelStyles
         var stylesheet = new Stylesheet();
 
         stylesheet.Append(new NumberingFormats(
-            new NumberingFormat { NumberFormatId = 164, FormatCode = DateFormatCode }) { Count = 1 });
+            new NumberingFormat { NumberFormatId = 164, FormatCode = DateFormatCode })
+        { Count = 1 });
         stylesheet.Append(new Fonts(
             new Font(new FontName { Val = "Calibri" }, new FontSize { Val = 11 }),
             new Font(new FontName { Val = "Calibri" }, new FontSize { Val = 11 }, new Bold()))

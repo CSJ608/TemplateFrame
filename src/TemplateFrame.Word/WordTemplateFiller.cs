@@ -1,13 +1,13 @@
-using System.Globalization;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.Globalization;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Engine;
 using TemplateFrame.Internal;
-using TemplateFrame.Word.Localization;
 using TemplateFrame.Validation;
+using TemplateFrame.Word.Localization;
 using A = DocumentFormat.OpenXml.Drawing;
 
 namespace TemplateFrame.Word;

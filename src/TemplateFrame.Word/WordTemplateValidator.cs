@@ -1,10 +1,10 @@
-using System.IO.Compression;
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
+using System.IO.Compression;
 using TemplateFrame.Contract;
-using TemplateFrame.Word.Localization;
 using TemplateFrame.Validation;
+using TemplateFrame.Word.Localization;
 using A = DocumentFormat.OpenXml.Drawing;
 
 namespace TemplateFrame.Word;
