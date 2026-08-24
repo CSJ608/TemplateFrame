@@ -9,6 +9,7 @@ artifacts/
 *.nupkg
 *.snupkg
 TestResults/
+BenchmarkDotNet.Artifacts/
 coverlet/
 *.trx
 !**/packages/**

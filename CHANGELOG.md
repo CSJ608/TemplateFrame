@@ -15,6 +15,7 @@
 - 四包版本统一 2.0.0（SemVer：破坏性变更须升主版本）
 
 ### 工程
+- **新增性能基准项目 `test/TemplateFrame.Benchmarks`**（BenchmarkDotNet，不参与 `dotnet test`）：Word / Excel / Excel.Simple 三插件的 Build/Fill/Parse/Write/Read 端到端吞吐（100·1k·10k 行伸缩）+ DataPathMapper 双向映射开销，`[MemoryDiagnoser]` 同时给出分配；运行：`dotnet run -c Release --project test/TemplateFrame.Benchmarks`
 - **插件去重（净删约 120 行）**：`EnumerateTables`（原 Word 插件内三份）与 `FindHostPart`（两份）并入 `SdtLocator` internal 方法；Word / Excel Parser 私有 `ReadAllBytes` 统一走基础包 `StreamUtil`；内置占位图 base64 与 `LoadPlaceholder` 下沉基础包 `PlaceholderImage`（统一按魔数识别扩展名；指定路径不存在时直接抛错而非静默回退内置图）
 - **大文件拆分（全库不再有 500+ 行文件，行为不变）**：`WordTemplateBuilder` 825→478 行（抽出 `WordXmlFactory` 366 行 OpenXML 纯构造逻辑）；`SimpleExcel` 737 行拆为 门面 31 + `SimpleExcelWriter` 204 + `SimpleExcelReader` 397 + `SimpleExcelAddress` 104 + Options/Table 独立文件（公共 API 不变）；`ExcelTemplateFiller` 656→410 行（抽出 `ExcelRowShifter` 131 与 `ExcelNumberFormat` 117）
 - **`IsRequired` 下沉**：Word / Excel 填充器各自私有的"元素（含表格列）是否必填"合并为公共 `TemplateContract.IsElementRequired(key)`

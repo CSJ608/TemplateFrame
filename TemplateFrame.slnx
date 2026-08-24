@@ -10,6 +10,7 @@
     <Project Path="test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj" />
     <Project Path="test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj" />
     <Project Path="test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj" />
+    <Project Path="test/TemplateFrame.Benchmarks/TemplateFrame.Benchmarks.csproj" />
   </Folder>
   <Folder Name="/samples/">
     <Project Path="samples/TemplateFrame.Demo.Word/TemplateFrame.Demo.Word.csproj" />
