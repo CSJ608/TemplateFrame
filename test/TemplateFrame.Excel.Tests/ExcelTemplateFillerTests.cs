@@ -207,6 +207,37 @@ public sealed class ExcelTemplateFillerTests
         Assert.Equal(3, parsed.Tables["Lines"].Count);
     }
 
+    [Fact]
+    public void Fill_WrongTypeElement_Throws()
+    {
+        // 契约声明图片元素，模板却只有普通单元格（命名区域指向处无图片锚定）
+        using var template = TestDocuments.BuildTemplate(b => b.AddElement("Logo", "B2"));
+        var contract = new TemplateContract { Elements = [new ImageElement { Key = "Logo" }] };
+        var data = new FillData { Values = new Dictionary<string, object?> { ["Logo"] = TestDocuments.TinyPng } };
+
+        Assert.Throws<InvalidOperationException>(() =>
+            new ExcelTemplateFiller().Fill(template, contract, data));
+    }
+
+    [Fact]
+    public void Fill_ExtraNamedRange_WarnsAndContinues()
+    {
+        using var template = TestDocuments.BuildTemplate(b =>
+        {
+            b.AddElement("OrderNo", "B2");
+            b.AddElement("Unknown", "B3");
+        });
+        var contract = new TemplateContract { Elements = [new TextElement { Key = "OrderNo" }] };
+        var data = new FillData { Values = new Dictionary<string, object?> { ["OrderNo"] = "PO-1" } };
+
+        var result = new ExcelTemplateFiller().Fill(template, contract, data);
+
+        var extra = Assert.Single(result.Warnings, w => w.Code == TemplateValidationIssueCode.Extra);
+        Assert.Equal("TF_Unknown", extra.Key);
+        var parsed = new ExcelTemplateParser().Parse(result.Output, contract);
+        Assert.Equal("PO-1", parsed.Values["OrderNo"]);
+    }
+
     private static FillData DemoData()
         => new()
         {
