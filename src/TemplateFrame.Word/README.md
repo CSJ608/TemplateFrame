@@ -77,6 +77,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 
 - 依赖 `DocumentFormat.OpenXml`（3.3.x）。
 - 测试 `test/TemplateFrame.Word.Tests`：生成 → 校验 → 填充 → 回读 → 断言（含页眉页脚、多表、批量、跨列布局、页眉图片 part 归属等边界）。
+- 性能（普通开发机实测，随行数线性伸缩）：千行明细填充 ~150ms、回读 ~125ms、构建 <1ms；快照见仓库 `docs/PERFORMANCE.md`，基准项目 `test/TemplateFrame.Benchmarks`。
 
 ## 完整示例
 

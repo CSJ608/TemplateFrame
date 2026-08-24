@@ -126,6 +126,7 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 | [docs/DEMOS.md](docs/DEMOS.md) | How to run the 8 demos (Chinese) |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | Iteration roadmap (Chinese) |
 | [docs/PUBLISHING.md](docs/PUBLISHING.md) | Release flow — push a `v*` tag (Chinese) |
+| [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | Performance snapshot (measured throughput/allocations, Chinese) |
 | [CHANGELOG.md](CHANGELOG.md) | Changelog |
 | Plugin READMEs | [Word](src/TemplateFrame.Word/README.md) · [Excel](src/TemplateFrame.Excel/README.md) · [Excel.Simple](src/TemplateFrame.Excel.Simple/README.md) |
 

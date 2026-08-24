@@ -143,6 +143,11 @@ var parsed = service.Parse(filled);      // 直接得到 List<MaterialLine>
 - 容器对象写法（`MaterialsData.Items`）与 `SimpleExcelTable` 底层 API 均保持不变，完全向后兼容。
 - i18n 与容器对象版一致：`Fill(..., culture, localizer)` 写本地化表头，定义名回读语言无关（示例见 `samples/TemplateFrame.Demo.Excel.Simple.I18n` 的根集合章节）。
 
+## 性能
+
+- 普通开发机实测（随行数线性伸缩）：写 / 读 1000 行 ~30ms，1 万行 ~0.3–0.5s；契约路径读 1 万行 ~0.6–0.9s。
+- 快照见仓库 `docs/PERFORMANCE.md`，基准项目 `test/TemplateFrame.Benchmarks`（`dotnet run -c Release` 可复现）。
+
 ## Demo
 
 仓库 `samples/TemplateFrame.Demo.Excel.Simple` 提供**物料基础数据**示例（模板 → 填充 → 反解析 完整链路，表头：编码 / 名称 / 基本单位 / 包装规格 / 型号）：

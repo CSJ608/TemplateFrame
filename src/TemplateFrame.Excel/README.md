@@ -83,6 +83,7 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
 ## 依赖与测试
 
 - 依赖 `DocumentFormat.OpenXml`（3.3.x，与 Word 插件同款）。
+- 性能（普通开发机实测，随行数线性伸缩）：千行明细填充 ~60ms、回读 ~115ms、构建 ~1ms；快照见仓库 `docs/PERFORMANCE.md`，基准项目 `test/TemplateFrame.Benchmarks`。
 - 测试 `test/TemplateFrame.Excel.Tests`：生成 → 校验 → 填充 → 回读 → 断言（含命名区域清单、类型化值、
   表格行克隆后范围重指、下方元素下移、图片替换、未填充占位等边界）。
 

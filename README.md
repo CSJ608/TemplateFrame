@@ -124,6 +124,7 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 | [docs/DEMOS.md](docs/DEMOS.md) | 8 个 Demo 的运行命令与输出说明 |
 | [docs/ROADMAP.md](docs/ROADMAP.md) | 迭代路线图（已归档 + 规划） |
 | [docs/PUBLISHING.md](docs/PUBLISHING.md) | 发布流程（打 `v*` tag 自动发 GitHub Release + nuget.org） |
+| [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | 性能快照（三插件吞吐/分配实测 + 基准复现） |
 | [CHANGELOG.md](CHANGELOG.md) | 变更日志 |
 | 插件 README | [Word](src/TemplateFrame.Word/README.md) · [Excel](src/TemplateFrame.Excel/README.md) · [Excel.Simple](src/TemplateFrame.Excel.Simple/README.md) |
 
