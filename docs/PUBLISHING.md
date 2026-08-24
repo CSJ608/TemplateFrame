@@ -57,7 +57,7 @@ gh run list --workflow publish-nuget.yml
 - 每次改动记录到 `## [Unreleased]` 段，按 `新增` / `修复` / `变更` 分类。
 - 发版时 `release.yml` 自动提取当前 tag 对应版本段落作为 Release 正文；找不到则回退到 GitHub 自动生成。
 
-## 首次发布检查清单（迭代 6 就绪后执行）
+## 发布检查清单
 
 发布前请按顺序确认：
 
@@ -72,7 +72,7 @@ gh run list --workflow publish-nuget.yml
 
 > 注意：前置配置（Trusted Publisher / NUGET_USER）需仓库账号操作，未完成前**不要**推送 `v*` tag，否则 publish-nuget 会失败。
 
-## 本地验证（迭代 6 前的兜底）
+## 本地验证
 
 ```bash
 dotnet build TemplateFrame.slnx -c Release

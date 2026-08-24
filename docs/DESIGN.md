@@ -184,10 +184,10 @@ public abstract class TemplateService<TData, TBuilder> where TBuilder : class, I
 
 | 插件 | 目标 | 状态 |
 |---|---|---|
-| `TemplateFrame` | 核心：契约元素模型 + 引擎抽象 + 数据形状 + Builder 抽象 | 迭代 1 起 |
-| `TemplateFrame.Word` | MS Word（OpenXML SDK）：内容控件生成/定位/填充/回读 | 迭代 1-3 ✅ |
-| `TemplateFrame.Excel` | MS Excel 灵活版式（OpenXML SDK 直写 + 命名区域定位；不提供页面设置） | 迭代 8 ✅ |
-| `TemplateFrame.Excel.Simple` | MS Excel 简单表格（标题行 + 数据行，命名区域标记；`SimpleExcel` / `SimpleExcelContract` / `SimpleExcelTemplateService`） | 迭代 8/9 ✅ |
+| `TemplateFrame` | 核心：契约元素模型 + 引擎抽象 + 数据形状 + Builder 抽象 | ✅ |
+| `TemplateFrame.Word` | MS Word（OpenXML SDK）：内容控件生成/定位/填充/回读 | ✅ |
+| `TemplateFrame.Excel` | MS Excel 灵活版式（OpenXML SDK 直写 + 命名区域定位；不提供页面设置） | ✅ |
+| `TemplateFrame.Excel.Simple` | MS Excel 简单表格（标题行 + 数据行，命名区域标记；`SimpleExcel` / `SimpleExcelContract` / `SimpleExcelTemplateService`） | ✅ |
 | `TemplateFrame.Wps` | WPS Word（未来，独立插件） | 未开始 |
 | `TemplateFrame.Label` | 标签模板（未来，其他工具定义模板） | 未开始 |
 
@@ -201,7 +201,7 @@ public abstract class TemplateService<TData, TBuilder> where TBuilder : class, I
 
 ---
 
-## 5. Word 插件设计（迭代 1-3 重点）
+## 5. Word 插件设计
 
 ### 5.1 定位：内容控件（SDT）
 
@@ -256,23 +256,27 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 
 ---
 
-## 6. 项目结构（参考 StreamFrame）
+## 6. 项目结构
 
 参考 StreamFrame 的组织方式：核心库无业务依赖 + 官方插件 + 测试 + 示例。
 
 ```
 TemplateFrame/
 ├─ TemplateFrame.slnx                  # 解决方案（src / test / samples 三组解决方案文件夹）
+├─ .editorconfig                       # 全仓风格基线（CI 用 dotnet format --verify-no-changes 校验）
+├─ icon.png                            # NuGet 包图标（四包共用，经 src/Directory.Build.props 打入）
+├─ src/Directory.Build.props           # 四包共享打包元数据单一来源（版本/作者/许可/图标/符号包）
 ├─ src/TemplateFrame/               # 基础包：契约模型 + 引擎抽象 + 数据形状（格式无关）
 │  ├─ Contract/                     # TemplateContract, TemplateElement, TextElement, ImageElement, TableElement
 │  ├─ Data/                         # FillData（数据形状）
 │  ├─ Mapping/                      # DataPathMapper（DataPath 自动映射）
 │  ├─ Engine/                       # ITemplateEngine（Validate/Fill/FillDetailed/Parse 抽象）+ TemplateFillResult / TemplateFillOptions / MissingElementPolicy
 │  ├─ Builder/                      # ITemplateBuilder（版式组合抽象）
-│  ├─ Internal/                     # StreamUtil / ImageTypeDetector（Word/Excel 共用，InternalsVisibleTo）
+│  ├─ Internal/                     # StreamUtil / ImageTypeDetector / PlaceholderImage（Word/Excel 共用，InternalsVisibleTo）
 │  └─ Services/                     # TemplateService<TData, TBuilder>（泛型基类）
 ├─ src/TemplateFrame.Word/          # 插件：MS Word（DocumentFormat.OpenXml）
 │  ├─ WordTemplateBuilder.cs        # 组装带 SDT 的 .docx（版式由业务服务驱动）
+│  ├─ WordXmlFactory.cs             # OpenXML 纯构造（run/表格/单元格/节属性/页码域/drawing）
 │  ├─ SdtLocator.cs                 # 按 tag 定位（正文/页眉/页脚）
 │  ├─ WordTemplateValidator.cs      # Validate
 │  ├─ WordTemplateFiller.cs         # Fill / FillDetailed：文本/图片/表格行
@@ -281,11 +285,20 @@ TemplateFrame/
 ├─ src/TemplateFrame.Excel/         # 插件：MS Excel 灵活版式（命名区域定位；不提供页面设置）
 │  ├─ ExcelTemplateBuilder.cs       # 组装带命名区域的 .xlsx（列宽/格式/合并/表格/图片锚定）
 │  ├─ ExcelNamedRangeLocator.cs     # 按命名区域定位（TF_ 前缀）
+│  ├─ ExcelAddressHelper.cs         # 单元格地址 / A1 引用互转
+│  ├─ ExcelStyleManager.cs          # 构建期单元格样式池（字体/边框/对齐去重）
 │  ├─ ExcelTemplateValidator.cs / ExcelTemplateFiller.cs / ExcelTemplateParser.cs
+│  ├─ ExcelRowShifter.cs            # 表格克隆后的行下移 + 命名区域/合并区域平移
+│  ├─ ExcelNumberFormat.cs          # .NET Format → Excel 数字格式映射与应用
 │  ├─ ExcelDrawingHelper.cs         # drawing 强类型操作（xdr:cNvPr 命名空间，兼容 Excel）
 │  └─ Localization/                 # Sr + Resources*.resx（中英消息）
-├─ src/TemplateFrame.Excel.Simple/  # 插件：MS Excel 简单表格（SimpleExcel Write/Read + SimpleExcelContract / SimpleExcelTemplateService 契约化强类型）
-├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射）
+├─ src/TemplateFrame.Excel.Simple/  # 插件：MS Excel 简单表格
+│  ├─ SimpleExcel.cs                # 公共门面（Write / Read / ColumnDefinedName）
+│  ├─ SimpleExcelWriter.cs / SimpleExcelReader.cs / SimpleExcelAddress.cs   # 导出 / 导入 / 地址解析实现
+│  ├─ SimpleExcelContract.cs / SimpleExcelTemplateService.cs               # 契约感知读写 + 强类型服务基类
+│  ├─ SimpleExcelOptions.cs / SimpleExcelTable.cs / SimpleExcelStyles.cs
+│  └─ Localization/                 # Sr + Resources*.resx（中英消息）
+├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射、图片探测）
 ├─ test/TemplateFrame.Word.Tests/   # Word 插件测试：生成→校验→填充→回读→断言
 ├─ test/TemplateFrame.Excel.Tests/  # Excel 灵活版式插件测试
 ├─ test/TemplateFrame.Excel.Simple.Tests/ # Excel 简单表格插件测试
@@ -298,9 +311,9 @@ TemplateFrame/
 ├─ samples/TemplateFrame.Demo.Excel.I18n/ # i18n 整体演示（Excel：AddTextKey/AddTableKeys 中英模板 + 回读）
 ├─ samples/TemplateFrame.Demo.Excel.Simple.I18n/ # i18n 整体演示（Excel.Simple：中英表头 + 定义名回读，语言无关）
 ├─ docs/DESIGN.md                   # 本文档
-├─ docs/PUBLISHING.md               # 发布指南（已启用：v* tag 触发 release + publish-nuget）
+├─ docs/ROADMAP.md / docs/DEMOS.md / docs/PUBLISHING.md
 ├─ CHANGELOG.md
-└─ .github/workflows/               # ci.yml / release.yml / publish-nuget.yml（参考 StreamFrame）
+└─ .github/workflows/               # ci.yml / release.yml / publish-nuget.yml
 ```
 
 示例场景服务放在 `samples`，用 **Demo 单据**（`DeliveryOrderData` / `DeliveryOrderTemplateService`）演示，不把业务名带进仓库。
@@ -309,8 +322,7 @@ TemplateFrame/
 
 ## 7. 迭代计划
 
-> 目标：先把本地功能测试做扎实；自动化发布已启用（v1.0.0 / v1.0.1）。
-> 详细路线图（已归档 + 规划）见 [docs/ROADMAP.md](ROADMAP.md)。
+> 详细路线图（已归档 + 规划）见 [docs/ROADMAP.md](ROADMAP.md)；每个迭代都跑 `dotnet build TemplateFrame.slnx` + `dotnet test`。
 
 | 阶段 | 迭代 | 主题 | 状态 |
 |---|---|---|---|
@@ -327,8 +339,6 @@ TemplateFrame/
 | 已归档 | **16** | SimpleExcel 根集合：`List<T>` 直接填充/解析 | ✅ 完成（随 v1.0.6 发布） |
 | 已归档 | **17** | 评审落地：Excel Drifted 修复 + API 简化（`MissingElementPolicy` / `TemplateFillOptions` 下沉、删除插件空壳类型）+ 插件去重 + 大文件拆分（全库无 500+ 行文件）+ 损坏流异常契约 + 测试补强（290 用例）+ 基建（editorconfig / Directory.Build.props / 包图标 / CI 矩阵与覆盖率）+ 文档"上手优先"重构 | ✅ 完成（2026-08-24，随 **2.0.0** 发布） |
 
-每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
-
 ---
 
 ## 8. CI 与发布（已启用）
@@ -337,9 +347,9 @@ TemplateFrame/
 
 | 文件 | 触发 | 作用 | 状态 |
 |---|---|---|---|
-| `ci.yml` | push / PR（main） | build + test | 已启用 |
-| `release.yml` | tag `v*` | build + test + pack → GitHub Release（附 nupkg/snupkg） | 已启用（v1.0.0 起） |
-| `publish-nuget.yml` | tag `v*` | OIDC Trusted Publishing → nuget.org | 已启用（v1.0.0 起） |
+| `ci.yml` | push / PR（main） | format 校验（`dotnet format --verify-no-changes`）+ build + test，**ubuntu / windows 双矩阵**，测试收集行覆盖率（coverlet） | 已启用 |
+| `release.yml` | tag `v*` | 版本校验（`src/Directory.Build.props` ↔ tag）+ build + test + pack → GitHub Release（附 nupkg/snupkg） | 已启用（v1.0.0 起） |
+| `publish-nuget.yml` | tag `v*` | 版本校验 + OIDC Trusted Publishing → nuget.org | 已启用（v1.0.0 起） |
 
 **发布说明**：
 - 推送 `v*` tag 即触发 `release.yml`（GitHub Release）与 `publish-nuget.yml`（OIDC 推送 nuget.org）；

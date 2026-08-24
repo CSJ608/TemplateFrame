@@ -1,7 +1,7 @@
 # TemplateFrame.Word
 
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Word.svg)](https://www.nuget.org/packages/TemplateFrame.Word)
-[![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Word)](https://www.nuget.org/stats/packages/TemplateFrame.Word?groupby=Version)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Word)](https://www.nuget.org/packages/TemplateFrame.Word)
 
 TemplateFrame 的 **MS Word 插件**：把基础包的"契约 + 数据形状"翻译成 `.docx`。
 基于内容控件（SDT / Structured Document Tag）实现**生成 → 定位 → 填充 → 回读 → 校验**全链路，

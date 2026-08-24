@@ -83,16 +83,16 @@ new ImageElement { Key = "QRCode",   DisplayName = "二维码",    DataPath = "Q
 - **文档内容**：业务注入本地化器（文化限定键 `"zh-CN:Doc.Title"` / `"en:Doc.Title"` + 文化中立兜底），**同一版式代码**（`AddParagraphKey` / `AddTextKey` / `AddTableKeys` + 本地化占位符 / 页码）输出中英两份模板（语言由文件名承载，如 `Word-I18n-DeliveryOrder-en-template.docx`）；填充后再回读——未填充模板的占位符规范化为 **null**（null=未填充、""=有意留空），已填充模板数据值原样（不翻译、`InvariantCulture`）。
 
 #### TemplateFrame.Demo.Excel.I18n
-- **消息层（迭代 12）**：与 Word 同模式——缺必填元素模板在 `zh-CN` / `en` 下 `Validate` 与 `Fill`，消息中英切换（MessageKey / MessageArgs）。
-- **文档内容（迭代 13/14）**：简单版送货单版式（标题 / 单据头 / 明细表），同一版式代码用 `AddTextKey` / `AddTableKeys` + 本地化占位符输出 zh/en 两份模板（如 `Excel-I18n-DeliveryOrder-en-template.xlsx`）；填充 → 回读——未填充 → null、已填充数据值原样（不翻译、`InvariantCulture`）。
+- **消息层**：与 Word 同模式——缺必填元素模板在 `zh-CN` / `en` 下 `Validate` 与 `Fill`，消息中英切换（MessageKey / MessageArgs）。
+- **文档内容**：简单版送货单版式（标题 / 单据头 / 明细表），同一版式代码用 `AddTextKey` / `AddTableKeys` + 本地化占位符输出 zh/en 两份模板（如 `Excel-I18n-DeliveryOrder-en-template.xlsx`）；填充 → 回读——未填充 → null、已填充数据值原样（不翻译、`InvariantCulture`）。
 
 #### TemplateFrame.Demo.Excel.Simple.I18n
-- **消息层（迭代 12）**：用缺「型号」列的模板对完整契约 `Validate`，Missing 消息随文化中英切换（MessageKey / MessageArgs）。
-- **文档内容（迭代 14）**：中英表头模板 + 填充（en 表头经本地化器，每列定义名 `TF_Table_<列Key>` → 表头单元格），**无语言回读**（`service.Parse` 走定义名定位，不依赖表头文本匹配）——回读与表头语言解耦；zh 文件走表头文本匹配回退。
-- **根集合（迭代 16）**：追加 `MaterialListTemplateService : SimpleExcelTemplateService<List<MaterialLine>>`——表格 DataPath 留空，`TData` 直接是 `List<MaterialLine>`；同一份列表中英填充 + `Parse` 直接回读 `List<MaterialLine>`（表头按语言、定义名回读语言无关，与容器对象版能力一致）。
+- **消息层**：用缺「型号」列的模板对完整契约 `Validate`，Missing 消息随文化中英切换（MessageKey / MessageArgs）。
+- **文档内容**：中英表头模板 + 填充（en 表头经本地化器，每列定义名 `TF_Table_<列Key>` → 表头单元格），**无语言回读**（`service.Parse` 走定义名定位，不依赖表头文本匹配）——回读与表头语言解耦；zh 文件走表头文本匹配回退。
+- **根集合**：追加 `MaterialListTemplateService : SimpleExcelTemplateService<List<MaterialLine>>`——表格 DataPath 留空，`TData` 直接是 `List<MaterialLine>`；同一份列表中英填充 + `Parse` 直接回读 `List<MaterialLine>`（表头按语言、定义名回读语言无关，与容器对象版能力一致）。
 
 ## 关联文档
 
 - 设计：`docs/DESIGN.md`（三层架构 / 契约 = 元素清单 / 数据形状 `FillData` / 自动映射 `DataPathMapper`）
-- 路线图：`docs/ROADMAP.md`（迭代 9：自动映射 + SimpleExcel 强类型；迭代 10/11 搁置；迭代 12：消息 i18n；迭代 13：文档内容 i18n 模板多语言；迭代 14：Excel 版式 i18n 键 + SimpleExcel 列定义名定位）
+- 路线图：`docs/ROADMAP.md`（已归档 + 规划）
 - 插件 README：`src/TemplateFrame.Word/README.md`、`src/TemplateFrame.Excel/README.md`、`src/TemplateFrame.Excel.Simple/README.md`
