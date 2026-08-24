@@ -16,6 +16,12 @@
   <data name="Excel.Builder.TableNeedsColumns" xml:space="preserve">
     <value>表格至少需要一列。</value>
   </data>
+  <data name="Excel.Fill.DriftedSkipped" xml:space="preserve">
+    <value>可选元素 "{0}" 在模板中缺失（Drifted），填充时跳过。</value>
+  </data>
+  <data name="Excel.Fill.MissingRequired" xml:space="preserve">
+    <value>填充失败：缺少必填元素 "{0}"（{1}）。可配置 MissingElementPolicy.SkipAndWarn 改为跳过并告警。</value>
+  </data>
   <data name="Excel.Fill.ValidationFailed" xml:space="preserve">
     <value>填充前校验失败：{0}</value>
   </data>

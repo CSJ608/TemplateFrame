@@ -16,6 +16,12 @@
   <data name="Excel.Builder.TableNeedsColumns" xml:space="preserve">
     <value>A table requires at least one column.</value>
   </data>
+  <data name="Excel.Fill.DriftedSkipped" xml:space="preserve">
+    <value>Optional element "{0}" is missing in the template (Drifted); skipped during fill.</value>
+  </data>
+  <data name="Excel.Fill.MissingRequired" xml:space="preserve">
+    <value>Fill failed: required element "{0}" is missing ({1}). Configure MissingElementPolicy.SkipAndWarn to skip and warn instead.</value>
+  </data>
   <data name="Excel.Fill.ValidationFailed" xml:space="preserve">
     <value>Fill failed during pre-validation: {0}</value>
   </data>

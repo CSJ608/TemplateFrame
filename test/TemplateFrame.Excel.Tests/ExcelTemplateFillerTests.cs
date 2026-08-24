@@ -128,6 +128,48 @@ public sealed class ExcelTemplateFillerTests
     }
 
     [Fact]
+    public void Fill_OptionalMissingElement_ReportsDriftedAndContinues()
+    {
+        // 模板没有可选元素 Remark（契约升级后新增字段的存量模板场景）
+        using var template = TestDocuments.BuildTemplate(b =>
+        {
+            b.AddElement("OrderNo", "B2");
+            b.AddTable("Lines", ["MC", "MName", "Qty"], new TableFormat { Bordered = true }, "A6");
+        });
+        var contract = new TemplateContract
+        {
+            Name = "DemoOrder",
+            Version = "1.0",
+            Elements =
+            [
+                new TextElement { Key = "OrderNo", DisplayName = "单号" },
+                new TableElement
+                {
+                    Key = "Lines",
+                    DisplayName = "明细行",
+                    Columns =
+                    [
+                        new TextElement { Key = "MC", DisplayName = "物料代码" },
+                        new TextElement { Key = "MName", DisplayName = "物料名称" },
+                        new TextElement { Key = "Qty", DisplayName = "数量", ValueType = typeof(decimal) },
+                    ],
+                },
+                new TextElement { Key = "Remark", DisplayName = "备注", Required = false },
+            ],
+        };
+
+        var result = new ExcelTemplateEngine().FillDetailed(template, contract, BelowData());
+
+        var drifted = Assert.Single(result.Warnings, w => w.Key == "Remark");
+        Assert.Equal(TemplateValidationIssueCode.Drifted, drifted.Code);
+        Assert.Equal(TemplateValidationSeverity.Warning, drifted.Severity);
+
+        var parsed = new ExcelTemplateParser().Parse(result.Output, contract);
+        Assert.Equal("DO001", parsed.Values["OrderNo"]);
+        Assert.Equal(3, parsed.Tables["Lines"].Count);
+    }
+
+    [Fact]
     public void ExcelTemplateEngine_FillDetailed_SurfacesWarnings()
     {
         using var template = TestDocuments.BuildTemplate(b =>

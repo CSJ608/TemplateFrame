@@ -61,7 +61,7 @@ public sealed class ExcelTemplateFiller
 
         // 填充前软校验：先跑一遍 Validate
         var validation = new ExcelTemplateValidator().Validate(new MemoryStream(bytes, writable: false), contract);
-        var warnings = ApplyValidation(validation);
+        var warnings = ApplyValidation(validation, contract);
 
         // 在工作副本上填充，避免改动调用方传入的模板流
         using var working = new MemoryStream();
@@ -83,33 +83,76 @@ public sealed class ExcelTemplateFiller
     }
 
     /// <summary>按设计文档 §5.3 处理软校验问题：Drifted/Extra 告警继续；Missing 按策略；其余硬错误抛错。</summary>
-    private IReadOnlyList<TemplateValidationIssue> ApplyValidation(TemplateValidationResult validation)
+    private IReadOnlyList<TemplateValidationIssue> ApplyValidation(
+        TemplateValidationResult validation,
+        TemplateContract contract)
     {
         var warnings = new List<TemplateValidationIssue>();
         foreach (var issue in validation.Issues)
         {
             switch (issue.Code)
             {
-                case TemplateValidationIssueCode.Drifted:
                 case TemplateValidationIssueCode.Extra:
+                case TemplateValidationIssueCode.Drifted:
                     warnings.Add(issue);
                     break;
 
                 case TemplateValidationIssueCode.Missing:
-                    if (_options.MissingElementPolicy == MissingElementPolicy.Throw)
+                    if (!IsRequired(contract, issue.Key))
                     {
-                        throw new InvalidOperationException(Sr.Get("Excel.Fill.ValidationFailed", issue.Message));
+                        // 可选元素缺失 = 契约升级后的漂移（Drifted），告警继续
+                        warnings.Add(issue with
+                        {
+                            Code = TemplateValidationIssueCode.Drifted,
+                            Severity = TemplateValidationSeverity.Warning,
+                            MessageKey = "Excel.Fill.DriftedSkipped",
+                            MessageArgs = [issue.Key],
+                            Message = Sr.Get("Excel.Fill.DriftedSkipped", issue.Key),
+                        });
+                    }
+                    else if (_options.MissingElementPolicy == MissingElementPolicy.SkipAndWarn)
+                    {
+                        warnings.Add(issue with { Severity = TemplateValidationSeverity.Warning });
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException(
+                            Sr.Get("Excel.Fill.MissingRequired", issue.Key, issue.Message));
                     }
 
-                    warnings.Add(issue);
                     break;
 
                 default:
+                    // WrongType / Ambiguous / Invalid：模板与契约不匹配，无法安全填充
                     throw new InvalidOperationException(Sr.Get("Excel.Fill.ValidationFailed", issue.Message));
             }
         }
 
         return warnings;
+    }
+
+    private static bool IsRequired(TemplateContract contract, string key)
+    {
+        foreach (var element in contract.Elements)
+        {
+            if (element.Key == key)
+            {
+                return element.Required;
+            }
+
+            if (element is TableElement table)
+            {
+                foreach (var column in table.Columns)
+                {
+                    if (column.Key == key)
+                    {
+                        return column.Required;
+                    }
+                }
+            }
+        }
+
+        return true;
     }
 
     private static void FillCore(WorkbookPart workbookPart, TemplateContract contract, FillData data)
