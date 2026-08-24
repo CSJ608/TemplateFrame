@@ -1,4 +1,3 @@
-using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Builder;
 using TemplateFrame.Contract;
@@ -96,10 +95,4 @@ internal static class TestDocuments
         68, 174, 66, 96, 130,
     ];
 
-    /// <summary>打开工作簿并取出第一个 WorksheetPart。</summary>
-    public static WorksheetPart OpenFirstWorksheet(Stream stream)
-    {
-        var document = SpreadsheetDocument.Open(stream, false);
-        return document.WorkbookPart!.WorksheetParts.First();
-    }
 }

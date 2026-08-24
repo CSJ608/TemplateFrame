@@ -18,6 +18,8 @@ namespace TemplateFrame.Mapping;
 /// </summary>
 public static class DataPathMapper
 {
+    // 缓存以契约实例为 key（契约通常是场景服务内的固定实例，随服务存活）；
+    // 动态生成大量一次性契约的场景不适合自动映射，请手写 MapToData/MapFromData。
     private static readonly ConcurrentDictionary<(TemplateContract Contract, Type DataType), ContractMapping> Cache = new();
 
     /// <summary>正向：强类型数据 → <see cref="FillData"/>（只映射声明了 DataPath 的元素）。</summary>
