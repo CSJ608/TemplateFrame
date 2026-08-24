@@ -10,10 +10,10 @@ using TemplateFrame.Validation;
 namespace TemplateFrame.Excel.Simple;
 
 /// <summary>
-/// 简单表格的契约感知读写（迭代 9）：把「标题行 + 数据行」接入 TemplateFrame 契约体系。
+/// 简单表格的契约感知读写：把「标题行 + 数据行」接入 TemplateFrame 契约体系。
 /// 契约必须是单个 <see cref="TableElement"/>（列 = 表头）；底层复用 <see cref="SimpleExcel"/>，
 /// 返回 / 接收 <see cref="FillData"/>，再配合基础包 DataPathMapper 完成强类型映射。
-/// 迭代 14：Write 支持按文化生成表头并写每列定义名；Read/Validate 列定位**分级回退**
+/// Write 支持按文化生成表头并写每列定义名；Read/Validate 列定位**分级回退**
 /// （每列定义名 → TF_Table 区域 + 表头文本 → 第一个非空行 + 表头文本），框架产物回读语言无关。
 /// </summary>
 public static class SimpleExcelContract
@@ -47,7 +47,7 @@ public static class SimpleExcelContract
     /// <summary>
     /// 导出：契约表格 + <see cref="FillData"/> → .xlsx。
     /// <paramref name="culture"/> 非空时表头按语言解析（本地化键 = 列 Key，未注册覆盖回退 DisplayName/Key）；
-    /// 同时写每列定义名 <c>TF_&lt;TableName&gt;_&lt;ColumnKey&gt;</c> → 表头单元格（迭代 14，回读语言无关）。
+    /// 同时写每列定义名 <c>TF_&lt;TableName&gt;_&lt;ColumnKey&gt;</c> → 表头单元格（回读语言无关）。
     /// </summary>
     public static void Write(
         Stream target,
@@ -78,7 +78,7 @@ public static class SimpleExcelContract
     }
 
     /// <summary>
-    /// 导入：.xlsx → <see cref="FillData"/>。列定位**分级回退**（迭代 14）：
+    /// 导入：.xlsx → <see cref="FillData"/>。列定位**分级回退**：
     /// ① 每列定义名 <c>TF_&lt;TableName&gt;_&lt;ColumnKey&gt;</c>（框架产物，语言无关）→
     /// ② <c>TF_Table</c> 区域 + 表头文本匹配 → ③ 第一个非空行 + 表头文本匹配。
     /// 多余列忽略；缺列整列补 null。
@@ -140,7 +140,7 @@ public static class SimpleExcelContract
 
     /// <summary>
     /// 校验：.xlsx 表头与契约列是否匹配（缺必填列报 Missing，可选列缺失告警，多余列告警）。
-    /// 列定位与 <see cref="Read"/> 相同的分级回退；重复列定义名报 Ambiguous（迭代 14）。
+    /// 列定位与 <see cref="Read"/> 相同的分级回退；重复列定义名报 Ambiguous。
     /// </summary>
     public static TemplateValidationResult Validate(Stream template, TemplateContract contract, SimpleExcelOptions? options = null)
     {

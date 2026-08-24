@@ -26,7 +26,7 @@ public sealed record SimpleExcelOptions
 /// <summary>
 /// 简单表格：标题行 + 数据行。单元格值支持 string / bool / DateTime / 数值（int、long、decimal、double、float）/ null。
 /// 与 TemplateFrame.Excel 的"灵活版式"定位不同：本插件只做
-/// 「标题行 + 一列一路下去」的表格导入/导出，不涉及合并 / 图片 / 页面设置（迭代 8 修订）。
+/// 「标题行 + 一列一路下去」的表格导入/导出，不涉及合并 / 图片 / 页面设置。
 /// 表格位置用**命名区域**标记（默认 TF_Table → 表格区域），Read 优先按它定位表头。
 /// </summary>
 public sealed record SimpleExcelTable
@@ -50,7 +50,7 @@ public static class SimpleExcel
 
     /// <summary>
     /// 导出：标题行 + 数据行 → .xlsx 写入 <paramref name="target"/>，并用命名区域标记表格位置。
-    /// <paramref name="columnKeys"/> 非空时另写每列定义名 <c>TF_&lt;TableName&gt;_&lt;ColumnKey&gt;</c> → 表头单元格（迭代 14：
+    /// <paramref name="columnKeys"/> 非空时另写每列定义名 <c>TF_&lt;TableName&gt;_&lt;ColumnKey&gt;</c> → 表头单元格（
     /// 单格引用，数据行增删不影响；契约路径写/读用它做语言无关的列定位）。
     /// </summary>
     public static void Write(Stream target, SimpleExcelTable table, SimpleExcelOptions? options = null, IReadOnlyList<string>? columnKeys = null)
@@ -356,7 +356,7 @@ public static class SimpleExcel
         return GetInlineStringText(cell.InlineString) ?? cell.CellValue?.Text;
     }
 
-    /// <summary>每列定义名：TF_&lt;TableName&gt;_&lt;ColumnKey&gt; → 表头单元格（迭代 14，契约路径写/读用做语言无关的列定位）。</summary>
+    /// <summary>每列定义名：TF_&lt;TableName&gt;_&lt;ColumnKey&gt; → 表头单元格（契约路径写/读用做语言无关的列定位）。</summary>
     public static string ColumnDefinedName(string tableName, string columnKey)
         => tableName.Trim() + "_" + columnKey.Trim();
 

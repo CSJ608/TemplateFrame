@@ -10,7 +10,7 @@ namespace TemplateFrame.Word;
 
 /// <summary>
 /// Word 引擎：实现 <see cref="ITemplateEngine"/>，把契约 + 数据形状翻译成 .docx。
-/// 迭代 13：可注入 <see cref="ITemplateLocalizer"/>（文档内容 i18n），
+/// 可注入 <see cref="ITemplateLocalizer"/>（文档内容 i18n），
 /// 生成模板时按文化解析占位符 / 页码 / 版式 i18n 键，回读时把已知占位符规范化为 null。
 /// </summary>
 public sealed class WordTemplateEngine : ITemplateEngine

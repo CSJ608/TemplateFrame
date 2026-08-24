@@ -8,7 +8,7 @@ using TemplateFrame.Validation;
 namespace TemplateFrame.Excel;
 
 /// <summary>
-/// Excel 模板校验（迭代 8 兜底）：枚举 <c>TF_</c> 命名区域，按契约报告 Missing / WrongType / Ambiguous，
+/// Excel 模板校验：枚举 <c>TF_</c> 命名区域，按契约报告 Missing / WrongType / Ambiguous，
 /// Extra 只告警放行（见设计文档 §5.3）。
 /// </summary>
 public sealed class ExcelTemplateValidator

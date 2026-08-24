@@ -9,7 +9,7 @@ using TemplateFrame.Localization;
 namespace TemplateFrame.Mapping;
 
 /// <summary>
-/// 自动映射器（迭代 9）：按契约元素的 <see cref="TemplateElement.DataPath"/> 反射完成 TData ⇄ FillData 双向映射。
+/// 自动映射器：按契约元素的 <see cref="TemplateElement.DataPath"/> 反射完成 TData ⇄ FillData 双向映射。
 /// <para>English: Auto-mapper — reflects TData ⇄ FillData by the DataPath declared on contract elements.</para>
 /// 显式 DataPath 为主：标量 / 图片用单级属性路径，表格用「集合属性 + 列属性」两级路径；
 /// 数据对象本身就是集合（<c>List&lt;T&gt;</c> / <c>IReadOnlyList&lt;T&gt;</c> / 数组）时，表格 DataPath 留空即按「根集合」映射。

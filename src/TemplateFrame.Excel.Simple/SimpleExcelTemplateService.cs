@@ -9,7 +9,7 @@ using TemplateFrame.Validation;
 namespace TemplateFrame.Excel.Simple;
 
 /// <summary>
-/// SimpleExcel 场景服务的轻量基类（迭代 9）：依赖契约（单个表格）获得强类型
+/// SimpleExcel 场景服务的轻量基类：依赖契约（单个表格）获得强类型
 /// <c>BuildTemplate / Validate / Fill / Parse</c>，无需 Builder / Engine。
 /// 契约表格与列声明 <see cref="TemplateElement.DataPath"/> 后，映射走 <see cref="DataPathMapper"/> 自动完成；
 /// TData 本身为 <c>List&lt;T&gt;</c> 等集合时，表格 DataPath 留空即按「根集合」直接填充 / 解析；

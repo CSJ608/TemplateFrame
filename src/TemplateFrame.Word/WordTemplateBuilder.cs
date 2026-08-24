@@ -48,7 +48,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     }
 
     /// <summary>
-    /// 以本地化器与目标文化创建 Word 文档构建器（迭代 13：文档内容 i18n）。
+    /// 以本地化器与目标文化创建 Word 文档构建器（文档内容 i18n）。
     /// <paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；
     /// <paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。
     /// </summary>
@@ -126,11 +126,11 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>追加一个按 i18n 键解析文案的段落（迭代 13：版式文本按语言解析；键 → 文案查找见 <see cref="ITemplateLocalizer"/>）。</summary>
+    /// <summary>追加一个按 i18n 键解析文案的段落（版式文本按语言解析；键 → 文案查找见 <see cref="ITemplateLocalizer"/>）。</summary>
     public WordTemplateBuilder AddParagraphKey(string key, string? style = null)
         => AddParagraph(_localizer.GetString(key, _culture), style);
 
-    /// <summary>追加一个按 i18n 键解析文案的段落（带文本格式，迭代 13）。</summary>
+    /// <summary>追加一个按 i18n 键解析文案的段落（带文本格式）。</summary>
     public WordTemplateBuilder AddParagraphKey(string key, TextFormat format)
         => AddParagraph(_localizer.GetString(key, _culture), format);
 
@@ -150,11 +150,11 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>在当前段落追加按 i18n 键解析的静态文本（迭代 13）。</summary>
+    /// <summary>在当前段落追加按 i18n 键解析的静态文本。</summary>
     public WordTemplateBuilder AddTextKey(string key)
         => AddText(_localizer.GetString(key, _culture));
 
-    /// <summary>在当前段落追加按 i18n 键解析的带格式静态文本（迭代 13）。</summary>
+    /// <summary>在当前段落追加按 i18n 键解析的带格式静态文本。</summary>
     public WordTemplateBuilder AddTextKey(string key, TextFormat format)
         => AddText(_localizer.GetString(key, _culture), format);
 
@@ -178,7 +178,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     public WordTemplateBuilder AddStaticText(string text)
         => AddParagraph(text);
 
-    /// <summary>追加一个独立段落，内容为按 i18n 键解析的静态文本（迭代 13）。</summary>
+    /// <summary>追加一个独立段落，内容为按 i18n 键解析的静态文本。</summary>
     public WordTemplateBuilder AddStaticTextKey(string key)
         => AddParagraphKey(key);
 
@@ -195,7 +195,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         => AddTableCore(key, columns, format, headerStyle, localizeHeaders: false);
 
     /// <summary>
-    /// 追加表格（迭代 13：i18n 键版）——<paramref name="columnKeys"/> 是本地化键，表头按语言解析；
+    /// 追加表格（i18n 键版）——<paramref name="columnKeys"/> 是本地化键，表头按语言解析；
     /// 但每格内容控件 tag 仍是列 Key（不本地化，保证 Fill/Parse 按 tag 匹配）。
     /// </summary>
     public WordTemplateBuilder AddTableKeys(
@@ -357,7 +357,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     }
 
     /// <summary>
-    /// 在当前段落追加页码域。默认 pattern 按语言解析（迭代 13：zh "第{page}页，总{total}页" / en "Page {page} of {total}"，
+    /// 在当前段落追加页码域。默认 pattern 按语言解析（zh "第{page}页，总{total}页" / en "Page {page} of {total}"，
     /// 可用 <see cref="DefaultTemplateLocalizer.PageNumberPatternKey"/> 业务覆盖）；
     /// <paramref name="pattern"/> 为 null 时取本地化默认，显式传入则原样使用（支持 {page} / {total} 占位符）。
     /// </summary>

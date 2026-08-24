@@ -1,6 +1,6 @@
 namespace TemplateFrame.Internal;
 
-/// <summary>内部图片类型探测（Word / Excel 插件共用，迭代 15 公共代码下沉）：按文件头魔数识别扩展名并映射 MIME。</summary>
+/// <summary>内部图片类型探测（Word / Excel 插件共用）：按文件头魔数识别扩展名并映射 MIME。</summary>
 internal static class ImageTypeDetector
 {
     /// <summary>按文件头魔数识别图片扩展名（png / jpg / gif / bmp / tiff；无法识别回退 png）。</summary>

@@ -15,7 +15,7 @@ namespace TemplateFrame.Excel;
 /// 与 <see cref="ExcelTemplateFiller"/> 共享同一套按命名区域定位逻辑（<see cref="ExcelNamedRangeLocator"/>），
 /// 只是方向相反。Text 按 <see cref="TextElement.ValueType"/> 转换（数字/日期序列号）；Table 按列命名区域范围逐行读出；
 /// Image 读回锚定格图片字节（可选能力）。
-/// 迭代 13（Parse 规范化，方案 3）：已知占位符（<see cref="ITemplateLocalizer.IsPlaceholderText"/>，
+/// Parse 规范化：已知占位符（<see cref="ITemplateLocalizer.IsPlaceholderText"/>，
 /// 默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 null（null=未填充、""=有意留空）；
 /// 元素缺失仍保持"键省略"语义。
 /// </summary>

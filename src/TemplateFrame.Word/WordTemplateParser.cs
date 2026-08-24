@@ -16,7 +16,7 @@ namespace TemplateFrame.Word;
 /// 与 <see cref="WordTemplateFiller"/> 共享同一套按 tag 定位逻辑（<see cref="SdtLocator"/>），只是方向相反。
 /// Text 读 w:t 文本并按 <see cref="TextElement.ValueType"/> 转换；Table 找到示例行克隆区逐行读出字段；
 /// Image 读回占位/填充后的图片字节（可选能力）。
-/// 迭代 13（Parse 规范化，方案 3）：已知占位符（<see cref="ITemplateLocalizer.IsPlaceholderText"/>，
+/// Parse 规范化：已知占位符（<see cref="ITemplateLocalizer.IsPlaceholderText"/>，
 /// 默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 null（null=未填充、""=有意留空）；
 /// 控件缺失仍保持"键省略"语义。
 /// </summary>

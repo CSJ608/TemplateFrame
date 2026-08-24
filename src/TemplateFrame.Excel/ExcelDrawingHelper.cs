@@ -30,7 +30,7 @@ internal static class ExcelDrawingHelper
 
         // 注意：cNvPr 必须用 xdr（spreadsheetDrawing）命名空间。SDK 的 A.NonVisualDrawingProperties
         // 序列化为 a:cNvPr，Excel 打开会报"已修复的部件: 有 XML 错误的 sheet1.xml"并移除整张 drawing
-        // （图片不可见），因此这里用原始 XML 构造 xdr:cNvPr（与 Excel 自产 drawing 一致，迭代 8 修订）。
+        // （图片不可见），因此这里用原始 XML 构造 xdr:cNvPr（与 Excel 自产 drawing 一致）。
         anchor.Append(new Xdr.Picture(
             new Xdr.NonVisualPictureProperties(
                 CreateCNvPr(id),

@@ -21,7 +21,7 @@ public interface ITemplateEngine
     ITemplateBuilder CreateBuilder();
 
     /// <summary>
-    /// 以本地化器与目标文化创建具体插件版式构建器（迭代 13：文档内容 i18n）。
+    /// 以本地化器与目标文化创建具体插件版式构建器（文档内容 i18n）。
     /// <para>English: Creates a concrete plugin builder with a localizer and target culture (Iteration 13: document content i18n).</para>
     /// 插件实现（Word/Excel）可覆盖此方法把 localizer / culture 传入构建器，
     /// 用于占位符 / 页码 / 版式 i18n 键解析；未覆盖的引擎回退到无参 <see cref="CreateBuilder()"/>。

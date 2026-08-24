@@ -17,8 +17,8 @@ public abstract record TemplateElement
     public bool Required { get; init; } = true;
 
     /// <summary>
-    /// 可选：从 TData 自动取值的路径（用于 DataPath 自动映射，迭代 4 提供）。
-    /// 迭代 1 要求业务服务手写映射，本属性暂不参与引擎逻辑。
+    /// 可选：从 TData 自动取值的路径（DataPath 自动映射用，见 <see cref="TemplateFrame.Mapping.DataPathMapper"/>）；
+    /// 未声明时业务服务手写 MapToData / MapFromData。
     /// </summary>
     public string? DataPath { get; init; }
 }

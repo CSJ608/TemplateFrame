@@ -14,7 +14,7 @@ namespace TemplateFrame.Excel;
 /// <summary>
 /// Excel 填充器（设计文档 §5.2 / §5.3）：文本写类型化值 + 数字格式（日期存序列号）；
 /// 图片按锚定格替换 part + 关系（尺寸继承占位）；表格行 deepcopy 示例行 N-1 次，
-/// 逐行填值后把列命名区域重指到整个数据块，并把表格下方命名区域/合并区域整体下移（迭代 8 §9）。
+/// 逐行填值后把列命名区域重指到整个数据块，并把表格下方命名区域/合并区域整体下移。
 /// </summary>
 public sealed class ExcelTemplateFiller
 {

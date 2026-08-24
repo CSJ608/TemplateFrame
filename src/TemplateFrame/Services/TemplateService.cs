@@ -16,8 +16,8 @@ namespace TemplateFrame.Services;
 /// 在无参数的 <see cref="BuildInitialTemplate"/> 里直接用类型化的 <see cref="Builder"/> 实例组装版式，
 /// 即可获得强类型 <c>BuildInitialTemplateFile / Validate / ValidateData / Fill / Parse</c>。
 /// 契约元素声明 <see cref="TemplateElement.DataPath"/> 后，<see cref="MapToData"/> / <see cref="MapFromData"/>
-/// 默认走 <see cref="DataPathMapper"/> 自动映射（迭代 9）；未声明 DataPath 时保持"需重写"语义。
-/// 迭代 13：<see cref="BuildInitialTemplateFile(CultureInfo?)"/> 支持按文化生成模板
+/// 默认走 <see cref="DataPathMapper"/> 自动映射；未声明 DataPath 时保持"需重写"语义。
+/// <see cref="BuildInitialTemplateFile(CultureInfo?)"/> 支持按文化生成模板
 /// （null = 中文默认，向后兼容）；<see cref="Localizer"/> 用于版式 i18n 键 / 占位符 / 页码解析。
 /// </summary>
 public abstract class TemplateService<TData, TBuilder>
@@ -39,7 +39,7 @@ public abstract class TemplateService<TData, TBuilder>
     /// <summary>当前契约（惰性求值，来自 <see cref="DefineContract"/>）。</summary>
     public TemplateContract Contract => _contract.Value;
 
-    /// <summary>当前本地化器（迭代 13：版式 i18n 键 / 占位符 / 页码解析；业务可注入覆盖）。</summary>
+    /// <summary>当前本地化器（版式 i18n 键 / 占位符 / 页码解析；业务可注入覆盖）。</summary>
     protected ITemplateLocalizer Localizer => _localizer;
 
     /// <summary>当前构建用的具体插件构建器（仅在 <see cref="BuildInitialTemplate"/> 内有效，类型即插件类型）。</summary>
@@ -54,7 +54,7 @@ public abstract class TemplateService<TData, TBuilder>
     /// <summary>
     /// 生成初始模板文件流（含内容控件 SDT）。
     /// <paramref name="culture"/>：模板内容语言（占位符 / 页码 / 版式 i18n 键按此解析）；
-    /// null = 中文默认（行为与迭代 12 及之前一致，向后兼容）。
+    /// null = 中文默认。
     /// </summary>
     public Stream BuildInitialTemplateFile(CultureInfo? culture = null)
     {
@@ -80,7 +80,7 @@ public abstract class TemplateService<TData, TBuilder>
     public TemplateValidationResult Validate(Stream template)
         => _engine.Validate(template, Contract);
 
-    /// <summary>校验数据与契约是否匹配（必填字段/表格缺失、类型不匹配、契约外字段），填充前兜底（迭代 4）。</summary>
+    /// <summary>校验数据与契约是否匹配（必填字段/表格缺失、类型不匹配、契约外字段），填充前兜底。</summary>
     public TemplateValidationResult ValidateData(TData data)
     {
         FillData fillData = MapToData(data);
@@ -102,7 +102,7 @@ public abstract class TemplateService<TData, TBuilder>
         return _engine.FillDetailed(template, Contract, fillData);
     }
 
-    /// <summary>回读：已填充模板 → 强类型数据（迭代 3 已落地）。</summary>
+    /// <summary>回读：已填充模板 → 强类型数据。</summary>
     public TData Parse(Stream template)
     {
         FillData fillData = _engine.Parse(template, Contract);

@@ -26,7 +26,7 @@ internal sealed record CellStyleSpec
 }
 
 /// <summary>
-/// 构建期单元格样式池：字体/边框/对齐去重后写入 styles.xml（迭代 8）。
+/// 构建期单元格样式池：字体/边框/对齐去重后写入 styles.xml。
 /// 数字格式不在构建期注册——元素类型/格式由契约在填充时决定，填充器按需补 numFmt。
 /// </summary>
 internal sealed class ExcelStyleManager

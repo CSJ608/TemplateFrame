@@ -1,6 +1,6 @@
 namespace TemplateFrame.Internal;
 
-/// <summary>内部流工具（Word / Excel 插件共用，迭代 15 公共代码下沉）。</summary>
+/// <summary>内部流工具（Word / Excel 插件共用）。</summary>
 internal static class StreamUtil
 {
     /// <summary>把流整体读成字节（可定位流先归零）。</summary>

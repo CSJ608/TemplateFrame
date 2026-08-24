@@ -17,7 +17,7 @@ namespace TemplateFrame.Excel;
 /// 文本元素（命名区域）/ 表格（表头 + 示例行）/ 图片（单元格锚定）/ 合并单元格）。
 /// 命名区域统一前缀 <c>TF_</c>，全表唯一；框架只认 <see cref="ITemplateBuilder.Save"/>。
 /// 与 Word 不同，Excel 是"网格规整"型版式，本插件不提供页面设置（纸张/方向/边距）——
-/// 由 Demo/业务侧按内容列数评估宽度、用合并单元格排版（迭代 8 修订）。
+/// 由 Demo/业务侧按内容列数评估宽度、用合并单元格排版。
 /// </summary>
 public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
 {
@@ -46,7 +46,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     }
 
     /// <summary>
-    /// 以本地化器与目标文化创建工作簿构建器（迭代 13：文档内容 i18n，占位符按语言解析）。
+    /// 以本地化器与目标文化创建工作簿构建器（文档内容 i18n，占位符按语言解析）。
     /// <paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；
     /// <paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。
     /// </summary>
@@ -101,7 +101,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>写按 i18n 键解析的文本到单元格（迭代 14：版式文本按语言解析；键 → 文案查找见 <see cref="TemplateFrame.Localization.ITemplateLocalizer"/>）。</summary>
+    /// <summary>写按 i18n 键解析的文本到单元格（版式文本按语言解析；键 → 文案查找见 <see cref="TemplateFrame.Localization.ITemplateLocalizer"/>）。</summary>
     public ExcelTemplateBuilder AddTextKey(string cellAddress, string key, TextFormat? format = null)
         => AddText(cellAddress, _localizer.GetString(key, _culture), format);
 
@@ -128,7 +128,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         => AddTableCore(key, columns, format, startCell, localizeHeaders: false);
 
     /// <summary>
-    /// 追加表格（迭代 14：i18n 键版）——<paramref name="columnKeys"/> 是本地化键，表头按语言解析；
+    /// 追加表格（i18n 键版）——<paramref name="columnKeys"/> 是本地化键，表头按语言解析；
     /// 但每列命名区域 <c>TF_&lt;TableKey&gt;_&lt;ColumnKey&gt;</c> 仍用列 Key（不本地化，保证 Fill/Parse 按命名区域匹配）。
     /// </summary>
     public ExcelTemplateBuilder AddTableKeys(
@@ -319,7 +319,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     {
         _worksheetPart = _workbookPart.AddNewPart<WorksheetPart>();
         // sheetViews 必须存在：缺少时 Excel 打开会重算自定义行高（如 ht=37 变成 24.65），
-        // 与 Excel 自产文件保持一致（迭代 8 修订）。
+        // 与 Excel 自产文件保持一致。
         _worksheetPart.Worksheet = new Worksheet(
             new SheetViews(new SheetView { WorkbookViewId = 0, TabSelected = true }),
             new SheetData());

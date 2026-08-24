@@ -46,7 +46,7 @@ public sealed record WordTemplateValidationResult : TemplateValidationResult
 }
 
 /// <summary>
-/// Word 模板校验（迭代 1 兜底）：枚举内容控件，按契约报告 Missing / WrongType / Ambiguous，
+/// Word 模板校验：枚举内容控件，按契约报告 Missing / WrongType / Ambiguous，
 /// Extra 只告警放行（见设计文档 §5.3）。
 /// </summary>
 public sealed class WordTemplateValidator
