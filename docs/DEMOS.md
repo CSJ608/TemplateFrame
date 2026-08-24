@@ -21,7 +21,7 @@
 | `samples/TemplateFrame.Demo.Excel.I18n` | Excel（灵活版式） | 自动映射 | **i18n**：消息层 + 文档内容（`AddTextKey` / `AddTableKeys` 中英模板 + 回读） | `dotnet run --project samples/TemplateFrame.Demo.Excel.I18n` |
 | `samples/TemplateFrame.Demo.Excel.Simple.I18n` | Excel.Simple（简单表格） | 自动映射 | **i18n**：消息层（缺列 Validate 中英）+ 文档内容（中英表头 + 定义名回读，语言无关）+ 根集合 `List<T>` 直接填充/解析 | `dotnet run --project samples/TemplateFrame.Demo.Excel.Simple.I18n` |
 
-> 所有 Demo 默认输出到 `%TEMP%\<Demo 项目名>`，也可用第一个参数指定输出目录，例如：
+> 所有 Demo 默认输出到系统临时目录（Windows `%TEMP%` / Linux·macOS `/tmp`）下的 `<Demo 项目名>` 子目录，也可用第一个参数指定输出目录，例如：
 > `dotnet run --project samples/TemplateFrame.Demo.Word.AutoMapping -- "D:\out"`。
 
 ## 手写映射 vs 自动映射

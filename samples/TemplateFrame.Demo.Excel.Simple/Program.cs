@@ -8,7 +8,7 @@ namespace TemplateFrame.Demo.Excel.Simple;
 /// 服务依赖契约（单个表格），表格与列声明 <see cref="TemplateElement.DataPath"/> 后由框架自动映射——
 /// 无手写 MapToData / MapFromData，即可获得 生成模板 / 强类型填充 / 强类型回读（service.Parse 直接得到 MaterialsData）。
 /// 输出文件带 Simple 标识：Excel-Simple-Materials-template.xlsx（仅表头）与
-/// Excel-Simple-Materials-filled.xlsx（表头 + 数据行）与 Excel-Simple-Materials-rootlist-filled.xlsx（根集合 List<MaterialLine> 直接填充 / 回读），默认输出到 %TEMP%\TemplateFrame.Demo.Excel.Simple。
+/// Excel-Simple-Materials-filled.xlsx（表头 + 数据行）与 Excel-Simple-Materials-rootlist-filled.xlsx（根集合 List<MaterialLine> 直接填充 / 回读），默认输出到系统临时目录（Windows %TEMP% / Linux·macOS /tmp）下的 TemplateFrame.Demo.Excel.Simple。
 /// i18n（中英表头 + 定义名回读）见独立 Demo：samples/TemplateFrame.Demo.Excel.Simple.I18n。
 /// </summary>
 internal static class Program

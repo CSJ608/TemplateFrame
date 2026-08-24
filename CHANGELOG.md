@@ -16,12 +16,19 @@
 
 ### 工程
 - **插件去重（净删约 120 行）**：`EnumerateTables`（原 Word 插件内三份）与 `FindHostPart`（两份）并入 `SdtLocator` internal 方法；Word / Excel Parser 私有 `ReadAllBytes` 统一走基础包 `StreamUtil`；内置占位图 base64 与 `LoadPlaceholder` 下沉基础包 `PlaceholderImage`（统一按魔数识别扩展名；指定路径不存在时直接抛错而非静默回退内置图）
+- **大文件拆分（全库不再有 500+ 行文件，行为不变）**：`WordTemplateBuilder` 825→478 行（抽出 `WordXmlFactory` 366 行 OpenXML 纯构造逻辑）；`SimpleExcel` 737 行拆为 门面 31 + `SimpleExcelWriter` 204 + `SimpleExcelReader` 397 + `SimpleExcelAddress` 104 + Options/Table 独立文件（公共 API 不变）；`ExcelTemplateFiller` 656→410 行（抽出 `ExcelRowShifter` 131 与 `ExcelNumberFormat` 117）
+- **`IsRequired` 下沉**：Word / Excel 填充器各自私有的"元素（含表格列）是否必填"合并为公共 `TemplateContract.IsElementRequired(key)`
+- **DataPathMapper 转换失败带上下文**：回填属性转换失败（如 "abc"→decimal）由裸 `FormatException` 改为 `InvalidOperationException`（含属性名，原始异常作 InnerException）；新增资源键 `Mapping.SetFailed`（中英）
+- **测试补强（+76 用例，全库 290）**：`ImageTypeDetector` 类型矩阵（png/jpg/gif/bmp/tiff/未知回退 + MIME 映射，基础包 IVT 开放测试）+ Word / Excel 非 PNG 图片填充端到端；`ExcelNamedRangeLocator` / `ExcelAddressHelper` 直接单测（列字母边界、`ParseCell` 非法输入、`QuoteSheet` 转义、引用构造/解析往返，42 个 Theory 用例）；DataPathMapper 转换矩阵（失败路径 / 空串与 null 的值类型语义 / bool / 数值收敛 / base64）；Excel Filler 告警矩阵补齐（WrongType 硬错误 + 直接 Filler 级 Extra）
+- **CI 加固**：`ci.yml` 增加 `windows-latest` 矩阵（跨平台验证）与 `dotnet test --collect:"XPlat Code Coverage"` 覆盖率收集（coverlet.collector）
 - **工程基建**：新增 `.editorconfig` + `dotnet format` 全仓统一（CI 增加 format 校验步骤）；新增 `src/Directory.Build.props` 作为四包共享打包元数据单一来源（版本 / 作者 / 许可 / 仓库 / 符号包），各 csproj 只留差异项；NuGet 四包新增图标 `icon.png`（此前为默认灰图标）；release / publish-nuget 工作流的版本一致性校验改读 `src/Directory.Build.props`（PUBLISHING.md 同步）
+- **小清理**：删除 Excel.Tests 死代码 `OpenFirstWorksheet`；`DataPathMapper` 缓存补设计说明注释；`TemplateValidationResult` 文档化"插件可继承附带宿主信息"的扩展点（Word 校验结果的 SDT 清单）
 
 ### 文档
 - **README（中英）重写为"上手优先"**：顶部新增"选哪个包"决策表；快速开始从 `TemplateFrame.Excel.Simple` 最简场景切入（3 分钟跑通导入导出）；Word / Excel 灵活版式作为进阶章节；文档索引表集中入口
 - 全仓清除"迭代 N"过程注记：源码 XML doc / 注释 44 处（含修正 `TemplateElement.DataPath` 的过时注释）、主 README 与三个插件 README；项目历史只在 ROADMAP / CHANGELOG 保留
 - 删除已实施完毕的一次性计划文档 `docs/EXCEL_SIMPLE_EMPTY_PARSE_FIX_PLAN.md`（内容已在 1.0.7 归档）
+- Demo 输出目录说明改跨平台措辞（Windows `%TEMP%` / Linux·macOS `/tmp`；文档与 Demo 头注释）
 - ROADMAP 新增迭代 17（评审落地）小节与状态行；DESIGN §7 补迭代 16 / 17 行、§9 补 2.0.0 三条决策记录
 
 ## [1.0.7] - 2026-08-17

@@ -5,7 +5,7 @@ namespace TemplateFrame.Demo.Word;
 
 /// <summary>
 /// TemplateFrame.Word 插件 Demo：送货单「生成 → 校验 → 填充（收货前/收货后）→ 回读」完整闭环。
-/// 输出文件带 Word 标识（Word-DeliveryOrder-*.docx），默认输出到 %TEMP%\TemplateFrame.Demo.Word。
+/// 输出文件带 Word 标识（Word-DeliveryOrder-*.docx），默认输出到系统临时目录（Windows %TEMP% / Linux·macOS /tmp）下的 TemplateFrame.Demo.Word。
 /// </summary>
 internal static class Program
 {

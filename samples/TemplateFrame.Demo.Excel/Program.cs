@@ -5,7 +5,7 @@ namespace TemplateFrame.Demo.Excel;
 
 /// <summary>
 /// TemplateFrame.Excel 插件 Demo：送货单「生成 → 校验 → 填充（收货前/收货后）→ 回读」完整闭环。
-/// 输出文件带 Excel 标识（Excel-DeliveryOrder-*.xlsx），默认输出到 %TEMP%\TemplateFrame.Demo.Excel。
+/// 输出文件带 Excel 标识（Excel-DeliveryOrder-*.xlsx），默认输出到系统临时目录（Windows %TEMP% / Linux·macOS /tmp）下的 TemplateFrame.Demo.Excel。
 /// </summary>
 internal static class Program
 {

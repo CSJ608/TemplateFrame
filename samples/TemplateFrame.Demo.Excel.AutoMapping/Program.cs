@@ -8,7 +8,7 @@ namespace TemplateFrame.Demo.Excel.AutoMapping;
 /// TemplateFrame.Excel 插件 Demo（自动映射版）：送货单「生成 → 校验 → 填充（收货前/收货后）→ 回读」完整闭环。
 /// 与手写映射版内容一致，区别只在映射——契约元素声明 DataPath 后由框架自动映射，
 /// 服务里没有 MapToData / MapFromData；图片字节（LOGO / 二维码）由数据直接携带。
-/// 输出文件带 AutoMapping 标识（Excel-AutoMapping-DeliveryOrder-*.xlsx），默认输出到 %TEMP%\TemplateFrame.Demo.Excel.AutoMapping。
+/// 输出文件带 AutoMapping 标识（Excel-AutoMapping-DeliveryOrder-*.xlsx），默认输出到系统临时目录（Windows %TEMP% / Linux·macOS /tmp）下的 TemplateFrame.Demo.Excel.AutoMapping。
 /// </summary>
 internal static class Program
 {

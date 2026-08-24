@@ -24,7 +24,7 @@
 | **13** | **文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化）** | ✅ 已完成（见下） |
 | **14** | **Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退）** | ✅ 已完成（见下） |
 | **16** | **SimpleExcel 根集合 `List<T>` 直接填充/解析**（随 v1.0.6 发布，见 CHANGELOG） | ✅ 已完成 |
-| **17** | **评审落地：Excel Drifted 修复 + API 简化（2.0.0）+ 去重 + 异常契约 + 基建 + 文档重构** | ✅ 已完成（见下） |
+| **17** | **评审落地：Excel Drifted 修复 + API 简化（2.0.0）+ 去重 + 大文件拆分 + 损坏流异常契约 + 测试补强（290 用例）+ 基建（CI 矩阵/覆盖率/图标）+ 文档重构** | ✅ 已完成（见下） |
 
 > 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
@@ -306,17 +306,20 @@
 2. **API 简化（破坏性，2.0.0）**：`MissingElementPolicy` / `TemplateFillOptions` 统一下沉基础包；删除 `WordFillOptions` / `ExcelFillOptions` / `WordFillResult` / `ExcelFillResult` 与泛型 `TemplateFillOptions<T>`——公共 API 净减 6 个类型，消除两插件同用时的 CS0104 枚举歧义
 3. **去重（净删约 120 行）**：`EnumerateTables` ×3 与 `FindHostPart` ×2 并入 `SdtLocator`（internal）；两个 Parser 私有 `ReadAllBytes` 统一走 `StreamUtil`；占位图 base64 与 `LoadPlaceholder`（按魔数识别扩展名，fail-fast）下沉基础包 `PlaceholderImage`
 4. **异常契约统一**：`WordTemplateParser.Parse` / `ExcelTemplateParser.Parse` / `SimpleExcel.Read` 对损坏流（非 OOXML / 截断 zip）统一包装为 `InvalidOperationException` + 本地化消息（原始异常作 InnerException），与 `Validate` / `Fill` 一致；三插件补 10 个异常契约测试
-5. **工程基建**：`.editorconfig` + `dotnet format` 全仓统一并加入 CI；`src/Directory.Build.props` 作为四包共享元数据（版本/作者/许可/图标）单一来源，csproj 各留差异项；NuGet 包图标 `icon.png`；发布工作流版本校验改读 props（PUBLISHING.md 同步）
-6. **文档重构**：README 中英双语重写为"上手优先"（选哪个包决策表置顶 → Excel.Simple 最简 Quickstart → 核心模型 → Word/Excel 进阶），全仓文档与源码注释清除迭代号注记（44 处），修正 `TemplateElement.DataPath` 过时注释；删除已实施完毕的 `EXCEL_SIMPLE_EMPTY_PARSE_FIX_PLAN.md`；DESIGN §9 补 2.0.0 决策记录
+5. **大文件拆分（全库不再有 500+ 行文件，行为不变）**：`WordTemplateBuilder` 825→478（抽出 `WordXmlFactory`）；`SimpleExcel` 737 拆为门面 + `SimpleExcelWriter` / `SimpleExcelReader` / `SimpleExcelAddress` + Options/Table 独立文件；`ExcelTemplateFiller` 656→410（抽出 `ExcelRowShifter` / `ExcelNumberFormat`）；`IsRequired` 下沉为 `TemplateContract.IsElementRequired`
+6. **测试补强（+76 用例，全库 290）**：`ImageTypeDetector` 类型矩阵 + Word / Excel 非 PNG 图片填充端到端；`ExcelNamedRangeLocator` / `ExcelAddressHelper` 直接单测（Theory）；DataPathMapper 转换矩阵（失败路径带属性名、空串/null 语义、bool/数值收敛/base64）；Excel Filler 告警矩阵补齐（WrongType / Extra）
+7. **工程基建**：`.editorconfig` + `dotnet format` 全仓统一并加入 CI；`src/Directory.Build.props` 作为四包共享元数据（版本/作者/许可/图标）单一来源，csproj 各留差异项；NuGet 包图标 `icon.png`；发布工作流版本校验改读 props（PUBLISHING.md 同步）；CI 增加 `windows-latest` 矩阵与 coverlet 覆盖率收集
+8. **文档重构**：README 中英双语重写为"上手优先"（选哪个包决策表置顶 → Excel.Simple 最简 Quickstart → 核心模型 → Word/Excel 进阶），全仓文档与源码注释清除迭代号注记（44 处），修正 `TemplateElement.DataPath` 过时注释；删除已实施完毕的 `EXCEL_SIMPLE_EMPTY_PARSE_FIX_PLAN.md`；DESIGN §9 补 2.0.0 决策记录；Demo 输出目录说明改跨平台措辞
 
 ### 不在范围（后续项）
-- 拆分三个超大文件（`WordTemplateBuilder` 840 行 / `SimpleExcel` 724 行 / `ExcelTemplateFiller` 633 行）——纯结构重构，等下一个功能迭代顺带做
-- CI 覆盖率收集（coverlet）与 windows 矩阵
-- 图片类型矩阵测试（JPEG/GIF/BMP）与 `ExcelNamedRangeLocator` 直接单测
+- `AddText` 跨插件语义统一 / `SdtLocator`、`ExcelNamedRangeLocator` 可见性收敛——又一次 breaking，等有真实用户反馈再决定
+- Word 内置样式表硬编码（`WordXmlFactory.CreateStyleRunProperties`）的自定义扩展
+- 既有 Fact 批量 Theory 化（新测试已用 Theory，旧的不值得批量改）；测试 helper 跨项目共享（~30 行，不值得建工程）
+- Demo 抽共享项目去重（4 份 DeliveryOrderData/QrCodeGenerator 只差 namespace；自包含比去重更有价值）
 
 ### 验收
-- `dotnet build` + `dotnet test` 全绿（214 用例：基础 57 + Word 77 + Excel 37 + Simple 43）
-- `dotnet format TemplateFrame.slnx --verify-no-changes` 通过；`dotnet pack` 四包均含 icon.png / README / XML doc，版本 2.0.0
+- `dotnet build` + `dotnet test` 全绿（290 用例：基础 83 + Word 80 + Excel 84 + Simple 43）
+- `dotnet format TemplateFrame.slnx --verify-no-changes` 通过；`dotnet pack` 四包均含 icon.png / README / XML doc，版本 2.0.0；`dotnet test --collect:"XPlat Code Coverage"` 本地验证通过（行覆盖 64%–85%）
 
 ### 约束
 - 提交用 Conventional Commits；不推 v* tag（2.0.0 待用户确认后发布）

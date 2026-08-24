@@ -12,7 +12,7 @@ namespace TemplateFrame.Demo.Excel.Simple.I18n;
 /// 回读走定义名定位（语言无关，无需知道文件语言）。
 /// 输出文件带 I18n 标识：Excel-Simple-I18n-Materials-{zh,en}-{template,filled}.xlsx 与根集合版
 /// Excel-Simple-I18n-Materials-rootlist-{zh,en}-filled.xlsx（TData 直接为 List&lt;MaterialLine&gt;），
-/// 默认输出到 %TEMP%\TemplateFrame.Demo.Excel.Simple.I18n。
+/// 默认输出到系统临时目录（Windows %TEMP% / Linux·macOS /tmp）下的 TemplateFrame.Demo.Excel.Simple.I18n。
 /// </summary>
 internal static class Program
 {

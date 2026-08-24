@@ -325,7 +325,7 @@ TemplateFrame/
 | 已归档 | **14** | Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退） | ✅ 完成（2026-08-08） |
 | 已归档 | **15** | 工程化收尾：文档同步 + 公共代码下沉（StreamUtil / ImageTypeDetector / TemplateFillResult）+ 填充告警出口 `FillDetailed` + 发布版本校验 | ✅ 完成（2026-08-08） |
 | 已归档 | **16** | SimpleExcel 根集合：`List<T>` 直接填充/解析 | ✅ 完成（随 v1.0.6 发布） |
-| 已归档 | **17** | 评审落地：Excel Drifted 修复 + API 简化（`MissingElementPolicy` / `TemplateFillOptions` 下沉、删除插件空壳类型）+ 插件去重 + 损坏流异常契约 + 基建（editorconfig / Directory.Build.props / 包图标）+ 文档"上手优先"重构 | ✅ 完成（2026-08-24，随 **2.0.0** 发布） |
+| 已归档 | **17** | 评审落地：Excel Drifted 修复 + API 简化（`MissingElementPolicy` / `TemplateFillOptions` 下沉、删除插件空壳类型）+ 插件去重 + 大文件拆分（全库无 500+ 行文件）+ 损坏流异常契约 + 测试补强（290 用例）+ 基建（editorconfig / Directory.Build.props / 包图标 / CI 矩阵与覆盖率）+ 文档"上手优先"重构 | ✅ 完成（2026-08-24，随 **2.0.0** 发布） |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
