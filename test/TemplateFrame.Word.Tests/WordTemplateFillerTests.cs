@@ -21,7 +21,7 @@ public sealed class WordTemplateFillerTests
             Values = new Dictionary<string, object?>
             {
                 ["OrderNo"] = "PO-2026-0806-001",
-                ["CustomerName"] = "科力尔电机",
+                ["CustomerName"] = "华宇精密",
             },
             Tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>
             {
@@ -42,7 +42,7 @@ public sealed class WordTemplateFillerTests
 
         using var document = WordprocessingDocument.Open(result.Output, false);
         Assert.Equal("PO-2026-0806-001", GetSdtText(document, "OrderNo"));
-        Assert.Equal("科力尔电机", GetSdtText(document, "CustomerName"));
+        Assert.Equal("华宇精密", GetSdtText(document, "CustomerName"));
     }
 
     [Fact]

@@ -12,7 +12,7 @@ public sealed class WordTemplateParserTests
             Values = new Dictionary<string, object?>
             {
                 ["OrderNo"] = "PO-2026-0806-001",
-                ["CustomerName"] = "科力尔电机",
+                ["CustomerName"] = "华宇精密",
             },
             Tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>
             {
@@ -34,7 +34,7 @@ public sealed class WordTemplateParserTests
         var parsed = new WordTemplateParser().Parse(filled, TestDocuments.DemoContract());
 
         Assert.Equal("PO-2026-0806-001", parsed.Values["OrderNo"]);
-        Assert.Equal("科力尔电机", parsed.Values["CustomerName"]);
+        Assert.Equal("华宇精密", parsed.Values["CustomerName"]);
     }
 
     [Fact]
