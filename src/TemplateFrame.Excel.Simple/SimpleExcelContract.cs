@@ -242,36 +242,36 @@ public static class SimpleExcelContract
         }
 
         var tableName = string.IsNullOrWhiteSpace(options.TableName) ? SimpleExcel.DefaultTableName : options.TableName.Trim();
-        var tableRange = SimpleExcel.FindTableRange(workbookPart, tableName);
+        var tableRange = SimpleExcelReader.FindTableRange(workbookPart, tableName);
         if (tableRange is null)
         {
             return null;
         }
 
-        var worksheetPart = SimpleExcel.ResolveWorksheetPart(workbookPart, tableRange.Value.Sheet);
+        var worksheetPart = SimpleExcelReader.ResolveWorksheetPart(workbookPart, tableRange.Value.Sheet);
         if (worksheetPart?.Worksheet?.GetFirstChild<SheetData>() is not { } sheetData)
         {
             return null;
         }
 
         var rows = sheetData.Elements<Row>().ToList();
-        var sharedStrings = SimpleExcel.MaterializeSharedStrings(workbookPart);
-        var rowLookup = SimpleExcel.BuildRowLookup(rows);
+        var sharedStrings = SimpleExcelReader.MaterializeSharedStrings(workbookPart);
+        var rowLookup = SimpleExcelReader.BuildRowLookup(rows);
         var columnIndex = new Dictionary<string, int>(StringComparer.Ordinal);
         var ambiguous = new List<string>();
 
         foreach (var column in table.Columns)
         {
             var name = SimpleExcel.ColumnDefinedName(tableName, column.Key);
-            if (SimpleExcel.CountDefinedName(workbookPart, name) > 1)
+            if (SimpleExcelReader.CountDefinedName(workbookPart, name) > 1)
             {
                 ambiguous.Add(column.Key);
                 continue;
             }
 
-            var reference = SimpleExcel.FindDefinedNameReference(workbookPart, name);
+            var reference = SimpleExcelReader.FindDefinedNameReference(workbookPart, name);
             if (reference is null
-                || !SimpleExcel.TryParseReference(reference, out var columnRange))
+                || !SimpleExcelAddress.TryParseReference(reference, out var columnRange))
             {
                 continue;
             }
@@ -297,8 +297,8 @@ public static class SimpleExcelContract
         var headers = new List<string>();
         for (var c = tableRange.Value.StartCol; c <= tableRange.Value.EndCol; c++)
         {
-            var cell = SimpleExcel.FindCell(rowLookup, tableRange.Value.StartRow, c);
-            headers.Add(SimpleExcel.GetCellText(sharedStrings, cell) ?? string.Empty);
+            var cell = SimpleExcelReader.FindCell(rowLookup, tableRange.Value.StartRow, c);
+            headers.Add(SimpleExcelReader.GetCellText(sharedStrings, cell) ?? string.Empty);
         }
 
         // P1：区域表头行为空（区域错位/指向空处）→ 整体回退文本匹配路径
@@ -318,10 +318,10 @@ public static class SimpleExcelContract
         DefinedNameLayout layout)
     {
         var workbookPart = document.WorkbookPart!;
-        var worksheetPart = SimpleExcel.ResolveWorksheetPart(workbookPart, layout.Range.Sheet);
+        var worksheetPart = SimpleExcelReader.ResolveWorksheetPart(workbookPart, layout.Range.Sheet);
         var rows = worksheetPart?.Worksheet?.GetFirstChild<SheetData>()?.Elements<Row>().ToList() ?? [];
-        var sharedStrings = SimpleExcel.MaterializeSharedStrings(workbookPart);
-        var rowLookup = SimpleExcel.BuildRowLookup(rows);
+        var sharedStrings = SimpleExcelReader.MaterializeSharedStrings(workbookPart);
+        var rowLookup = SimpleExcelReader.BuildRowLookup(rows);
 
         // P1：数据区顺延到工作表最后一行（与 SimpleExcel.Read 一致；全空行跳过）。
         var endRow = rows.Count > 0 ? Math.Max(layout.Range.EndRow, rowLookup.Keys.Max()) : layout.Range.EndRow;
@@ -335,8 +335,8 @@ public static class SimpleExcelContract
             {
                 if (layout.ColumnIndex.TryGetValue(column.Key, out var col))
                 {
-                    var cell = SimpleExcel.FindCell(rowLookup, r, col);
-                    var value = cell is null ? null : SimpleExcel.ReadCellValue(workbookPart, sharedStrings, cell);
+                    var cell = SimpleExcelReader.FindCell(rowLookup, r, col);
+                    var value = cell is null ? null : SimpleExcelReader.ReadCellValue(workbookPart, sharedStrings, cell);
                     rowValues[column.Key] = value;
                     any |= value is not null;
                 }
@@ -491,7 +491,7 @@ public static class SimpleExcelContract
 
     /// <summary>定义名布局：表格区域 + 表头文本（区域列序）+ 列 Key → 绝对列号 + Ambiguous 列。</summary>
     private sealed record DefinedNameLayout(
-        SimpleExcel.TableRange Range,
+        SimpleExcelAddress.TableRange Range,
         IReadOnlyList<string> Headers,
         IReadOnlyDictionary<string, int> ColumnIndex,
         IReadOnlyList<string> AmbiguousColumnKeys);
