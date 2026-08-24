@@ -334,8 +334,19 @@ public static class DataPathMapper
 
     private static void SetValue(PropertyInfo property, object instance, object? value, TextElement? element)
     {
+        object? converted;
+        try
+        {
+            converted = ConvertValue(value, property.PropertyType, element);
+        }
+        catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException or ArgumentException)
+        {
+            // 转换失败带上属性名（裸 FormatException 不知道错在哪个字段）
+            throw new InvalidOperationException(
+                Sr.Get("Mapping.SetFailed", property.Name, value?.GetType().Name ?? "null", ex.Message), ex);
+        }
+
         var targetType = property.PropertyType;
-        var converted = ConvertValue(value, targetType, element);
         if (converted is null && targetType.IsValueType && Nullable.GetUnderlyingType(targetType) is null)
         {
             // 空值落在非空值类型：保持构造默认值（跳过赋值）
