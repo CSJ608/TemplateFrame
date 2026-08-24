@@ -225,7 +225,7 @@ public sealed class WordTemplateValidator
         // 行模板只需包含全部必填列；可选列缺失不阻断（模板仍有效）
         var requiredKeys = element.Columns.Where(c => c.Required).Select(c => c.Key).ToHashSet(StringComparer.Ordinal);
         var missingRequired = missingColumns.Where(requiredKeys.Contains).ToList();
-        var hasCompleteRow = EnumerateTables(document).Any(table =>
+        var hasCompleteRow = SdtLocator.EnumerateTables(document).Any(table =>
             table.Descendants<TableRow>().Any(row =>
                 requiredKeys.All(key =>
                     row.Descendants<SdtElement>().Any(s => SdtLocator.GetTag(s) == key))));
@@ -259,40 +259,6 @@ public sealed class WordTemplateValidator
         }
 
         return SdtKind.Text;
-    }
-
-    private static IEnumerable<Table> EnumerateTables(WordprocessingDocument document)
-    {
-        var mainPart = document.MainDocumentPart!;
-        if (mainPart.Document?.Body is { } body)
-        {
-            foreach (var table in body.Descendants<Table>())
-            {
-                yield return table;
-            }
-        }
-
-        foreach (var headerPart in mainPart.HeaderParts)
-        {
-            if (headerPart.Header is { } header)
-            {
-                foreach (var table in header.Descendants<Table>())
-                {
-                    yield return table;
-                }
-            }
-        }
-
-        foreach (var footerPart in mainPart.FooterParts)
-        {
-            if (footerPart.Footer is { } footer)
-            {
-                foreach (var table in footer.Descendants<Table>())
-                {
-                    yield return table;
-                }
-            }
-        }
     }
 
     private static TemplateValidationIssue Missing(

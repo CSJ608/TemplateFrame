@@ -23,10 +23,6 @@ namespace TemplateFrame.Word;
 /// </summary>
 public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 {
-    /// <summary>内置占位图（浅灰棋盘 240x120 PNG，base64）。</summary>
-    private const string PlaceholderPngBase64 =
-        "iVBORw0KGgoAAAANSUhEUgAAAPAAAAB4CAIAAABD1OhwAAACAUlEQVR4nO3asQnAMBAEwe+/KdfhbpQ6FQZjLfMFDBJseHNv3rV5fP6X/vztQXz+G1/Q/JQvaH7KFzQ/5Quan/IFzU/5guanfEHzU76g+Slf0PyUL2h+yhc0P+ULmp/yBc1P+YLmp/w5/QN8/vMEzU/5guanfEHzU76g+Slf0PyUL2h+yhc0P+ULmp/yBc1P+YLmp3xB81O+oPkpX9D8lC9ofsoXND/lG/jzU76g+Slf0PyUL2h+yhc0P+ULmp/yBc1P+YLmp3xB81O+oPkpX9D8lC9ofsoXND/lC5qf8gXNT/mC5qd8A39+yhc0P+ULmp/yBc1P+YLmp3xB81O+oPkpX9D8lC9ofsoXND/lC5qf8gXNT/mC5qd8QfNTvqD5KV/Q/JRv4M9P+YLmp3xB81O+oPkpX9D8lC9ofsoXND/lC5qf8gXNT/mC5qd8QfNTvqD5KV/Q/JQvaH7KFzQ/5Quan/IN/PkpX9D8lC9ofsoXND/lC5qf8gXNT/mC5qd8QfNTvqD5KV/Q/JQvaH7KFzQ/5Quan/IFzU/5guanfEHzU76BPz/lC5qf8gXNT/mC5qd8QfNTvqD5KV/Q/JQvaH7KFzQ/5Quan/IFzU/5guanfEHzU76g+Slf0PyUL2h+yjfw56d8QfNTvqD5KV/Q/JQvaH7KFzQ/5Quan/IFzU/5C7iGFURrlyOlAAAAAElFTkSuQmCC";
-
     private readonly MemoryStream _stream = new();
     private readonly WordprocessingDocument _document;
     private readonly MainDocumentPart _mainPart;
@@ -345,7 +341,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     {
         EnsureParagraph();
 
-        var (bytes, extension) = LoadPlaceholder(placeholderPath);
+        var (bytes, extension) = PlaceholderImage.Load(placeholderPath);
         var relId = AddImagePart(bytes, extension);
         var run = new Run(CreateDrawing(relId, widthInches, heightInches, extension));
 
@@ -767,18 +763,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldCode { Text = instruction });
         yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldChar { FieldCharType = FieldCharValues.Separate }, new Text(cached) { Space = SpaceProcessingModeValues.Preserve });
         yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldChar { FieldCharType = FieldCharValues.End });
-    }
-
-    private static (byte[] Bytes, string Extension) LoadPlaceholder(string? placeholderPath)
-    {
-        if (!string.IsNullOrWhiteSpace(placeholderPath))
-        {
-            var bytes = File.ReadAllBytes(placeholderPath);
-            var extension = (Path.GetExtension(placeholderPath) ?? "png").TrimStart('.').ToLowerInvariant();
-            return (bytes, string.IsNullOrEmpty(extension) ? "png" : extension);
-        }
-
-        return (Convert.FromBase64String(PlaceholderPngBase64), "png");
     }
 
     private string AddImagePart(byte[] bytes, string extension)

@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Internal;
 using TemplateFrame.Localization;
 using A = DocumentFormat.OpenXml.Drawing;
 
@@ -31,7 +32,7 @@ public sealed class WordTemplateParser
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(contract);
 
-        var bytes = ReadAllBytes(template);
+        var bytes = StreamUtil.ReadAllBytes(template);
         using var document = WordprocessingDocument.Open(new MemoryStream(bytes, writable: false), false);
 
         var values = new Dictionary<string, object?>();
@@ -109,7 +110,7 @@ public sealed class WordTemplateParser
             return null;
         }
 
-        var hostPart = FindHostPart(document, match.Element);
+        var hostPart = SdtLocator.FindHostPart(document, match.Element);
         if (hostPart.GetPartById(relId) is not ImagePart imagePart)
         {
             return null;
@@ -130,7 +131,7 @@ public sealed class WordTemplateParser
         TableElement table)
     {
         var columnKeys = table.Columns.Select(c => c.Key).ToHashSet(StringComparer.Ordinal);
-        foreach (var tbl in EnumerateTables(document))
+        foreach (var tbl in SdtLocator.EnumerateTables(document))
         {
             var hasTemplateRow = tbl.Elements<TableRow>().Any(row =>
                 columnKeys.All(key =>
@@ -210,72 +211,4 @@ public sealed class WordTemplateParser
         return text;
     }
 
-
-    private static OpenXmlPart FindHostPart(WordprocessingDocument document, SdtElement sdt)
-    {
-        var mainPart = document.MainDocumentPart!;
-        foreach (var headerPart in mainPart.HeaderParts)
-        {
-            if (headerPart.Header is { } header && sdt.Ancestors().Contains(header))
-            {
-                return headerPart;
-            }
-        }
-
-        foreach (var footerPart in mainPart.FooterParts)
-        {
-            if (footerPart.Footer is { } footer && sdt.Ancestors().Contains(footer))
-            {
-                return footerPart;
-            }
-        }
-
-        return mainPart;
-    }
-
-    private static IEnumerable<Table> EnumerateTables(WordprocessingDocument document)
-    {
-        var mainPart = document.MainDocumentPart!;
-        if (mainPart.Document?.Body is { } body)
-        {
-            foreach (var table in body.Descendants<Table>())
-            {
-                yield return table;
-            }
-        }
-
-        foreach (var headerPart in mainPart.HeaderParts)
-        {
-            if (headerPart.Header is { } header)
-            {
-                foreach (var table in header.Descendants<Table>())
-                {
-                    yield return table;
-                }
-            }
-        }
-
-        foreach (var footerPart in mainPart.FooterParts)
-        {
-            if (footerPart.Footer is { } footer)
-            {
-                foreach (var table in footer.Descendants<Table>())
-                {
-                    yield return table;
-                }
-            }
-        }
-    }
-
-    private static byte[] ReadAllBytes(Stream stream)
-    {
-        if (stream.CanSeek)
-        {
-            stream.Position = 0;
-        }
-
-        using var buffer = new MemoryStream();
-        stream.CopyTo(buffer);
-        return buffer.ToArray();
-    }
 }

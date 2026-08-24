@@ -74,6 +74,64 @@ public static class SdtLocator
     public static int? GetId(SdtElement? sdt)
         => sdt?.SdtProperties?.GetFirstChild<SdtId>()?.Val?.Value;
 
+    /// <summary>枚举文档内全部表格（正文 + 页眉 + 页脚；插件内 Filler / Parser / Validator 共用）。</summary>
+    internal static IEnumerable<Table> EnumerateTables(WordprocessingDocument document)
+    {
+        var mainPart = document.MainDocumentPart!;
+        if (mainPart.Document?.Body is { } body)
+        {
+            foreach (var table in body.Descendants<Table>())
+            {
+                yield return table;
+            }
+        }
+
+        foreach (var headerPart in mainPart.HeaderParts)
+        {
+            if (headerPart.Header is { } header)
+            {
+                foreach (var table in header.Descendants<Table>())
+                {
+                    yield return table;
+                }
+            }
+        }
+
+        foreach (var footerPart in mainPart.FooterParts)
+        {
+            if (footerPart.Footer is { } footer)
+            {
+                foreach (var table in footer.Descendants<Table>())
+                {
+                    yield return table;
+                }
+            }
+        }
+    }
+
+    /// <summary>定位 SDT 所属宿主 part（页眉 / 页脚 / 正文），图片 part 须加在所属宿主上。</summary>
+    internal static OpenXmlPart FindHostPart(WordprocessingDocument document, SdtElement sdt)
+    {
+        var mainPart = document.MainDocumentPart!;
+        foreach (var headerPart in mainPart.HeaderParts)
+        {
+            if (headerPart.Header is { } header && sdt.Ancestors().Contains(header))
+            {
+                return headerPart;
+            }
+        }
+
+        foreach (var footerPart in mainPart.FooterParts)
+        {
+            if (footerPart.Footer is { } footer && sdt.Ancestors().Contains(footer))
+            {
+                return footerPart;
+            }
+        }
+
+        return mainPart;
+    }
+
     private static IEnumerable<SdtMatch> EnumerateIn(OpenXmlElement root, SdtLocation location)
     {
         foreach (var sdt in root.Descendants<SdtElement>())

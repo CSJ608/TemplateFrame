@@ -21,10 +21,6 @@ namespace TemplateFrame.Excel;
 /// </summary>
 public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
 {
-    /// <summary>内置占位图（浅灰棋盘 240x120 PNG，base64，与 Word 插件共用）。</summary>
-    private const string PlaceholderPngBase64 =
-        "iVBORw0KGgoAAAANSUhEUgAAAPAAAAB4CAIAAABD1OhwAAACAUlEQVR4nO3asQnAMBAEwe+/KdfhbpQ6FQZjLfMFDBJseHNv3rV5fP6X/vztQXz+G1/Q/JQvaH7KFzQ/5Quan/IFzU/5guanfEHzU76g+Slf0PyUL2h+yhc0P+ULmp/yBc1P+YLmp/w5/QN8/vMEzU/5guanfEHzU76g+Slf0PyUL2h+yhc0P+ULmp/yBc1P+YLmp3xB81O+oPkpX9D8lC9ofsoXND/lG/jzU76g+Slf0PyUL2h+yhc0P+ULmp/yBc1P+YLmp3xB81O+oPkpX9D8lC9ofsoXND/lC5qf8gXNT/mC5qd8A39+yhc0P+ULmp/yBc1P+YLmp3xB81O+oPkpX9D8lC9ofsoXND/lC5qf8gXNT/mC5qd8QfNTvqD5KV/Q/JRv4M9P+YLmp3xB81O+oPkpX9D8lC9ofsoXND/lC5qf8gXNT/mC5qd8QfNTvqD5KV/Q/JQvaH7KFzQ/5Quan/IN/PkpX9D8lC9ofsoXND/lC5qf8gXNT/mC5qd8QfNTvqD5KV/Q/JQvaH7KFzQ/5Quan/IFzU/5guanfEHzU76BPz/lC5qf8gXNT/mC5qd8QfNTvqD5KV/Q/JQvaH7KFzQ/5Quan/IFzU/5guanfEHzU76g+Slf0PyUL2h+yjfw56d8QfNTvqD5KV/Q/JQvaH7KFzQ/5Quan/IFzU/5C7iGFURrlyOlAAAAAElFTkSuQmCC";
-
     private readonly MemoryStream _stream = new();
     private readonly SpreadsheetDocument _document;
     private readonly WorkbookPart _workbookPart;
@@ -206,7 +202,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     {
         ArgumentNullException.ThrowIfNull(key);
         var (row, col) = ExcelAddressHelper.ParseCell(anchorCell);
-        var (bytes, extension) = LoadPlaceholder(placeholderPath);
+        var (bytes, extension) = PlaceholderImage.Load(placeholderPath);
         var contentType = extension == "jpg" ? "image/jpeg" : "image/png";
 
         _drawingsPart ??= _worksheetPart!.AddNewPart<DrawingsPart>();
@@ -446,17 +442,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         cell.RemoveAllChildren<CellValue>();
         cell.RemoveAllChildren<InlineString>();
         cell.AppendChild(new InlineString(new Text(text) { Space = SpaceProcessingModeValues.Preserve }));
-    }
-
-    private static (byte[] Bytes, string Extension) LoadPlaceholder(string? placeholderPath)
-    {
-        if (!string.IsNullOrEmpty(placeholderPath) && File.Exists(placeholderPath))
-        {
-            var bytes = File.ReadAllBytes(placeholderPath);
-            return (bytes, ImageTypeDetector.DetectExtension(bytes));
-        }
-
-        return (Convert.FromBase64String(PlaceholderPngBase64), "png");
     }
 
 }

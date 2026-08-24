@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Internal;
 using TemplateFrame.Localization;
 
 namespace TemplateFrame.Excel;
@@ -30,7 +31,7 @@ public sealed class ExcelTemplateParser
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(contract);
 
-        var bytes = ReadAllBytes(template);
+        var bytes = StreamUtil.ReadAllBytes(template);
         using var document = SpreadsheetDocument.Open(new MemoryStream(bytes, writable: false), false);
         if (document.WorkbookPart is not { } workbookPart)
         {
@@ -280,15 +281,4 @@ public sealed class ExcelTemplateParser
         return text;
     }
 
-    private static byte[] ReadAllBytes(Stream stream)
-    {
-        if (stream.CanSeek)
-        {
-            stream.Position = 0;
-        }
-
-        using var buffer = new MemoryStream();
-        stream.CopyTo(buffer);
-        return buffer.ToArray();
-    }
 }

@@ -211,7 +211,7 @@ public sealed class WordTemplateFiller
 
         // 图片 part 归属 SDT 所在宿主（正文=MainDocumentPart；页眉/页脚=对应 Header/FooterPart），
         // 否则页眉里的 r:embed 在 header 的 rels 里解析不到。
-        var hostPart = FindHostPart(document, match.Element);
+        var hostPart = SdtLocator.FindHostPart(document, match.Element);
         var imagePart = AddImagePart(hostPart, bytes);
         using (var buffer = new MemoryStream(bytes, writable: false))
         {
@@ -276,7 +276,7 @@ public sealed class WordTemplateFiller
         TableElement table)
     {
         var columnKeys = table.Columns.Select(c => c.Key).ToHashSet(StringComparer.Ordinal);
-        foreach (var tbl in EnumerateTables(document))
+        foreach (var tbl in SdtLocator.EnumerateTables(document))
         {
             foreach (var row in tbl.Elements<TableRow>())
             {
@@ -292,40 +292,6 @@ public sealed class WordTemplateFiller
         }
 
         return (null, null);
-    }
-
-    private static IEnumerable<Table> EnumerateTables(WordprocessingDocument document)
-    {
-        var mainPart = document.MainDocumentPart!;
-        if (mainPart.Document?.Body is { } body)
-        {
-            foreach (var table in body.Descendants<Table>())
-            {
-                yield return table;
-            }
-        }
-
-        foreach (var headerPart in mainPart.HeaderParts)
-        {
-            if (headerPart.Header is { } header)
-            {
-                foreach (var table in header.Descendants<Table>())
-                {
-                    yield return table;
-                }
-            }
-        }
-
-        foreach (var footerPart in mainPart.FooterParts)
-        {
-            if (footerPart.Footer is { } footer)
-            {
-                foreach (var table in footer.Descendants<Table>())
-                {
-                    yield return table;
-                }
-            }
-        }
     }
 
     private static void ReassignSdtIds(TableRow row, ref int counter)
@@ -412,29 +378,6 @@ public sealed class WordTemplateFiller
         => value.Length > 0 && (char.IsWhiteSpace(value[0]) || char.IsWhiteSpace(value[^1]))
             ? SpaceProcessingModeValues.Preserve
             : null;
-
-
-    private static OpenXmlPart FindHostPart(WordprocessingDocument document, SdtElement sdt)
-    {
-        var mainPart = document.MainDocumentPart!;
-        foreach (var headerPart in mainPart.HeaderParts)
-        {
-            if (headerPart.Header is { } header && sdt.Ancestors().Contains(header))
-            {
-                return headerPart;
-            }
-        }
-
-        foreach (var footerPart in mainPart.FooterParts)
-        {
-            if (footerPart.Footer is { } footer && sdt.Ancestors().Contains(footer))
-            {
-                return footerPart;
-            }
-        }
-
-        return mainPart;
-    }
 
     private static ImagePart AddImagePart(OpenXmlPart hostPart, byte[] bytes)
         => hostPart switch
