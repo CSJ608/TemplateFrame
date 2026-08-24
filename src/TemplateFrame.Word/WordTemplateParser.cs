@@ -1,4 +1,5 @@
 using System.Globalization;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Contract;
@@ -6,6 +7,7 @@ using TemplateFrame.Data;
 using TemplateFrame.Internal;
 using TemplateFrame.Localization;
 using A = DocumentFormat.OpenXml.Drawing;
+using Sr = TemplateFrame.Word.Localization.Sr;
 
 namespace TemplateFrame.Word;
 
@@ -33,7 +35,7 @@ public sealed class WordTemplateParser
         ArgumentNullException.ThrowIfNull(contract);
 
         var bytes = StreamUtil.ReadAllBytes(template);
-        using var document = WordprocessingDocument.Open(new MemoryStream(bytes, writable: false), false);
+        using var document = OpenDocument(bytes);
 
         var values = new Dictionary<string, object?>();
         var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
@@ -72,6 +74,22 @@ public sealed class WordTemplateParser
         }
 
         return new FillData { Values = values, Tables = tables };
+    }
+
+    /// <summary>
+    /// 打开文档包：损坏流（非 OOXML / 截断 zip）统一包装为
+    /// <see cref="InvalidOperationException"/> + 本地化消息（与 Validate / Fill 的异常契约一致）。
+    /// </summary>
+    private static WordprocessingDocument OpenDocument(byte[] bytes)
+    {
+        try
+        {
+            return WordprocessingDocument.Open(new MemoryStream(bytes, writable: false), false);
+        }
+        catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or FileFormatException)
+        {
+            throw new InvalidOperationException(Sr.Get("Word.Validation.CannotOpen", ex.Message), ex);
+        }
     }
 
     /// <summary>

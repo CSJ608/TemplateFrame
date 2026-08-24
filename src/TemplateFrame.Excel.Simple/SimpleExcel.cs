@@ -175,6 +175,19 @@ public static class SimpleExcel
         document.Save();
     }
 
+    /// <summary>打开工作簿：损坏流（非 OOXML / 截断 zip）统一包装为 <see cref="InvalidOperationException"/> + 本地化消息。</summary>
+    private static SpreadsheetDocument OpenWorkbook(Stream source)
+    {
+        try
+        {
+            return SpreadsheetDocument.Open(source, false);
+        }
+        catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or FileFormatException)
+        {
+            throw new InvalidOperationException(Sr.Get("SimpleExcel.Read.CannotOpen", ex.Message), ex);
+        }
+    }
+
     /// <summary>
     /// 导入：.xlsx → 标题行 + 数据行。优先按命名区域（<paramref name="tableName"/>，默认 TF_Table）定位表头；
     /// 区域不可用（不存在 / 表头行为空）时回退"第一个多单元格非空行"（P5：跳过仅 1 个非空单元格的标题/装饰行）。
@@ -183,7 +196,7 @@ public static class SimpleExcel
     public static SimpleExcelTable Read(Stream source, string? tableName = null)
     {
         ArgumentNullException.ThrowIfNull(source);
-        using var document = SpreadsheetDocument.Open(source, false);
+        using var document = OpenWorkbook(source);
         var workbookPart = document.WorkbookPart;
         if (workbookPart is null)
         {

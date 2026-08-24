@@ -1,10 +1,12 @@
 using System.Globalization;
+using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Internal;
 using TemplateFrame.Localization;
+using Sr = TemplateFrame.Excel.Localization.Sr;
 
 namespace TemplateFrame.Excel;
 
@@ -32,7 +34,7 @@ public sealed class ExcelTemplateParser
         ArgumentNullException.ThrowIfNull(contract);
 
         var bytes = StreamUtil.ReadAllBytes(template);
-        using var document = SpreadsheetDocument.Open(new MemoryStream(bytes, writable: false), false);
+        using var document = OpenDocument(bytes);
         if (document.WorkbookPart is not { } workbookPart)
         {
             return new FillData();
@@ -75,6 +77,22 @@ public sealed class ExcelTemplateParser
         }
 
         return new FillData { Values = values, Tables = tables };
+    }
+
+    /// <summary>
+    /// 打开工作簿包：损坏流（非 OOXML / 截断 zip）统一包装为
+    /// <see cref="InvalidOperationException"/> + 本地化消息（与 Validate / Fill 的异常契约一致）。
+    /// </summary>
+    private static SpreadsheetDocument OpenDocument(byte[] bytes)
+    {
+        try
+        {
+            return SpreadsheetDocument.Open(new MemoryStream(bytes, writable: false), false);
+        }
+        catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or FileFormatException)
+        {
+            throw new InvalidOperationException(Sr.Get("Excel.Validation.CannotOpen", ex.Message), ex);
+        }
     }
 
     /// <summary>

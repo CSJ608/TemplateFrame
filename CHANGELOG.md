@@ -10,6 +10,7 @@
 ### 变更（破坏性，2.0.0）
 - **`MissingElementPolicy` 统一下沉基础包**：Word / Excel 插件各自同名同值的枚举合并为基础包 `TemplateFrame.Engine.MissingElementPolicy`——消除同时引用两插件时 `MissingElementPolicy.SkipAndWarn` 的 CS0104 歧义。迁移：`using TemplateFrame.Word;` → `using TemplateFrame.Engine;`，代码不变
 - **删除六个冗余公共类型**：`WordFillOptions` / `ExcelFillOptions`（空壳，直接用基础包 `TemplateFillOptions`）、`WordFillResult` / `ExcelFillResult`（零成员，直接用基础包 `TemplateFillResult`）、基础包泛型 `TemplateFillOptions<TMissingPolicy>` 改为非泛型 `TemplateFillOptions`。`WordTemplateEngine` / `ExcelTemplateEngine` / 两个 Filler 的构造参数与返回类型同步改为基础包类型。迁移：改个类型名即可，行为不变
+- **损坏流的异常契约统一**：`WordTemplateParser.Parse` / `ExcelTemplateParser.Parse` / `SimpleExcel.Read` 此前对非 OOXML 字节 / 截断 zip 漏出底层 `OpenXmlPackageException`；现统一包装为 `InvalidOperationException` + 本地化消息（原始异常作 InnerException），与 `Validate` / `Fill` 的契约一致；新增资源键 `SimpleExcel.Read.CannotOpen`，Word / Excel 复用既有 `*.Validation.CannotOpen`
 - `TemplateFillResult` 改为 `sealed`（不再有插件子类）
 - 四包版本统一 2.0.0（SemVer：破坏性变更须升主版本）
 
