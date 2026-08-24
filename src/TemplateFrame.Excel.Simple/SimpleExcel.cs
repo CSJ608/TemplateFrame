@@ -20,8 +20,7 @@ public static class SimpleExcel
 
     /// <summary>
     /// 导入：.xlsx → 标题行 + 数据行。优先按命名区域（<paramref name="tableName"/>，默认 TF_Table）定位表头；
-    /// 区域不可用（不存在 / 表头行为空）时回退"第一个多单元格非空行"（P5：跳过仅 1 个非空单元格的标题/装饰行）。
-    /// 数据区统一顺延到工作表最后一行，全空行跳过（P1：区域过窄/错位不再静默丢数据）。
+    /// 区域不可用时回退"第一个多单元格非空行"（跳过标题/装饰行）；数据区顺延到工作表最后一行，全空行跳过。
     /// </summary>
     public static SimpleExcelTable Read(Stream source, string? tableName = null)
         => SimpleExcelReader.Read(source, tableName);

@@ -301,7 +301,7 @@ public static class SimpleExcelContract
             headers.Add(SimpleExcelReader.GetCellText(sharedStrings, cell) ?? string.Empty);
         }
 
-        // P1：区域表头行为空（区域错位/指向空处）→ 整体回退文本匹配路径
+        // 区域表头行为空（错位/指向空处）→ 整体回退文本匹配路径
         if (headers.All(string.IsNullOrEmpty))
         {
             return null;
@@ -323,7 +323,7 @@ public static class SimpleExcelContract
         var sharedStrings = SimpleExcelReader.MaterializeSharedStrings(workbookPart);
         var rowLookup = SimpleExcelReader.BuildRowLookup(rows);
 
-        // P1：数据区顺延到工作表最后一行（与 SimpleExcel.Read 一致；全空行跳过）。
+        // 数据区顺延到工作表最后一行（与 SimpleExcel.Read 一致；全空行跳过）。
         var endRow = rows.Count > 0 ? Math.Max(layout.Range.EndRow, rowLookup.Keys.Max()) : layout.Range.EndRow;
 
         var dataRows = new List<IReadOnlyDictionary<string, object?>>();

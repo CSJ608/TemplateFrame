@@ -5,7 +5,7 @@ namespace TemplateFrame.Localization;
 
 /// <summary>
 /// 默认模板内容本地化器：查找顺序 业务注入覆盖 → 框架资源（中文中性 + en 卫星）→ 键本身。
-/// <para>English: Default template content localizer (Iteration 13) — lookup order:
+/// <para>English: Default template content localizer — lookup order:
 /// business-injected overrides → framework resources (Chinese-neutral + en satellite) → the key itself.</para>
 /// 占位符默认 zh "待填充" / en "To be filled"（框架资源键 <see cref="PlaceholderKey"/>），
 /// 页码默认 pattern 见 <see cref="PageNumberPatternKey"/>。

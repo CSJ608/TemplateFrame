@@ -121,7 +121,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>追加一个按 i18n 键解析文案的段落（版式文本按语言解析；键 → 文案查找见 <see cref="ITemplateLocalizer"/>）。</summary>
+    /// <summary>追加一个按 i18n 键解析文案的段落（键 → 文案查找见 <see cref="ITemplateLocalizer"/>）。</summary>
     public WordTemplateBuilder AddParagraphKey(string key, string? style = null)
         => AddParagraph(_localizer.GetString(key, _culture), style);
 

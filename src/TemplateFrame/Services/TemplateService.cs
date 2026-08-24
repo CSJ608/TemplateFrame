@@ -10,15 +10,11 @@ using TemplateFrame.Validation;
 namespace TemplateFrame.Services;
 
 /// <summary>
-/// 业务场景服务的泛型基类：业务服务继承它并声明所用的具体插件构建器类型
+/// 业务场景服务的泛型基类：继承时声明所用的插件构建器类型（如 <c>TemplateService&lt;DeliveryOrderData, WordTemplateBuilder&gt;</c>），
 /// <para>English: Generic base class for business scene services — provides strongly-typed Build / Validate / Fill / Parse.</para>
-/// （如 <c>TemplateService&lt;DeliveryOrderData, WordTemplateBuilder&gt;</c>），
-/// 在无参数的 <see cref="BuildInitialTemplate"/> 里直接用类型化的 <see cref="Builder"/> 实例组装版式，
-/// 即可获得强类型 <c>BuildInitialTemplateFile / Validate / ValidateData / Fill / Parse</c>。
-/// 契约元素声明 <see cref="TemplateElement.DataPath"/> 后，<see cref="MapToData"/> / <see cref="MapFromData"/>
-/// 默认走 <see cref="DataPathMapper"/> 自动映射；未声明 DataPath 时保持"需重写"语义。
-/// <see cref="BuildInitialTemplateFile(CultureInfo?)"/> 支持按文化生成模板
-/// （null = 中文默认，向后兼容）；<see cref="Localizer"/> 用于版式 i18n 键 / 占位符 / 页码解析。
+/// 在 <see cref="BuildInitialTemplate"/> 里用类型化的 <see cref="Builder"/> 组装版式，
+/// 即可获得强类型 BuildInitialTemplateFile / Validate / ValidateData / Fill / FillDetailed / Parse；
+/// 契约元素声明 <see cref="TemplateElement.DataPath"/> 后映射默认走 <see cref="DataPathMapper"/> 自动映射。
 /// </summary>
 public abstract class TemplateService<TData, TBuilder>
     where TBuilder : class, ITemplateBuilder

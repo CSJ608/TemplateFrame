@@ -23,12 +23,12 @@ internal static class SimpleExcelReader
             return new SimpleExcelTable();
         }
 
-        // R1：共享字符串表一次性物化（避免逐单元格 O(n) 查找；P3：富文本项拼 <r> 片段）。
+        // 共享字符串表一次性物化（避免逐单元格 O(n) 查找）；富文本项拼接所有 <r> 片段。
         var sharedStrings = MaterializeSharedStrings(workbookPart);
 
         var tableRange = FindTableRange(workbookPart, string.IsNullOrWhiteSpace(tableName) ? SimpleExcel.DefaultTableName : tableName.Trim());
 
-        // 工作表只解析一次；行查找表（P4：行缺 r 属性按文档顺序推断）供表头定位与数据读取共用。
+        // 工作表只解析一次；行查找表（行缺 r 属性时按文档顺序推断）供表头定位与数据读取共用。
         var worksheetPart = tableRange.HasValue
             ? ResolveWorksheetPart(workbookPart, tableRange.Value.Sheet)
             : workbookPart.WorksheetParts.FirstOrDefault();
@@ -46,14 +46,14 @@ internal static class SimpleExcelReader
         if (tableRange is { } range
             && HasNonEmptyCellInSpan(rowLookup, range.StartRow, range.StartCol, range.EndCol - range.StartCol + 1, sharedStrings))
         {
-            // P1：区域表头行有内容 → 按区域行/列跨度定位。
+            // 区域表头行有内容 → 按区域行/列跨度定位。
             headerRow = range.StartRow;
             colStart = range.StartCol;
             colCount = range.EndCol - range.StartCol + 1;
         }
         else
         {
-            // P1：区域不存在/错位/指向空处 → 回退"首非空行"扫描（P5：跳过仅 1 个非空单元格的标题/装饰行）。
+            // 区域不存在/错位/指向空处 → 回退"首非空行"扫描（跳过仅 1 个非空单元格的标题/装饰行）。
             var headerIndex = FindHeaderRowIndex(rows, sharedStrings);
             if (headerIndex < 0)
             {
@@ -299,7 +299,7 @@ internal static class SimpleExcelReader
 
     /// <summary>
     /// 回退表头定位：第一个"非空单元格 ≥ 2"的行；整表都没有时回退首个非空行。
-    /// P5：跳过仅 1 个非空单元格的前导行（标题/装饰行特征），避免把标题当表头、数据被截断。
+    /// 跳过仅 1 个非空单元格的前导行（标题/装饰行特征），避免把标题当表头、数据被截断。
     /// </summary>
     internal static int FindHeaderRowIndex(IReadOnlyList<Row> rows, IReadOnlyList<string> sharedStrings)
     {

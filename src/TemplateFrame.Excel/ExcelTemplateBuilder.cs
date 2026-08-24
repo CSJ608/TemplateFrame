@@ -101,7 +101,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>写按 i18n 键解析的文本到单元格（版式文本按语言解析；键 → 文案查找见 <see cref="TemplateFrame.Localization.ITemplateLocalizer"/>）。</summary>
+    /// <summary>写按 i18n 键解析的文本到单元格（键 → 文案查找见 <see cref="TemplateFrame.Localization.ITemplateLocalizer"/>）。</summary>
     public ExcelTemplateBuilder AddTextKey(string cellAddress, string key, TextFormat? format = null)
         => AddText(cellAddress, _localizer.GetString(key, _culture), format);
 
