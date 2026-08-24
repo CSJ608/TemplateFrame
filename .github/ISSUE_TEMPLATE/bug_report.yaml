@@ -1,0 +1,49 @@
+name: 问题反馈
+description: 库的行为与预期不符（Bug）
+labels: ["bug"]
+body:
+  - type: dropdown
+    id: package
+    attributes:
+      label: 涉及的包
+      options:
+        - TemplateFrame（基础包）
+        - TemplateFrame.Word
+        - TemplateFrame.Excel
+        - TemplateFrame.Excel.Simple
+        - 不确定 / 跨包
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: 包版本
+      placeholder: "如 2.0.0"
+    validations:
+      required: true
+  - type: input
+    id: runtime
+    attributes:
+      label: .NET 运行时 / OS
+      placeholder: "如 net8.0 / Windows；net8.0 / Linux"
+    validations:
+      required: true
+  - type: textarea
+    id: what-happened
+    attributes:
+      label: 现象描述
+      description: 发生了什么、与预期的差异；如有异常请贴完整消息（含 MessageKey）
+    validations:
+      required: true
+  - type: textarea
+    id: repro
+    attributes:
+      label: 复现步骤 / 最小代码
+      description: 契约定义 + 构建器组装 + 调用序列，能跑出问题的最小片段；涉密数据请用虚构名替换
+    validations:
+      required: true
+  - type: textarea
+    id: attachment
+    attributes:
+      label: 模板 / 填充后文件（可选）
+      description: 如方便请附 .docx / .xlsx（可先改成 .zip 上传）；含真实公司名或隐私数据请先脱敏
