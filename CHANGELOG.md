@@ -2,7 +2,7 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
-## [Unreleased]（下一个发布为 2.0.0，含破坏性变更）
+## [2.0.0] - 2026-08-25
 
 ### 修复
 - **Excel 填充可选元素缺失的行为与 Word 对齐**：`ExcelTemplateFiller` 此前对一切 `Missing`（含可选元素）默认抛异常；现与 Word 一致——可选元素缺失转 `Drifted` 告警继续填充，仅必填元素缺失按策略（默认抛错，可配 `SkipAndWarn`）。契约升级新增可选字段后，存量 Excel 模板不再填充失败（设计文档 §5.3 本意）；新增消息键 `Excel.Fill.DriftedSkipped` / `Excel.Fill.MissingRequired`（中英），必填缺失的异常消息更具体（原来笼统走 `Excel.Fill.ValidationFailed`）；补对称测试 `Fill_OptionalMissingElement_ReportsDriftedAndContinues`
