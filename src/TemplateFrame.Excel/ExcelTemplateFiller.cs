@@ -78,7 +78,7 @@ public sealed class ExcelTemplateFiller
                     break;
 
                 case TemplateValidationIssueCode.Missing:
-                    if (!IsRequired(contract, issue.Key))
+                    if (!contract.IsElementRequired(issue.Key))
                     {
                         // 可选元素缺失 = 契约升级后的漂移（Drifted），告警继续
                         warnings.Add(issue with
@@ -109,30 +109,6 @@ public sealed class ExcelTemplateFiller
         }
 
         return warnings;
-    }
-
-    private static bool IsRequired(TemplateContract contract, string key)
-    {
-        foreach (var element in contract.Elements)
-        {
-            if (element.Key == key)
-            {
-                return element.Required;
-            }
-
-            if (element is TableElement table)
-            {
-                foreach (var column in table.Columns)
-                {
-                    if (column.Key == key)
-                    {
-                        return column.Required;
-                    }
-                }
-            }
-        }
-
-        return true;
     }
 
     private static void FillCore(WorkbookPart workbookPart, TemplateContract contract, FillData data)
@@ -257,52 +233,9 @@ public sealed class ExcelTemplateFiller
             return;
         }
 
-        // 克隆前先记录示例行下方的既有行（克隆后仅这些行整体下移，克隆行本身不动）
+        // 克隆示例行 2..N（重写行号/单元格引用）并把下方既有行整体下移（等价 Excel 插入行）
         var delta = rows.Count - 1;
-        var belowRowsToShift = delta > 0
-            ? sheetData.Elements<Row>()
-                .Where(r => r.RowIndex?.Value > sampleRow)
-                .OrderByDescending(r => r.RowIndex!.Value)
-                .ToList()
-            : new List<Row>();
-
-        // 示例行作为第 1 行数据行；克隆 2..N 行（重写行号与单元格引用）
-        var clones = new List<Row> { sampleRowElement };
-        var anchor = sampleRowElement;
-        for (var i = 1; i < rows.Count; i++)
-        {
-            var clone = (Row)sampleRowElement.CloneNode(true);
-            var newRowIndex = sampleRow + i;
-            clone.RowIndex = (uint)newRowIndex;
-            foreach (var cell in clone.Elements<Cell>())
-            {
-                if (cell.CellReference?.Value is { } reference)
-                {
-                    var (_, col) = ExcelAddressHelper.ParseCell(reference);
-                    cell.CellReference = ExcelAddressHelper.CellReference(newRowIndex, col);
-                }
-            }
-
-            anchor.InsertAfterSelf(clone);
-            anchor = clone;
-            clones.Add(clone);
-        }
-
-        // 示例行下方的既有行整体下移 delta（等价 Excel 插入行：行号/单元格引用同步 +delta）
-        foreach (var belowRow in belowRowsToShift)
-        {
-            var oldIndex = belowRow.RowIndex!.Value;
-            var newIndex = oldIndex + (uint)delta;
-            belowRow.RowIndex = newIndex;
-            foreach (var cell in belowRow.Elements<Cell>())
-            {
-                if (cell.CellReference?.Value is { } reference)
-                {
-                    var (_, col) = ExcelAddressHelper.ParseCell(reference);
-                    cell.CellReference = ExcelAddressHelper.CellReference((int)newIndex, col);
-                }
-            }
-        }
+        var clones = ExcelRowShifter.CloneAndShiftRows(sheetData, sampleRowElement, sampleRow, rows.Count);
 
         // 逐行填值
         var sampleCols = columnRanges.ToDictionary(c => c.Column.Key, c => c.Start.Col, StringComparer.Ordinal);
@@ -318,7 +251,7 @@ public sealed class ExcelTemplateFiller
             foreach (var (column, start) in columnRanges)
             {
                 var name = ExcelNamedRangeLocator.TableColumnName(table.Key, column.Key);
-                SetDefinedName(
+                ExcelRowShifter.SetDefinedName(
                     workbookPart,
                     name,
                     ExcelNamedRangeLocator.BuildReference(
@@ -328,7 +261,7 @@ public sealed class ExcelTemplateFiller
             }
 
             // 表格下方命名区域 / 合并区域整体下移 delta 行
-            ShiftBelow(workbookPart, worksheetPart, sheet, sampleRow, delta);
+            ExcelRowShifter.ShiftBelow(workbookPart, worksheetPart, sheet, sampleRow, delta);
         }
     }
 
@@ -359,61 +292,6 @@ public sealed class ExcelTemplateFiller
         }
     }
 
-    /// <summary>把起始行在示例行下方的命名区域与合并区域整体下移 delta 行。</summary>
-    private static void ShiftBelow(
-        WorkbookPart workbookPart,
-        WorksheetPart worksheetPart,
-        string sheet,
-        int sampleRow,
-        int delta)
-    {
-        foreach (var match in ExcelNamedRangeLocator.FindAll(workbookPart))
-        {
-            var (matchSheet, start, end) = ExcelNamedRangeLocator.ParseReference(match.Reference);
-            if (matchSheet != sheet)
-            {
-                continue;
-            }
-
-            if (start.Row > sampleRow)
-            {
-                SetDefinedName(
-                    workbookPart,
-                    match.Name,
-                    ExcelNamedRangeLocator.BuildReference(
-                        sheet,
-                        (start.Row + delta, start.Col),
-                        (end.Row + delta, end.Col)));
-            }
-        }
-
-        var mergeCells = worksheetPart.Worksheet?.GetFirstChild<MergeCells>();
-        if (mergeCells is null)
-        {
-            return;
-        }
-
-        foreach (var mergeCell in mergeCells.Elements<MergeCell>().ToList())
-        {
-            if (mergeCell.Reference?.Value is not { } range)
-            {
-                continue;
-            }
-
-            var colon = range.IndexOf(':');
-            var startCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range[..colon]);
-            var endCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range[(colon + 1)..]);
-            if (startCell.Row <= sampleRow)
-            {
-                continue;
-            }
-
-            mergeCell.Reference = ExcelAddressHelper.CellReference(startCell.Row + delta, startCell.Col)
-                                  + ":"
-                                  + ExcelAddressHelper.CellReference(endCell.Row + delta, endCell.Col);
-        }
-    }
-
     /// <summary>写类型化值：null → 空 inline string；bool → 0/1；日期 → 序列号 + 日期数字格式；数值 → 数字。</summary>
     private static void WriteValue(WorkbookPart workbookPart, Cell cell, TextElement element, object? value)
     {
@@ -433,21 +311,21 @@ public sealed class ExcelTemplateFiller
                 cell.DataType = CellValues.Number;
                 cell.RemoveAllChildren();
                 cell.AppendChild(new CellValue(dateTime.ToOADate().ToString(CultureInfo.InvariantCulture)));
-                ApplyNumberFormat(workbookPart, cell, ExcelNumberFormat.Map(element.Format, typeof(DateTime)));
+                ExcelNumberFormat.ApplyToCell(workbookPart, cell, ExcelNumberFormat.Map(element.Format, typeof(DateTime)));
                 break;
 
             case int intValue:
                 cell.DataType = CellValues.Number;
                 cell.RemoveAllChildren();
                 cell.AppendChild(new CellValue(intValue.ToString(CultureInfo.InvariantCulture)));
-                ApplyNumberFormat(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
+                ExcelNumberFormat.ApplyToCell(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
                 break;
 
             case long longValue:
                 cell.DataType = CellValues.Number;
                 cell.RemoveAllChildren();
                 cell.AppendChild(new CellValue(longValue.ToString(CultureInfo.InvariantCulture)));
-                ApplyNumberFormat(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
+                ExcelNumberFormat.ApplyToCell(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
                 break;
 
             case decimal decimalValue:
@@ -456,102 +334,12 @@ public sealed class ExcelTemplateFiller
                 cell.DataType = CellValues.Number;
                 cell.RemoveAllChildren();
                 cell.AppendChild(new CellValue(Convert.ToDecimal(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture)));
-                ApplyNumberFormat(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
+                ExcelNumberFormat.ApplyToCell(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
                 break;
 
             default:
                 SetInlineString(cell, Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty);
                 break;
-        }
-    }
-
-    /// <summary>给单元格补数字格式（克隆基样式 cellXf + numFmtId，保留字体/边框/对齐）。</summary>
-    private static void ApplyNumberFormat(WorkbookPart workbookPart, Cell cell, string? formatCode)
-    {
-        if (string.IsNullOrEmpty(formatCode))
-        {
-            return;
-        }
-
-        var stylesPart = workbookPart.WorkbookStylesPart;
-        if (stylesPart is null)
-        {
-            stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
-            stylesPart.Stylesheet = new Stylesheet();
-        }
-
-        var stylesheet = stylesPart.Stylesheet ??= new Stylesheet();
-        var numFmts = stylesheet.GetFirstChild<NumberingFormats>();
-        if (numFmts is null)
-        {
-            numFmts = new NumberingFormats();
-            stylesheet.InsertAt(numFmts, 0);
-        }
-
-        var existing = numFmts.Elements<NumberingFormat>()
-            .FirstOrDefault(n => string.Equals(n.FormatCode?.Value, formatCode, StringComparison.OrdinalIgnoreCase));
-        uint numFmtId;
-        if (existing is not null)
-        {
-            numFmtId = existing.NumberFormatId!.Value;
-        }
-        else
-        {
-            numFmtId = Math.Max(164u, numFmts.Elements<NumberingFormat>().Select(n => n.NumberFormatId!.Value).DefaultIfEmpty(0u).Max() + 1);
-            numFmts.Append(new NumberingFormat { NumberFormatId = numFmtId, FormatCode = formatCode });
-            numFmts.Count = (uint)numFmts.Elements<NumberingFormat>().Count();
-        }
-
-        var cellFormats = stylesheet.GetFirstChild<CellFormats>();
-        if (cellFormats is null)
-        {
-            return;
-        }
-
-        var baseIndex = cell.StyleIndex?.Value ?? 0u;
-        var baseXf = cellFormats.Elements<CellFormat>().ElementAtOrDefault((int)baseIndex);
-        if (baseXf is null)
-        {
-            return;
-        }
-
-        var existingTarget = cellFormats.Elements<CellFormat>()
-            .Select((xf, i) => (Xf: xf, Index: i))
-            .FirstOrDefault(t =>
-                t.Xf.NumberFormatId?.Value == numFmtId
-                && t.Xf.FontId?.Value == baseXf.FontId?.Value
-                && t.Xf.FillId?.Value == baseXf.FillId?.Value
-                && t.Xf.BorderId?.Value == baseXf.BorderId?.Value);
-
-        uint newIndex;
-        if (existingTarget.Xf is not null)
-        {
-            newIndex = (uint)existingTarget.Index;
-        }
-        else
-        {
-            newIndex = (uint)cellFormats.Elements<CellFormat>().Count();
-            var clone = (CellFormat)baseXf.CloneNode(true);
-            clone.NumberFormatId = numFmtId;
-            clone.ApplyNumberFormat = true;
-            cellFormats.Append(clone);
-            cellFormats.Count = newIndex + 1;
-        }
-
-        cell.StyleIndex = newIndex;
-    }
-
-    private static void SetDefinedName(WorkbookPart workbookPart, string name, string reference)
-    {
-        if (workbookPart.Workbook?.DefinedNames is not { } definedNames)
-        {
-            return;
-        }
-
-        var target = definedNames.Elements<DefinedName>().FirstOrDefault(d => d.Name?.Value == name);
-        if (target is not null)
-        {
-            target.Text = reference;
         }
     }
 
@@ -620,37 +408,3 @@ public sealed class ExcelTemplateFiller
 
 }
 
-/// <summary>.NET 风格 Format → Excel 数字格式代码的映射。</summary>
-internal static class ExcelNumberFormat
-{
-    public static string? Map(string? format, Type valueType)
-    {
-        if (valueType == typeof(DateTime))
-        {
-            return string.IsNullOrEmpty(format) ? "yyyy-mm-dd" : format;
-        }
-
-        if (string.IsNullOrEmpty(format))
-        {
-            return null;
-        }
-
-        return format switch
-        {
-            "N0" => "#,##0",
-            "N1" => "#,##0.0",
-            "N2" => "#,##0.00",
-            "N3" => "#,##0.000",
-            "F0" => "0",
-            "F1" => "0.0",
-            "F2" => "0.00",
-            "F3" => "0.000",
-            "D2" => "00",
-            "D4" => "0000",
-            "P0" => "0%",
-            "P1" => "0.0%",
-            "P2" => "0.00%",
-            _ => format,
-        };
-    }
-}

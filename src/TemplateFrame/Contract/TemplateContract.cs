@@ -20,6 +20,31 @@ public sealed record TemplateContract
     public TemplateElement? Find(string key)
         => Elements.FirstOrDefault(e => e.Key == key);
 
+    /// <summary>元素（含表格列）是否必填；未知 Key 视为必填（填充软校验据此区分 Missing 抛错与 Drifted 告警）。</summary>
+    public bool IsElementRequired(string key)
+    {
+        foreach (var element in Elements)
+        {
+            if (element.Key == key)
+            {
+                return element.Required;
+            }
+
+            if (element is TableElement table)
+            {
+                foreach (var column in table.Columns)
+                {
+                    if (column.Key == key)
+                    {
+                        return column.Required;
+                    }
+                }
+            }
+        }
+
+        return true;
+    }
+
     /// <summary>
     /// 枚举会映射为文档内内容控件 tag 的全部 Key：
     /// 文本/图片元素自身的 Key + 表格各列 Key（表格 Key 本身只是 FillData.Tables 的逻辑键，不落 tag）。

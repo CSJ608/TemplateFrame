@@ -83,7 +83,7 @@ public sealed class WordTemplateFiller
                     break;
 
                 case TemplateValidationIssueCode.Missing:
-                    if (!IsRequired(contract, issue.Key))
+                    if (!contract.IsElementRequired(issue.Key))
                     {
                         // 可选元素缺失 = 契约升级后的漂移（Drifted），告警继续
                         warnings.Add(issue with
@@ -339,30 +339,6 @@ public sealed class WordTemplateFiller
         }
 
         return Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty;
-    }
-
-    private static bool IsRequired(TemplateContract contract, string key)
-    {
-        foreach (var element in contract.Elements)
-        {
-            if (element.Key == key)
-            {
-                return element.Required;
-            }
-
-            if (element is TableElement table)
-            {
-                foreach (var column in table.Columns)
-                {
-                    if (column.Key == key)
-                    {
-                        return column.Required;
-                    }
-                }
-            }
-        }
-
-        return true;
     }
 
     private static Text CreateText(string value)
