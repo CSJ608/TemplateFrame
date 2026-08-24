@@ -1,5 +1,8 @@
 # TemplateFrame.Excel.Simple
 
+[![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Excel.Simple.svg)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Excel.Simple)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
+
 TemplateFrame 的**简化 Excel 插件**：只支持「标题行 + 数据行」的表格导入/导出。
 
 大多数 Excel 导入/导出的形态就是"标题行，然后一列一路下去"。对这种简单需求，不需要

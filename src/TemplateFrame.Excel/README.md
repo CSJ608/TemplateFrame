@@ -1,6 +1,7 @@
 # TemplateFrame.Excel
 
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Excel.svg)](https://www.nuget.org/packages/TemplateFrame.Excel)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Excel)](https://www.nuget.org/packages/TemplateFrame.Excel)
 
 TemplateFrame 的 **MS Excel 插件**：把基础包的"契约 + 数据形状"翻译成 `.xlsx`。
 基于**命名区域（defined names）**实现**生成 → 定位 → 填充 → 回读 → 校验**全链路，直接使用

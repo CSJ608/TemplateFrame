@@ -1,6 +1,7 @@
 # TemplateFrame
 
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.svg)](https://www.nuget.org/packages/TemplateFrame)
+[![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame)](https://www.nuget.org/packages/TemplateFrame)
 [![CI](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml/badge.svg)](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml)
 
 > English · [中文](README.md)
