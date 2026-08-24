@@ -1,0 +1,13 @@
+# 行尾统一治理：文本文件入库一律 LF，检出交给各平台默认；
+# 避免 ubuntu/windows 双矩阵 CI 与 dotnet format 检查因 CRLF/LF 漂移误报。
+* text=auto
+
+# 二进制文件不做任何转换
+*.png binary
+*.gif binary
+*.jpg binary
+*.ico binary
+*.nupkg binary
+*.snupkg binary
+*.docx binary
+*.xlsx binary
