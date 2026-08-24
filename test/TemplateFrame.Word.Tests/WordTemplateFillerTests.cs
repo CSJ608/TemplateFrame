@@ -4,6 +4,7 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Builder;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Engine;
 using TemplateFrame.Services;
 using TemplateFrame.Validation;
 using Xunit;
@@ -207,7 +208,7 @@ public sealed class WordTemplateFillerTests
         };
         var data = new FillData { Values = new Dictionary<string, object?> { ["OrderNo"] = "PO-1" } };
 
-        var options = new WordFillOptions { MissingElementPolicy = MissingElementPolicy.SkipAndWarn };
+        var options = new TemplateFillOptions { MissingElementPolicy = MissingElementPolicy.SkipAndWarn };
         var result = new WordTemplateFiller(options).Fill(template, contract, data);
 
         var warning = Assert.Single(result.Warnings, w => w.Key == "CustomerName");

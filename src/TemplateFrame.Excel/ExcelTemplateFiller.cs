@@ -11,26 +11,6 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel;
 
-/// <summary>填充时缺失必填元素的处理策略（见设计文档 §5.3）。</summary>
-public enum MissingElementPolicy
-{
-    /// <summary>默认：缺失必填元素时抛 <see cref="InvalidOperationException"/>，避免打印场景盲填。</summary>
-    Throw,
-
-    /// <summary>缺失必填元素时跳过该元素并记录告警，填充继续。</summary>
-    SkipAndWarn,
-}
-
-/// <summary>Excel 填充配置（继承基础包通用形状，策略枚举保持 <see cref="MissingElementPolicy"/>，迭代 15 公共下沉）。</summary>
-public sealed record ExcelFillOptions : TemplateFillOptions<MissingElementPolicy>
-{
-}
-
-/// <summary>一次填充的结果：输出流 + 填充过程中的告警（Extra / Drifted / 按策略跳过的 Missing）。</summary>
-public sealed record ExcelFillResult : TemplateFillResult
-{
-}
-
 /// <summary>
 /// Excel 填充器（设计文档 §5.2 / §5.3）：文本写类型化值 + 数字格式（日期存序列号）；
 /// 图片按锚定格替换 part + 关系（尺寸继承占位）；表格行 deepcopy 示例行 N-1 次，
@@ -38,20 +18,20 @@ public sealed record ExcelFillResult : TemplateFillResult
 /// </summary>
 public sealed class ExcelTemplateFiller
 {
-    private readonly ExcelFillOptions _options;
+    private readonly TemplateFillOptions _options;
 
     /// <summary>以默认配置创建填充器（缺失必填元素默认抛错）。</summary>
     public ExcelTemplateFiller()
-        : this(new ExcelFillOptions())
+        : this(new TemplateFillOptions())
     {
     }
 
     /// <summary>以指定配置创建填充器。</summary>
-    public ExcelTemplateFiller(ExcelFillOptions options)
+    public ExcelTemplateFiller(TemplateFillOptions options)
         => _options = options ?? throw new ArgumentNullException(nameof(options));
 
     /// <summary>填充 .xlsx：模板 + FillData → 新文件流（不改动传入的模板流）。</summary>
-    public ExcelFillResult Fill(Stream template, TemplateContract contract, FillData data)
+    public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
     {
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(contract);
@@ -79,7 +59,7 @@ public sealed class ExcelTemplateFiller
         }
 
         output.Position = 0;
-        return new ExcelFillResult { Output = output, Warnings = warnings };
+        return new TemplateFillResult { Output = output, Warnings = warnings };
     }
 
     /// <summary>按设计文档 §5.3 处理软校验问题：Drifted/Extra 告警继续；Missing 按策略；其余硬错误抛错。</summary>

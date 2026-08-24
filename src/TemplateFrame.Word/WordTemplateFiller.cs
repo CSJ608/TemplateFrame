@@ -12,26 +12,6 @@ using A = DocumentFormat.OpenXml.Drawing;
 
 namespace TemplateFrame.Word;
 
-/// <summary>填充时缺失必填元素的处理策略（见设计文档 §5.3）。</summary>
-public enum MissingElementPolicy
-{
-    /// <summary>默认：缺失必填元素时抛 <see cref="InvalidOperationException"/>，避免打印场景盲填。</summary>
-    Throw,
-
-    /// <summary>缺失必填元素时跳过该元素并记录告警，填充继续。</summary>
-    SkipAndWarn,
-}
-
-/// <summary>Word 填充配置（继承基础包通用形状，策略枚举保持 <see cref="MissingElementPolicy"/>，迭代 15 公共下沉）。</summary>
-public sealed record WordFillOptions : TemplateFillOptions<MissingElementPolicy>
-{
-}
-
-/// <summary>一次填充的结果：输出流 + 填充过程中的告警（Extra / Drifted / 按策略跳过的 Missing）。</summary>
-public sealed record WordFillResult : TemplateFillResult
-{
-}
-
 /// <summary>
 /// Word 填充器（设计文档 §5.2 / §5.3）：
 /// 文本改 sdtContent 内第一个 w:r/w:t（保留 run 格式，首尾空格补 xml:space="preserve"）；
@@ -42,20 +22,20 @@ public sealed record WordFillResult : TemplateFillResult
 /// </summary>
 public sealed class WordTemplateFiller
 {
-    private readonly WordFillOptions _options;
+    private readonly TemplateFillOptions _options;
 
     /// <summary>以默认配置创建填充器（缺失必填元素默认抛错）。</summary>
     public WordTemplateFiller()
-        : this(new WordFillOptions())
+        : this(new TemplateFillOptions())
     {
     }
 
     /// <summary>以指定配置创建填充器。</summary>
-    public WordTemplateFiller(WordFillOptions options)
+    public WordTemplateFiller(TemplateFillOptions options)
         => _options = options ?? throw new ArgumentNullException(nameof(options));
 
     /// <summary>填充 .docx：模板 + FillData → 新文件流（不改动传入的模板流）。</summary>
-    public WordFillResult Fill(Stream template, TemplateContract contract, FillData data)
+    public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
     {
         ArgumentNullException.ThrowIfNull(template);
         ArgumentNullException.ThrowIfNull(contract);
@@ -84,7 +64,7 @@ public sealed class WordTemplateFiller
         }
 
         output.Position = 0;
-        return new WordFillResult { Output = output, Warnings = warnings };
+        return new TemplateFillResult { Output = output, Warnings = warnings };
     }
 
     /// <summary>按设计文档 §5.3 处理软校验问题：Drifted/Extra 告警继续；Missing 按策略；其余硬错误抛错。</summary>
@@ -111,8 +91,8 @@ public sealed class WordTemplateFiller
                             Code = TemplateValidationIssueCode.Drifted,
                             Severity = TemplateValidationSeverity.Warning,
                             MessageKey = "Word.Fill.DriftedSkipped",
-                           MessageArgs = [issue.Key],
-                           Message = Sr.Get("Word.Fill.DriftedSkipped", issue.Key),
+                            MessageArgs = [issue.Key],
+                            Message = Sr.Get("Word.Fill.DriftedSkipped", issue.Key),
                         });
                     }
                     else if (_options.MissingElementPolicy == MissingElementPolicy.SkipAndWarn)

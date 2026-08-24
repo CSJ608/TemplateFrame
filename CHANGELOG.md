@@ -2,6 +2,17 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [Unreleased]（下一个发布为 2.0.0，含破坏性变更）
+
+### 修复
+- **Excel 填充可选元素缺失的行为与 Word 对齐**：`ExcelTemplateFiller` 此前对一切 `Missing`（含可选元素）默认抛异常；现与 Word 一致——可选元素缺失转 `Drifted` 告警继续填充，仅必填元素缺失按策略（默认抛错，可配 `SkipAndWarn`）。契约升级新增可选字段后，存量 Excel 模板不再填充失败（设计文档 §5.3 本意）；新增消息键 `Excel.Fill.DriftedSkipped` / `Excel.Fill.MissingRequired`（中英），必填缺失的异常消息更具体（原来笼统走 `Excel.Fill.ValidationFailed`）；补对称测试 `Fill_OptionalMissingElement_ReportsDriftedAndContinues`
+
+### 变更（破坏性，2.0.0）
+- **`MissingElementPolicy` 统一下沉基础包**：Word / Excel 插件各自同名同值的枚举合并为基础包 `TemplateFrame.Engine.MissingElementPolicy`——消除同时引用两插件时 `MissingElementPolicy.SkipAndWarn` 的 CS0104 歧义。迁移：`using TemplateFrame.Word;` → `using TemplateFrame.Engine;`，代码不变
+- **删除六个冗余公共类型**：`WordFillOptions` / `ExcelFillOptions`（空壳，直接用基础包 `TemplateFillOptions`）、`WordFillResult` / `ExcelFillResult`（零成员，直接用基础包 `TemplateFillResult`）、基础包泛型 `TemplateFillOptions<TMissingPolicy>` 改为非泛型 `TemplateFillOptions`。`WordTemplateEngine` / `ExcelTemplateEngine` / 两个 Filler 的构造参数与返回类型同步改为基础包类型。迁移：改个类型名即可，行为不变
+- `TemplateFillResult` 改为 `sealed`（不再有插件子类）
+- 四包版本统一 2.0.0（SemVer：破坏性变更须升主版本）
+
 ## [1.0.7] - 2026-08-17
 
 ### 修复

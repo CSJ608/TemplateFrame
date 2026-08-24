@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml.Packaging;
 using TemplateFrame.Builder;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Engine;
 using TemplateFrame.Validation;
 using Xunit;
 
@@ -194,7 +195,7 @@ public sealed class ExcelTemplateFillerTests
     public void Fill_MissingRequired_SkipAndWarnContinues()
     {
         using var template = TestDocuments.BuildTemplateWithBelowElement();
-        var engine = new ExcelTemplateEngine(new ExcelFillOptions
+        var engine = new ExcelTemplateEngine(new TemplateFillOptions
         {
             MissingElementPolicy = MissingElementPolicy.SkipAndWarn,
         });

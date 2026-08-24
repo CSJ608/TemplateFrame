@@ -29,9 +29,9 @@ public sealed class ExcelTemplateEngine : ITemplateEngine
     /// 以指定填充配置创建引擎（可配置缺失必填元素的处理策略，见设计文档 §5.3）。
     /// <paramref name="localizer"/>：文档内容本地化器（null = <see cref="DefaultTemplateLocalizer.Instance"/>）。
     /// </summary>
-    public ExcelTemplateEngine(ExcelFillOptions? options = null, ITemplateLocalizer? localizer = null)
+    public ExcelTemplateEngine(TemplateFillOptions? options = null, ITemplateLocalizer? localizer = null)
     {
-        _filler = new ExcelTemplateFiller(options ?? new ExcelFillOptions());
+        _filler = new ExcelTemplateFiller(options ?? new TemplateFillOptions());
         _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
         _parser = new ExcelTemplateParser(_localizer);
     }
@@ -54,10 +54,7 @@ public sealed class ExcelTemplateEngine : ITemplateEngine
 
     /// <inheritdoc />
     public TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data)
-    {
-        var result = _filler.Fill(template, contract, data);
-        return new TemplateFillResult { Output = result.Output, Warnings = result.Warnings };
-    }
+        => _filler.Fill(template, contract, data);
 
     /// <inheritdoc />
     public FillData Parse(Stream template, TemplateContract contract)

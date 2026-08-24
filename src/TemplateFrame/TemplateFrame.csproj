@@ -10,7 +10,7 @@
     <Description>模板 ⇄ 数据契约引擎：契约元素模型 + 数据形状 + Builder 抽象（格式无关基础包）</Description>
 
     <!-- 打包准备（迭代 5）：XML doc + NuGet 元数据；版本与 git tag 一致（见 docs/PUBLISHING.md） -->
-    <Version>1.0.7</Version>
+    <Version>2.0.0</Version>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PackageId>TemplateFrame</PackageId>
     <Authors>CSJ608</Authors>

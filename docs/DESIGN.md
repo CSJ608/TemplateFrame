@@ -267,7 +267,7 @@ TemplateFrame/
 │  ├─ Contract/                     # TemplateContract, TemplateElement, TextElement, ImageElement, TableElement
 │  ├─ Data/                         # FillData（数据形状）
 │  ├─ Mapping/                      # DataPathMapper（DataPath 自动映射）
-│  ├─ Engine/                       # ITemplateEngine（Validate/Fill/FillDetailed/Parse 抽象）+ TemplateFillResult / TemplateFillOptions<T>
+│  ├─ Engine/                       # ITemplateEngine（Validate/Fill/FillDetailed/Parse 抽象）+ TemplateFillResult / TemplateFillOptions / MissingElementPolicy
 │  ├─ Builder/                      # ITemplateBuilder（版式组合抽象）
 │  ├─ Internal/                     # StreamUtil / ImageTypeDetector（Word/Excel 共用，InternalsVisibleTo）
 │  └─ Services/                     # TemplateService<TData, TBuilder>（泛型基类）
