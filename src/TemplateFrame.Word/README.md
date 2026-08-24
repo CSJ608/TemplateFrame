@@ -65,13 +65,13 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - **图片**：往包内加图片 part + 关系拿新 `rId`，替换 SDT 内 `<a:blip r:embed>`；尺寸/位置/环绕继承占位图；**页眉/页脚里的图片 part 归属对应 Header/Footer rels**。
 - **表格行**：deepcopy 示例行 N 次，逐行按 tag 填值；**克隆后每个 SDT 重发唯一 `w:id`**。
 - **软校验**（填充前跑 Validate）：`Drifted`/`Extra` 只记告警继续；Missing 必填按策略（默认抛错，可配 `MissingElementPolicy.SkipAndWarn`）；`WrongType`/`Ambiguous`/`Invalid` 视为硬错误。
-- **告警出口**：`WordTemplateFiller.Fill` 返回 `WordFillResult`（输出流 + Warnings）；引擎/服务层可用 `FillDetailed`（`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`）拿到同样的软校验告警，`Fill` 保持只返回输出流（迭代 15）。
+- **告警出口**：`WordTemplateFiller.Fill` 返回 `TemplateFillResult`（输出流 + Warnings）；引擎/服务层可用 `FillDetailed`（`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`）拿到同样的软校验告警，`Fill` 保持只返回输出流。
 - **收货前/收货后**：同一模板两次填充——收货前空字段传 `null`（显示为空），收货后补齐。
 
 ## 回读行为要点
 
 - 文本按 `TextElement.ValueType` 转换（string/decimal/int/DateTime/bool）；表格找到示例行克隆区逐行读回；图片读回字节。
-- **Parse 规范化（迭代 13）**：未填充模板回读已知占位符（默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 **null**（null=未填充、""=有意留空）。
+- **Parse 规范化**：未填充模板回读已知占位符（默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 **null**（null=未填充、""=有意留空）。
 
 ## 依赖与测试
 

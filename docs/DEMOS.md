@@ -4,7 +4,7 @@
 
 - **手动映射**（Word / Excel 各 1）：完整送货单版式（A5 横版双层页眉 / 3×9 网格版头 + LOGO 二维码），展示框架能做到的效果；
 - **自动映射**（Word / Excel / Excel.Simple 各 1）：Word / Excel 版式与手动映射版**完全一致**，仅映射方式不同；Excel.Simple 为物料基础数据（维持现状）；
-- **i18n**（Word / Excel / Excel.Simple 各 1）：每插件一个**整体** i18n 演示——消息层（迭代 12，Validate/Fill 消息中英切换）+ 文档内容（迭代 13/14，中英模板 / 表头按语言 + 回读，未填充占位符 → null）。
+- **i18n**（Word / Excel / Excel.Simple 各 1）：每插件一个**整体** i18n 演示——消息层（Validate/Fill 消息中英切换）+ 文档内容（中英模板 / 表头按语言 + 回读，未填充占位符 → null）。
 
 每个 Demo 运行后都留下「模板文件 + 填充后文件」，命令行打印回读值（`Parse` 强类型结果）——直观看到**模板长什么样、填充后长什么样、读回的值是什么**。
 
@@ -79,8 +79,8 @@ new ImageElement { Key = "QRCode",   DisplayName = "二维码",    DataPath = "Q
 ### i18n（每插件一个整体演示：消息层 + 文档内容）
 
 #### TemplateFrame.Demo.Word.I18n
-- **消息层（迭代 12）**：生成模板**故意只放「单据编号」内容控件**，让 供应商 / 制单日期 缺失；同一份模板在 `zh-CN`（中文中性默认）与 `en`（英文卫星）两种文化下分别执行 `Validate` 与 `Fill`——校验消息、缺必填元素异常消息随 `CurrentUICulture` **自动中英切换**；每条校验问题打印 `MessageKey` / `MessageArgs`（稳定结构，不随语言变）。
-- **文档内容（迭代 13）**：业务注入本地化器（文化限定键 `"zh-CN:Doc.Title"` / `"en:Doc.Title"` + 文化中立兜底），**同一版式代码**（`AddParagraphKey` / `AddTextKey` / `AddTableKeys` + 本地化占位符 / 页码）输出中英两份模板（语言由文件名承载，如 `Word-I18n-DeliveryOrder-en-template.docx`）；填充后再回读——未填充模板的占位符规范化为 **null**（null=未填充、""=有意留空），已填充模板数据值原样（不翻译、`InvariantCulture`）。
+- **消息层**：生成模板**故意只放「单据编号」内容控件**，让 供应商 / 制单日期 缺失；同一份模板在 `zh-CN`（中文中性默认）与 `en`（英文卫星）两种文化下分别执行 `Validate` 与 `Fill`——校验消息、缺必填元素异常消息随 `CurrentUICulture` **自动中英切换**；每条校验问题打印 `MessageKey` / `MessageArgs`（稳定结构，不随语言变）。
+- **文档内容**：业务注入本地化器（文化限定键 `"zh-CN:Doc.Title"` / `"en:Doc.Title"` + 文化中立兜底），**同一版式代码**（`AddParagraphKey` / `AddTextKey` / `AddTableKeys` + 本地化占位符 / 页码）输出中英两份模板（语言由文件名承载，如 `Word-I18n-DeliveryOrder-en-template.docx`）；填充后再回读——未填充模板的占位符规范化为 **null**（null=未填充、""=有意留空），已填充模板数据值原样（不翻译、`InvariantCulture`）。
 
 #### TemplateFrame.Demo.Excel.I18n
 - **消息层（迭代 12）**：与 Word 同模式——缺必填元素模板在 `zh-CN` / `en` 下 `Validate` 与 `Fill`，消息中英切换（MessageKey / MessageArgs）。

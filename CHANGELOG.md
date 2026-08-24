@@ -14,6 +14,16 @@
 - `TemplateFillResult` 改为 `sealed`（不再有插件子类）
 - 四包版本统一 2.0.0（SemVer：破坏性变更须升主版本）
 
+### 工程
+- **插件去重（净删约 120 行）**：`EnumerateTables`（原 Word 插件内三份）与 `FindHostPart`（两份）并入 `SdtLocator` internal 方法；Word / Excel Parser 私有 `ReadAllBytes` 统一走基础包 `StreamUtil`；内置占位图 base64 与 `LoadPlaceholder` 下沉基础包 `PlaceholderImage`（统一按魔数识别扩展名；指定路径不存在时直接抛错而非静默回退内置图）
+- **工程基建**：新增 `.editorconfig` + `dotnet format` 全仓统一（CI 增加 format 校验步骤）；新增 `src/Directory.Build.props` 作为四包共享打包元数据单一来源（版本 / 作者 / 许可 / 仓库 / 符号包），各 csproj 只留差异项；NuGet 四包新增图标 `icon.png`（此前为默认灰图标）；release / publish-nuget 工作流的版本一致性校验改读 `src/Directory.Build.props`（PUBLISHING.md 同步）
+
+### 文档
+- **README（中英）重写为"上手优先"**：顶部新增"选哪个包"决策表；快速开始从 `TemplateFrame.Excel.Simple` 最简场景切入（3 分钟跑通导入导出）；Word / Excel 灵活版式作为进阶章节；文档索引表集中入口
+- 全仓清除"迭代 N"过程注记：源码 XML doc / 注释 44 处（含修正 `TemplateElement.DataPath` 的过时注释）、主 README 与三个插件 README；项目历史只在 ROADMAP / CHANGELOG 保留
+- 删除已实施完毕的一次性计划文档 `docs/EXCEL_SIMPLE_EMPTY_PARSE_FIX_PLAN.md`（内容已在 1.0.7 归档）
+- ROADMAP 新增迭代 17（评审落地）小节与状态行；DESIGN §7 补迭代 16 / 17 行、§9 补 2.0.0 三条决策记录
+
 ## [1.0.7] - 2026-08-17
 
 ### 修复

@@ -6,7 +6,7 @@ TemplateFrame 的 **MS Excel 插件**：把基础包的"契约 + 数据形状"�
 基于**命名区域（defined names）**实现**生成 → 定位 → 填充 → 回读 → 校验**全链路，直接使用
 DocumentFormat.OpenXml（与 Word 插件同族，不引入新第三方依赖）。
 
-## 设计约定（迭代 8 修订）
+## 设计约定
 
 - **不提供页面设置**：Excel 是"网格规整"型版式（与 Word 的纸张/方向/边距不同），
   Builder 没有 SetPageSetup；宽度由正文列数决定，用合并单元格排版（Demo 用 3×9 网格版头）。
@@ -32,8 +32,8 @@ Excel 没有内容控件（SDT），用**命名区域**承担 tag 定位：
 - 标量元素：`TF_<Key>` → 单格（如 `TF_单据编号` → `'送货单'!$B$2`），全表唯一；
 - 表格：每列 `TF_<TableKey>_<ColumnKey>` 指向**示例行**对应格；填充时示例行作为第 1 行数据行，
   克隆第 2..N 行后把每列命名区域**重指到整个数据块**（如 `$C$5:$C$9`），并把表格下方命名区域/合并区域**整体下移 (N-1) 行**；
-- 未填充模板回读示例行得到占位文本（默认 zh "待填充" / en "To be filled"，按语言生成；迭代 13 起 Parse 把已知占位符规范化为 null）。
-- **i18n 键（迭代 14）**：`AddTextKey(cellAddress, key, format?)` / `AddTableKeys(key, columnKeys, format?, startCell?)` 按语言解析版式文本 / 表头（键方法 vs 字面量方法区分；每列命名区域 `TF_<TableKey>_<ColumnKey>` 仍用列 Key，回读不受表头语言影响）。
+- 未填充模板回读示例行得到占位文本（默认 zh "待填充" / en "To be filled"，按语言生成；Parse 把已知占位符规范化为 null）。
+- **i18n 键**：`AddTextKey(cellAddress, key, format?)` / `AddTableKeys(key, columnKeys, format?, startCell?)` 按语言解析版式文本 / 表头（键方法 vs 字面量方法区分；每列命名区域 `TF_<TableKey>_<ColumnKey>` 仍用列 Key，回读不受表头语言影响）。
 
 ## 快速开始
 
@@ -73,12 +73,12 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
   克隆后列命名区域重指到数据块，表格下方命名区域/合并区域整体下移。
 - **软校验**（填充前跑 Validate）：`Drifted`/`Extra` 只记告警继续；Missing 必填按策略（默认抛错，可配 `SkipAndWarn`）；
   `WrongType`/`Ambiguous`/`Invalid` 视为硬错误。
-- **告警出口**：`ExcelTemplateFiller.Fill` 返回 `ExcelFillResult`（输出流 + Warnings）；引擎/服务层可用 `FillDetailed`（`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`）拿到同样的软校验告警，`Fill` 保持只返回输出流（迭代 15）。
+- **告警出口**：`ExcelTemplateFiller.Fill` 返回 `TemplateFillResult`（输出流 + Warnings）；引擎/服务层可用 `FillDetailed`（`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`）拿到同样的软校验告警，`Fill` 保持只返回输出流。
 
 ## 回读行为要点
 
 - 文本按 `TextElement.ValueType` 转换（string/decimal/int/DateTime/bool；日期按序列号还原）；表格按列命名区域范围逐行读回（各列按行号对齐）；图片读回字节。
-- 未填充模板回读已知占位符（默认 zh "待填充" / en "To be filled"）规范化为 **null**（迭代 13）。
+- 未填充模板回读已知占位符（默认 zh "待填充" / en "To be filled"）规范化为 **null**。
 
 ## 依赖与测试
 

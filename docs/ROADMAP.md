@@ -23,6 +23,8 @@
 | **12** | **国际化（i18n）：运行时消息中英双语（中文默认 + 英文按 CurrentUICulture 自动）** | ✅ 已完成 |
 | **13** | **文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化）** | ✅ 已完成（见下） |
 | **14** | **Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退）** | ✅ 已完成（见下） |
+| **16** | **SimpleExcel 根集合 `List<T>` 直接填充/解析**（随 v1.0.6 发布，见 CHANGELOG） | ✅ 已完成 |
+| **17** | **评审落地：Excel Drifted 修复 + API 简化（2.0.0）+ 去重 + 异常契约 + 基建 + 文档重构** | ✅ 已完成（见下） |
 
 > 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
@@ -281,7 +283,7 @@
 5. **发布版本校验**：release.yml / publish-nuget.yml 增加「csproj `<Version>` 与 tag 一致」校验步骤，不一致即失败
 
 ### 不在范围
-- 统一 `MissingElementPolicy` 枚举到基础包（会破坏 Word / Excel 公开枚举类型的 API，留待 1.1.0 级破坏性变更）
+- 统一 `MissingElementPolicy` 枚举到基础包（会破坏 Word / Excel 公开枚举类型的 API，留待 1.1.0 级破坏性变更）→ **已于迭代 17 以 2.0.0 落地**（SemVer：破坏性变更升主版本）
 - SimpleExcel 与 Excel 的单元格地址辅助合并（内部实现，价值低，留待后续）
 
 ### 验收
@@ -290,6 +292,34 @@
 
 ### 约束
 - 提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 v* tag；不改设计文档中未规划内容；CI/发布工作流不手动触发
+
+---
+
+## 迭代 17：评审落地（正确性修复 + API 简化 + 去重 + 异常契约 + 基建 + 文档重构）—— 已完成
+
+> **状态**：✅ 已完成（2026-08-24）。`dotnet build` / `dotnet test`（214 用例）/ `dotnet format --verify-no-changes` / `dotnet pack` 全部通过。来源：外部多维度评审（产品设计 / 代码质量 / 测试 / 流程 / 基建）的优先行动清单。
+
+**目标**：让仓库对第一次来的用户好用——修正确性分歧、趁无用户做 API 简化、删重复代码、补异常契约、补工程基建、文档转向"上手优先"。
+
+### 落地内容
+1. **正确性**：Excel 填充器"可选元素缺失"此前默认抛异常，现与 Word 一致转 `Drifted` 告警继续（设计文档 §5.3 本意；契约升级新增可选字段后存量模板不再填充失败）+ 对称测试
+2. **API 简化（破坏性，2.0.0）**：`MissingElementPolicy` / `TemplateFillOptions` 统一下沉基础包；删除 `WordFillOptions` / `ExcelFillOptions` / `WordFillResult` / `ExcelFillResult` 与泛型 `TemplateFillOptions<T>`——公共 API 净减 6 个类型，消除两插件同用时的 CS0104 枚举歧义
+3. **去重（净删约 120 行）**：`EnumerateTables` ×3 与 `FindHostPart` ×2 并入 `SdtLocator`（internal）；两个 Parser 私有 `ReadAllBytes` 统一走 `StreamUtil`；占位图 base64 与 `LoadPlaceholder`（按魔数识别扩展名，fail-fast）下沉基础包 `PlaceholderImage`
+4. **异常契约统一**：`WordTemplateParser.Parse` / `ExcelTemplateParser.Parse` / `SimpleExcel.Read` 对损坏流（非 OOXML / 截断 zip）统一包装为 `InvalidOperationException` + 本地化消息（原始异常作 InnerException），与 `Validate` / `Fill` 一致；三插件补 10 个异常契约测试
+5. **工程基建**：`.editorconfig` + `dotnet format` 全仓统一并加入 CI；`src/Directory.Build.props` 作为四包共享元数据（版本/作者/许可/图标）单一来源，csproj 各留差异项；NuGet 包图标 `icon.png`；发布工作流版本校验改读 props（PUBLISHING.md 同步）
+6. **文档重构**：README 中英双语重写为"上手优先"（选哪个包决策表置顶 → Excel.Simple 最简 Quickstart → 核心模型 → Word/Excel 进阶），全仓文档与源码注释清除迭代号注记（44 处），修正 `TemplateElement.DataPath` 过时注释；删除已实施完毕的 `EXCEL_SIMPLE_EMPTY_PARSE_FIX_PLAN.md`；DESIGN §9 补 2.0.0 决策记录
+
+### 不在范围（后续项）
+- 拆分三个超大文件（`WordTemplateBuilder` 840 行 / `SimpleExcel` 724 行 / `ExcelTemplateFiller` 633 行）——纯结构重构，等下一个功能迭代顺带做
+- CI 覆盖率收集（coverlet）与 windows 矩阵
+- 图片类型矩阵测试（JPEG/GIF/BMP）与 `ExcelNamedRangeLocator` 直接单测
+
+### 验收
+- `dotnet build` + `dotnet test` 全绿（214 用例：基础 57 + Word 77 + Excel 37 + Simple 43）
+- `dotnet format TemplateFrame.slnx --verify-no-changes` 通过；`dotnet pack` 四包均含 icon.png / README / XML doc，版本 2.0.0
+
+### 约束
+- 提交用 Conventional Commits；不推 v* tag（2.0.0 待用户确认后发布）
 
 ---
 

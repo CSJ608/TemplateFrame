@@ -155,14 +155,14 @@ public abstract class TemplateService<TData, TBuilder> where TBuilder : class, I
     protected abstract void BuildInitialTemplate();        // 无参：直接用类型化 Builder 组装版式
     protected TBuilder Builder { get; }                     // 仅在 BuildInitialTemplate 内有效
 
-    protected virtual FillData MapToData(TData data);       // 默认走 DataPath 自动映射（迭代 9）
+    protected virtual FillData MapToData(TData data);       // 默认走 DataPath 自动映射
     protected virtual TData MapFromData(FillData data);     // 默认走 DataPath 自动映射
 
     public Stream BuildInitialTemplateFile(CultureInfo? culture = null);
     public TemplateValidationResult Validate(Stream template);
     public TemplateValidationResult ValidateData(TData data);
     public Stream Fill(Stream template, TData data);        // 向后兼容；软校验告警见 FillDetailed
-    public TemplateFillResult FillDetailed(Stream template, TData data);  // 迭代 15：输出流 + 软校验告警
+    public TemplateFillResult FillDetailed(Stream template, TData data);  // 输出流 + 软校验告警
     public TData Parse(Stream template);
 }
 ```
@@ -324,6 +324,8 @@ TemplateFrame/
 | 已归档 | **13** | 文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化） | ✅ 完成（2026-08-08） |
 | 已归档 | **14** | Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退） | ✅ 完成（2026-08-08） |
 | 已归档 | **15** | 工程化收尾：文档同步 + 公共代码下沉（StreamUtil / ImageTypeDetector / TemplateFillResult）+ 填充告警出口 `FillDetailed` + 发布版本校验 | ✅ 完成（2026-08-08） |
+| 已归档 | **16** | SimpleExcel 根集合：`List<T>` 直接填充/解析 | ✅ 完成（随 v1.0.6 发布） |
+| 已归档 | **17** | 评审落地：Excel Drifted 修复 + API 简化（`MissingElementPolicy` / `TemplateFillOptions` 下沉、删除插件空壳类型）+ 插件去重 + 损坏流异常契约 + 基建（editorconfig / Directory.Build.props / 包图标）+ 文档"上手优先"重构 | ✅ 完成（2026-08-24，随 **2.0.0** 发布） |
 
 每个迭代都跑：`dotnet build TemplateFrame.slnx` + `dotnet test`。
 
@@ -342,7 +344,7 @@ TemplateFrame/
 **发布说明**：
 - 推送 `v*` tag 即触发 `release.yml`（GitHub Release）与 `publish-nuget.yml`（OIDC 推送 nuget.org）；
 - NuGet 发布依赖一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
-- 已发布版本：v1.0.0 / v1.0.1 / v1.0.2 / v1.0.3 / v1.0.4（v1.0.4 修复发布工作流补齐 Excel / Excel.Simple 打包推送；v1.0.3 含迭代 9：自动映射 + SimpleExcel 强类型 + 各插件自动映射 Demo + DEMOS.md；v1.0.2 含迭代 7 + 迭代 8：Excel 插件 / Excel.Simple 插件与修订；v1.0.5 含迭代 12 + 13 + 14：消息 i18n + 文档内容模板多语言（Parse 占位符→null）+ Excel 版式 i18n 键 + SimpleExcel 列定义名定位）。
+- 已发布版本：v1.0.0 – v1.0.7（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）；下一个发布为 **2.0.0**（迭代 17：破坏性 API 简化，版本单一来源 `src/Directory.Build.props`）。
 
 ---
 
@@ -372,6 +374,9 @@ TemplateFrame/
 | SimpleExcel 列定位（迭代 14） | SimpleExcel 契约路径回读靠"表头文本 → 列"匹配，表头随语言变则无法匹配；需要语言元数据 | **迭代 14 定（列定义名定位）**：① 契约 Write 写每列定义名 `TF_<TableName>_<ColumnKey>` → 表头单元格（单格引用，数据行增删不影响，Excel 自动调整引用）；Read/Validate 列定位**分级回退**——定义名 → `TF_Table` 区域 + 表头文本匹配 → 第一个非空行 + 文本匹配，定义名指向与表头行不一致时整体回退文本匹配，重复定义名 Validate 报 Ambiguous；② 框架产物回读**语言无关**（不再需要语言元数据）；手改文件（无定义名）回退仍按中文 DisplayName → Key，表头按语言匹配继续搁置（需语言元数据，列后续）；③ Excel 灵活版式同轮补 i18n 键 `AddTextKey`/`AddTableKeys`（命名区域定位，表头本地化不影响回读）；④ 原始 `SimpleExcelTable` 静态 API 不改（迭代 14 定，已落地） |
 | 填充告警出口（迭代 15） | 填充软校验告警（Extra / Drifted / 按策略跳过的 Missing）在引擎/服务层被 `Fill` 丢弃，调用方拿不到 | **迭代 15 定**：基础包新增 `TemplateFillResult`（Output + Warnings）；`ITemplateEngine.FillDetailed`（默认实现包 `Fill` 输出，Word / Excel 引擎覆盖返回填充器收集的真实告警）与 `TemplateService.FillDetailed` 作为带告警出口；`Fill` 保持只返回输出流（向后兼容）；Word / Excel 的 `WordFillResult` / `ExcelFillResult` 改为继承基础包 `TemplateFillResult`，`WordFillOptions` / `ExcelFillOptions` 继承 `TemplateFillOptions&lt;TMissingPolicy&gt;`（策略枚举类型保持插件各自的公开枚举，向后兼容）（迭代 15 定，已落地） |
 | 公共内部工具下沉（迭代 15） | Word / Excel 插件各自维护流读取与图片魔数探测的私有副本，重复维护 | **迭代 15 定**：基础包新增 internal `StreamUtil` / `ImageTypeDetector`（基础包 `InternalsVisibleTo` 开放给 Word / Excel），两插件删除私有副本并统一调用（迭代 15 定，已落地） |
+| 填充配置统一（2.0.0，迭代 17） | `MissingElementPolicy` 在 Word / Excel 各有一份同名同值枚举，同时引用两插件时 CS0104 歧义；`WordFillOptions` / `ExcelFillOptions` / `WordFillResult` / `ExcelFillResult` 是零差异空壳类型 | **2.0.0 定**：枚举与非泛型 `TemplateFillOptions` 下沉基础包 `Engine`，删除四个空壳类型与泛型 `TemplateFillOptions<T>`；趁无用户按 SemVer 升主版本一次到位（迁移只需改类型名 / using） |
+| 损坏流异常契约（2.0.0，迭代 17） | `Validate` / `Fill` 对损坏流抛 `InvalidOperationException` + 本地化消息，但 `Parse` / `SimpleExcel.Read` 漏出底层 `OpenXmlPackageException`，契约不一致 | **2.0.0 定**：三处入口统一包装为 `InvalidOperationException` + 本地化消息（原始异常作 InnerException），异常契约测试固定 |
+| 共享元数据单一来源（迭代 17） | 版本 / 作者 / 许可 / 仓库地址在四个 csproj 各写一份，需靠工作流校验防漂移 | **迭代 17 定**：`src/Directory.Build.props` 承载四包共享打包元数据（含新增包图标 `icon.png`），csproj 只留差异项（PackageId / Description / Tags / README）；发布工作流版本校验改读 props |
 
 ---
 

@@ -4,7 +4,7 @@ TemplateFrame 的**简化 Excel 插件**：只支持「标题行 + 数据行」�
 
 大多数 Excel 导入/导出的形态就是"标题行，然后一列一路下去"。对这种简单需求，不需要
 [TemplateFrame.Excel](../TemplateFrame.Excel/README.md) 的合并单元格 / 图片 / 版式能力——
-两个插件把两种不同的需求拆开（迭代 8 修订）：
+两个插件把两种不同的需求拆开：
 
 | 插件 | 定位 | 能力 |
 |---|---|---|
@@ -41,7 +41,7 @@ var loaded = SimpleExcel.Read(input); // Headers + Rows（string / bool / DateTi
 - 数字按 `double` 返回，日期格式单元格按 `DateTime` 返回；全空行跳过、缺列补 null。
 - 不提供页面设置 / 合并单元格 / 图片——保持"简单表格"的最小形态。
 
-## 契约 + 强类型服务（迭代 9）
+## 契约 + 强类型服务
 
 简单表格也可以接入 TemplateFrame 契约体系，像 Word 那样 `service.Parse` 直接得到强类型数据：
 
@@ -95,8 +95,8 @@ var parsed = service.Parse(filled);                    // xlsx → 强类型 Mat
 ```
 
 - **契约形态**：只支持**单个 `TableElement`**（列 = 表头）；含标量/图片元素或多个表格会抛清晰错误（那是 `TemplateFrame.Excel` 灵活版式的活）。
-- **列定位（迭代 14，分级回退）**：读/校验先按**每列定义名**（`TF_<TableName>_<ColumnKey>` → 表头单元格，框架产物写时自动生成）定位列——**回读与表头语言解耦（语言无关）**；定义名不可用时回退表头文本匹配（`DisplayName` → `Key`）。多余列忽略、缺列整列补 null；`Validate` 对缺必填列报 `Missing`（Error）、可选列缺失与多余列报 `Warning`、重复列定义名报 `Ambiguous`（Error）。
-- **按语言表头（迭代 14）**：`SimpleExcelContract.Write(..., culture, localizer)` 或 `service.Fill(data, options, culture, localizer)` 可写本地化表头（本地化键 = 列 Key，未注册覆盖回退 `DisplayName`/`Key`）；回读仍语言无关（定义名定位）。
+- **列定位（分级回退）**：读/校验先按**每列定义名**（`TF_<TableName>_<ColumnKey>` → 表头单元格，框架产物写时自动生成）定位列——**回读与表头语言解耦（语言无关）**；定义名不可用时回退表头文本匹配（`DisplayName` → `Key`）。多余列忽略、缺列整列补 null；`Validate` 对缺必填列报 `Missing`（Error）、可选列缺失与多余列报 `Warning`、重复列定义名报 `Ambiguous`（Error）。
+- **按语言表头**：`SimpleExcelContract.Write(..., culture, localizer)` 或 `service.Fill(data, options, culture, localizer)` 可写本地化表头（本地化键 = 列 Key，未注册覆盖回退 `DisplayName`/`Key`）；回读仍语言无关（定义名定位）。
 - **底层 API**：也可直接用 `SimpleExcelContract.Write / Read / Validate`（基于 `FillData`），再配合基础包 `DataPathMapper` 自行映射。
 - **向后兼容**：原有 `SimpleExcel.Write / Read`（`SimpleExcelTable`）保持不变。
 ## 根集合：List<T> 直接填充 / 解析
