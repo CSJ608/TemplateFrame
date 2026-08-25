@@ -30,10 +30,10 @@ jobs:
       - name: Build
         run: dotnet build TemplateFrame.slnx -c Release --no-restore
 
-      - name: Test (Linux: net8.0 — net472 需 Windows 运行时)
+      - name: Test ubuntu（仅 net8.0，net472 需 Windows 运行时）
         if: runner.os == 'Linux'
         run: dotnet test TemplateFrame.slnx -c Release --no-build -f net8.0 --collect:"XPlat Code Coverage"
 
-      - name: Test (Windows: 全部目标框架)
+      - name: Test windows（全部目标框架）
         if: runner.os == 'Windows'
         run: dotnet test TemplateFrame.slnx -c Release --no-build --collect:"XPlat Code Coverage"
