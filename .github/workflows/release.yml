@@ -37,8 +37,8 @@ jobs:
       - name: Build
         run: dotnet build TemplateFrame.slnx -c Release
 
-      - name: Test
-        run: dotnet test TemplateFrame.slnx -c Release --no-build
+      - name: Test（ubuntu 仅 net8.0；net472 由 ci.yml 的 windows 矩阵覆盖）
+        run: dotnet test TemplateFrame.slnx -c Release --no-build -f net8.0
 
       - name: Pack
         run: |
