@@ -25,6 +25,7 @@
 | **14** | **Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退）** | ✅ 已完成（见下） |
 | **16** | **SimpleExcel 根集合 `List<T>` 直接填充/解析**（随 v1.0.6 发布，见 CHANGELOG） | ✅ 已完成 |
 | **17** | **评审落地：Excel Drifted 修复 + API 简化（2.0.0）+ 去重 + 大文件拆分 + 损坏流异常契约 + 测试补强（290 用例）+ 基建（CI 矩阵/覆盖率/图标）+ 文档重构** | ✅ 已完成（见下） |
+| **18** | **多目标框架支持：netstandard2.0 + net462 + net8.0（2.1.0，非破坏性）** | 📋 草案（2026-08-25 讨论定稿，见下） |
 
 > 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
@@ -323,6 +324,57 @@
 
 ### 约束
 - 提交用 Conventional Commits；不推 v* tag（2.0.0 待用户确认后发布）
+
+---
+
+## 迭代 18：多目标框架支持（netstandard2.0 + net462 + net8.0）—— 草案（待启动）
+
+> **状态**：📋 已立项（2026-08-25 讨论定稿，待实施）。目标框架矩阵与生命周期均已核实（依据见下）；版本 **2.1.0**（SemVer：新增目标框架属非破坏性变更）。
+
+**目标**：让四个包覆盖「办公服务后端」的真实运行时分布——.NET Framework 4.x 存量、net5–net7 维护期、net8+ 现代——不新增公共 API、不改变行为，只扩大可安装面。
+
+### 事实依据（2026-08-25 核实）
+- **DocumentFormat.OpenXml 3.3.0**（2025-03-05 发布，MIT）：实际 lib 资产为 net35 / net40 / net46 / netstandard2.0 / net8.0，唯一依赖 DocumentFormat.OpenXml.Framework ≥3.3.0；Framework 的 .NET Framework 组（net35/40/46）**零 NuGet 依赖**（System.IO.Packaging 用系统 WindowsBase），netstandard2.0 / net6 / net8 组才引入 System.IO.Packaging ≥8.0.1
+- **生命周期**（截至 2026-08-25）：net462 支持至 **2027-01-12**；net472 / 4.8 / 4.8.1 随 OS 生命周期（无固定截止）；net6.0 已 EOL（2024-11-12）；net8.0 与 net9.0 **同日 EOL（2026-11-10）**；net10.0（LTS）至 2028-11-14；netstandard2.0 为冻结契约、不受生命周期管理
+- **本仓代码审计**：`ArgumentNullException.ThrowIfNull` 44 处（net6+ API）；`WordXmlFactory` 页码展开 1 处 `AsSpan(int).StartsWith`（netcore / System.Memory API）；record 类型四包均在使用（net462 / netstandard2.0 需 `IsExternalInit` shim）；无 `required` 成员；无直接 `System.IO.Packaging` / `WindowsBase` 类型用法
+
+### 选型结论
+**`<TargetFrameworks>netstandard2.0;net462;net8.0</TargetFrameworks>`（四包统一）**，资产选择映射：
+
+| 消费方运行时 | 命中资产 | 传递依赖 |
+|---|---|---|
+| .NET Framework 4.6.2+（含 4.7.2 / 4.8 / 4.8.1） | net462 | 仅 DocumentFormat.OpenXml（其 net46 组零依赖） |
+| net5.0–net7.x（维护期） | netstandard2.0 | + System.IO.Packaging 8.0.1 |
+| net8.0+（含 net9 / net10，向后兼容消费） | net8.0 | 现状不变 |
+
+明确不支持（显式资产）：
+- **net6.0 / net9.0**——分别已 EOL / 即将 EOL（2026-11-10），且 net6/7 已被 netstandard2.0 资产覆盖、net9 已被 net8.0 资产覆盖（.NET 向后兼容消费），显式资产零增益、纯增维护面
+- **net472**——被 net462 编译目标覆盖（编译向下取整不损失 4.7.2+ 宿主，运行时向上兼容），单独收窄无收益
+- **net10.0**——net8.0 资产对 net10 应用可直接消费；等需要 net10 专属 API 或 net8.0 全面退场时再补（后续加资产属非破坏性变更，不需要动主版本）
+
+### 范围
+1. **TargetFrameworks 上移共享 props**：`src/Directory.Build.props` 承载 `<TargetFrameworks>netstandard2.0;net462;net8.0</TargetFrameworks>`（延续迭代 17「共享元数据单一来源」理念）；四个 src csproj 删除各自的 `TargetFramework`
+2. **语言 / API 适配（条件编译点）**：新增共享 polyfill 源文件（链接进四包，`#if !NET5_0_OR_GREATER` / `!NET6_0_OR_GREATER` 守卫）——`IsExternalInit`（record / init）+ `ArgumentNullException.ThrowIfNull`；`WordXmlFactory` 页码 span 实现改写为 IndexOf 字符串实现（消除对 System.Memory 的依赖，三 TFM 同源）；以三 TFM 编译通过为审计闸门，编译期暴露的 netcore 专属 API 逐个改写或条件编译
+3. **CI 适配（ci.yml）**：SDK 维持 9.0.x；确认 ubuntu 编译 net462（现代 SDK 应自动引 Microsoft.NETFramework.ReferenceAssemblies，失败则条件 PackageReference 兜底）；测试步骤 ubuntu 限定 `-f net8.0`、windows 跑全部 TFM（net462 测试用 runner 自带 .NET Framework 4.8 运行）；release / publish 工作流版本校验读 props，**不受影响、不动**
+4. **测试项目跟随双目标**：test 四项目 `net8.0;net462`（netstandard2.0 不可执行、不测——其源码与 net462 共享 shim，由编译闸门覆盖）；测试栈（xunit 2.9.3 / MSTS 17.14.1）确认支持 net462，不支持则回退测试单目标 net8.0、net462 仅编译验证；`InternalsVisibleTo` 按程序集名工作、无需改；coverlet 在 net462 不可用则覆盖率仅收 net8.0（可接受）
+5. **四包 pack 验证**：`dotnet pack` 断言每包含 lib/netstandard2.0 + lib/net462 + lib/net8.0 三份程序集 + XML doc + en 卫星（`lib/<tfm>/en/`）；snupkg 三 TFM 符号齐全；包体积前后对比记入 CHANGELOG（lib 部分 ≈ ×3，绝对量为百 KB 级 / TFM）
+6. **samples 与 benchmarks 保持 net8.0 单目标**：引用多目标库自动解析 net8.0 资产、零改动；benchmarks README 注明性能数据测的是 net8.0 资产
+7. **文档同步**：主 README + README.en 增加「运行时 → 命中资产」兼容性表；三插件 README 框架行更新；DESIGN §9 补多目标决策行、§8 补 CI 双 TFM 测试描述；CHANGELOG Unreleased → 2.1.0
+8. **版本 2.1.0**：`src/Directory.Build.props` 的 `Version` 2.0.0 → 2.1.0（四包统一，随迭代发布）
+
+### 不在范围（明确排除）
+- net6.0 / net9.0 / net472 / net10.0 显式资产（理由见选型结论；net10.0 列为后续非破坏性可选项）
+- DocumentFormat.OpenXml 版本升级（3.3.0 → 3.4+，另行评估、独立迭代）
+- 公共 API 与行为变更（本迭代对 net8.0 资产保持二进制等价）
+- .NET Framework 专属差异（全局文化 vs netcore culture 行为等）的专项回归测试——以既有 290 用例在 net462 上跑通兜底，不新增专项
+
+### 验收
+- `dotnet build` / `dotnet format --verify-no-changes` / `dotnet test`（windows 双 TFM、ubuntu net8.0）全绿
+- `dotnet pack` 四包版本 2.1.0：nupkg 三 TFM 资产 + en 卫星齐全，snupkg 对应
+- 文档同步完成（README / README.en / 三插件 README / DESIGN §9 + §8 / CHANGELOG）
+
+### 约束
+- 提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 `v*` tag（2.1.0 待用户确认后发布）；CI / 发布工作流不手动触发；不改设计文档未规划内容
 
 ---
 
