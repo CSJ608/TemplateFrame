@@ -2,6 +2,25 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [2.1.0] - 2026-08-25
+
+### 新增
+- **多目标框架支持**：四包统一 `netstandard2.0;net462;net8.0`（此前仅 net8.0），NuGet 按运行时自动选资产——.NET Framework 4.6.2+ → net462；.NET 5–7 → netstandard2.0；.NET 8+ → net8.0（现状不变）。明确不做 net6 / net9 / net472 / net10 显式资产（理由见 ROADMAP 迭代 18）；`TargetFrameworks` 收敛到 `src/Directory.Build.props` 单一来源；net462 资产额外依赖 `System.ValueTuple` 4.5.0（.NET Framework 4.7 以下不内置）
+
+### 变更
+- `ITemplateEngine` 移除两个默认接口实现（`CreateBuilder(localizer, culture)` / `FillDetailed`）——net462 / netstandard2.0 的编译器不支持 DIM；仓内 Word / Excel 引擎本就自行实现，调用方无感；**自行实现 `ITemplateEngine` 的业务方需补这两个成员**（默认体照抄：转发 `CreateBuilder()` / 包一层 `Fill` 即可）
+
+### 修复
+- **.NET Framework 下产物无法重开**：`WordTemplateBuilder` / `ExcelTemplateBuilder` 的 `Save` 与两个 Filler 的填充输出此前在包仅 Flush（未终结）时复制流——net8 打包层 Flush 即完整 zip，netfx `ZipPackage` 的 deflate 流不定稿，产物重开报「压缩部分具有不一致的数据长度」。现统一改为包终结（Dispose）后再复制；net8 行为不变
+
+### 工程
+- 共享编译垫片 `src/Shared/Compatibility.cs`（`IsExternalInit` / `NotNullWhen`，链接进四包）；空值守卫 `Guard.ThrowIfNull` 下沉基础包（IVT 供 Word / Excel 使用，Excel.Simple 因 `Sr` 命名冲突自带本地副本）
+- netcore 专属 API 全量等价改写（span / Range / `Math.Clamp` / `char.IsAscii*` / `ToHashSet` / `Dictionary.TryAdd` / `string.Contains(StringComparison)` / KeyValuePair 解构），三 TFM 同源
+- 测试项目双目标 `net8.0;net472`（xunit runner 的 netfx 底线为 net472，库资产仍解析 net462 构建），290 用例 × 2 TFM 全绿；CI 测试按 OS 分流（ubuntu 限 net8.0，windows 跑全部目标框架）
+
+### 文档
+- README（中英）新增「目标框架」章节（运行时 → 资产映射）；三插件 README 依赖段补框架说明；基准项目 README 注明测的是 net8.0 资产；DESIGN §7 / §8 / §9 与 ROADMAP 迭代 18 同步
+
 ## [2.0.0] - 2026-08-25
 
 ### 修复

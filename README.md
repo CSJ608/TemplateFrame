@@ -23,6 +23,18 @@
 
 三个插件都依赖基础包 `TemplateFrame`（契约模型 + 强类型服务基类），装插件即自动引入。只想手写 Excel 表格、不要契约？`TemplateFrame.Excel.Simple` 里的 `SimpleExcel.Write / Read` 静态类可以单独用。
 
+## 目标框架
+
+四包统一 `netstandard2.0 / net462 / net8.0` 多目标，NuGet 按运行时自动选择：
+
+| 你的运行时 | 命中资产 |
+|---|---|
+| .NET Framework 4.6.2+ | net462 |
+| .NET 5 – 7 | netstandard2.0 |
+| .NET 8+ | net8.0（net9 / net10 向下兼容消费） |
+
+唯一第三方依赖 `DocumentFormat.OpenXml`（net462 资产另带 `System.ValueTuple`）。
+
 ## 快速开始：3 分钟跑通导入导出
 
 以物料清单为例（`TemplateFrame.Excel.Simple`）：

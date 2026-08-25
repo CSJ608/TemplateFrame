@@ -25,7 +25,7 @@
 | **14** | **Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退）** | ✅ 已完成（见下） |
 | **16** | **SimpleExcel 根集合 `List<T>` 直接填充/解析**（随 v1.0.6 发布，见 CHANGELOG） | ✅ 已完成 |
 | **17** | **评审落地：Excel Drifted 修复 + API 简化（2.0.0）+ 去重 + 大文件拆分 + 损坏流异常契约 + 测试补强（290 用例）+ 基建（CI 矩阵/覆盖率/图标）+ 文档重构** | ✅ 已完成（见下） |
-| **18** | **多目标框架支持：netstandard2.0 + net462 + net8.0（2.1.0，非破坏性）** | 📋 草案（2026-08-25 讨论定稿，见下） |
+| **18** | **多目标框架支持：netstandard2.0 + net462 + net8.0（2.1.0，非破坏性）** | ✅ 已完成（见下） |
 
 > 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
@@ -327,9 +327,16 @@
 
 ---
 
-## 迭代 18：多目标框架支持（netstandard2.0 + net462 + net8.0）—— 草案（待启动）
+## 迭代 18：多目标框架支持（netstandard2.0 + net462 + net8.0）—— 已完成
 
-> **状态**：📋 已立项（2026-08-25 讨论定稿，待实施）。目标框架矩阵与生命周期均已核实（依据见下）；版本 **2.1.0**（SemVer：新增目标框架属非破坏性变更）。
+> **状态**：✅ 已完成（2026-08-25）。三 TFM 编译零告警；290 用例 × 2 TFM（net8.0 + net472）全绿；`dotnet format --verify-no-changes` 通过；四包 `dotnet pack` 2.1.0 验证三 TFM 资产 + XML doc + en 卫星 + snupkg 齐全。
+
+### 落地备注（与草案的差异）
+- 测试 TFM 为 `net8.0;net472` 而非草案的 net462：`xunit.runner.visualstudio` 3.1.4 的 .NET Framework 底线是 net472；项目引用的资产选择仍解析到库的 **net462 构建**，netfx 运行时覆盖不丢
+- net462 资产额外依赖 `System.ValueTuple` 4.5.0（.NET Framework 4.7 以下不内置，缓存键元组与元组签名需要）
+- `ITemplateEngine` 移除两个默认接口实现（net462 / netstandard2.0 编译器不支持 DIM；仓内引擎均已自实现，外部实现者需补成员——CHANGELOG 已注记）
+- 顺带修复 netfx 产物不可重开：Word / Excel Builder 与 Filler 改为包终结（Dispose）后再复制输出（net8 行为与产物不变）
+- `Guard` 下沉基础包经 IVT 供 Word / Excel；Excel.Simple 因 `Sr` 命名冲突自带本地副本
 
 **目标**：让四个包覆盖「办公服务后端」的真实运行时分布——.NET Framework 4.x 存量、net5–net7 维护期、net8+ 现代——不新增公共 API、不改变行为，只扩大可安装面。
 

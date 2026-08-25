@@ -1,6 +1,6 @@
 # TemplateFrame 性能基准
 
-用 [BenchmarkDotNet](https://benchmarkdotnet.org/) 度量三个插件核心路径的吞吐与内存分配。基准**不参与 `dotnet test`**（独立控制台项目），按需手动运行。最新一轮结果快照见 [docs/PERFORMANCE.md](../../docs/PERFORMANCE.md)。
+用 [BenchmarkDotNet](https://benchmarkdotnet.org/) 度量三个插件核心路径的吞吐与内存分配。基准**不参与 `dotnet test`**（独立控制台项目，单目标 net8.0——度量的是库的 net8.0 资产），按需手动运行。最新一轮结果快照见 [docs/PERFORMANCE.md](../../docs/PERFORMANCE.md)。
 
 ## 覆盖场景
 

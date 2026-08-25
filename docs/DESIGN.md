@@ -338,6 +338,7 @@ TemplateFrame/
 | 已归档 | **15** | 工程化收尾：文档同步 + 公共代码下沉（StreamUtil / ImageTypeDetector / TemplateFillResult）+ 填充告警出口 `FillDetailed` + 发布版本校验 | ✅ 完成（2026-08-08） |
 | 已归档 | **16** | SimpleExcel 根集合：`List<T>` 直接填充/解析 | ✅ 完成（随 v1.0.6 发布） |
 | 已归档 | **17** | 评审落地：Excel Drifted 修复 + API 简化（`MissingElementPolicy` / `TemplateFillOptions` 下沉、删除插件空壳类型）+ 插件去重 + 大文件拆分（全库无 500+ 行文件）+ 损坏流异常契约 + 测试补强（290 用例）+ 基建（editorconfig / Directory.Build.props / 包图标 / CI 矩阵与覆盖率）+ 文档"上手优先"重构 | ✅ 完成（2026-08-24，随 **2.0.0** 发布） |
+| 已归档 | **18** | 多目标框架支持：四包统一 `netstandard2.0;net462;net8.0`（2.1.0） | ✅ 完成（2026-08-25） |
 
 ---
 
@@ -347,14 +348,14 @@ TemplateFrame/
 
 | 文件 | 触发 | 作用 | 状态 |
 |---|---|---|---|
-| `ci.yml` | push / PR（main） | format 校验（`dotnet format --verify-no-changes`）+ build + test，**ubuntu / windows 双矩阵**，测试收集行覆盖率（coverlet） | 已启用 |
+| `ci.yml` | push / PR（main） | format 校验（`dotnet format --verify-no-changes`）+ build（三 TFM）+ test，**ubuntu / windows 双矩阵**（ubuntu 仅测 net8.0，windows 测全部目标框架），测试收集行覆盖率（coverlet） | 已启用 |
 | `release.yml` | tag `v*` | 版本校验（`src/Directory.Build.props` ↔ tag）+ build + test + pack → GitHub Release（附 nupkg/snupkg） | 已启用（v1.0.0 起） |
 | `publish-nuget.yml` | tag `v*` | 版本校验 + OIDC Trusted Publishing → nuget.org | 已启用（v1.0.0 起） |
 
 **发布说明**：
 - 推送 `v*` tag 即触发 `release.yml`（GitHub Release）与 `publish-nuget.yml`（OIDC 推送 nuget.org）；
 - NuGet 发布依赖一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
-- 已发布版本：v1.0.0 – v1.0.7（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）；下一个发布为 **2.0.0**（迭代 17：破坏性 API 简化，版本单一来源 `src/Directory.Build.props`）。
+- 已发布版本：v1.0.0 – v1.0.7、2.0.0（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）；下一个发布为 **2.1.0**（迭代 18：多目标框架，非破坏性）。
 
 ---
 
@@ -387,6 +388,7 @@ TemplateFrame/
 | 填充配置统一（2.0.0，迭代 17） | `MissingElementPolicy` 在 Word / Excel 各有一份同名同值枚举，同时引用两插件时 CS0104 歧义；`WordFillOptions` / `ExcelFillOptions` / `WordFillResult` / `ExcelFillResult` 是零差异空壳类型 | **2.0.0 定**：枚举与非泛型 `TemplateFillOptions` 下沉基础包 `Engine`，删除四个空壳类型与泛型 `TemplateFillOptions<T>`；趁无用户按 SemVer 升主版本一次到位（迁移只需改类型名 / using） |
 | 损坏流异常契约（2.0.0，迭代 17） | `Validate` / `Fill` 对损坏流抛 `InvalidOperationException` + 本地化消息，但 `Parse` / `SimpleExcel.Read` 漏出底层 `OpenXmlPackageException`，契约不一致 | **2.0.0 定**：三处入口统一包装为 `InvalidOperationException` + 本地化消息（原始异常作 InnerException），异常契约测试固定 |
 | 共享元数据单一来源（迭代 17） | 版本 / 作者 / 许可 / 仓库地址在四个 csproj 各写一份，需靠工作流校验防漂移 | **迭代 17 定**：`src/Directory.Build.props` 承载四包共享打包元数据（含新增包图标 `icon.png`），csproj 只留差异项（PackageId / Description / Tags / README）；发布工作流版本校验改读 props |
+| 多目标框架（迭代 18，2.1.0） | 目标用户（办公服务后端）可能停留在 .NET Framework 4.x 或 net5–net7 维护期，单一 net8.0 装不上 | **迭代 18 定**：四包统一 `netstandard2.0;net462;net8.0`（TargetFrameworks 上移 props 单一来源，编译底边对齐 DF.OOX 3.3.0 的 net46 底边）；不做 net6 / net9 / net472 / net10 显式资产（netfx 已被 net462 覆盖、net6/7 走 netstandard2.0、net9/10 走 net8.0 资产）；`ITemplateEngine` 移除默认接口实现（net462 / netstandard2.0 编译器不支持 DIM，仓内引擎均已自实现）；netfx 包终结修复（Builder / Filler 改为 Dispose 后再复制输出，net8 不变）；net462 资产另依赖 `System.ValueTuple` 4.5.0 |
 
 ---
 
