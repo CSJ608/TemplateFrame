@@ -37,9 +37,9 @@ public sealed class WordTemplateFiller
     /// <summary>填充 .docx：模板 + FillData → 新文件流（不改动传入的模板流）。</summary>
     public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
     {
-        ArgumentNullException.ThrowIfNull(template);
-        ArgumentNullException.ThrowIfNull(contract);
-        ArgumentNullException.ThrowIfNull(data);
+        Guard.ThrowIfNull(template);
+        Guard.ThrowIfNull(contract);
+        Guard.ThrowIfNull(data);
 
         var bytes = StreamUtil.ReadAllBytes(template);
 
@@ -56,12 +56,12 @@ public sealed class WordTemplateFiller
         using (var document = WordprocessingDocument.Open(working, true))
         {
             FillCore(document, contract, data);
-            document.Save();
-
-            working.Position = 0;
-            output = new MemoryStream();
-            working.CopyTo(output);
         }
+
+        // 包终结（Dispose）后再复制：netfx 的 ZipPackage 仅 Save/Flush 时 deflate 流不定稿，产物无法重开
+        working.Position = 0;
+        output = new MemoryStream();
+        working.CopyTo(output);
 
         output.Position = 0;
         return new TemplateFillResult { Output = output, Warnings = warnings };
@@ -275,15 +275,15 @@ public sealed class WordTemplateFiller
         WordprocessingDocument document,
         TableElement table)
     {
-        var columnKeys = table.Columns.Select(c => c.Key).ToHashSet(StringComparer.Ordinal);
+        var columnKeys = new HashSet<string>(table.Columns.Select(c => c.Key), StringComparer.Ordinal);
         foreach (var tbl in SdtLocator.EnumerateTables(document))
         {
             foreach (var row in tbl.Elements<TableRow>())
             {
-                var tags = row.Descendants<SdtElement>()
-                    .Select(SdtLocator.GetTag)
-                    .Where(t => t is not null)
-                    .ToHashSet(StringComparer.Ordinal);
+                var tags = new HashSet<string?>(
+                    row.Descendants<SdtElement>()
+                        .Select(SdtLocator.GetTag)
+                        .Where(t => t is not null), StringComparer.Ordinal);
                 if (columnKeys.All(tags.Contains))
                 {
                     return (tbl, row);
@@ -351,7 +351,7 @@ public sealed class WordTemplateFiller
     }
 
     private static SpaceProcessingModeValues? GetSpaceMode(string value)
-        => value.Length > 0 && (char.IsWhiteSpace(value[0]) || char.IsWhiteSpace(value[^1]))
+        => value.Length > 0 && (char.IsWhiteSpace(value[0]) || char.IsWhiteSpace(value[value.Length - 1]))
             ? SpaceProcessingModeValues.Preserve
             : null;
 

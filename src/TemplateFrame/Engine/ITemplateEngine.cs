@@ -21,19 +21,16 @@ public interface ITemplateEngine
     /// <summary>
     /// 以本地化器与目标文化创建具体插件版式构建器（占位符 / 页码 / 版式 i18n 键按语言解析）。
     /// <para>English: Creates a concrete plugin builder with a localizer and target culture for per-language content.</para>
-    /// 未覆盖的引擎回退到无参 <see cref="CreateBuilder()"/>。
+    /// 引擎无法本地化时返回无参 <see cref="CreateBuilder()"/> 的结果即可。
     /// </summary>
-    ITemplateBuilder CreateBuilder(ITemplateLocalizer localizer, CultureInfo? culture)
-        => CreateBuilder();
+    ITemplateBuilder CreateBuilder(ITemplateLocalizer localizer, CultureInfo? culture);
 
     /// <summary>
     /// 填充并返回软校验告警（推荐）：模板 + FillData → <see cref="TemplateFillResult"/>（输出流 + Warnings）。
     /// <para>English: Fills and returns the result including soft-validation warnings.</para>
-    /// 默认实现把 <see cref="Fill"/> 的输出包成无告警结果；插件引擎（Word / Excel）应覆盖此方法返回填充器收集到的告警
-    /// （Extra / Drifted / 按策略跳过的 Missing）。
+    /// 插件引擎返回填充器收集到的告警（Extra / Drifted / 按策略跳过的 Missing）；仅需输出流时用 <see cref="Fill"/>。
     /// </summary>
-    TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data)
-        => new() { Output = Fill(template, contract, data) };
+    TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data);
 
     /// <summary>校验模板与契约是否匹配（Missing / WrongType / Ambiguous 等）。</summary>
     TemplateValidationResult Validate(Stream template, TemplateContract contract);

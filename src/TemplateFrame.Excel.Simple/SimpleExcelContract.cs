@@ -21,7 +21,7 @@ public static class SimpleExcelContract
     /// <summary>校验并取出契约中的唯一表格元素（SimpleExcel 只支持单个表格契约）。</summary>
     internal static TableElement RequireSingleTable(TemplateContract contract)
     {
-        ArgumentNullException.ThrowIfNull(contract);
+        Guard.ThrowIfNull(contract);
         var tables = contract.Elements.OfType<TableElement>().ToList();
         if (tables.Count == 0)
         {
@@ -57,8 +57,8 @@ public static class SimpleExcelContract
         CultureInfo? culture = null,
         ITemplateLocalizer? localizer = null)
     {
-        ArgumentNullException.ThrowIfNull(target);
-        ArgumentNullException.ThrowIfNull(data);
+        Guard.ThrowIfNull(target);
+        Guard.ThrowIfNull(data);
         var table = RequireSingleTable(contract);
         var headers = table.Columns
             .Select(c => ResolveHeaderText(c, culture, localizer))
@@ -85,7 +85,7 @@ public static class SimpleExcelContract
     /// </summary>
     public static FillData Read(Stream source, TemplateContract contract, SimpleExcelOptions? options = null)
     {
-        ArgumentNullException.ThrowIfNull(source);
+        Guard.ThrowIfNull(source);
         options ??= new SimpleExcelOptions();
         var table = RequireSingleTable(contract);
 
@@ -384,14 +384,13 @@ public static class SimpleExcelContract
             });
         }
 
-        var ambiguousSet = layout.AmbiguousColumnKeys.ToHashSet(StringComparer.Ordinal);
+        var ambiguousSet = new HashSet<string>(layout.AmbiguousColumnKeys, StringComparer.Ordinal);
         var columnByPosition = layout.ColumnIndex.ToDictionary(kv => kv.Value, kv => kv.Key);
         // Ambiguous 列（重复定义名）不再计入 Missing / Extra（已单独报 Ambiguous）
-        var contractHeaderNames = table.Columns
+        var contractHeaderNames = new HashSet<string>(table.Columns
             .SelectMany(c => new[] { c.DisplayName, c.Key })
             .Where(n => !string.IsNullOrWhiteSpace(n))
-            .Select(n => n!.Trim())
-            .ToHashSet(StringComparer.Ordinal);
+            .Select(n => n!.Trim()), StringComparer.Ordinal);
         foreach (var column in table.Columns)
         {
             if (layout.ColumnIndex.ContainsKey(column.Key) || ambiguousSet.Contains(column.Key))
@@ -407,12 +406,12 @@ public static class SimpleExcelContract
             var header = layout.Headers[c]?.Trim();
             if (string.IsNullOrEmpty(header)
                 || columnByPosition.ContainsKey(layout.Range.StartCol + c)
-                || contractHeaderNames.Contains(header))
+                || contractHeaderNames.Contains(header!))
             {
                 continue;
             }
 
-            issues.Add(Extra(header));
+            issues.Add(Extra(header!));
         }
 
         return new TemplateValidationResult { Issues = issues };
@@ -478,11 +477,18 @@ public static class SimpleExcelContract
             var display = column.DisplayName?.Trim();
             if (display is { Length: > 0 })
             {
-                lookup.TryAdd(display, column);
+                if (!lookup.ContainsKey(display))
+                {
+                    lookup[display] = column;
+                }
             }
             else if (column.Key is { Length: > 0 })
             {
-                lookup.TryAdd(column.Key.Trim(), column);
+                var key = column.Key.Trim();
+                if (!lookup.ContainsKey(key))
+                {
+                    lookup[key] = column;
+                }
             }
         }
 

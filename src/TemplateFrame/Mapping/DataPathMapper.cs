@@ -25,7 +25,7 @@ public static class DataPathMapper
     /// <summary>正向：强类型数据 → <see cref="FillData"/>（只映射声明了 DataPath 的元素）。</summary>
     public static FillData ToFillData<TData>(TData data, TemplateContract contract)
     {
-        ArgumentNullException.ThrowIfNull(contract);
+        Guard.ThrowIfNull(contract);
         var mapping = GetMapping(contract, typeof(TData));
         var values = new Dictionary<string, object?>();
         var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
@@ -54,8 +54,8 @@ public static class DataPathMapper
     /// </summary>
     public static TData FromFillData<TData>(FillData data, TemplateContract contract)
     {
-        ArgumentNullException.ThrowIfNull(data);
-        ArgumentNullException.ThrowIfNull(contract);
+        Guard.ThrowIfNull(data);
+        Guard.ThrowIfNull(contract);
         var mapping = GetMapping(contract, typeof(TData));
         object? instance = null;
 
@@ -220,7 +220,7 @@ public static class DataPathMapper
     /// </summary>
     public static bool IsCollectionDataType(Type type)
     {
-        ArgumentNullException.ThrowIfNull(type);
+        Guard.ThrowIfNull(type);
         return type != typeof(string)
                && (type.IsArray
                    || type.GetInterfaces()
@@ -275,9 +275,9 @@ public static class DataPathMapper
         foreach (var line in lines)
         {
             var row = new Dictionary<string, object?>();
-            foreach (var (columnKey, property) in tableMapping.Columns)
+            foreach (var column in tableMapping.Columns)
             {
-                row[columnKey] = property.GetValue(line);
+                row[column.Key] = column.Value.GetValue(line);
             }
 
             result.Add(row);
@@ -321,11 +321,11 @@ public static class DataPathMapper
         IReadOnlyDictionary<string, object?> row)
     {
         var line = Activator.CreateInstance(tableMapping.ElementType)!;
-        foreach (var (columnKey, property) in tableMapping.Columns)
+        foreach (var column in tableMapping.Columns)
         {
-            if (row.TryGetValue(columnKey, out var value))
+            if (row.TryGetValue(column.Key, out var value))
             {
-                SetValue(property, line, value, null);
+                SetValue(column.Value, line, value, null);
             }
         }
 

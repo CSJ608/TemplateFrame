@@ -16,8 +16,8 @@ public sealed class ExcelTemplateValidator
     /// <summary>校验 .xlsx 模板与契约是否匹配。</summary>
     public TemplateValidationResult Validate(Stream template, TemplateContract contract)
     {
-        ArgumentNullException.ThrowIfNull(template);
-        ArgumentNullException.ThrowIfNull(contract);
+        Guard.ThrowIfNull(template);
+        Guard.ThrowIfNull(contract);
         if (template.CanSeek)
         {
             template.Position = 0;
@@ -192,7 +192,7 @@ public sealed class ExcelTemplateValidator
             }
         }
 
-        var requiredKeys = element.Columns.Where(c => c.Required).Select(c => c.Key).ToHashSet(StringComparer.Ordinal);
+        var requiredKeys = new HashSet<string>(element.Columns.Where(c => c.Required).Select(c => c.Key), StringComparer.Ordinal);
         var missingRequired = missingColumns.Where(requiredKeys.Contains).ToList();
         var hasCompleteRow = rows.Count > 0 && rows.Distinct().Count() == 1;
 

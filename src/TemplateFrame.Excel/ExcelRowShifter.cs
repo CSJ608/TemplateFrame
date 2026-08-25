@@ -101,8 +101,8 @@ internal static class ExcelRowShifter
             }
 
             var colon = range.IndexOf(':');
-            var startCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range[..colon]);
-            var endCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range[(colon + 1)..]);
+            var startCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range.Substring(0, colon));
+            var endCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range.Substring(colon + 1));
             if (startCell.Row <= sampleRow)
             {
                 continue;

@@ -15,7 +15,7 @@ internal static class SimpleExcelReader
 {
     internal static SimpleExcelTable Read(Stream source, string? tableName = null)
     {
-        ArgumentNullException.ThrowIfNull(source);
+        Guard.ThrowIfNull(source);
         using var document = OpenWorkbook(source);
         var workbookPart = document.WorkbookPart;
         if (workbookPart is null)
@@ -26,7 +26,7 @@ internal static class SimpleExcelReader
         // 共享字符串表一次性物化（避免逐单元格 O(n) 查找）；富文本项拼接所有 <r> 片段。
         var sharedStrings = MaterializeSharedStrings(workbookPart);
 
-        var tableRange = FindTableRange(workbookPart, string.IsNullOrWhiteSpace(tableName) ? SimpleExcel.DefaultTableName : tableName.Trim());
+        var tableRange = FindTableRange(workbookPart, string.IsNullOrWhiteSpace(tableName) ? SimpleExcel.DefaultTableName : tableName!.Trim());
 
         // 工作表只解析一次；行查找表（行缺 r 属性时按文档顺序推断）供表头定位与数据读取共用。
         var worksheetPart = tableRange.HasValue
@@ -177,9 +177,9 @@ internal static class SimpleExcelReader
         var formatCode = workbookPart.WorkbookStylesPart?.Stylesheet?.GetFirstChild<NumberingFormats>()
             ?.Elements<NumberingFormat>().FirstOrDefault(n => n.NumberFormatId?.Value == numberFormatId)?.FormatCode?.Value;
         return formatCode is not null
-               && (formatCode.Contains("yy", StringComparison.OrdinalIgnoreCase)
-                   || formatCode.Contains("hh", StringComparison.OrdinalIgnoreCase)
-                   || formatCode.Contains("dd", StringComparison.OrdinalIgnoreCase));
+               && (formatCode.IndexOf("yy", StringComparison.OrdinalIgnoreCase) >= 0
+                   || formatCode.IndexOf("hh", StringComparison.OrdinalIgnoreCase) >= 0
+                   || formatCode.IndexOf("dd", StringComparison.OrdinalIgnoreCase) >= 0);
     }
 
     internal static string? GetCellText(IReadOnlyList<string> sharedStrings, Cell? cell)
@@ -291,7 +291,10 @@ internal static class SimpleExcelReader
                 current++;
             }
 
-            lookup.TryAdd(current, row);
+            if (!lookup.ContainsKey(current))
+            {
+                lookup[current] = row;
+            }
         }
 
         return lookup;

@@ -41,7 +41,7 @@ internal static class ExcelAddressHelper
     /// <summary>解析单个单元格引用（兼容 $B$2 / B2）→ (行, 列)，1 基。</summary>
     public static (int Row, int Col) ParseCell(string reference)
     {
-        ArgumentNullException.ThrowIfNull(reference);
+        Guard.ThrowIfNull(reference);
         var cleaned = reference.Trim().Replace("$", string.Empty);
 
         var i = 0;
@@ -55,8 +55,8 @@ internal static class ExcelAddressHelper
             throw new FormatException(Sr.Get("Excel.Address.CannotParse", reference));
         }
 
-        var col = ColumnIndex(cleaned[..i]);
-        var row = int.Parse(cleaned[i..], CultureInfo.InvariantCulture);
+        var col = ColumnIndex(cleaned.Substring(0, i));
+        var row = int.Parse(cleaned.Substring(i), CultureInfo.InvariantCulture);
         return (row, col);
     }
 }

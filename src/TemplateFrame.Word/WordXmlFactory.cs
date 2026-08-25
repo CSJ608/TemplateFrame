@@ -275,10 +275,15 @@ internal static class WordXmlFactory
 
     internal static IEnumerable<(string Text, string? Instruction)> ParsePagePattern(string pattern)
     {
+        // string.CompareOrdinal 三 TFM 通用（Span 重载是 netcore/System.Memory 专属）
+        static bool StartsAt(string source, int index, string literal) =>
+            index + literal.Length <= source.Length
+            && string.CompareOrdinal(source, index, literal, 0, literal.Length) == 0;
+
         var sb = new StringBuilder();
         for (var i = 0; i < pattern.Length;)
         {
-            if (pattern.AsSpan(i).StartsWith("{page}"))
+            if (StartsAt(pattern, i, "{page}"))
             {
                 if (sb.Length > 0)
                 {
@@ -289,7 +294,7 @@ internal static class WordXmlFactory
                 yield return (string.Empty, "PAGE");
                 i += "{page}".Length;
             }
-            else if (pattern.AsSpan(i).StartsWith("{total}"))
+            else if (StartsAt(pattern, i, "{total}"))
             {
                 if (sb.Length > 0)
                 {

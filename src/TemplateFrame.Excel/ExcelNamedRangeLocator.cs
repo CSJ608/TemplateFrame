@@ -28,7 +28,7 @@ public static class ExcelNamedRangeLocator
     /// <summary>枚举工作簿内全部 <see cref="Prefix"/> 开头的命名区域。</summary>
     public static IReadOnlyList<NamedRangeMatch> FindAll(WorkbookPart workbookPart)
     {
-        ArgumentNullException.ThrowIfNull(workbookPart);
+        Guard.ThrowIfNull(workbookPart);
         var results = new List<NamedRangeMatch>();
         if (workbookPart.Workbook?.DefinedNames is not { } definedNames)
         {
@@ -55,7 +55,7 @@ public static class ExcelNamedRangeLocator
     /// </summary>
     public static (string Sheet, (int Row, int Col) Start, (int Row, int Col) End) ParseReference(string reference)
     {
-        ArgumentNullException.ThrowIfNull(reference);
+        Guard.ThrowIfNull(reference);
         var exclamation = reference.IndexOf('!');
         string sheet;
         string cells;
@@ -66,13 +66,13 @@ public static class ExcelNamedRangeLocator
         }
         else
         {
-            sheet = reference[..exclamation].Trim();
-            cells = reference[(exclamation + 1)..];
+            sheet = reference.Substring(0, exclamation).Trim();
+            cells = reference.Substring(exclamation + 1);
         }
 
-        if (sheet.Length >= 2 && sheet[0] == '\'' && sheet[^1] == '\'')
+        if (sheet.Length >= 2 && sheet[0] == '\'' && sheet[sheet.Length - 1] == '\'')
         {
-            sheet = sheet[1..^1].Replace("''", "'");
+            sheet = sheet.Substring(1, sheet.Length - 2).Replace("''", "'");
         }
 
         var colon = cells.IndexOf(':');
@@ -82,8 +82,8 @@ public static class ExcelNamedRangeLocator
             return (sheet, start, start);
         }
 
-        var startCell = ExcelAddressHelper.ParseCell(cells[..colon]);
-        var endCell = ExcelAddressHelper.ParseCell(cells[(colon + 1)..]);
+        var startCell = ExcelAddressHelper.ParseCell(cells.Substring(0, colon));
+        var endCell = ExcelAddressHelper.ParseCell(cells.Substring(colon + 1));
         return (sheet, startCell, endCell);
     }
 
@@ -111,12 +111,12 @@ public static class ExcelNamedRangeLocator
             return string.Empty;
         }
 
-        var simple = (char.IsAsciiLetter(sheet[0]) || sheet[0] == '_');
+        var simple = IsAsciiLetter(sheet[0]) || sheet[0] == '_';
         if (simple)
         {
             foreach (var ch in sheet)
             {
-                if (!(char.IsAsciiLetterOrDigit(ch) || ch == '_' || ch == '.'))
+                if (!(IsAsciiLetterOrDigit(ch) || ch == '_' || ch == '.'))
                 {
                     simple = false;
                     break;
@@ -126,4 +126,10 @@ public static class ExcelNamedRangeLocator
 
         return simple ? sheet : "'" + sheet.Replace("'", "''") + "'";
     }
+
+    private static bool IsAsciiLetter(char ch)
+        => (ch >= 'a' && ch <= 'z') || (ch >= 'A' && ch <= 'Z');
+
+    private static bool IsAsciiLetterOrDigit(char ch)
+        => IsAsciiLetter(ch) || (ch >= '0' && ch <= '9');
 }

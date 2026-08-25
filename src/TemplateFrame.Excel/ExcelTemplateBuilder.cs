@@ -38,6 +38,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     private string _sheetName = "Sheet1";
     private DrawingsPart? _drawingsPart;
     private bool _saved;
+    private bool _finalized;
 
     /// <summary>创建一个空的工作簿构建器（单 Sheet，默认名 Sheet1），默认本地化器 + 中文文化（null = 中文默认）。</summary>
     public ExcelTemplateBuilder()
@@ -108,7 +109,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     /// <summary>放置一个文本元素：占位文本按语言（默认 zh "待填充" / en "To be filled"，经本地化器解析）+ 命名区域 <c>TF_&lt;Key&gt;</c> → 单元格。</summary>
     public ExcelTemplateBuilder AddElement(string key, string cellAddress, TextFormat? format = null)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        Guard.ThrowIfNull(key);
         var cell = GetOrCreateCell(cellAddress);
         SetInlineString(cell, _localizer.PlaceholderText(_culture));
         ApplyStyle(cell, format, bordered: false, horizontal: null, vertical: null);
@@ -145,8 +146,8 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         string startCell,
         bool localizeHeaders)
     {
-        ArgumentNullException.ThrowIfNull(key);
-        ArgumentNullException.ThrowIfNull(columns);
+        Guard.ThrowIfNull(key);
+        Guard.ThrowIfNull(columns);
         if (columns.Count == 0)
         {
             throw new ArgumentException(Sr.Get("Excel.Builder.TableNeedsColumns"), nameof(columns));
@@ -200,7 +201,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         double xOffsetInches = 0,
         double yOffsetInches = 0)
     {
-        ArgumentNullException.ThrowIfNull(key);
+        Guard.ThrowIfNull(key);
         var (row, col) = ExcelAddressHelper.ParseCell(anchorCell);
         var (bytes, extension) = PlaceholderImage.Load(placeholderPath);
         var contentType = extension == "jpg" ? "image/jpeg" : "image/png";
@@ -238,7 +239,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     /// <inheritdoc />
     public void Save(Stream target)
     {
-        ArgumentNullException.ThrowIfNull(target);
+        Guard.ThrowIfNull(target);
         if (_saved)
         {
             throw new InvalidOperationException(Sr.Get("Excel.Builder.SaveOnce"));
@@ -247,10 +248,10 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         var worksheet = _worksheetPart!.Worksheet!;
         var sheetData = _sheetData!;
 
-        foreach (var (rowIndex, heightPoints) in _rowHeights.OrderBy(p => p.Key))
+        foreach (var rowHeight in _rowHeights.OrderBy(p => p.Key))
         {
-            var row = GetOrCreateRow(rowIndex);
-            row.Height = heightPoints;
+            var row = GetOrCreateRow(rowHeight.Key);
+            row.Height = rowHeight.Value;
             row.CustomHeight = true;
         }
 
@@ -302,7 +303,10 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
 
         _styles.WriteTo(_workbookPart);
 
+        // 终结包（Dispose）后再复制：netfx 的 ZipPackage 仅 Save/Flush 时 deflate 流不定稿，产物无法重开
         _document.Save();
+        _document.Dispose();
+        _finalized = true;
         _stream.Position = 0;
         _stream.CopyTo(target);
         _saved = true;
@@ -311,7 +315,11 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     /// <inheritdoc />
     public void Dispose()
     {
-        _document.Dispose();
+        if (!_finalized)
+        {
+            _document.Dispose();
+        }
+
         _stream.Dispose();
     }
 

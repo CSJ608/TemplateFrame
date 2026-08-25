@@ -10,8 +10,8 @@ internal static class SimpleExcelWriter
 {
     internal static void Write(Stream target, SimpleExcelTable table, SimpleExcelOptions? options = null, IReadOnlyList<string>? columnKeys = null)
     {
-        ArgumentNullException.ThrowIfNull(target);
-        ArgumentNullException.ThrowIfNull(table);
+        Guard.ThrowIfNull(target);
+        Guard.ThrowIfNull(table);
         options ??= new SimpleExcelOptions();
 
         var headers = table.Headers ?? [];
@@ -117,7 +117,7 @@ internal static class SimpleExcelWriter
 
                     definedNames.Add(new DefinedName
                     {
-                        Name = SimpleExcel.ColumnDefinedName(tableName, columnKey),
+                        Name = SimpleExcel.ColumnDefinedName(tableName, columnKey!),
                         Text = SimpleExcelAddress.QuoteSheet(sheetName) + "!$" + SimpleExcelAddress.ColumnLetter(startCol + i) + "$" + startRow,
                     });
                 }
@@ -185,7 +185,9 @@ internal static class SimpleExcelWriter
                 }
             }
 
-            widths.Add(Math.Clamp(max + 2, 8, 60));
+            // 宽度收敛到 [8, 60]（Math.Clamp 是 netcore API）
+            var width = max + 2;
+            widths.Add(width < 8 ? 8 : width > 60 ? 60 : width);
         }
 
         return widths;

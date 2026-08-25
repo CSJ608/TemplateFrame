@@ -33,9 +33,9 @@ public sealed class ExcelTemplateFiller
     /// <summary>填充 .xlsx：模板 + FillData → 新文件流（不改动传入的模板流）。</summary>
     public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
     {
-        ArgumentNullException.ThrowIfNull(template);
-        ArgumentNullException.ThrowIfNull(contract);
-        ArgumentNullException.ThrowIfNull(data);
+        Guard.ThrowIfNull(template);
+        Guard.ThrowIfNull(contract);
+        Guard.ThrowIfNull(data);
 
         var bytes = StreamUtil.ReadAllBytes(template);
 
@@ -51,12 +51,12 @@ public sealed class ExcelTemplateFiller
         using (var document = SpreadsheetDocument.Open(working, true))
         {
             FillCore(document.WorkbookPart!, contract, data);
-            document.Save();
-
-            working.Position = 0;
-            output = new MemoryStream();
-            working.CopyTo(output);
         }
+
+        // 包终结（Dispose）后再复制：netfx 的 ZipPackage 仅 Save/Flush 时 deflate 流不定稿，产物无法重开
+        working.Position = 0;
+        output = new MemoryStream();
+        working.CopyTo(output);
 
         output.Position = 0;
         return new TemplateFillResult { Output = output, Warnings = warnings };

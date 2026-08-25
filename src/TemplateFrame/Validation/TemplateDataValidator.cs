@@ -14,8 +14,8 @@ public sealed class TemplateDataValidator
     /// <summary>校验数据与契约是否匹配。</summary>
     public TemplateValidationResult Validate(FillData data, TemplateContract contract)
     {
-        ArgumentNullException.ThrowIfNull(data);
-        ArgumentNullException.ThrowIfNull(contract);
+        Guard.ThrowIfNull(data);
+        Guard.ThrowIfNull(contract);
 
         var issues = new List<TemplateValidationIssue>();
         var knownKeys = new HashSet<string>(contract.EnumerateTagKeys(), StringComparer.Ordinal);

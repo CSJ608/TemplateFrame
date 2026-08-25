@@ -35,6 +35,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     private int _layoutCol;
     private int _layoutCols;
     private bool _saved;
+    private bool _finalized;
 
     /// <summary>创建一个空的 Word 文档构建器（正文），默认本地化器 + 中文文化（null = 中文默认）。</summary>
     public WordTemplateBuilder()
@@ -85,7 +86,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// <summary>添加页眉（每节一个 default 引用），内容用同一构建器能力组装。</summary>
     public void AddHeader(Action<WordTemplateBuilder> compose)
     {
-        ArgumentNullException.ThrowIfNull(compose);
+        Guard.ThrowIfNull(compose);
         var headerPart = _mainPart.AddNewPart<HeaderPart>();
         headerPart.Header = new Header();
         compose(new WordTemplateBuilder(this, headerPart, headerPart.Header));
@@ -95,7 +96,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// <summary>添加页脚（每节一个 default 引用），内容用同一构建器能力组装。</summary>
     public void AddFooter(Action<WordTemplateBuilder> compose)
     {
-        ArgumentNullException.ThrowIfNull(compose);
+        Guard.ThrowIfNull(compose);
         var footerPart = _mainPart.AddNewPart<FooterPart>();
         footerPart.Footer = new Footer();
         compose(new WordTemplateBuilder(this, footerPart, footerPart.Footer));
@@ -207,8 +208,8 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         string? headerStyle,
         bool localizeHeaders)
     {
-        ArgumentNullException.ThrowIfNull(key);
-        ArgumentNullException.ThrowIfNull(columns);
+        Guard.ThrowIfNull(key);
+        Guard.ThrowIfNull(columns);
         if (columns.Count == 0)
         {
             throw new ArgumentException(Sr.Get("Word.Builder.TableNeedsColumns"), nameof(columns));
@@ -283,7 +284,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// </summary>
     public WordTemplateBuilder AddCell(Action<WordTemplateBuilder> compose, int columnSpan = 1)
     {
-        ArgumentNullException.ThrowIfNull(compose);
+        Guard.ThrowIfNull(compose);
         if (columnSpan < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(columnSpan), Sr.Get("Word.Builder.ColumnSpanPositive"));
@@ -380,7 +381,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// <inheritdoc />
     public void Save(Stream target)
     {
-        ArgumentNullException.ThrowIfNull(target);
+        Guard.ThrowIfNull(target);
         if (!_ownsDocument)
         {
             throw new InvalidOperationException(Sr.Get("Word.Builder.SubBuilderCannotSave"));
@@ -396,7 +397,10 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             _container.Append(WordXmlFactory.CreateSectionProperties(_pageSetup));
         }
 
+        // 终结包（Dispose）后再复制：netfx 的 ZipPackage 仅 Save/Flush 时 deflate 流不定稿，产物无法重开
         _document.Save();
+        _document.Dispose();
+        _finalized = true;
         _stream.Position = 0;
         _stream.CopyTo(target);
         _saved = true;
@@ -407,7 +411,11 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     {
         if (_ownsDocument)
         {
-            _document.Dispose();
+            if (!_finalized)
+            {
+                _document.Dispose();
+            }
+
             _stream.Dispose();
         }
     }

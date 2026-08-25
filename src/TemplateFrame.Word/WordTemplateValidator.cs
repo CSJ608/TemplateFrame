@@ -54,8 +54,8 @@ public sealed class WordTemplateValidator
     /// <summary>校验 .docx 模板与契约是否匹配。</summary>
     public WordTemplateValidationResult Validate(Stream template, TemplateContract contract)
     {
-        ArgumentNullException.ThrowIfNull(template);
-        ArgumentNullException.ThrowIfNull(contract);
+        Guard.ThrowIfNull(template);
+        Guard.ThrowIfNull(contract);
         if (template.CanSeek)
         {
             template.Position = 0;
@@ -223,7 +223,7 @@ public sealed class WordTemplateValidator
         }
 
         // 行模板只需包含全部必填列；可选列缺失不阻断（模板仍有效）
-        var requiredKeys = element.Columns.Where(c => c.Required).Select(c => c.Key).ToHashSet(StringComparer.Ordinal);
+        var requiredKeys = new HashSet<string>(element.Columns.Where(c => c.Required).Select(c => c.Key), StringComparer.Ordinal);
         var missingRequired = missingColumns.Where(requiredKeys.Contains).ToList();
         var hasCompleteRow = SdtLocator.EnumerateTables(document).Any(table =>
             table.Descendants<TableRow>().Any(row =>

@@ -30,8 +30,8 @@ public sealed class ExcelTemplateParser
     /// <summary>回读 .xlsx：模板 + 契约 → FillData（不改动传入的模板流）。</summary>
     public FillData Parse(Stream template, TemplateContract contract)
     {
-        ArgumentNullException.ThrowIfNull(template);
-        ArgumentNullException.ThrowIfNull(contract);
+        Guard.ThrowIfNull(template);
+        Guard.ThrowIfNull(contract);
 
         var bytes = StreamUtil.ReadAllBytes(template);
         using var document = OpenDocument(bytes);

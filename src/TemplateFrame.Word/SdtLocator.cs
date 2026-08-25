@@ -29,7 +29,7 @@ public static class SdtLocator
     /// <summary>枚举文档内全部内容控件（正文 + 页眉 + 页脚）。</summary>
     public static IReadOnlyList<SdtMatch> FindAll(WordprocessingDocument document)
     {
-        ArgumentNullException.ThrowIfNull(document);
+        Guard.ThrowIfNull(document);
 
         var results = new List<SdtMatch>();
         var mainPart = document.MainDocumentPart;

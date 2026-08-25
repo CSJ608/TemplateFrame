@@ -13,10 +13,21 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <IncludeSymbols>true</IncludeSymbols>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <!-- 迭代 18：四包统一多目标——.NET Framework 4.6.2+（net462）/ net5–net7（netstandard2.0）/ net8+（net8.0） -->
+    <TargetFrameworks>netstandard2.0;net462;net8.0</TargetFrameworks>
   </PropertyGroup>
 
   <ItemGroup>
     <None Include="..\..\icon.png" Pack="true" PackagePath="\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="$(MSBuildThisFileDirectory)Shared\Compatibility.cs" Link="Shared\Compatibility.cs" />
+  </ItemGroup>
+
+  <!-- net462 需 NuGet 版 ValueTuple（.NET Framework 4.7+ 才内置），仅 net462 资产可见 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
   </ItemGroup>
 
 </Project>

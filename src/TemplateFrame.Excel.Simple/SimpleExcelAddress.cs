@@ -15,13 +15,13 @@ internal static class SimpleExcelAddress
         var cellPart = reference;
         if (exclamation >= 0)
         {
-            sheet = reference[..exclamation].Trim().Trim('\'');
-            cellPart = reference[(exclamation + 1)..];
+            sheet = reference.Substring(0, exclamation).Trim().Trim('\'');
+            cellPart = reference.Substring(exclamation + 1);
         }
 
         var colon = cellPart.IndexOf(':');
-        var startCell = colon >= 0 ? cellPart[..colon] : cellPart;
-        var endCell = colon >= 0 ? cellPart[(colon + 1)..] : cellPart;
+        var startCell = colon >= 0 ? cellPart.Substring(0, colon) : cellPart;
+        var endCell = colon >= 0 ? cellPart.Substring(colon + 1) : cellPart;
         if (!TryParseCell(startCell, out var startCol, out var startRow))
         {
             return false;
@@ -50,7 +50,7 @@ internal static class SimpleExcelAddress
             i++;
         }
 
-        return col > 0 && int.TryParse(cell[i..], out row) && row > 0;
+        return col > 0 && int.TryParse(cell.Substring(i), out row) && row > 0;
     }
 
     internal static (int Row, int Col) ParseCellAddress(string address)
@@ -64,7 +64,7 @@ internal static class SimpleExcelAddress
             i++;
         }
 
-        if (col <= 0 || !int.TryParse(trimmed[i..], out var row) || row <= 0)
+        if (col <= 0 || !int.TryParse(trimmed.Substring(i), out var row) || row <= 0)
         {
             throw new ArgumentException(Sr.Get("SimpleExcel.InvalidCellAddress", address), nameof(address));
         }
