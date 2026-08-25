@@ -1,7 +1,9 @@
+using System.Globalization;
 using TemplateFrame.Builder;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Engine;
+using TemplateFrame.Localization;
 using TemplateFrame.Services;
 using TemplateFrame.Validation;
 using Xunit;
@@ -28,6 +30,12 @@ public sealed class AutoMappingRecordingEngine : ITemplateEngine
     public FillData? LastFillData { get; private set; }
 
     public ITemplateBuilder CreateBuilder() => new FakeBuilder();
+
+    public ITemplateBuilder CreateBuilder(ITemplateLocalizer localizer, CultureInfo? culture)
+        => CreateBuilder();
+
+    public TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data)
+        => new() { Output = Fill(template, contract, data) };
 
     public TemplateValidationResult Validate(Stream template, TemplateContract contract) => new();
 

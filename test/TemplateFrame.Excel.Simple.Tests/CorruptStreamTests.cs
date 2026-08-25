@@ -25,7 +25,8 @@ public sealed class CorruptStreamTests
             Headers = ["编码"],
             Rows = [["A-1"]],
         });
-        var truncated = written.ToArray()[..30];
+        var truncated = written.ToArray();
+        Array.Resize(ref truncated, 30);
         using var stream = new MemoryStream(truncated);
         Assert.Throws<InvalidOperationException>(() => SimpleExcel.Read(stream));
     }

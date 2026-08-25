@@ -127,7 +127,7 @@ public sealed class WordTemplateFillerTests
         var imagePart = Assert.IsAssignableFrom<ImagePart>(mainPart.GetPartById(blip.Embed!.Value!));
         using var partStream = imagePart.GetStream();
         var bytes = new byte[partStream.Length];
-        partStream.ReadExactly(bytes, 0, bytes.Length);
+        partStream.Read(bytes, 0, bytes.Length);
         Assert.Equal(TestDocuments.TinyPng, bytes);
 
         // 尺寸/位置/环绕继承占位图（几何不变）

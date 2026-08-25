@@ -33,7 +33,8 @@ public sealed class CorruptStreamTests
     public void Fill_TruncatedZip_ThrowsInvalidOperation()
     {
         using var template = TestDocuments.BuildTemplate(b => b.AddElement("OrderNo"));
-        var truncated = template.ToArray()[..30];
+        var truncated = template.ToArray();
+        Array.Resize(ref truncated, 30);
         using var stream = new MemoryStream(truncated);
         Assert.Throws<InvalidOperationException>(() =>
             new WordTemplateFiller().Fill(stream, Contract, Data));
@@ -51,7 +52,8 @@ public sealed class CorruptStreamTests
     public void Parse_TruncatedZip_ThrowsInvalidOperation()
     {
         using var template = TestDocuments.BuildTemplate(b => b.AddElement("OrderNo"));
-        var truncated = template.ToArray()[..30];
+        var truncated = template.ToArray();
+        Array.Resize(ref truncated, 30);
         using var stream = new MemoryStream(truncated);
         Assert.Throws<InvalidOperationException>(() =>
             new WordTemplateParser().Parse(stream, Contract));

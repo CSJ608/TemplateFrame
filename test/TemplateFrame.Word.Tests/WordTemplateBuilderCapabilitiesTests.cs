@@ -212,7 +212,7 @@ public sealed class WordTemplateBuilderCapabilitiesTests
         var imagePart = Assert.IsAssignableFrom<ImagePart>(headerPart.GetPartById(blip.Embed!.Value!));
         using var stream = imagePart.GetStream();
         var bytes = new byte[stream.Length];
-        stream.ReadExactly(bytes, 0, bytes.Length);
+        stream.Read(bytes, 0, bytes.Length);
         Assert.Equal(TestDocuments.TinyPng, bytes);
     }
 

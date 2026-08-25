@@ -1,7 +1,9 @@
+using System.Globalization;
 using TemplateFrame.Builder;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Engine;
+using TemplateFrame.Localization;
 using TemplateFrame.Services;
 using TemplateFrame.Validation;
 using Xunit;
@@ -58,6 +60,12 @@ public sealed class RecordingEngine : ITemplateEngine
         return LastBuilder;
     }
 
+    public ITemplateBuilder CreateBuilder(ITemplateLocalizer localizer, CultureInfo? culture)
+        => CreateBuilder();
+
+    public TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data)
+        => new() { Output = Fill(template, contract, data) };
+
     public TemplateValidationResult Validate(Stream template, TemplateContract contract)
     {
         LastValidateContract = contract;
@@ -87,6 +95,9 @@ public sealed class RecordingEngine : ITemplateEngine
 public sealed class WarningEngine : ITemplateEngine
 {
     public ITemplateBuilder CreateBuilder() => new FakeBuilder();
+
+    public ITemplateBuilder CreateBuilder(ITemplateLocalizer localizer, CultureInfo? culture)
+        => CreateBuilder();
 
     public TemplateValidationResult Validate(Stream template, TemplateContract contract) => new();
 
@@ -253,6 +264,12 @@ public sealed class TemplateServiceTests
 public sealed class WrongBuilderEngine : ITemplateEngine
 {
     public ITemplateBuilder CreateBuilder() => new OtherBuilder();
+
+    public ITemplateBuilder CreateBuilder(ITemplateLocalizer localizer, CultureInfo? culture)
+        => CreateBuilder();
+
+    public TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data)
+        => new() { Output = Fill(template, contract, data) };
 
     public TemplateValidationResult Validate(Stream template, TemplateContract contract)
         => new();

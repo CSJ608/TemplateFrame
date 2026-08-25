@@ -86,7 +86,7 @@ public sealed class WordTemplateBuilderTests
             var imagePart = document.MainDocumentPart!.ImageParts.Single();
             using var partStream = imagePart.GetStream();
             var bytes = new byte[partStream.Length];
-            partStream.ReadExactly(bytes, 0, bytes.Length);
+            partStream.Read(bytes, 0, bytes.Length);
             Assert.Equal(tinyPng, bytes);
         }
         finally
