@@ -3,6 +3,8 @@
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Excel.Simple.svg)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Excel.Simple)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
 
+> 中文 · [English](README.en.md)
+
 TemplateFrame 的**简化 Excel 插件**：只支持「标题行 + 数据行」的表格导入/导出。
 
 大多数 Excel 导入/导出的形态就是"标题行，然后一列一路下去"。对这种简单需求，不需要
@@ -102,6 +104,7 @@ var parsed = service.Parse(filled);                    // xlsx → 强类型 Mat
 - **按语言表头**：`SimpleExcelContract.Write(..., culture, localizer)` 或 `service.Fill(data, options, culture, localizer)` 可写本地化表头（本地化键 = 列 Key，未注册覆盖回退 `DisplayName`/`Key`）；回读仍语言无关（定义名定位）。
 - **底层 API**：也可直接用 `SimpleExcelContract.Write / Read / Validate`（基于 `FillData`），再配合基础包 `DataPathMapper` 自行映射。
 - **向后兼容**：原有 `SimpleExcel.Write / Read`（`SimpleExcelTable`）保持不变。
+
 ## 根集合：List<T> 直接填充 / 解析
 
 如果场景数据就是一个列表（不需要再包一层容器对象），把 `TData` 直接声明为集合类型，表格 `DataPath` 留空即可——行数据自动取根对象本身：

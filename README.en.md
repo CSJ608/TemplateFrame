@@ -157,7 +157,7 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 | [docs/PUBLISHING.md](docs/PUBLISHING.md) | Release flow — push a `v*` tag (Chinese) |
 | [docs/PERFORMANCE.md](docs/PERFORMANCE.md) | Performance snapshot (measured throughput/allocations, Chinese) |
 | [CHANGELOG.md](CHANGELOG.md) | Changelog |
-| Plugin READMEs | [Word](src/TemplateFrame.Word/README.md) · [Excel](src/TemplateFrame.Excel/README.md) · [Excel.Simple](src/TemplateFrame.Excel.Simple/README.md) |
+| Plugin READMEs | [Word](src/TemplateFrame.Word/README.en.md) · [Excel](src/TemplateFrame.Excel/README.en.md) · [Excel.Simple](src/TemplateFrame.Excel.Simple/README.en.md) |
 
 ## Build & test
 
