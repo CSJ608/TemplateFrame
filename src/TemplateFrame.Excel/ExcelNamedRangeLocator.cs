@@ -28,7 +28,7 @@ public static class ExcelNamedRangeLocator
     /// <summary>枚举工作簿内全部 <see cref="Prefix"/> 开头的命名区域。</summary>
     public static IReadOnlyList<NamedRangeMatch> FindAll(WorkbookPart workbookPart)
     {
-        Guard.ThrowIfNull(workbookPart);
+        Guard.ThrowIfNull(workbookPart, nameof(workbookPart));
         var results = new List<NamedRangeMatch>();
         if (workbookPart.Workbook?.DefinedNames is not { } definedNames)
         {
@@ -55,7 +55,7 @@ public static class ExcelNamedRangeLocator
     /// </summary>
     public static (string Sheet, (int Row, int Col) Start, (int Row, int Col) End) ParseReference(string reference)
     {
-        Guard.ThrowIfNull(reference);
+        Guard.ThrowIfNull(reference, nameof(reference));
         var exclamation = reference.IndexOf('!');
         string sheet;
         string cells;

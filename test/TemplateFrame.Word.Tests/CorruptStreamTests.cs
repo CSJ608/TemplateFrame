@@ -1,6 +1,7 @@
 using System.Text;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
+using TemplateFrame.Validation;
 using Xunit;
 
 namespace TemplateFrame.Word.Tests;
@@ -57,5 +58,60 @@ public sealed class CorruptStreamTests
         using var stream = new MemoryStream(truncated);
         Assert.Throws<InvalidOperationException>(() =>
             new WordTemplateParser().Parse(stream, Contract));
+    }
+
+    // ---------------- zip 有效但 XML 损坏（惰性 DOM，Open 阶段不抛、树访问时才抛） ----------------
+
+    /// <summary>把 zip 内首个匹配的 XML 条目重写为无法解析的内容：包结构合法、条目 XML 损坏。</summary>
+    private static MemoryStream WithCorruptXmlEntry(Stream source, string entryPattern)
+    {
+        source.Position = 0;
+        var buffer = new MemoryStream();
+        source.CopyTo(buffer);
+        buffer.Position = 0;
+        using (var zip = new System.IO.Compression.ZipArchive(buffer, System.IO.Compression.ZipArchiveMode.Update, leaveOpen: true))
+        {
+            var entry = zip.Entries.First(e =>
+                e.FullName.EndsWith(".xml", StringComparison.OrdinalIgnoreCase)
+                && e.FullName.IndexOf(entryPattern, StringComparison.OrdinalIgnoreCase) >= 0);
+            entry.Delete();
+            using var replacement = zip.CreateEntry(entry.FullName).Open();
+            var payload = Encoding.UTF8.GetBytes("<<< this is not valid xml >>>");
+            replacement.Write(payload, 0, payload.Length);
+        }
+
+        buffer.Position = 0;
+        return buffer;
+    }
+
+    [Fact]
+    public void Validate_DocumentXmlCorrupt_ReturnsInvalidInsteadOfThrowing()
+    {
+        using var template = TestDocuments.BuildTemplate(b => b.AddElement("OrderNo"));
+        using var corrupted = WithCorruptXmlEntry(template, "document.xml");
+
+        var result = new WordTemplateValidator().Validate(corrupted, Contract);
+
+        Assert.False(result.IsValid);
+        Assert.Contains(result.Issues, i => i.Code == TemplateValidationIssueCode.Invalid);
+    }
+
+    [Fact]
+    public void Parse_DocumentXmlCorrupt_ThrowsInvalidOperation()
+    {
+        using var template = TestDocuments.BuildTemplate(b => b.AddElement("OrderNo"));
+        using var corrupted = WithCorruptXmlEntry(template, "document.xml");
+
+        Assert.Throws<InvalidOperationException>(() => new WordTemplateParser().Parse(corrupted, Contract));
+    }
+
+    [Fact]
+    public void Fill_DocumentXmlCorrupt_ThrowsInvalidOperation()
+    {
+        using var template = TestDocuments.BuildTemplate(b => b.AddElement("OrderNo"));
+        using var corrupted = WithCorruptXmlEntry(template, "document.xml");
+
+        Assert.Throws<InvalidOperationException>(() =>
+            new WordTemplateFiller().Fill(corrupted, Contract, Data));
     }
 }

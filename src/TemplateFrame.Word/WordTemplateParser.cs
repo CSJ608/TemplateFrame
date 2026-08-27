@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.Globalization;
+using System.Xml;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Internal;
@@ -31,8 +32,8 @@ public sealed class WordTemplateParser
     /// <summary>回读 .docx：模板 + 契约 → FillData（不改动传入的模板流）。</summary>
     public FillData Parse(Stream template, TemplateContract contract)
     {
-        Guard.ThrowIfNull(template);
-        Guard.ThrowIfNull(contract);
+        Guard.ThrowIfNull(template, nameof(template));
+        Guard.ThrowIfNull(contract, nameof(contract));
 
         var bytes = StreamUtil.ReadAllBytes(template);
         using var document = OpenDocument(bytes);
@@ -40,37 +41,45 @@ public sealed class WordTemplateParser
         var values = new Dictionary<string, object?>();
         var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
 
-        foreach (var element in contract.Elements)
+        try
         {
-            switch (element)
+            foreach (var element in contract.Elements)
             {
-                case TextElement text:
-                    var (found, textValue) = ReadText(document, text);
-                    if (found)
-                    {
-                        values[text.Key] = textValue; // 占位符 → null（未填充），控件缺失 → 键省略
-                    }
+                switch (element)
+                {
+                    case TextElement text:
+                        var (found, textValue) = ReadText(document, text);
+                        if (found)
+                        {
+                            values[text.Key] = textValue; // 占位符 → null（未填充），控件缺失 → 键省略
+                        }
 
-                    break;
+                        break;
 
-                case ImageElement image:
-                    var imageBytes = ReadImage(document, image.Key);
-                    if (imageBytes is not null)
-                    {
-                        values[image.Key] = imageBytes;
-                    }
+                    case ImageElement image:
+                        var imageBytes = ReadImage(document, image.Key);
+                        if (imageBytes is not null)
+                        {
+                            values[image.Key] = imageBytes;
+                        }
 
-                    break;
+                        break;
 
-                case TableElement table:
-                    var rows = ReadTableRows(document, table);
-                    if (rows is not null)
-                    {
-                        tables[table.Key] = rows;
-                    }
+                    case TableElement table:
+                        var rows = ReadTableRows(document, table);
+                        if (rows is not null)
+                        {
+                            tables[table.Key] = rows;
+                        }
 
-                    break;
+                        break;
+                }
             }
+        }
+        catch (XmlException ex)
+        {
+            // zip 有效但 document.xml 损坏：惰性 DOM 在首次树访问时才抛（OpenDocument 的 catch 罩不到这里）
+            throw new InvalidOperationException(Sr.Get("Word.Validation.XmlCorrupt", ex.Message), ex);
         }
 
         return new FillData { Values = values, Tables = tables };
@@ -110,7 +119,7 @@ public sealed class WordTemplateParser
             return (true, null);
         }
 
-        return (true, ConvertToValueType(text, element.ValueType));
+        return (true, ContractValueConverter.ConvertToValueType(text, element.ValueType));
     }
 
     /// <summary>读取图片控件：blip r:embed 指向的图片 part 字节；无 blip 或控件缺失返回 null。</summary>
@@ -183,7 +192,7 @@ public sealed class WordTemplateParser
                     var text = string.Concat(sdt.Descendants<Text>().Select(t => t.Text ?? string.Empty));
                     rowValues[column.Key] = _localizer.IsPlaceholderText(text)
                         ? null
-                        : ConvertToValueType(text, column.ValueType);
+                        : ContractValueConverter.ConvertToValueType(text, column.ValueType);
                 }
 
                 rows.Add(rowValues);
@@ -194,39 +203,4 @@ public sealed class WordTemplateParser
 
         return null;
     }
-
-    /// <summary>按 TextElement.ValueType 把文本转换为目标类型；转换失败或未知类型保留原始文本。</summary>
-    private static object? ConvertToValueType(string text, Type valueType)
-    {
-        if (valueType == typeof(string) || valueType == typeof(object))
-        {
-            return text;
-        }
-
-        if (valueType == typeof(decimal)
-            && decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var decimalValue))
-        {
-            return decimalValue;
-        }
-
-        if (valueType == typeof(int)
-            && int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue))
-        {
-            return intValue;
-        }
-
-        if (valueType == typeof(DateTime)
-            && DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTimeValue))
-        {
-            return dateTimeValue;
-        }
-
-        if (valueType == typeof(bool) && bool.TryParse(text, out var boolValue))
-        {
-            return boolValue;
-        }
-
-        return text;
-    }
-
 }

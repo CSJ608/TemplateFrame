@@ -23,7 +23,7 @@
     <value>填充失败：缺少必填元素 "{0}"（{1}）。可配置 MissingElementPolicy.SkipAndWarn 改为跳过并告警。</value>
   </data>
   <data name="Excel.Fill.ValidationFailed" xml:space="preserve">
-    <value>填充前校验失败：{0}</value>
+    <value>填充失败：模板与契约不匹配（{0}）。{1}</value>
   </data>
   <data name="Excel.Validation.AmbiguousNamedRange" xml:space="preserve">
     <value>命名区域 {0} 重复出现。</value>
@@ -60,5 +60,8 @@
   </data>
   <data name="Excel.Validation.MissingWorkbookPart" xml:space="preserve">
     <value>文档缺少工作簿部分（xl/workbook.xml）。</value>
+  </data>
+  <data name="Excel.Validation.XmlCorrupt" xml:space="preserve">
+    <value>工作簿 XML 已损坏，无法解析：{0}</value>
   </data>
 </root>

@@ -1,6 +1,7 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Globalization;
+using System.Xml;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Excel.Simple.Localization;
@@ -21,7 +22,7 @@ public static class SimpleExcelContract
     /// <summary>校验并取出契约中的唯一表格元素（SimpleExcel 只支持单个表格契约）。</summary>
     internal static TableElement RequireSingleTable(TemplateContract contract)
     {
-        Guard.ThrowIfNull(contract);
+        Guard.ThrowIfNull(contract, nameof(contract));
         var tables = contract.Elements.OfType<TableElement>().ToList();
         if (tables.Count == 0)
         {
@@ -57,8 +58,8 @@ public static class SimpleExcelContract
         CultureInfo? culture = null,
         ITemplateLocalizer? localizer = null)
     {
-        Guard.ThrowIfNull(target);
-        Guard.ThrowIfNull(data);
+        Guard.ThrowIfNull(target, nameof(target));
+        Guard.ThrowIfNull(data, nameof(data));
         var table = RequireSingleTable(contract);
         var headers = table.Columns
             .Select(c => ResolveHeaderText(c, culture, localizer))
@@ -85,10 +86,24 @@ public static class SimpleExcelContract
     /// </summary>
     public static FillData Read(Stream source, TemplateContract contract, SimpleExcelOptions? options = null)
     {
-        Guard.ThrowIfNull(source);
+        Guard.ThrowIfNull(source, nameof(source));
+        Guard.ThrowIfNull(contract, nameof(contract));
         options ??= new SimpleExcelOptions();
         var table = RequireSingleTable(contract);
 
+        try
+        {
+            return ReadCore(source, table, options);
+        }
+        catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or FileFormatException
+                                   or XmlException) // zip 有效但 XML 损坏：惰性 DOM 在树访问时才抛
+        {
+            throw new InvalidOperationException(Sr.Get("SimpleExcel.Contract.CannotOpen", ex.Message), ex);
+        }
+    }
+
+    private static FillData ReadCore(Stream source, TableElement table, SimpleExcelOptions options)
+    {
         // ① 每列定义名定位（开一次文档）
         if (source.CanSeek)
         {
@@ -144,6 +159,8 @@ public static class SimpleExcelContract
     /// </summary>
     public static TemplateValidationResult Validate(Stream template, TemplateContract contract, SimpleExcelOptions? options = null)
     {
+        Guard.ThrowIfNull(template, nameof(template));
+        Guard.ThrowIfNull(contract, nameof(contract));
         var table = RequireSingleTable(contract);
         options ??= new SimpleExcelOptions();
 
@@ -164,7 +181,7 @@ public static class SimpleExcelContract
             }
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException
-                                       or FileFormatException or IOException)
+                                       or FileFormatException or IOException or XmlException) // XmlException：zip 有效但 XML 损坏（惰性 DOM）
         {
             return Invalid(ex);
         }
@@ -181,7 +198,7 @@ public static class SimpleExcelContract
             loaded = SimpleExcel.Read(template, options.TableName);
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException
-                                       or FileFormatException or IOException)
+                                       or FileFormatException or IOException or XmlException)
         {
             return Invalid(ex);
         }
@@ -259,6 +276,8 @@ public static class SimpleExcelContract
         var rowLookup = SimpleExcelReader.BuildRowLookup(rows);
         var columnIndex = new Dictionary<string, int>(StringComparer.Ordinal);
         var ambiguous = new List<string>();
+        var positionAmbiguous = new List<string>();
+        var keyByPosition = new Dictionary<int, string>();
 
         foreach (var column in table.Columns)
         {
@@ -285,10 +304,20 @@ public static class SimpleExcelContract
                 return null;
             }
 
+            // 不同列的定义名指向同一单元格：位置歧义（手工改乱），两列都不参与定位（否则下游 ToDictionary 崩溃）
+            if (keyByPosition.TryGetValue(columnRange.StartCol, out var conflictingKey))
+            {
+                columnIndex.Remove(conflictingKey);
+                positionAmbiguous.Add(conflictingKey);
+                positionAmbiguous.Add(column.Key);
+                continue;
+            }
+
             columnIndex[column.Key] = columnRange.StartCol;
+            keyByPosition[columnRange.StartCol] = column.Key;
         }
 
-        if (columnIndex.Count == 0 && ambiguous.Count == 0)
+        if (columnIndex.Count == 0 && ambiguous.Count == 0 && positionAmbiguous.Count == 0)
         {
             return null; // 没有可用列定义名 → 回退文本匹配
         }
@@ -307,7 +336,7 @@ public static class SimpleExcelContract
             return null;
         }
 
-        return new DefinedNameLayout(tableRange.Value, headers, columnIndex, ambiguous);
+        return new DefinedNameLayout(tableRange.Value, headers, columnIndex, ambiguous, positionAmbiguous);
     }
 
     /// <summary>按列定义名布局读数据行（列 Key → 绝对列号；缺列补 null；全空行跳过）。</summary>
@@ -384,9 +413,23 @@ public static class SimpleExcelContract
             });
         }
 
-        var ambiguousSet = new HashSet<string>(layout.AmbiguousColumnKeys, StringComparer.Ordinal);
+        foreach (var columnKey in layout.PositionAmbiguousColumnKeys)
+        {
+            issues.Add(new TemplateValidationIssue
+            {
+                Code = TemplateValidationIssueCode.Ambiguous,
+                Key = columnKey,
+                MessageKey = "SimpleExcel.Contract.AmbiguousColumnPosition",
+                MessageArgs = [table.Key, SimpleExcel.ColumnDefinedName(tableName, columnKey)],
+                Message = Sr.Get("SimpleExcel.Contract.AmbiguousColumnPosition", table.Key, SimpleExcel.ColumnDefinedName(tableName, columnKey)),
+                Severity = TemplateValidationSeverity.Error,
+            });
+        }
+
+        var ambiguousSet = new HashSet<string>(
+            layout.AmbiguousColumnKeys.Concat(layout.PositionAmbiguousColumnKeys), StringComparer.Ordinal);
         var columnByPosition = layout.ColumnIndex.ToDictionary(kv => kv.Value, kv => kv.Key);
-        // Ambiguous 列（重复定义名）不再计入 Missing / Extra（已单独报 Ambiguous）
+        // Ambiguous 列（重复定义名 / 同位置）不再计入 Missing / Extra（已单独报 Ambiguous）
         var contractHeaderNames = new HashSet<string>(table.Columns
             .SelectMany(c => new[] { c.DisplayName, c.Key })
             .Where(n => !string.IsNullOrWhiteSpace(n))
@@ -495,10 +538,11 @@ public static class SimpleExcelContract
         return lookup;
     }
 
-    /// <summary>定义名布局：表格区域 + 表头文本（区域列序）+ 列 Key → 绝对列号 + Ambiguous 列。</summary>
+    /// <summary>定义名布局：表格区域 + 表头文本（区域列序）+ 列 Key → 绝对列号 + Ambiguous 列（重名 / 同位置两类）。</summary>
     private sealed record DefinedNameLayout(
         SimpleExcelAddress.TableRange Range,
         IReadOnlyList<string> Headers,
         IReadOnlyDictionary<string, int> ColumnIndex,
-        IReadOnlyList<string> AmbiguousColumnKeys);
+        IReadOnlyList<string> AmbiguousColumnKeys,
+        IReadOnlyList<string> PositionAmbiguousColumnKeys);
 }

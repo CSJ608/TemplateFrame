@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Wordprocessing;
 using System.IO.Compression;
+using System.Xml;
 using TemplateFrame.Contract;
 using TemplateFrame.Validation;
 using TemplateFrame.Word.Localization;
@@ -54,8 +55,8 @@ public sealed class WordTemplateValidator
     /// <summary>校验 .docx 模板与契约是否匹配。</summary>
     public WordTemplateValidationResult Validate(Stream template, TemplateContract contract)
     {
-        Guard.ThrowIfNull(template);
-        Guard.ThrowIfNull(contract);
+        Guard.ThrowIfNull(template, nameof(template));
+        Guard.ThrowIfNull(contract, nameof(contract));
         if (template.CanSeek)
         {
             template.Position = 0;
@@ -71,7 +72,8 @@ public sealed class WordTemplateValidator
 
             return ValidateCore(document, contract);
         }
-        catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException or FileFormatException)
+        catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException or FileFormatException
+                                   or XmlException) // zip 有效但 XML 损坏：惰性 DOM 在树访问时才抛
         {
             return Invalid("Word.Validation.CannotOpen", ex.Message);
         }

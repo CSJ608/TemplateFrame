@@ -41,7 +41,7 @@ internal static class ExcelAddressHelper
     /// <summary>解析单个单元格引用（兼容 $B$2 / B2）→ (行, 列)，1 基。</summary>
     public static (int Row, int Col) ParseCell(string reference)
     {
-        Guard.ThrowIfNull(reference);
+        Guard.ThrowIfNull(reference, nameof(reference));
         var cleaned = reference.Trim().Replace("$", string.Empty);
 
         var i = 0;

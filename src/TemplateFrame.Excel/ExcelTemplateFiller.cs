@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Globalization;
+using System.Xml;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Engine;
@@ -33,9 +34,9 @@ public sealed class ExcelTemplateFiller
     /// <summary>填充 .xlsx：模板 + FillData → 新文件流（不改动传入的模板流）。</summary>
     public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
     {
-        Guard.ThrowIfNull(template);
-        Guard.ThrowIfNull(contract);
-        Guard.ThrowIfNull(data);
+        Guard.ThrowIfNull(template, nameof(template));
+        Guard.ThrowIfNull(contract, nameof(contract));
+        Guard.ThrowIfNull(data, nameof(data));
 
         var bytes = StreamUtil.ReadAllBytes(template);
 
@@ -50,7 +51,15 @@ public sealed class ExcelTemplateFiller
         MemoryStream output;
         using (var document = SpreadsheetDocument.Open(working, true))
         {
-            FillCore(document.WorkbookPart!, contract, data);
+            try
+            {
+                FillCore(document.WorkbookPart!, contract, data);
+            }
+            catch (XmlException ex)
+            {
+                // zip 有效但 sheet XML 损坏：校验器只读 workbook.xml（命名区域）发现不了，惰性 DOM 在这里才抛
+                throw new InvalidOperationException(Sr.Get("Excel.Validation.XmlCorrupt", ex.Message), ex);
+            }
         }
 
         // 包终结（Dispose）后再复制：netfx 的 ZipPackage 仅 Save/Flush 时 deflate 流不定稿，产物无法重开
@@ -63,53 +72,13 @@ public sealed class ExcelTemplateFiller
     }
 
     /// <summary>按设计文档 §5.3 处理软校验问题：Drifted/Extra 告警继续；Missing 按策略；其余硬错误抛错。</summary>
+    /// <summary>按设计文档 §5.3 处理软校验问题（共用逻辑见 <see cref="ValidationApplier"/>）：Drifted/Extra 告警继续；Missing 按策略；其余硬错误抛错。</summary>
     private IReadOnlyList<TemplateValidationIssue> ApplyValidation(
         TemplateValidationResult validation,
         TemplateContract contract)
-    {
-        var warnings = new List<TemplateValidationIssue>();
-        foreach (var issue in validation.Issues)
-        {
-            switch (issue.Code)
-            {
-                case TemplateValidationIssueCode.Extra:
-                case TemplateValidationIssueCode.Drifted:
-                    warnings.Add(issue);
-                    break;
-
-                case TemplateValidationIssueCode.Missing:
-                    if (!contract.IsElementRequired(issue.Key))
-                    {
-                        // 可选元素缺失 = 契约升级后的漂移（Drifted），告警继续
-                        warnings.Add(issue with
-                        {
-                            Code = TemplateValidationIssueCode.Drifted,
-                            Severity = TemplateValidationSeverity.Warning,
-                            MessageKey = "Excel.Fill.DriftedSkipped",
-                            MessageArgs = [issue.Key],
-                            Message = Sr.Get("Excel.Fill.DriftedSkipped", issue.Key),
-                        });
-                    }
-                    else if (_options.MissingElementPolicy == MissingElementPolicy.SkipAndWarn)
-                    {
-                        warnings.Add(issue with { Severity = TemplateValidationSeverity.Warning });
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(
-                            Sr.Get("Excel.Fill.MissingRequired", issue.Key, issue.Message));
-                    }
-
-                    break;
-
-                default:
-                    // WrongType / Ambiguous / Invalid：模板与契约不匹配，无法安全填充
-                    throw new InvalidOperationException(Sr.Get("Excel.Fill.ValidationFailed", issue.Message));
-            }
-        }
-
-        return warnings;
-    }
+        => ValidationApplier.Apply(
+            validation, contract, _options.MissingElementPolicy, "Excel",
+            (key, args) => Sr.Get(key, args));
 
     private static void FillCore(WorkbookPart workbookPart, TemplateContract contract, FillData data)
     {

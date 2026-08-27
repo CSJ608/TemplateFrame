@@ -3,6 +3,7 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Globalization;
 using System.Text;
+using System.Xml;
 using TemplateFrame.Excel.Simple.Localization;
 
 namespace TemplateFrame.Excel.Simple;
@@ -15,7 +16,20 @@ internal static class SimpleExcelReader
 {
     internal static SimpleExcelTable Read(Stream source, string? tableName = null)
     {
-        Guard.ThrowIfNull(source);
+        Guard.ThrowIfNull(source, nameof(source));
+        try
+        {
+            return ReadCore(source, tableName);
+        }
+        catch (XmlException ex)
+        {
+            // zip 有效但 sheet XML 损坏：惰性 DOM 在首次树访问时才抛（OpenWorkbook 的 catch 罩不到这里）
+            throw new InvalidOperationException(Sr.Get("SimpleExcel.Read.XmlCorrupt", ex.Message), ex);
+        }
+    }
+
+    private static SimpleExcelTable ReadCore(Stream source, string? tableName)
+    {
         using var document = OpenWorkbook(source);
         var workbookPart = document.WorkbookPart;
         if (workbookPart is null)
@@ -61,8 +75,20 @@ internal static class SimpleExcelReader
             }
 
             headerRow = GetRowIndex(rows, headerIndex);
-            colStart = 1;
-            colCount = rows[headerIndex].Elements<Cell>().Count();
+            // 起始列取表头行首个单元格的列号——非 A 列起始的第三方表格不再错位丢列；
+            // 宽度按最大列号推算——物理元素数会因 Excel 不写空单元格而少计，导致末列被静默丢弃
+            var headerColumnNumbers = rows[headerIndex].Elements<Cell>().Select(CellColumnNumber)
+                .Where(c => c.HasValue).Select(c => c!.Value).ToList();
+            if (headerColumnNumbers.Count == 0)
+            {
+                colStart = 1;
+                colCount = rows[headerIndex].Elements<Cell>().Count();
+            }
+            else
+            {
+                colStart = headerColumnNumbers.Min();
+                colCount = headerColumnNumbers.Max() - colStart + 1;
+            }
         }
 
         // P1/P1-3：endRow 统一顺延到工作表最后一个行元素（与回退路径一致；全空行在数据循环中被跳过）。
@@ -347,6 +373,12 @@ internal static class SimpleExcelReader
 
         return false;
     }
+
+    /// <summary>单元格列号（1 起）；CellReference 缺失或无法解析时为 null（该单元格对 FindCell 也不可见）。</summary>
+    private static int? CellColumnNumber(Cell cell)
+        => cell.CellReference?.Value is { } reference && SimpleExcelAddress.TryParseReference(reference, out var parsed)
+            ? parsed.StartCol
+            : null;
 
     internal static Cell? FindCell(IReadOnlyDictionary<int, Row> rowsByIndex, int rowIndex, int colIndex)
     {

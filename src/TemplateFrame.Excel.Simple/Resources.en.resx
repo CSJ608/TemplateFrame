@@ -37,4 +37,10 @@
   <data name="SimpleExcel.Contract.AmbiguousColumnName" xml:space="preserve">
     <value>The defined name "{1}" for table "{0}" is duplicated (possibly from merging/hand-editing); the column position is ambiguous.</value>
   </data>
+  <data name="SimpleExcel.Contract.AmbiguousColumnPosition" xml:space="preserve">
+    <value>The defined name "{1}" for table "{0}" points to the same cell as another column (possibly from hand-editing); the column position is ambiguous.</value>
+  </data>
+  <data name="SimpleExcel.Read.XmlCorrupt" xml:space="preserve">
+    <value>The worksheet XML is corrupt and cannot be parsed: {0}</value>
+  </data>
 </root>

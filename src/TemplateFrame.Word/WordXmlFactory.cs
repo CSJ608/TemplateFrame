@@ -127,7 +127,9 @@ internal static class WordXmlFactory
                 new InsideVerticalBorder { Val = BorderValues.Single, Size = 4U, Color = "000000" }));
         }
 
-        props.Append(new TableCellMargin(
+        // tblPr 级默认单元格边距的元素是 w:tblCellMar（TableCellMarginDefault）；
+        // TableCellMargin 序列化为 w:tcMar（tcPr 级），混入 tblPr 通不过 schema 校验。
+        props.Append(new TableCellMarginDefault(
             new TopMargin { Width = "60", Type = TableWidthUnitValues.Dxa },
             new TableCellLeftMargin { Width = 108, Type = TableWidthValues.Dxa },
             new BottomMargin { Width = "60", Type = TableWidthUnitValues.Dxa },

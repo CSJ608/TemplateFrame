@@ -1,5 +1,6 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using TemplateFrame.Builder;
 using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
@@ -42,6 +43,27 @@ public sealed class ExcelTemplateBuilderTests
 
         Assert.NotNull(orderNo);
         Assert.Equal("'送货单'!$B$2", orderNo!.Reference);
+    }
+
+    /// <summary>
+    /// 2.1.1 评审落地 B-4：SetSheetName 晚于 AddElement 调用时，命名区域引用此前仍指向旧表名
+    /// （登记时即拼死表名）——区域失效、Validate 报 Missing。现表名延迟到 Save 时拼接。
+    /// </summary>
+    [Fact]
+    public void Build_SheetNameRenamedAfterElements_NamedRangesFollowNewName()
+    {
+        using var stream = TestDocuments.BuildTemplate(builder =>
+        {
+            builder.AddElement("OrderNo", "B2");   // 先登记命名区域
+            builder.AddTable("Lines", ["MC", "Qty"], new TableFormat { Bordered = true }, "A4");
+            builder.SetSheetName("送货单");          // 后改表名
+        });
+        using var document = SpreadsheetDocument.Open(stream, false);
+        var orderNo = ExcelNamedRangeLocator.FindByName(document.WorkbookPart!, "TF_OrderNo");
+
+        Assert.NotNull(orderNo);
+        Assert.Equal("'送货单'!$B$2", orderNo!.Reference);
+        Assert.Equal("送货单", document.WorkbookPart!.Workbook.Sheets!.Elements<Sheet>().First().Name!.Value);
     }
 
     [Fact]

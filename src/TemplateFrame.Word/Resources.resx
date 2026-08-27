@@ -79,4 +79,7 @@
   <data name="Word.Validation.TextElementIsImage" xml:space="preserve">
     <value>文本元素 "{0}" 对应的内容控件是图片控件。</value>
   </data>
+  <data name="Word.Validation.XmlCorrupt" xml:space="preserve">
+    <value>文档 XML 已损坏，无法解析：{0}</value>
+  </data>
 </root>

@@ -79,4 +79,7 @@
   <data name="Word.Validation.TextElementIsImage" xml:space="preserve">
     <value>The content control for text element "{0}" is an image control.</value>
   </data>
+  <data name="Word.Validation.XmlCorrupt" xml:space="preserve">
+    <value>The document XML is corrupt and cannot be parsed: {0}</value>
+  </data>
 </root>

@@ -25,7 +25,10 @@ public static class DataPathMapper
     /// <summary>正向：强类型数据 → <see cref="FillData"/>（只映射声明了 DataPath 的元素）。</summary>
     public static FillData ToFillData<TData>(TData data, TemplateContract contract)
     {
-        Guard.ThrowIfNull(contract);
+        // data 为 null 统一抛 ArgumentNullException：此前根集合模式静默导出仅表头的空文件、
+        // 容器模式抛裸反射异常——同一输入错误应有同一行为
+        Guard.ThrowIfNull(data, nameof(data));
+        Guard.ThrowIfNull(contract, nameof(contract));
         var mapping = GetMapping(contract, typeof(TData));
         var values = new Dictionary<string, object?>();
         var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
@@ -54,8 +57,8 @@ public static class DataPathMapper
     /// </summary>
     public static TData FromFillData<TData>(FillData data, TemplateContract contract)
     {
-        Guard.ThrowIfNull(data);
-        Guard.ThrowIfNull(contract);
+        Guard.ThrowIfNull(data, nameof(data));
+        Guard.ThrowIfNull(contract, nameof(contract));
         var mapping = GetMapping(contract, typeof(TData));
         object? instance = null;
 
@@ -220,7 +223,7 @@ public static class DataPathMapper
     /// </summary>
     public static bool IsCollectionDataType(Type type)
     {
-        Guard.ThrowIfNull(type);
+        Guard.ThrowIfNull(type, nameof(type));
         return type != typeof(string)
                && (type.IsArray
                    || type.GetInterfaces()
@@ -339,7 +342,8 @@ public static class DataPathMapper
         {
             converted = ConvertValue(value, property.PropertyType, element);
         }
-        catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException or ArgumentException)
+        catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException or ArgumentException
+                                   or InvalidOperationException) // Convert.ChangeType 对不支持的转换恰抛该类型
         {
             // 转换失败带上属性名（裸 FormatException 不知道错在哪个字段）
             throw new InvalidOperationException(

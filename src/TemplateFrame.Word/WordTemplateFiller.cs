@@ -37,9 +37,9 @@ public sealed class WordTemplateFiller
     /// <summary>填充 .docx：模板 + FillData → 新文件流（不改动传入的模板流）。</summary>
     public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
     {
-        Guard.ThrowIfNull(template);
-        Guard.ThrowIfNull(contract);
-        Guard.ThrowIfNull(data);
+        Guard.ThrowIfNull(template, nameof(template));
+        Guard.ThrowIfNull(contract, nameof(contract));
+        Guard.ThrowIfNull(data, nameof(data));
 
         var bytes = StreamUtil.ReadAllBytes(template);
 
@@ -67,55 +67,13 @@ public sealed class WordTemplateFiller
         return new TemplateFillResult { Output = output, Warnings = warnings };
     }
 
-    /// <summary>按设计文档 §5.3 处理软校验问题：Drifted/Extra 告警继续；Missing 按策略；其余硬错误抛错。</summary>
+    /// <summary>按设计文档 §5.3 处理软校验问题（共用逻辑见 <see cref="ValidationApplier"/>）：Drifted/Extra 告警继续；Missing 按策略；其余硬错误抛错。</summary>
     private IReadOnlyList<TemplateValidationIssue> ApplyValidation(
         TemplateValidationResult validation,
         TemplateContract contract)
-    {
-        var warnings = new List<TemplateValidationIssue>();
-        foreach (var issue in validation.Issues)
-        {
-            switch (issue.Code)
-            {
-                case TemplateValidationIssueCode.Extra:
-                case TemplateValidationIssueCode.Drifted:
-                    warnings.Add(issue);
-                    break;
-
-                case TemplateValidationIssueCode.Missing:
-                    if (!contract.IsElementRequired(issue.Key))
-                    {
-                        // 可选元素缺失 = 契约升级后的漂移（Drifted），告警继续
-                        warnings.Add(issue with
-                        {
-                            Code = TemplateValidationIssueCode.Drifted,
-                            Severity = TemplateValidationSeverity.Warning,
-                            MessageKey = "Word.Fill.DriftedSkipped",
-                            MessageArgs = [issue.Key],
-                            Message = Sr.Get("Word.Fill.DriftedSkipped", issue.Key),
-                        });
-                    }
-                    else if (_options.MissingElementPolicy == MissingElementPolicy.SkipAndWarn)
-                    {
-                        warnings.Add(issue with { Severity = TemplateValidationSeverity.Warning });
-                    }
-                    else
-                    {
-                        throw new InvalidOperationException(
-                            Sr.Get("Word.Fill.MissingRequired", issue.Key, issue.Message));
-                    }
-
-                    break;
-
-                default:
-                    // WrongType / Ambiguous / Invalid：模板与契约不匹配，无法安全填充
-                    throw new InvalidOperationException(
-                        Sr.Get("Word.Fill.ValidationFailed", issue.Code, issue.Message));
-            }
-        }
-
-        return warnings;
-    }
+        => ValidationApplier.Apply(
+            validation, contract, _options.MissingElementPolicy, "Word",
+            (key, args) => Sr.Get(key, args));
 
     private static void FillCore(WordprocessingDocument document, TemplateContract contract, FillData data)
     {

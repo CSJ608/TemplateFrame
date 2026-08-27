@@ -23,4 +23,9 @@
     <ProjectReference Include="..\..\src\TemplateFrame.Excel.Simple\TemplateFrame.Excel.Simple.csproj" />
   </ItemGroup>
 
+  <!-- net472 下 ZipArchive（损坏流测试构造 zip-valid-xml-corrupt 样本）需要显式引用框架程序集 -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <Reference Include="System.IO.Compression" />
+  </ItemGroup>
+
 </Project>

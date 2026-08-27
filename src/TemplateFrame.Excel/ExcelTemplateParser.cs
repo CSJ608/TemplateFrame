@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Globalization;
+using System.Xml;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Internal;
@@ -30,8 +31,8 @@ public sealed class ExcelTemplateParser
     /// <summary>回读 .xlsx：模板 + 契约 → FillData（不改动传入的模板流）。</summary>
     public FillData Parse(Stream template, TemplateContract contract)
     {
-        Guard.ThrowIfNull(template);
-        Guard.ThrowIfNull(contract);
+        Guard.ThrowIfNull(template, nameof(template));
+        Guard.ThrowIfNull(contract, nameof(contract));
 
         var bytes = StreamUtil.ReadAllBytes(template);
         using var document = OpenDocument(bytes);
@@ -43,37 +44,45 @@ public sealed class ExcelTemplateParser
         var values = new Dictionary<string, object?>();
         var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
 
-        foreach (var element in contract.Elements)
+        try
         {
-            switch (element)
+            foreach (var element in contract.Elements)
             {
-                case TextElement text:
-                    var (found, textValue) = ReadText(workbookPart, text);
-                    if (found)
-                    {
-                        values[text.Key] = textValue; // 占位符 → null（未填充），元素缺失 → 键省略
-                    }
+                switch (element)
+                {
+                    case TextElement text:
+                        var (found, textValue) = ReadText(workbookPart, text);
+                        if (found)
+                        {
+                            values[text.Key] = textValue; // 占位符 → null（未填充），元素缺失 → 键省略
+                        }
 
-                    break;
+                        break;
 
-                case ImageElement image:
-                    var imageBytes = ReadImage(workbookPart, image.Key);
-                    if (imageBytes is not null)
-                    {
-                        values[image.Key] = imageBytes;
-                    }
+                    case ImageElement image:
+                        var imageBytes = ReadImage(workbookPart, image.Key);
+                        if (imageBytes is not null)
+                        {
+                            values[image.Key] = imageBytes;
+                        }
 
-                    break;
+                        break;
 
-                case TableElement table:
-                    var rows = ReadTableRows(workbookPart, table);
-                    if (rows is not null)
-                    {
-                        tables[table.Key] = rows;
-                    }
+                    case TableElement table:
+                        var rows = ReadTableRows(workbookPart, table);
+                        if (rows is not null)
+                        {
+                            tables[table.Key] = rows;
+                        }
 
-                    break;
+                        break;
+                }
             }
+        }
+        catch (XmlException ex)
+        {
+            // zip 有效但 sheet/workbook XML 损坏：惰性 DOM 在首次树访问时才抛（OpenDocument 的 catch 罩不到这里）
+            throw new InvalidOperationException(Sr.Get("Excel.Validation.XmlCorrupt", ex.Message), ex);
         }
 
         return new FillData { Values = values, Tables = tables };
@@ -208,9 +217,18 @@ public sealed class ExcelTemplateParser
         var dataType = cell.DataType?.Value;
         if (dataType == CellValues.Boolean)
         {
-            if (cell.CellValue?.Text is { } boolText && bool.TryParse(boolText, out var boolValue))
+            if (cell.CellValue?.Text is { } boolText)
             {
-                return boolValue;
+                // OOXML 布尔单元格值为 "1"/"0"（Excel 与本库 Fill 端均如此保存）；True/False 文本为宽容兼容
+                if (boolText is "1" or "0")
+                {
+                    return boolText == "1";
+                }
+
+                if (bool.TryParse(boolText, out var boolValue))
+                {
+                    return boolValue;
+                }
             }
 
             return null;
@@ -229,7 +247,7 @@ public sealed class ExcelTemplateParser
                 return DateTime.FromOADate(serial);
             }
 
-            return ConvertToValueType(numberText, element.ValueType);
+            return ContractValueConverter.ConvertToValueType(numberText, element.ValueType);
         }
 
         if (dataType == CellValues.SharedString)
@@ -245,13 +263,13 @@ public sealed class ExcelTemplateParser
                 return null;
             }
 
-            return _localizer.IsPlaceholderText(sharedText) ? null : ConvertToValueType(sharedText, element.ValueType);
+            return _localizer.IsPlaceholderText(sharedText) ? null : ContractValueConverter.ConvertToValueType(sharedText, element.ValueType);
         }
 
         var text = cell.InlineString?.Text?.Text
                    ?? cell.CellValue?.Text
                    ?? string.Empty;
-        return _localizer.IsPlaceholderText(text) ? null : ConvertToValueType(text, element.ValueType);
+        return _localizer.IsPlaceholderText(text) ? null : ContractValueConverter.ConvertToValueType(text, element.ValueType);
     }
 
     private static string? ReadSharedString(WorkbookPart workbookPart, string indexText)
@@ -264,39 +282,4 @@ public sealed class ExcelTemplateParser
 
         return sharedStrings.Elements<SharedStringItem>().ElementAtOrDefault(index)?.Text?.Text;
     }
-
-    /// <summary>按 TextElement.ValueType 把文本转换为目标类型；转换失败或未知类型保留原始文本。</summary>
-    private static object? ConvertToValueType(string text, Type valueType)
-    {
-        if (valueType == typeof(string) || valueType == typeof(object))
-        {
-            return text;
-        }
-
-        if (valueType == typeof(decimal)
-            && decimal.TryParse(text, NumberStyles.Number, CultureInfo.InvariantCulture, out var decimalValue))
-        {
-            return decimalValue;
-        }
-
-        if (valueType == typeof(int)
-            && int.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var intValue))
-        {
-            return intValue;
-        }
-
-        if (valueType == typeof(DateTime)
-            && DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTimeValue))
-        {
-            return dateTimeValue;
-        }
-
-        if (valueType == typeof(bool) && bool.TryParse(text, out var boolValue))
-        {
-            return boolValue;
-        }
-
-        return text;
-    }
-
 }

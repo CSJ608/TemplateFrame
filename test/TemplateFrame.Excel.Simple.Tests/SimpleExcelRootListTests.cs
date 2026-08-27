@@ -133,4 +133,41 @@ public sealed class SimpleExcelRootListTests
         var ex = Assert.Throws<InvalidOperationException>(() => service.Fill(SampleLines()));
         Assert.Contains("DataPath", ex.Message);
     }
+
+    /// <summary>
+    /// 2.1.1 评审落地 B-12：Fill(null) 此前根集合模式静默导出仅表头的空文件、容器模式抛裸反射异常——
+    /// 现统一抛 <see cref="ArgumentNullException"/>（参数名 data）。
+    /// </summary>
+    [Fact]
+    public void Service_FillNull_ThrowsArgumentNull_InBothModes()
+    {
+        var rootList = new MaterialListService();
+        var rootListEx = Assert.Throws<ArgumentNullException>(() => rootList.Fill(null!));
+        Assert.Equal("data", rootListEx.ParamName);
+
+        var container = new ContainerService();
+        var containerEx = Assert.Throws<ArgumentNullException>(() => container.Fill(null!));
+        Assert.Equal("data", containerEx.ParamName);
+    }
+
+    private sealed class ContainerService : SimpleExcelTemplateService<MaterialsData>
+    {
+        protected override TemplateContract DefineContract()
+            => new()
+            {
+                Name = "Materials",
+                Elements =
+                [
+                    new TableElement
+                    {
+                        Key = "Materials",
+                        DataPath = "Items",
+                        Columns =
+                        [
+                            new TextElement { Key = "编码", DataPath = "Code" },
+                        ],
+                    },
+                ],
+            };
+    }
 }

@@ -149,6 +149,43 @@ public sealed class DefinedNameColumnTests
         Assert.DoesNotContain(result.Issues, i => i.Code == TemplateValidationIssueCode.Extra && i.Key == "编码");
     }
 
+    /// <summary>
+    /// 2.1.1 回归：两个不同列的定义名指向同一单元格（各自只出现一次，非重名）——
+    /// Validate 应报 Ambiguous（两列、位置歧义消息），而不是 ToDictionary 抛 ArgumentException 崩溃。
+    /// </summary>
+    [Fact]
+    public void Validate_ReportsAmbiguous_WhenTwoColumnDefinedNamesPointToSameCell()
+    {
+        using var stream = new MemoryStream();
+        SimpleExcelContract.Write(stream, SampleFillData(), MaterialsContract(), new SimpleExcelOptions { SheetName = "物料清单" });
+        stream.Position = 0;
+
+        using var conflicted = WithModifiedDefinedNames(stream, names =>
+        {
+            var code = names.Elements<DefinedName>().First(d => d.Name?.Value == "TF_Table_编码");
+            var qty = names.Elements<DefinedName>().First(d => d.Name?.Value == "TF_Table_数量");
+            qty.Text = code.Text; // "数量" 改指 "编码" 的同一单元格
+        });
+
+        var result = SimpleExcelContract.Validate(conflicted, MaterialsContract());
+
+        Assert.False(result.IsValid);
+        var ambiguous = result.Issues.Where(i => i.Code == TemplateValidationIssueCode.Ambiguous).ToList();
+        Assert.Equal(2, ambiguous.Count);
+        Assert.All(ambiguous, i => Assert.Equal("SimpleExcel.Contract.AmbiguousColumnPosition", i.MessageKey));
+        Assert.Contains(ambiguous, i => i.Key == "编码");
+        Assert.Contains(ambiguous, i => i.Key == "数量");
+
+        // Read 同样不崩溃：歧义两列（编码/数量）都不参与定位、值补 null，其余列正常读
+        conflicted.Position = 0;
+        var loaded = SimpleExcelContract.Read(conflicted, MaterialsContract());
+        var rows = loaded.Tables["Materials"];
+        Assert.Equal(2, rows.Count);
+        Assert.Null(rows[0]["编码"]);
+        Assert.Equal("铝型材 6063-T5", rows[0]["名称"]);
+        Assert.Null(rows[0]["数量"]);
+    }
+
     [Fact]
     public void Validate_EnglishWrittenFile_ByDefinedNames_IsValid_WithoutLanguage()
     {

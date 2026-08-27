@@ -37,4 +37,10 @@
   <data name="SimpleExcel.Contract.AmbiguousColumnName" xml:space="preserve">
     <value>表格 "{0}" 的列定义名 "{1}" 重复（可能由合并/手工修改导致），无法确定列位置。</value>
   </data>
+  <data name="SimpleExcel.Contract.AmbiguousColumnPosition" xml:space="preserve">
+    <value>表格 "{0}" 的列定义名 "{1}" 与其他列指向同一单元格（可能由手工修改导致），列位置有歧义。</value>
+  </data>
+  <data name="SimpleExcel.Read.XmlCorrupt" xml:space="preserve">
+    <value>工作表 XML 已损坏，无法解析：{0}</value>
+  </data>
 </root>

@@ -10,8 +10,8 @@ internal static class SimpleExcelWriter
 {
     internal static void Write(Stream target, SimpleExcelTable table, SimpleExcelOptions? options = null, IReadOnlyList<string>? columnKeys = null)
     {
-        Guard.ThrowIfNull(target);
-        Guard.ThrowIfNull(table);
+        Guard.ThrowIfNull(target, nameof(target));
+        Guard.ThrowIfNull(table, nameof(table));
         options ??= new SimpleExcelOptions();
 
         var headers = table.Headers ?? [];

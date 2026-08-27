@@ -58,7 +58,7 @@ internal sealed class ExcelStyleManager
     /// <summary>按规格取（或创建）样式索引。</summary>
     public uint GetStyleIndex(CellStyleSpec spec)
     {
-        Guard.ThrowIfNull(spec);
+        Guard.ThrowIfNull(spec, nameof(spec));
 
         var key = BuildKey(spec);
         if (_cache.TryGetValue(key, out var existing))
@@ -124,7 +124,7 @@ internal sealed class ExcelStyleManager
     /// <summary>把样式池写入工作簿的 styles.xml（StylesheetPart）。</summary>
     public void WriteTo(WorkbookPart workbookPart)
     {
-        Guard.ThrowIfNull(workbookPart);
+        Guard.ThrowIfNull(workbookPart, nameof(workbookPart));
         var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
         var stylesheet = new Stylesheet();
 

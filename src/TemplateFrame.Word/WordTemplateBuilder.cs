@@ -86,7 +86,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// <summary>添加页眉（每节一个 default 引用），内容用同一构建器能力组装。</summary>
     public void AddHeader(Action<WordTemplateBuilder> compose)
     {
-        Guard.ThrowIfNull(compose);
+        Guard.ThrowIfNull(compose, nameof(compose));
         var headerPart = _mainPart.AddNewPart<HeaderPart>();
         headerPart.Header = new Header();
         compose(new WordTemplateBuilder(this, headerPart, headerPart.Header));
@@ -96,7 +96,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// <summary>添加页脚（每节一个 default 引用），内容用同一构建器能力组装。</summary>
     public void AddFooter(Action<WordTemplateBuilder> compose)
     {
-        Guard.ThrowIfNull(compose);
+        Guard.ThrowIfNull(compose, nameof(compose));
         var footerPart = _mainPart.AddNewPart<FooterPart>();
         footerPart.Footer = new Footer();
         compose(new WordTemplateBuilder(this, footerPart, footerPart.Footer));
@@ -208,8 +208,8 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         string? headerStyle,
         bool localizeHeaders)
     {
-        Guard.ThrowIfNull(key);
-        Guard.ThrowIfNull(columns);
+        Guard.ThrowIfNull(key, nameof(key));
+        Guard.ThrowIfNull(columns, nameof(columns));
         if (columns.Count == 0)
         {
             throw new ArgumentException(Sr.Get("Word.Builder.TableNeedsColumns"), nameof(columns));
@@ -284,7 +284,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// </summary>
     public WordTemplateBuilder AddCell(Action<WordTemplateBuilder> compose, int columnSpan = 1)
     {
-        Guard.ThrowIfNull(compose);
+        Guard.ThrowIfNull(compose, nameof(compose));
         if (columnSpan < 1)
         {
             throw new ArgumentOutOfRangeException(nameof(columnSpan), Sr.Get("Word.Builder.ColumnSpanPositive"));
@@ -381,7 +381,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     /// <inheritdoc />
     public void Save(Stream target)
     {
-        Guard.ThrowIfNull(target);
+        Guard.ThrowIfNull(target, nameof(target));
         if (!_ownsDocument)
         {
             throw new InvalidOperationException(Sr.Get("Word.Builder.SubBuilderCannotSave"));
@@ -392,9 +392,17 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             throw new InvalidOperationException(Sr.Get("Word.Builder.SaveOnce"));
         }
 
-        if (!_container.Elements<SectionProperties>().Any())
+        // OOXML 规定 CT_Body 的 sectPr 必须是最后一个子元素：AddHeader/AddFooter 首次调用时已把 sectPr
+        // 追加到当时还空的 Body，其后写入的段落/表格会排在它之后——Save 时统一归位到末尾。
+        var sectionProperties = _container.Elements<SectionProperties>().FirstOrDefault();
+        if (sectionProperties is null)
         {
             _container.Append(WordXmlFactory.CreateSectionProperties(_pageSetup));
+        }
+        else if (!ReferenceEquals(_container.LastChild, sectionProperties))
+        {
+            sectionProperties.Remove();
+            _container.Append(sectionProperties);
         }
 
         // 终结包（Dispose）后再复制：netfx 的 ZipPackage 仅 Save/Flush 时 deflate 流不定稿，产物无法重开
@@ -446,7 +454,8 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             existing.Remove();
         }
 
-        sectionProperties.Append(reference);
+        // CT_SectPr 要求 header/footerReference 位于最前（先于 pgSz/pgMar 等），追加到末尾通不过 schema 校验
+        sectionProperties.PrependChild(reference);
     }
 
     private SdtRun CreateTextSdt(string key, TextFormat? format = null)

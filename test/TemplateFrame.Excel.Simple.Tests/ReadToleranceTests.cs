@@ -229,9 +229,59 @@ public sealed class ReadToleranceTests
         Assert.DoesNotContain(result.Issues, issue => issue.Code == TemplateValidationIssueCode.Invalid);
     }
 
+    // ---------------- B-1（2.1.1 评审落地）：回退路径列定位 ----------------
+
+    /// <summary>
+    /// 表头不在 A 列起始（第三方工具产物常见）：回退路径此前固定 colStart=1——从 A 列错读，
+    /// 前两列恒空、末列被静默丢弃。现按表头行首个单元格列号起、最大列号计宽。
+    /// </summary>
+    [Fact]
+    public void Read_Fallback_TableNotStartingAtColumnA_ReadsActualColumns()
+    {
+        using var stream = new MemoryStream();
+        BuildWorkbook(stream, tableRange: null, rows: new[]
+        {
+            new[] { "编码", "名称", "单位" },
+            new[] { "M1", "物料一", "件" },
+            new[] { "M2", "物料二", "箱" },
+        }, startColumn: 3);
+        stream.Position = 0;
+
+        var loaded = SimpleExcel.Read(stream);
+
+        Assert.Equal(["编码", "名称", "单位"], loaded.Headers);
+        Assert.Equal(2, loaded.Rows.Count);
+        Assert.Equal("M1", loaded.Rows[0][0]);
+        Assert.Equal("物料一", loaded.Rows[0][1]);
+        Assert.Equal("箱", loaded.Rows[1][2]);
+    }
+
+    /// <summary>表头行有空单元格（Excel 常不写空元素）：物理元素数会少计宽度导致末列被丢——现按最大列号推算。</summary>
+    [Fact]
+    public void Read_Fallback_HeaderWithHole_KeepsTrailingColumns()
+    {
+        using var stream = new MemoryStream();
+        BuildWorkbook(stream, tableRange: null, rows: new[]
+        {
+            new[] { "编码", null, "名称", "数量" },
+            new[] { "M1", null, "物料一", "120" },
+        }, startColumn: 3);
+        stream.Position = 0;
+
+        var loaded = SimpleExcel.Read(stream);
+
+        // 表头行物理元素只有 3 个（D 列空未写），但跨度是 C..F 共 4 列
+        Assert.Equal(["编码", "", "名称", "数量"], loaded.Headers);
+        Assert.Single(loaded.Rows);
+        Assert.Equal("M1", loaded.Rows[0][0]);
+        Assert.Null(loaded.Rows[0][1]);
+        Assert.Equal("120", loaded.Rows[0][3]);
+    }
+
     // ---------------- 工作簿构造器 ----------------
 
-    private static void BuildWorkbook(Stream ms, string? tableRange, string[][] rows, bool includeRowIndex = true)
+    private static void BuildWorkbook(
+        Stream ms, string? tableRange, string?[][] rows, bool includeRowIndex = true, int startColumn = 1)
     {
         using var doc = SpreadsheetDocument.Create(ms, SpreadsheetDocumentType.Workbook);
         var wbp = doc.AddWorkbookPart();
@@ -256,11 +306,16 @@ public sealed class ReadToleranceTests
 
             for (var c = 0; c < rows[r].Length; c++)
             {
+                if (rows[r][c] is not string text)
+                {
+                    continue; // 空单元格不写元素（模拟 Excel 对空单元格的行为）
+                }
+
                 row.Append(new Cell
                 {
-                    CellReference = ColumnLetter(c + 1) + (r + 1),
+                    CellReference = ColumnLetter(startColumn + c) + (r + 1),
                     DataType = CellValues.InlineString,
-                    InlineString = new InlineString(new Text(rows[r][c]) { Space = SpaceProcessingModeValues.Preserve }),
+                    InlineString = new InlineString(new Text(text) { Space = SpaceProcessingModeValues.Preserve }),
                 });
             }
 

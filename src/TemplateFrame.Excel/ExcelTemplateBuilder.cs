@@ -109,7 +109,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     /// <summary>放置一个文本元素：占位文本按语言（默认 zh "待填充" / en "To be filled"，经本地化器解析）+ 命名区域 <c>TF_&lt;Key&gt;</c> → 单元格。</summary>
     public ExcelTemplateBuilder AddElement(string key, string cellAddress, TextFormat? format = null)
     {
-        Guard.ThrowIfNull(key);
+        Guard.ThrowIfNull(key, nameof(key));
         var cell = GetOrCreateCell(cellAddress);
         SetInlineString(cell, _localizer.PlaceholderText(_culture));
         ApplyStyle(cell, format, bordered: false, horizontal: null, vertical: null);
@@ -146,8 +146,8 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         string startCell,
         bool localizeHeaders)
     {
-        Guard.ThrowIfNull(key);
-        Guard.ThrowIfNull(columns);
+        Guard.ThrowIfNull(key, nameof(key));
+        Guard.ThrowIfNull(columns, nameof(columns));
         if (columns.Count == 0)
         {
             throw new ArgumentException(Sr.Get("Excel.Builder.TableNeedsColumns"), nameof(columns));
@@ -201,10 +201,12 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         double xOffsetInches = 0,
         double yOffsetInches = 0)
     {
-        Guard.ThrowIfNull(key);
+        Guard.ThrowIfNull(key, nameof(key));
         var (row, col) = ExcelAddressHelper.ParseCell(anchorCell);
-        var (bytes, extension) = PlaceholderImage.Load(placeholderPath);
-        var contentType = extension == "jpg" ? "image/jpeg" : "image/png";
+        var (bytes, _) = PlaceholderImage.Load(placeholderPath);
+        // 占位图按魔数探测 MIME（与 Filler 一致）：用户可传 GIF/BMP/TIFF 占位图（PlaceholderImage.Load 支持），
+        // 此前只映射 jpg/png，其余会以错误的 image/png 存入
+        var contentType = ImageTypeDetector.DetectContentType(bytes);
 
         _drawingsPart ??= _worksheetPart!.AddNewPart<DrawingsPart>();
 
@@ -239,7 +241,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     /// <inheritdoc />
     public void Save(Stream target)
     {
-        Guard.ThrowIfNull(target);
+        Guard.ThrowIfNull(target, nameof(target));
         if (_saved)
         {
             throw new InvalidOperationException(Sr.Get("Excel.Builder.SaveOnce"));
@@ -292,10 +294,12 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
 
         if (_definedNames.Count > 0)
         {
+            // 表名在 Save 时拼进引用（登记时只存 $B$2 形式的单元格部分），SetSheetName 晚调用不失效
             var definedNames = new DefinedNames();
+            var quotedSheet = ExcelNamedRangeLocator.QuoteSheet(_sheetName);
             foreach (var (name, reference) in _definedNames)
             {
-                definedNames.Append(new DefinedName { Name = name, Text = reference });
+                definedNames.Append(new DefinedName { Name = name, Text = quotedSheet + "!" + reference });
             }
 
             _workbookPart.Workbook!.Append(definedNames);
@@ -348,10 +352,10 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
             throw new InvalidOperationException(Sr.Get("Excel.Builder.DuplicateNamedRange", name));
         }
 
-        var reference = ExcelNamedRangeLocator.QuoteSheet(_sheetName)
-                        + "!$" + ExcelAddressHelper.ColumnLetter(ExcelAddressHelper.ParseCell(cellAddress).Col)
-                        + "$" + ExcelAddressHelper.ParseCell(cellAddress).Row;
-        _definedNames.Add((name, reference));
+        // 只存绝对单元格引用（$B$2）；表名在 Save 时才拼接——SetSheetName 晚于 AddElement/AddTable
+        // 调用时，已登记区域仍指向当前表名，不会失效
+        var cell = ExcelAddressHelper.ParseCell(cellAddress);
+        _definedNames.Add((name, "$" + ExcelAddressHelper.ColumnLetter(cell.Col) + "$" + cell.Row));
     }
 
     private Row GetOrCreateRow(int rowIndex)

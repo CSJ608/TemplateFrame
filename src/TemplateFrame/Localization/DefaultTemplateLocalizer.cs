@@ -55,7 +55,7 @@ public sealed class DefaultTemplateLocalizer : ITemplateLocalizer
     /// <inheritdoc />
     public string GetString(string key, CultureInfo? culture = null)
     {
-        Guard.ThrowIfNull(key);
+        Guard.ThrowIfNull(key, nameof(key));
         var targetCulture = culture ?? CultureInfo.CurrentUICulture;
 
         // 1) 业务注入覆盖优先：文化限定（祖先链回退）→ 文化中立

@@ -1,6 +1,11 @@
-# 打标签 v* 时：构建 + 测试 + 打包，创建 GitHub Release 并附 nupkg/snupkg。
-# Release 正文优先从 CHANGELOG.md 提取当前版本段落；找不到时回退到 GitHub 自动生成。
-# 参考：StreamFrame 的 .github/workflows/release.yml
+# 打标签 v* 时：测试门禁（全目标框架）→ 构建 + 打包 → GitHub Release + OIDC Trusted Publishing 推送 nuget.org。
+# 2.1.1 起合并原 release.yml 与 publish-nuget.yml：
+#   - 发布（GitHub Release / nuget.org 均不可撤回）必须通过测试门禁（needs: test），tag 打在未跑过 CI 的提交上也无法绕过；
+#   - 测试在 windows 上跑全部目标框架（net472 需要 Windows 运行时），补齐原发布链路对 netfx 资产的零验证；
+#   - 消除两份工作流的重复 build/pack 步骤（历史上漏过一次少打包两个包）。
+# 前置（一次性，浏览器操作）：
+#   1. nuget.org 注册本仓库为 trusted publisher（见 docs/PUBLISHING.md）
+#   2. GitHub 仓库 Settings → Secrets and variables → Actions → Variables 添加 NUGET_USER
 name: release
 
 on:
@@ -9,18 +14,17 @@ on:
       - "v*"
 
 permissions:
-  contents: write
+  id-token: write   # OIDC Trusted Publishing
+  contents: write   # GitHub Release
 
 jobs:
-  release:
-    runs-on: ubuntu-latest
+  test:
+    runs-on: windows-latest
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
 
       - name: Verify version matches tag
-        if: startsWith(github.ref, 'refs/tags/')
         run: |
           tag="${GITHUB_REF_NAME#v}"
           version="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/Directory.Build.props)"
@@ -34,11 +38,29 @@ jobs:
         with:
           dotnet-version: "9.0.x"
 
+      - name: Restore
+        run: dotnet restore TemplateFrame.slnx
+
+      - name: Build
+        run: dotnet build TemplateFrame.slnx -c Release --no-restore
+
+      - name: Test（windows 全部目标框架；发布门禁）
+        run: dotnet test TemplateFrame.slnx -c Release --no-build
+
+  release:
+    needs: test
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Set up .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: "9.0.x"
+
       - name: Build
         run: dotnet build TemplateFrame.slnx -c Release
-
-      - name: Test（ubuntu 仅 net8.0；net472 由 ci.yml 的 windows 矩阵覆盖）
-        run: dotnet test TemplateFrame.slnx -c Release --no-build -f net8.0
 
       - name: Pack
         run: |
@@ -46,6 +68,29 @@ jobs:
           dotnet pack src/TemplateFrame.Word/TemplateFrame.Word.csproj -c Release --no-build -o artifacts
           dotnet pack src/TemplateFrame.Excel/TemplateFrame.Excel.csproj -c Release --no-build -o artifacts
           dotnet pack src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj -c Release --no-build -o artifacts
+
+      - name: Verify NUGET_USER variable
+        run: |
+          echo "NUGET_USER length: ${#NUGET_USER}"
+          if [ -z "${NUGET_USER}" ]; then
+            echo "::error::NUGET_USER is EMPTY. Add it in Settings → Secrets and variables → Actions → Variables (not Secrets)."
+            exit 1
+          fi
+        env:
+          NUGET_USER: ${{ vars.NUGET_USER }}
+
+      - name: NuGet Login (OIDC)
+        id: login
+        uses: NuGet/login@v1
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Push to nuget.org
+        run: |
+          dotnet nuget push "artifacts/*.nupkg" \
+            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --source https://www.nuget.org/api/v2/package \
+            --skip-duplicate
 
       - name: Extract tag version
         id: tag
