@@ -2,6 +2,35 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [2.2.0] - 2026-08-27
+
+### 修复
+- **Excel 插件布尔列 Fill→Parse 往返恒为 null**：填充端按 OOXML 规范把布尔写成 `t="b"` + `"1"/"0"`（与 Excel 自身保存形态一致），解析端此前只认 `True`/`False` 文本——任何含布尔列的文件（本库导出的、真实 Excel 编辑过的）回读布尔一律静默 null。现解析端兼容 `"1"/"0"` 数字形态（Simple 包本就兼容，插件间已对齐）
+- **Word 生成文档的 OOXML schema 违规（三处，Word 桌面容忍但严格消费者拒绝）**：① 先 `AddHeader`/`AddFooter` 再写正文时 `sectPr` 停在 Body 中部（规范要求必须是 `CT_Body` 最后一个子元素），`Save` 时统一归位——官方 Demo 的调用顺序恰好触发；② `headerReference`/`footerReference` 追加在 `sectPr` 末尾（规范要求引用组位于最前）；③ 表格默认单元格边距误用 `w:tcMar`（tcPr 级元素）写进 `tblPr`，应为 `w:tblCellMar`。新增 `SchemaValidationTests` 用 `OpenXmlValidator` 固化全文档校验通过
+- **Excel.Simple `Validate` 遇「两个不同列定义名指向同一单元格」崩溃**：各出现一次（非重名）的两列定义名被改成同一单元格时，`ToDictionary` 抛裸 `ArgumentException`——违背「坏文件返回 Invalid/Ambiguous issue」的异常契约。现两列均报 `Ambiguous`（新消息键 `SimpleExcel.Contract.AmbiguousColumnPosition`，中英），`Read` 不崩溃、歧义列值补 null
+- **SimpleExcel 回退路径列定位错读非 A 列起始的第三方表格**：表头不在 A 列（如 C3 起）时此前固定从 A 列读——前几列恒空、末列被静默丢弃；表头行有空单元格时宽度按物理元素数少计，末列同样被丢。现按「表头行首个单元格列号起、最大列号计宽」定位
+- **zip 有效但 XML 损坏的文件漏裸 `XmlException`**：OpenXML SDK 惰性加载 DOM，打开包不抛、首次树访问才抛——现有 catch 只罩住 Open 阶段。Word/Excel 的 Validator / Parser / Filler 与 Simple 的 Read / `SimpleExcelContract.Read` 补齐（新消息键 `*.Validation.XmlCorrupt` / `SimpleExcel.Read.XmlCorrupt`，中英）；新增 zip-valid-xml-corrupt 样本测试（三插件 CorruptStreamTests 各一组）
+- **`SetSheetName` 晚于 `AddElement`/`AddTable` 调用时命名区域失效**：区域引用在登记时即拼死当时的表名，后改名区域仍指向旧表 → Validate 报 Missing。现表名延迟到 `Save` 时拼接
+- **Excel Builder 占位图 content-type 只映射 jpg/png**：用户传 GIF/BMP/TIFF 占位图（`PlaceholderImage.Load` 明确支持）会以错误的 `image/png` 存入。现与 Filler 一致按魔数探测（`ImageTypeDetector`）
+- **`SimpleExcelContract.Read` 抛裸 `OpenXmlPackageException`**（同文件 `Validate`/`SimpleExcel.Read` 均已包装）：现统一包装为 `InvalidOperationException` + 本地化消息；`Validate` 补 `template`/`contract` 空值守卫（此前 null → NRE）
+- **`DataPathMapper.SetValue` 的 catch 清单漏 `InvalidOperationException`**：`Convert.ChangeType` 对不支持的转换恰抛该类型，绕过「转换失败带上属性名」的包装
+
+### 变更
+- **`Fill(data)` 传 null 统一抛 `ArgumentNullException`（参数名 data）**：此前根集合模式（`TData = List<T>`）静默导出仅表头的空文件、容器模式抛裸反射异常——同一输入错误应有同一行为
+- **`Excel.Fill.ValidationFailed` 消息参数与 Word 统一**：软校验硬错误的异常消息现同样携带问题码（`{0}` = Code、`{1}` = 详情），此前 Excel 版缺问题码参数
+- `Guard.ThrowIfNull` 全部 48 处调用补 `nameof` 参数名——此前 `ArgumentNullException.ParamName` 恒为 null，多参数 API 无法定位是哪个参数为空
+
+### 新增
+- **Fill→Parse 往返对称矩阵测试**（Word / Excel 插件各一组）：文本 / 数字 / 日期 / 布尔 × 标量与表格列 + 图片的往返断言——此前布尔丢失正是因为缺这条通用护栏（Simple 包已有对等覆盖）
+- **公共代码下沉基础包**（`TemplateFrame.Internal`）：`ValidationApplier`（Word / Excel 两 Filler 逐行重复的软校验处理，约 48 行 ×2）与 `ContractValueConverter`（两 Parser 逐字相同的 ValueType 转换，32 行 ×2）；消息键按插件前缀（`Word.Fill.*` / `Excel.Fill.*`）经委托用各插件自己的资源渲染
+
+### 工程
+- **发布链路加测试门禁**：`release.yml` 与 `publish-nuget.yml` 合并为单工作流两 job——`test`（windows 全部目标框架，含版本校验）→ `needs: test` 的 `release`（打包 + GitHub Release + OIDC 推送 nuget.org）。发布不再可能绕过测试；netfx 资产在发布链路上有了测试覆盖（此前仅 ci.yml 的 windows 腿验证，tag 可绕过）；删除手动触发死配置；各 job 加 `timeout-minutes`；`NUGET_USER` 缺失时快速失败
+
+### 文档
+- README（中英）快速开始补 `MaterialLine`/`MaterialsData` 定义与落盘两行（此前示例引用未定义类型，照抄编译不过）
+- DESIGN §8 更新为合并后的发布工作流并修正发布状态（2.1.0 已发布）；PUBLISHING 同步；删除 samples 遗留空壳目录 `TemplateFrame.Demo.Word.ContentI18n`（磁盘 9 个目录 vs 文档 8 个）
+
 ## [2.1.0] - 2026-08-25
 
 ### 新增
