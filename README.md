@@ -43,11 +43,23 @@
 dotnet add package TemplateFrame.Excel.Simple
 ```
 
-**① 定义场景服务**——声明契约（有哪些列），版式与映射全部省掉：
+**① 定义数据与服务**——声明契约（有哪些列），版式与映射全部省掉：
 
 ```csharp
 using TemplateFrame.Contract;
 using TemplateFrame.Excel.Simple;
+
+public sealed record MaterialLine
+{
+    public string Code { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string? Unit { get; init; }
+}
+
+public sealed record MaterialsData
+{
+    public IReadOnlyList<MaterialLine> Items { get; init; } = [];
+}
 
 public sealed class MaterialsService : SimpleExcelTemplateService<MaterialsData>
 {
@@ -82,9 +94,13 @@ using var template = service.BuildTemplate();   // 生成模板（仅表头的 x
 using var filled   = service.Fill(data);        // 强类型数据 → 填充后的 xlsx（导出）
 var validation    = service.Validate(template); // 校验上传的模板与契约匹配（缺列/错位列清单）
 var parsed        = service.Parse(filled);      // 读回文件 → 强类型 MaterialsData（导入）
+
+// BuildTemplate / Fill 返回内存流，需要落盘时：
+using var file = File.Create("filled.xlsx");
+filled.CopyTo(file);
 ```
 
-`TData` 甚至可以直接是 `List<MaterialLine>`（根集合，契约表格的 `DataPath` 留空）——`Fill(list)` / `Parse(stream)` 不用包一层容器。
+`TData` 甚至可以直接是 `List<MaterialLine>`（根集合，契约表格的 `DataPath` 留空）——`Fill(list)` / `Parse(stream)` 不用包一层容器对象。
 
 ## 核心模型
 

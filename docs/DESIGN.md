@@ -313,7 +313,7 @@ TemplateFrame/
 ├─ docs/DESIGN.md                   # 本文档
 ├─ docs/ROADMAP.md / docs/DEMOS.md / docs/PUBLISHING.md
 ├─ CHANGELOG.md
-└─ .github/workflows/               # ci.yml / release.yml / publish-nuget.yml
+└─ .github/workflows/               # ci.yml / release.yml
 ```
 
 示例场景服务放在 `samples`，用 **Demo 单据**（`DeliveryOrderData` / `DeliveryOrderTemplateService`）演示，不把业务名带进仓库。
@@ -339,6 +339,7 @@ TemplateFrame/
 | 已归档 | **16** | SimpleExcel 根集合：`List<T>` 直接填充/解析 | ✅ 完成（随 v1.0.6 发布） |
 | 已归档 | **17** | 评审落地：Excel Drifted 修复 + API 简化（`MissingElementPolicy` / `TemplateFillOptions` 下沉、删除插件空壳类型）+ 插件去重 + 大文件拆分（全库无 500+ 行文件）+ 损坏流异常契约 + 测试补强（290 用例）+ 基建（editorconfig / Directory.Build.props / 包图标 / CI 矩阵与覆盖率）+ 文档"上手优先"重构 | ✅ 完成（2026-08-24，随 **2.0.0** 发布） |
 | 已归档 | **18** | 多目标框架支持：四包统一 `netstandard2.0;net462;net8.0`（2.1.0） | ✅ 完成（2026-08-25） |
+| 已归档 | **19** | 评审落地（第二轮）：布尔回读 / Word schema 三处 / 发布测试门禁（合并发布工作流）/ XML 损坏泄漏 / 回退列定位 / SetSheetName 时序 / 同位置定义名 / 异常契约统一 + `ValidationApplier`/`ContractValueConverter` 下沉 + 往返矩阵与 schema 校验护栏测试（310 用例） | ✅ 完成（2026-08-27，随 **2.2.0** 发布） |
 
 ---
 
@@ -349,13 +350,12 @@ TemplateFrame/
 | 文件 | 触发 | 作用 | 状态 |
 |---|---|---|---|
 | `ci.yml` | push / PR（main） | format 校验（`dotnet format --verify-no-changes`）+ build（三 TFM）+ test，**ubuntu / windows 双矩阵**（ubuntu 仅测 net8.0，windows 测全部目标框架），测试收集行覆盖率（coverlet） | 已启用 |
-| `release.yml` | tag `v*` | 版本校验（`src/Directory.Build.props` ↔ tag）+ build + test + pack → GitHub Release（附 nupkg/snupkg） | 已启用（v1.0.0 起） |
-| `publish-nuget.yml` | tag `v*` | 版本校验 + OIDC Trusted Publishing → nuget.org | 已启用（v1.0.0 起） |
+| `release.yml` | tag `v*` | `test` job（windows 全 TFM 测试门禁，含版本校验）→ `needs: test` 的 `release` job：build + pack → OIDC Trusted Publishing 推 nuget.org + GitHub Release（附 nupkg/snupkg）。2.2.0 起合并原 `publish-nuget.yml`：发布必须先过测试门禁，netfx 资产在发布链路上也有测试覆盖 | 已启用（v1.0.0 起） |
 
 **发布说明**：
-- 推送 `v*` tag 即触发 `release.yml`（GitHub Release）与 `publish-nuget.yml`（OIDC 推送 nuget.org）；
+- 推送 `v*` tag 即触发 `release.yml`：先测试（windows 全部目标框架），通过后 GitHub Release + 推送 nuget.org；
 - NuGet 发布依赖一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
-- 已发布版本：v1.0.0 – v1.0.7、2.0.0（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）；下一个发布为 **2.1.0**（迭代 18：多目标框架，非破坏性）。
+- 已发布版本：v1.0.0 – v1.0.7、2.0.0、2.1.0、2.2.0（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）。
 
 ---
 

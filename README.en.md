@@ -45,11 +45,23 @@ Using a materials list (`TemplateFrame.Excel.Simple`):
 dotnet add package TemplateFrame.Excel.Simple
 ```
 
-**① Define a scenario service** — declare the contract (which columns); layout and mapping are automatic:
+**① Define data and the service** — declare the contract (which columns); layout and mapping are automatic:
 
 ```csharp
 using TemplateFrame.Contract;
 using TemplateFrame.Excel.Simple;
+
+public sealed record MaterialLine
+{
+    public string Code { get; init; } = string.Empty;
+    public string Name { get; init; } = string.Empty;
+    public string? Unit { get; init; }
+}
+
+public sealed record MaterialsData
+{
+    public IReadOnlyList<MaterialLine> Items { get; init; } = [];
+}
 
 public sealed class MaterialsService : SimpleExcelTemplateService<MaterialsData>
 {
@@ -84,6 +96,10 @@ using var template = service.BuildTemplate();   // generate the template (header
 using var filled   = service.Fill(data);        // typed data → filled xlsx (export)
 var validation    = service.Validate(template); // check an uploaded template against the contract
 var parsed        = service.Parse(filled);      // read a file back → typed MaterialsData (import)
+
+// BuildTemplate / Fill return in-memory streams; persist with:
+using var file = File.Create("filled.xlsx");
+filled.CopyTo(file);
 ```
 
 `TData` can even be a `List<MaterialLine>` directly (root collection — leave the table's `DataPath` empty), no wrapper object needed.

@@ -26,6 +26,7 @@
 | **16** | **SimpleExcel 根集合 `List<T>` 直接填充/解析**（随 v1.0.6 发布，见 CHANGELOG） | ✅ 已完成 |
 | **17** | **评审落地：Excel Drifted 修复 + API 简化（2.0.0）+ 去重 + 大文件拆分 + 损坏流异常契约 + 测试补强（290 用例）+ 基建（CI 矩阵/覆盖率/图标）+ 文档重构** | ✅ 已完成（见下） |
 | **18** | **多目标框架支持：netstandard2.0 + net462 + net8.0（2.1.0，非破坏性）** | ✅ 已完成（见下） |
+| **19** | **评审落地（第二轮）：布尔回读 / Word schema 三处 / 发布测试门禁 / XML 损坏泄漏 / 回退列定位 / SetSheetName 时序 / 同位置定义名 / 异常契约统一 + 公共代码下沉（2.2.0）** | ✅ 已完成（见下） |
 
 > 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
@@ -382,6 +383,23 @@
 
 ### 约束
 - 提交用 Conventional Commits（feat:/fix:/test:/docs:/chore:）；不推 `v*` tag（2.1.0 待用户确认后发布）；CI / 发布工作流不手动触发；不改设计文档未规划内容
+
+---
+
+## 迭代 19：评审落地（第二轮：正确性 + 发布门禁 + 异常契约）—— 已完成
+
+> **状态**：✅ 已完成（2026-08-27，随 **2.2.0** 发布）。310 用例 × 2 TFM 全绿；`dotnet format --verify-no-changes` 通过；三 Demo 端到端复跑通过。
+> 评审来源：外部两轮多维度评审报告（第一轮聚焦 P0 与 API 整洁度；第二轮五个专项深扫 + 主评审复核），关键结论全部对照源码核实后落地。
+
+### 落地内容
+- **P0 修复**：① Excel 布尔列 Fill→Parse 往返恒 null（OOXML 布尔值 "1"/"0" 与 `bool.TryParse` 不兼容，真实 Excel 文件同样中招）；② Word 生成文档三处 schema 违规（sectPr 未归位 Body 末尾 / headerReference 未前置 / `w:tcMar` 误入 tblPr 应为 `w:tblCellMar`——`OpenXmlValidator` 全文校验护栏顺带暴露）；③ 发布链路无测试门禁（`release.yml` 合并 `publish-nuget.yml`：test job 前置 + `needs:`，netfx 资产在发布链路有了测试覆盖）
+- **P1/P2 修复**：zip 有效 XML 损坏漏裸 `XmlException`（含 Excel Filler——校验器只读 workbook.xml 罩不到的第五个泄漏点）；SimpleExcel 回退路径非 A 列起始丢列；`SetSheetName` 晚调用命名区域失效（表名延迟到 Save 拼接）；同位置列定义名 Validate 崩溃（归入 Ambiguous）；占位图 content-type 走魔数探测；`SimpleExcelContract.Read` 异常包装 + Validate 空值守卫；`SetValue` catch 清单
+- **行为统一（2.2.0 次版本原因）**：`Fill(null)` 统一抛 `ArgumentNullException`（此前根集合模式静默导出空表、容器模式裸反射异常）；`Excel.Fill.ValidationFailed` 消息参数与 Word 统一（带问题码）
+- **公共代码下沉**：`ValidationApplier`（两 Filler 软校验处理）与 `ContractValueConverter`（两 Parser ValueType 转换）进 `TemplateFrame.Internal`；`Guard` 全 48 处调用补 `nameof` 参数名
+- **护栏测试（290 → 310 用例）**：Fill→Parse 往返对称矩阵（Word/Excel × 文本/数字/日期/布尔/图片）、`OpenXmlValidator` schema 校验、zip-valid-xml-corrupt 样本（三插件）、回退列定位、SetSheetName 时序、同位置定义名、Fill(null)
+
+### 验收
+- `dotnet build` 零警告 / `dotnet format --verify-no-changes` / `dotnet test`（310 用例 × net8.0 + net472）全绿；三 Demo 端到端；YAML 语法校验；版本三证一致（props 2.2.0 ↔ tag v2.2.0 ↔ CHANGELOG [2.2.0]）
 
 ---
 
