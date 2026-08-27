@@ -27,7 +27,7 @@
 | **17** | **评审落地：Excel Drifted 修复 + API 简化（2.0.0）+ 去重 + 大文件拆分 + 损坏流异常契约 + 测试补强（290 用例）+ 基建（CI 矩阵/覆盖率/图标）+ 文档重构** | ✅ 已完成（见下） |
 | **18** | **多目标框架支持：netstandard2.0 + net462 + net8.0（2.1.0，非破坏性）** | ✅ 已完成（见下） |
 | **19** | **评审落地（第二轮）：布尔回读 / Word schema 三处 / 发布测试门禁 / XML 损坏泄漏 / 回退列定位 / SetSheetName 时序 / 同位置定义名 / 异常契约统一 + 公共代码下沉（2.2.0）** | ✅ 已完成（见下） |
-| **20** | **ParseDetailed（导入方向告警出口，`ConversionFailed`）+ XML 注释双语规则（英文 summary + 中文 remarks）+ 插件 README 中英** | ✅ 已完成（见下） |
+| **20** | **ParseDetailed（导入方向告警出口，`ConversionFailed`）+ XML 注释双语规则（英文 summary + 中文 remarks）+ 插件 README 中英（2.3.0）** | ✅ 已完成（见下） |
 
 > 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
@@ -406,7 +406,7 @@
 
 ## 迭代 20：ParseDetailed + XML 注释双语 —— 已完成
 
-> **状态**：✅ 已完成（2026-08-27）。318 用例 × 2 TFM 全绿；`dotnet format --verify-no-changes` 通过；XML doc（net8.0 资产）经反编译抽查四包 public 成员 summary 均为英文。
+> **状态**：✅ 已完成（2026-08-27，随 **2.3.0** 发布）。318 用例 × 2 TFM 全绿；`dotnet format --verify-no-changes` 通过。
 
 ### 落地内容
 - **ParseDetailed（FillDetailed 在导入方向的对称出口）**：新问题码 `ConversionFailed`（Warning，复用 `TemplateValidationIssue`）+ 结果类型 `TemplateParseResult`（引擎层）/ `TemplateParseResult<TData>`（服务层）；`ITemplateEngine` / 两插件 Parser / Engine / `TemplateService` 全链路接入。转换失败的字段保留原始文本（`Parse` 行为逐字节不变），表格列告警带行号（Word 数据行号 / Excel 工作表行号）——「null=未填充」与「转换失败」可区分

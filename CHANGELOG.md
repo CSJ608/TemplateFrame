@@ -2,7 +2,7 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
-## [Unreleased]
+## [2.3.0] - 2026-08-27
 
 ### 新增
 - **`ParseDetailed`：导入方向的告警出口（与 `FillDetailed` 对称）**：值转换失败的字段在 `FillData` 中保留原始文本，并以 `ConversionFailed`（新问题码，Warning 级，复用 `TemplateValidationIssue` 形状；表格列告警带行号——Word 为数据行号、Excel 为工作表绝对行号）随 `TemplateParseResult` 返回——「null = 未填充」与「转换失败」从此可区分，`Parse` 行为不变。入口：`ITemplateEngine.ParseDetailed` / `WordTemplateParser` / `ExcelTemplateParser` / `TemplateService<TData,TBuilder>.ParseDetailed`（返回 `TemplateParseResult<TData>`，服务层走宽容映射：转换失败的字段保持默认值不抛错，`MapFromDataDetailed` 可重写）。新消息键 `Word/Excel.Parse.ConversionFailed` 与 `…TableConversionFailed`（中英）。**自行实现 `ITemplateEngine` 的业务方需补 `ParseDetailed` 成员**（沿用 2.1.0 移除 DIM 后 `FillDetailed` 的先例）

@@ -341,7 +341,7 @@ TemplateFrame/
 | 已归档 | **17** | 评审落地：Excel Drifted 修复 + API 简化（`MissingElementPolicy` / `TemplateFillOptions` 下沉、删除插件空壳类型）+ 插件去重 + 大文件拆分（全库无 500+ 行文件）+ 损坏流异常契约 + 测试补强（290 用例）+ 基建（editorconfig / Directory.Build.props / 包图标 / CI 矩阵与覆盖率）+ 文档"上手优先"重构 | ✅ 完成（2026-08-24，随 **2.0.0** 发布） |
 | 已归档 | **18** | 多目标框架支持：四包统一 `netstandard2.0;net462;net8.0`（2.1.0） | ✅ 完成（2026-08-25） |
 | 已归档 | **19** | 评审落地（第二轮）：布尔回读 / Word schema 三处 / 发布测试门禁（合并发布工作流）/ XML 损坏泄漏 / 回退列定位 / SetSheetName 时序 / 同位置定义名 / 异常契约统一 + `ValidationApplier`/`ContractValueConverter` 下沉 + 往返矩阵与 schema 校验护栏测试（310 用例） | ✅ 完成（2026-08-27，随 **2.2.0** 发布） |
-| 已归档 | **20** | ParseDetailed（导入方向告警出口，`ConversionFailed`）+ XML 注释双语规则（英文 summary + 中文 remarks）+ 插件 README 中英 | ✅ 完成（2026-08-27） |
+| 已归档 | **20** | ParseDetailed（导入方向告警出口，`ConversionFailed`）+ XML 注释双语规则（英文 summary + 中文 remarks）+ 插件 README 中英 | ✅ 完成（2026-08-27，随 **2.3.0** 发布） |
 
 ---
 
@@ -357,7 +357,7 @@ TemplateFrame/
 **发布说明**：
 - 推送 `v*` tag 即触发 `release.yml`：先测试（windows 全部目标框架），通过后 GitHub Release + 推送 nuget.org；
 - NuGet 发布依赖一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
-- 已发布版本：v1.0.0 – v1.0.7、2.0.0、2.1.0、2.2.0（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）。
+- 已发布版本：v1.0.0 – v1.0.7、2.0.0、2.1.0、2.2.0、2.3.0（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）。
 
 ---
 
