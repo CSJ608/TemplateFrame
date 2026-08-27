@@ -342,7 +342,7 @@ TemplateFrame/
 | 已归档 | **18** | 多目标框架支持：四包统一 `netstandard2.0;net462;net8.0`（2.1.0） | ✅ 完成（2026-08-25） |
 | 已归档 | **19** | 评审落地（第二轮）：布尔回读 / Word schema 三处 / 发布测试门禁（合并发布工作流）/ XML 损坏泄漏 / 回退列定位 / SetSheetName 时序 / 同位置定义名 / 异常契约统一 + `ValidationApplier`/`ContractValueConverter` 下沉 + 往返矩阵与 schema 校验护栏测试（310 用例） | ✅ 完成（2026-08-27，随 **2.2.0** 发布） |
 | 已归档 | **20** | ParseDetailed（导入方向告警出口，`ConversionFailed`）+ XML 注释双语规则（英文 summary + 中文 remarks）+ 插件 README 中英 | ✅ 完成（2026-08-27，随 **2.3.0** 发布） |
-| 已归档 | **21** | 真实场景正确性收尾：嵌套 SDT 不吞内层 / 0 行清空占位 / 行下移平移图片锚点 / decimal・long 全精度 / 多图 docPr 唯一 / 二次 Fill 文档化 | ✅ 完成（2026-08-27） |
+| 已归档 | **21** | 真实场景正确性收尾：嵌套 SDT 不吞内层 / 0 行清空占位 / 行下移平移图片锚点 / decimal・long 全精度 / 多图 docPr 唯一 / 二次 Fill 文档化 | ✅ 完成（2026-08-27，随 **2.3.1** 发布） |
 
 ---
 
@@ -358,7 +358,7 @@ TemplateFrame/
 **发布说明**：
 - 推送 `v*` tag 即触发 `release.yml`：先测试（windows 全部目标框架），通过后 GitHub Release + 推送 nuget.org；
 - NuGet 发布依赖一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
-- 已发布版本：v1.0.0 – v1.0.7、2.0.0、2.1.0、2.2.0、2.3.0（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）。
+- 已发布版本：v1.0.0 – v1.0.7、2.0.0、2.1.0、2.2.0、2.3.0、2.3.1（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）。
 
 ---
 

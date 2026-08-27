@@ -3,7 +3,7 @@
   <!-- 四个包共享的作者与打包元数据（版本与 git tag 一致，见 docs/PUBLISHING.md）；
        各包差异项（PackageId / Description / PackageTags / README）保留在各自 csproj。 -->
   <PropertyGroup>
-    <Version>2.3.0</Version>
+    <Version>2.3.1</Version>
     <Authors>CSJ608</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <RepositoryType>git</RepositoryType>

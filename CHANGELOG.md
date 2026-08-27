@@ -2,7 +2,7 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
-## [Unreleased]
+## [2.3.1] - 2026-08-27
 
 ### 修复
 - **嵌套 SDT 填外层吞内层文本（Word，手工模板场景）**：`SetSdtText` 此前按 `Descendants<Text>()` 改一个删其余——控件嵌套（富文本控件套普通控件，Word 手工模板常见）时填外层会删光内层控件的全部文本。现填充与回读都只触碰**控件直属**的 w:t（内层文本归内层元素自己），Filler / Parser 对称修复
