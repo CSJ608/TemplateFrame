@@ -10,49 +10,47 @@ using A = DocumentFormat.OpenXml.Drawing;
 
 namespace TemplateFrame.Word;
 
-/// <summary>内容控件的类型：文本 / 图片 / 表格列（行模板单元格）。</summary>
+/// <summary>Kind of a content control: text / image / table column (sample-row cell).</summary>
 public enum SdtKind
 {
-    /// <summary>普通文本控件。</summary>
+    /// <summary>A plain text control.</summary>
     Text,
 
-    /// <summary>图片控件（控件内包含 w:drawing / a:blip）。</summary>
+    /// <summary>An image control (contains w:drawing / a:blip).</summary>
     Image,
 
-    /// <summary>表格列控件（控件位于 w:tbl 内，行模板单元格）。</summary>
+    /// <summary>A table-column control (inside w:tbl, sample-row cell).</summary>
     Table,
 }
 
-/// <summary>一次枚举到的内容控件信息（校验清单用）。</summary>
+/// <summary>Information about one enumerated content control (for validation listings).</summary>
 public sealed record SdtInfo
 {
-    /// <summary>内容控件 tag。</summary>
+    /// <summary>The content-control tag.</summary>
     public string Tag { get; init; } = string.Empty;
 
-    /// <summary>内容控件 w:id。</summary>
+    /// <summary>The content-control w:id.</summary>
     public int? Id { get; init; }
 
-    /// <summary>所在区域（正文 / 页眉 / 页脚）。</summary>
+    /// <summary>Where the control lives (body / header / footer).</summary>
     public SdtLocation Location { get; init; }
 
-    /// <summary>控件类型。</summary>
+    /// <summary>The control kind.</summary>
     public SdtKind Kind { get; init; }
 }
 
-/// <summary>Word 校验结果：在基础校验结果之上附带 SDT 清单。</summary>
+/// <summary>Word validation result — the base result plus the enumerated SDT list.</summary>
 public sealed record WordTemplateValidationResult : TemplateValidationResult
 {
-    /// <summary>枚举到的全部内容控件（正文 + 页眉 + 页脚）。</summary>
+    /// <summary>All enumerated content controls (body + headers + footers).</summary>
     public IReadOnlyList<SdtInfo> Sdts { get; init; } = [];
 }
 
-/// <summary>
-/// Word 模板校验：枚举内容控件，按契约报告 Missing / WrongType / Ambiguous，
-/// Extra 只告警放行（见设计文档 §5.3）。
-/// </summary>
+/// <summary>Word template validator — enumerates content controls and reports Missing / WrongType / Ambiguous (§5.3).</summary>
+/// <remarks>Extra 只告警放行。</remarks>
 public sealed class WordTemplateValidator
 {
-    /// <summary>校验 .docx 模板与契约是否匹配。</summary>
+    /// <summary>Validates whether a .docx template matches the contract.</summary>
     public WordTemplateValidationResult Validate(Stream template, TemplateContract contract)
     {
         Guard.ThrowIfNull(template, nameof(template));

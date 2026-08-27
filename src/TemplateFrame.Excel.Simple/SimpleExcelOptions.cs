@@ -1,17 +1,17 @@
 namespace TemplateFrame.Excel.Simple;
 
-/// <summary>简单表格写入选项。</summary>
+/// <summary>Options for simple-table writing.</summary>
 public sealed record SimpleExcelOptions
 {
-    /// <summary>工作表名（默认 Sheet1）。</summary>
+    /// <summary>Worksheet name (default Sheet1).</summary>
     public string SheetName { get; init; } = "Sheet1";
 
-    /// <summary>标题行是否加粗（默认加粗）。</summary>
+    /// <summary>Whether the header row is bold (default true).</summary>
     public bool BoldHeader { get; init; } = true;
 
-    /// <summary>表格起始单元格（如 "A1" / "C5"），表头写在这里，数据行向下排。</summary>
+    /// <summary>The starting cell (e.g. "A1" / "C5"); headers land here, data rows follow below.</summary>
     public string StartCell { get; init; } = "A1";
 
-    /// <summary>标记表格区域的命名区域名（默认 TF_Table）；为空则不写命名区域。</summary>
+    /// <summary>The named range marking the table area (default TF_Table); empty = no named range.</summary>
     public string TableName { get; init; } = "TF_Table";
 }

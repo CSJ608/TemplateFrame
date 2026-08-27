@@ -1,23 +1,29 @@
 namespace TemplateFrame.Validation;
 
-/// <summary>校验问题类别（见设计文档 §5.3）。</summary>
+/// <summary>Validation issue category (see design doc §5.3).</summary>
 public enum TemplateValidationIssueCode
 {
-    /// <summary>契约要求、模板里没有。</summary>
+    /// <summary>Required by the contract but absent from the template.</summary>
     Missing,
 
-    /// <summary>元素在但类型不对（如 Image 里没图片 / 文本控件被包成图片）。</summary>
+    /// <summary>The element exists but has the wrong kind (e.g. no image inside an image control).</summary>
     WrongType,
 
-    /// <summary>模板里多了契约外元素（默认放行，告警）。</summary>
+    /// <summary>Present in the template but outside the contract (passes with a warning by default).</summary>
     Extra,
 
-    /// <summary>tag 重复（文档内非唯一）。</summary>
+    /// <summary>Duplicate tag (not unique within the document).</summary>
     Ambiguous,
 
-    /// <summary>契约升级后，存量模板缺新元素（填充时软校验用，告警）。</summary>
+    /// <summary>Missing after a contract upgrade — existing templates lack new elements (fill-time warning).</summary>
     Drifted,
 
-    /// <summary>文档本身无法解析 / 契约内部不一致等硬错误。</summary>
+    /// <summary>Hard errors — the document itself cannot be parsed / the contract is internally inconsistent.</summary>
     Invalid,
+
+    /// <summary>
+    /// Value conversion failed during parse (ParseDetailed only; the raw text is kept in the data).
+    /// <para>中文：回读时值转换失败（仅 ParseDetailed 报告；数据中保留原始文本）。</para>
+    /// </summary>
+    ConversionFailed,
 }

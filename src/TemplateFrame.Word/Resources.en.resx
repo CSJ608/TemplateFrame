@@ -82,4 +82,10 @@
   <data name="Word.Validation.XmlCorrupt" xml:space="preserve">
     <value>The document XML is corrupt and cannot be parsed: {0}</value>
   </data>
+  <data name="Word.Parse.ConversionFailed" xml:space="preserve">
+    <value>Value "{1}" of element "{0}" cannot be converted to {2}; the raw text is kept.</value>
+  </data>
+  <data name="Word.Parse.TableConversionFailed" xml:space="preserve">
+    <value>Value "{2}" of table column "{0}" in data row {1} cannot be converted to {3}; the raw text is kept.</value>
+  </data>
 </root>

@@ -11,14 +11,13 @@ using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
 
 namespace TemplateFrame.Excel;
 
-/// <summary>
-/// Excel 版式构建器：业务服务声明 <c>TemplateService&lt;TData, ExcelTemplateBuilder&gt;</c> 后，
-/// 在无参数 <c>BuildInitialTemplate()</c> 里直接调用本类的全部能力（列宽 / 单元格文本 /
-/// 文本元素（命名区域）/ 表格（表头 + 示例行）/ 图片（单元格锚定）/ 合并单元格）。
+/// <summary>Excel layout builder — column widths, cell text, named-range elements, tables, cell-anchored images, merges.</summary>
+/// <remarks>
+/// 业务服务声明 <c>TemplateService&lt;TData, ExcelTemplateBuilder&gt;</c> 后，在无参数 <c>BuildInitialTemplate()</c> 里直接调用本类的全部能力。
 /// 命名区域统一前缀 <c>TF_</c>，全表唯一；框架只认 <see cref="ITemplateBuilder.Save"/>。
 /// 与 Word 不同，Excel 是"网格规整"型版式，本插件不提供页面设置（纸张/方向/边距）——
 /// 由 Demo/业务侧按内容列数评估宽度、用合并单元格排版。
-/// </summary>
+/// </remarks>
 public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
 {
     private readonly MemoryStream _stream = new();
@@ -40,17 +39,14 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     private bool _saved;
     private bool _finalized;
 
-    /// <summary>创建一个空的工作簿构建器（单 Sheet，默认名 Sheet1），默认本地化器 + 中文文化（null = 中文默认）。</summary>
+    /// <summary>Creates an empty workbook builder (single sheet, default name Sheet1); default localizer + Chinese culture.</summary>
     public ExcelTemplateBuilder()
         : this(null, null)
     {
     }
 
-    /// <summary>
-    /// 以本地化器与目标文化创建工作簿构建器（文档内容 i18n，占位符按语言解析）。
-    /// <paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；
-    /// <paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。
-    /// </summary>
+    /// <summary>Creates the builder with a localizer and target culture (document content i18n).</summary>
+    /// <remarks><paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；<paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。</remarks>
     public ExcelTemplateBuilder(ITemplateLocalizer? localizer, CultureInfo? culture)
     {
         _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
@@ -62,7 +58,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         EnsureWorksheet();
     }
 
-    /// <summary>设置工作表名（默认 Sheet1；命名区域引用会自动加引号）。</summary>
+    /// <summary>Sets the worksheet name (default Sheet1; named-range references quote it as needed).</summary>
     public ExcelTemplateBuilder SetSheetName(string name)
     {
         _sheetName = string.IsNullOrWhiteSpace(name) ? "Sheet1" : name.Trim();
@@ -74,14 +70,14 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>设置列宽（字符数，近似；1cm ≈ 5 字符，见 <see cref="AddTable"/> 的 cm 换算）。</summary>
+    /// <summary>Sets a column width in characters (approximate; 1cm ≈ 5 chars, see <see cref="AddTable"/>).</summary>
     public ExcelTemplateBuilder SetColumnWidth(string column, double widthChars)
     {
         _columnWidths[column.Trim().ToUpperInvariant()] = widthChars;
         return this;
     }
 
-    /// <summary>设置行高（磅）；写 customHeight，行内文本超出时不再自动增高。</summary>
+    /// <summary>Sets a row height (points); writes customHeight so overflow text no longer auto-grows the row.</summary>
     public ExcelTemplateBuilder SetRowHeight(int row, double heightPoints)
     {
         if (row < 1)
@@ -93,7 +89,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>写静态文本到单元格（可带格式）。</summary>
+    /// <summary>Writes static text to a cell (optionally formatted).</summary>
     public ExcelTemplateBuilder AddText(string cellAddress, string text, TextFormat? format = null)
     {
         var cell = GetOrCreateCell(cellAddress);
@@ -102,11 +98,11 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>写按 i18n 键解析的文本到单元格（键 → 文案查找见 <see cref="TemplateFrame.Localization.ITemplateLocalizer"/>）。</summary>
+    /// <summary>Writes text resolved from an i18n key to a cell (see <see cref="TemplateFrame.Localization.ITemplateLocalizer"/>).</summary>
     public ExcelTemplateBuilder AddTextKey(string cellAddress, string key, TextFormat? format = null)
         => AddText(cellAddress, _localizer.GetString(key, _culture), format);
 
-    /// <summary>放置一个文本元素：占位文本按语言（默认 zh "待填充" / en "To be filled"，经本地化器解析）+ 命名区域 <c>TF_&lt;Key&gt;</c> → 单元格。</summary>
+    /// <summary>Places a text element: localized placeholder + named range TF_&lt;Key&gt; pointing at the cell.</summary>
     public ExcelTemplateBuilder AddElement(string key, string cellAddress, TextFormat? format = null)
     {
         Guard.ThrowIfNull(key, nameof(key));
@@ -117,10 +113,8 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>
-    /// 追加表格：<paramref name="startCell"/> 起始，首行表头（静态文本），下一行示例行（每格一个命名区域
-    /// <c>TF_&lt;TableKey&gt;_&lt;ColumnKey&gt;</c>）。列宽由 <see cref="TableFormat.ColumnWidthsCm"/> 近似换算（1cm ≈ 5 字符）。
-    /// </summary>
+    /// <summary>Appends a table from <paramref name="startCell"/>: static header row + sample row with per-column named ranges.</summary>
+    /// <remarks>列宽由 <see cref="TableFormat.ColumnWidthsCm"/> 近似换算（1cm ≈ 5 字符）。</remarks>
     public ExcelTemplateBuilder AddTable(
         string key,
         IReadOnlyList<string> columns,
@@ -128,10 +122,8 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         string startCell = "A1")
         => AddTableCore(key, columns, format, startCell, localizeHeaders: false);
 
-    /// <summary>
-    /// 追加表格（i18n 键版）——<paramref name="columnKeys"/> 是本地化键，表头按语言解析；
-    /// 但每列命名区域 <c>TF_&lt;TableKey&gt;_&lt;ColumnKey&gt;</c> 仍用列 Key（不本地化，保证 Fill/Parse 按命名区域匹配）。
-    /// </summary>
+    /// <summary>Appends a table with i18n-key headers; column named ranges stay the raw keys so Fill/Parse match by name.</summary>
+    /// <remarks><paramref name="columnKeys"/> 是本地化键，表头按语言解析。</remarks>
     public ExcelTemplateBuilder AddTableKeys(
         string key,
         IReadOnlyList<string> columnKeys,
@@ -188,10 +180,8 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>
-    /// 放置图片占位：按单元格锚定（oneCellAnchor），尺寸默认 1.5in × 1.5in，
-    /// 可选相对锚定格左上角的偏移（英寸，用于微调图片位置）；命名区域 <c>TF_&lt;Key&gt;</c> → 锚定格。
-    /// </summary>
+    /// <summary>Places an image placeholder: cell-anchored (oneCellAnchor), default 1.5in × 1.5in, optional inch offsets.</summary>
+    /// <remarks>命名区域 <c>TF_&lt;Key&gt;</c> → 锚定格。</remarks>
     public ExcelTemplateBuilder AddImage(
         string key,
         string anchorCell,
@@ -227,7 +217,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>合并单元格区域（如 "A1:I1"）。</summary>
+    /// <summary>Merges a cell range (e.g. "A1:I1").</summary>
     public ExcelTemplateBuilder MergeCells(string range)
     {
         if (!string.IsNullOrWhiteSpace(range))

@@ -8,13 +8,11 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel;
 
-/// <summary>
-/// Excel 模板校验：枚举 <c>TF_</c> 命名区域，按契约报告 Missing / WrongType / Ambiguous，
-/// Extra 只告警放行（见设计文档 §5.3）。
-/// </summary>
+/// <summary>Excel template validator — enumerates TF_ named ranges and reports Missing / WrongType / Ambiguous (§5.3).</summary>
+/// <remarks>Extra 只告警放行。</remarks>
 public sealed class ExcelTemplateValidator
 {
-    /// <summary>校验 .xlsx 模板与契约是否匹配。</summary>
+    /// <summary>Validates whether an .xlsx template matches the contract.</summary>
     public TemplateValidationResult Validate(Stream template, TemplateContract contract)
     {
         Guard.ThrowIfNull(template, nameof(template));

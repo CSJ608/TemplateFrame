@@ -3,23 +3,22 @@ using System.Resources;
 
 namespace TemplateFrame.Localization;
 
-/// <summary>
+/// <summary>Default template content localizer — business overrides → framework resources (zh-neutral + en satellite) → the key itself.</summary>
+/// <remarks>
 /// 默认模板内容本地化器：查找顺序 业务注入覆盖 → 框架资源（中文中性 + en 卫星）→ 键本身。
-/// <para>English: Default template content localizer — lookup order:
-/// business-injected overrides → framework resources (Chinese-neutral + en satellite) → the key itself.</para>
 /// 占位符默认 zh "待填充" / en "To be filled"（框架资源键 <see cref="PlaceholderKey"/>），
 /// 页码默认 pattern 见 <see cref="PageNumberPatternKey"/>。
 /// <para>业务注入覆盖（键 → 文案，对所有文化生效）支持两种键格式：
 /// ① 文化限定 <c>"en:Doc.Title"</c>（按文化的祖先链回退：zh-CN → zh → 中性）；
 /// ② 文化中立 <c>"Doc.Title"</c>（所有文化兜底，优先级低于文化限定）。
 /// 额外占位符由构造函数 <c>extraPlaceholders</c> 注册（<see cref="IsPlaceholderText"/> 一并识别）。</para>
-/// </summary>
+/// </remarks>
 public sealed class DefaultTemplateLocalizer : ITemplateLocalizer
 {
-    /// <summary>框架资源键：占位符默认文案（zh 中性 "待填充" / en 卫星 "To be filled"）。</summary>
+    /// <summary>Framework resource key for the default placeholder (zh-neutral "待填充" / en satellite "To be filled").</summary>
     public const string PlaceholderKey = "Document.Placeholder";
 
-    /// <summary>框架资源键：页码默认 pattern（zh "第{page}页，总{total}页" / en "Page {page} of {total}"）。</summary>
+    /// <summary>Framework resource key for the default page-number pattern (zh "第{page}页，总{total}页" / en "Page {page} of {total}").</summary>
     public const string PageNumberPatternKey = "Document.PageNumberPattern";
 
     private static readonly ResourceManager Manager =
@@ -30,15 +29,15 @@ public sealed class DefaultTemplateLocalizer : ITemplateLocalizer
     private readonly IReadOnlyDictionary<string, string>? _overrides;
     private readonly string[] _extraPlaceholders;
 
-    /// <summary>共享默认实例（无覆盖、无扩展占位符）。</summary>
+    /// <summary>The shared default instance (no overrides, no extra placeholders).</summary>
     public static DefaultTemplateLocalizer Instance => Shared.Value;
 
-    /// <summary>
-    /// 创建默认本地化器。
+    /// <summary>Creates a default localizer with optional business overrides and extra placeholders.</summary>
+    /// <remarks>
     /// <paramref name="overrides"/>：业务注入覆盖——文化限定键 <c>"en:Key"</c> 优先（按文化祖先链回退），
     /// 文化中立键 <c>"Key"</c> 兜底（对所有文化生效）；
     /// <paramref name="extraPlaceholders"/>：业务注册的额外占位符文案（<see cref="IsPlaceholderText"/> 一并识别）。
-    /// </summary>
+    /// </remarks>
     public DefaultTemplateLocalizer(
         IReadOnlyDictionary<string, string>? overrides = null,
         IReadOnlyCollection<string>? extraPlaceholders = null)

@@ -9,13 +9,12 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Services;
 
-/// <summary>
-/// 业务场景服务的泛型基类：继承时声明所用的插件构建器类型（如 <c>TemplateService&lt;DeliveryOrderData, WordTemplateBuilder&gt;</c>），
-/// <para>English: Generic base class for business scene services — provides strongly-typed Build / Validate / Fill / Parse.</para>
-/// 在 <see cref="BuildInitialTemplate"/> 里用类型化的 <see cref="Builder"/> 组装版式，
-/// 即可获得强类型 BuildInitialTemplateFile / Validate / ValidateData / Fill / FillDetailed / Parse；
+/// <summary>Generic base class for business scene services — strongly-typed Build / Validate / Fill / FillDetailed / Parse / ParseDetailed.</summary>
+/// <remarks>
+/// 继承时声明所用的插件构建器类型（如 <c>TemplateService&lt;DeliveryOrderData, WordTemplateBuilder&gt;</c>），
+/// 在 <see cref="BuildInitialTemplate"/> 里用类型化的 <see cref="Builder"/> 组装版式；
 /// 契约元素声明 <see cref="TemplateElement.DataPath"/> 后映射默认走 <see cref="DataPathMapper"/> 自动映射。
-/// </summary>
+/// </remarks>
 public abstract class TemplateService<TData, TBuilder>
     where TBuilder : class, ITemplateBuilder
 {
@@ -23,8 +22,8 @@ public abstract class TemplateService<TData, TBuilder>
     private readonly ITemplateLocalizer _localizer;
     private readonly Lazy<TemplateContract> _contract;
 
-    /// <summary>以引擎实现创建服务（业务服务构造函数传入具体插件引擎，如 <c>WordTemplateEngine</c>）；
-    /// <paramref name="localizer"/> 为 null 时使用 <see cref="DefaultTemplateLocalizer.Instance"/>。</summary>
+    /// <summary>Creates the service with a plugin engine (e.g. <c>WordTemplateEngine</c>).</summary>
+    /// <remarks><paramref name="localizer"/> 为 null 时使用 <see cref="DefaultTemplateLocalizer.Instance"/>。</remarks>
     protected TemplateService(ITemplateEngine engine, ITemplateLocalizer? localizer = null)
     {
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
@@ -32,26 +31,23 @@ public abstract class TemplateService<TData, TBuilder>
         _contract = new Lazy<TemplateContract>(DefineContract);
     }
 
-    /// <summary>当前契约（惰性求值，来自 <see cref="DefineContract"/>）。</summary>
+    /// <summary>The current contract (lazily evaluated from <see cref="DefineContract"/>).</summary>
     public TemplateContract Contract => _contract.Value;
 
-    /// <summary>当前本地化器（版式 i18n 键 / 占位符 / 页码解析；业务可注入覆盖）。</summary>
+    /// <summary>The current localizer (layout i18n keys / placeholders / page numbers; business-injectable).</summary>
     protected ITemplateLocalizer Localizer => _localizer;
 
-    /// <summary>当前构建用的具体插件构建器（仅在 <see cref="BuildInitialTemplate"/> 内有效，类型即插件类型）。</summary>
+    /// <summary>The concrete plugin builder — valid only inside <see cref="BuildInitialTemplate"/>.</summary>
     protected TBuilder Builder { get; private set; } = null!;
 
-    /// <summary>声明契约：这个场景有哪些元素。</summary>
+    /// <summary>Declares the contract: which elements this scene has.</summary>
     protected abstract TemplateContract DefineContract();
 
-    /// <summary>组装初始版式：直接用 <see cref="Builder"/> 的具体实例调用插件全部能力。</summary>
+    /// <summary>Composes the initial layout using the concrete <see cref="Builder"/> instance.</summary>
     protected abstract void BuildInitialTemplate();
 
-    /// <summary>
-    /// 生成初始模板文件流（含内容控件 SDT）。
-    /// <paramref name="culture"/>：模板内容语言（占位符 / 页码 / 版式 i18n 键按此解析）；
-    /// null = 中文默认。
-    /// </summary>
+    /// <summary>Generates the initial template file stream (with content controls).</summary>
+    /// <remarks><paramref name="culture"/>：模板内容语言（占位符 / 页码 / 版式 i18n 键按此解析）；null = 中文默认。</remarks>
     public Stream BuildInitialTemplateFile(CultureInfo? culture = null)
     {
         var builder = _engine.CreateBuilder(_localizer, culture) as TBuilder
@@ -72,40 +68,65 @@ public abstract class TemplateService<TData, TBuilder>
         }
     }
 
-    /// <summary>校验模板与契约是否匹配（Missing / WrongType / Ambiguous）。</summary>
+    /// <summary>Validates that the template matches the contract (Missing / WrongType / Ambiguous).</summary>
     public TemplateValidationResult Validate(Stream template)
         => _engine.Validate(template, Contract);
 
-    /// <summary>校验数据与契约是否匹配（必填字段/表格缺失、类型不匹配、契约外字段），填充前兜底。</summary>
+    /// <summary>Validates the data against the contract (missing required fields/tables, type mismatches, extra fields).</summary>
     public TemplateValidationResult ValidateData(TData data)
     {
         FillData fillData = MapToData(data);
         return new TemplateDataValidator().Validate(fillData, Contract);
     }
 
-    /// <summary>填充：模板 + 强类型数据 → 新文件流（向后兼容；软校验告警见 <see cref="FillDetailed"/>）。</summary>
+    /// <summary>Fills: template + typed data → a new document stream (see <see cref="FillDetailed"/> for warnings).</summary>
     public Stream Fill(Stream template, TData data)
         => FillDetailed(template, data).Output;
 
-    /// <summary>
+    /// <summary>Fills and returns the result including soft-validation warnings (Extra / Drifted / skipped Missing).</summary>
+    /// <remarks>
     /// 填充并返回软校验告警（推荐）：模板 + 强类型数据 → <see cref="TemplateFillResult"/>（输出流 + Warnings）。
-    /// <para>English: Fills and returns the result including soft-validation warnings (Extra / Drifted / skipped Missing).</para>
-    /// 引擎填充器先跑软校验，硬错误照常抛错；告警（Extra / Drifted / 按策略跳过的 Missing）随结果返回（见设计文档 §5.3）。
-    /// </summary>
+    /// 引擎填充器先跑软校验，硬错误照常抛错；告警随结果返回（见设计文档 §5.3）。
+    /// </remarks>
     public TemplateFillResult FillDetailed(Stream template, TData data)
     {
         FillData fillData = MapToData(data);
         return _engine.FillDetailed(template, Contract, fillData);
     }
 
-    /// <summary>回读：已填充模板 → 强类型数据。</summary>
+    /// <summary>Parses a filled template back into typed data.</summary>
     public TData Parse(Stream template)
     {
         FillData fillData = _engine.Parse(template, Contract);
         return MapFromData(fillData);
     }
 
-    /// <summary>TData → FillData：契约元素声明 DataPath 时自动映射；否则需业务服务重写。</summary>
+    /// <summary>Parses and returns conversion warnings (recommended) — the parse-side counterpart of <see cref="FillDetailed"/>.</summary>
+    /// <remarks>
+    /// 回读并返回转换告警——FillDetailed 在导入方向的对称出口。
+    /// 值转换失败的字段以 <see cref="Validation.TemplateValidationIssueCode.ConversionFailed"/>（Warning）随结果返回；
+    /// 仅需数据时用 <see cref="Parse"/>（行为不变）。
+    /// </remarks>
+    public TemplateParseResult<TData> ParseDetailed(Stream template)
+    {
+        var result = _engine.ParseDetailed(template, Contract);
+        return new TemplateParseResult<TData>
+        {
+            Data = MapFromDataDetailed(result.Data),
+            Warnings = result.Warnings,
+        };
+    }
+
+    /// <summary>Mapping used by ParseDetailed — failed conversions keep the property default instead of throwing.</summary>
+    /// <remarks>
+    /// 未重写时走自动映射的宽容模式，业务重写 <see cref="MapFromData"/> 后默认回落到严格映射（可按需一并重写）。
+    /// </remarks>
+    protected virtual TData MapFromDataDetailed(FillData data)
+        => ContractHasDataPath
+            ? DataPathMapper.FromFillData<TData>(data, Contract, lenientConversion: true)
+            : MapFromData(data);
+
+    /// <summary>TData → FillData: auto-mapped when elements declare DataPath; override otherwise.</summary>
     protected virtual FillData MapToData(TData data)
     {
         if (ContractHasDataPath)
@@ -116,7 +137,7 @@ public abstract class TemplateService<TData, TBuilder>
         throw new NotSupportedException(Sr.Get("Service.MapToDataNotImplemented"));
     }
 
-    /// <summary>FillData → TData：契约元素声明 DataPath 时自动映射；否则需业务服务重写。</summary>
+    /// <summary>FillData → TData: auto-mapped when elements declare DataPath; override otherwise.</summary>
     protected virtual TData MapFromData(FillData data)
     {
         if (ContractHasDataPath)

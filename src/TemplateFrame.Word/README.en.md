@@ -68,6 +68,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - **Table rows**: deep-copies the sample row N times and fills by tag per row; **every SDT gets a fresh unique `w:id` after cloning**.
 - **Soft validation** (Validate runs before filling): `Drifted`/`Extra` only record warnings and continue; missing required elements follow the policy (throw by default, configurable via `MissingElementPolicy.SkipAndWarn`); `WrongType`/`Ambiguous`/`Invalid` are hard errors.
 - **Warning outlet**: `WordTemplateFiller.Fill` returns a `TemplateFillResult` (output stream + Warnings); the engine/service layer offers `FillDetailed` (`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`) for the same soft-validation warnings, while `Fill` keeps returning only the output stream.
+- **ParseDetailed (2.3.0)**: the import-side counterpart — fields whose conversion fails keep their raw text and are reported as `ConversionFailed` (Warning, table columns carry the data row number) in a `TemplateParseResult`; null still means not filled, `Parse` is unchanged.
 - **Before/after receipt**: the same template filled twice — pass `null` for empty fields before receipt (rendered empty), fill them in after.
 
 ## Parse behavior notes

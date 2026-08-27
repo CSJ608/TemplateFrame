@@ -5,13 +5,15 @@ using TemplateFrame.Localization;
 namespace TemplateFrame.Validation;
 
 /// <summary>
-/// 数据校验器（`ValidateData`）：校验 <see cref="FillData"/> 与 <see cref="TemplateContract"/> 是否匹配。
+/// Data validator ("ValidateData") — checks a <see cref="FillData"/> against a <see cref="TemplateContract"/>.
+/// </summary>
+/// <remarks>
 /// 与模板校验（WordTemplateValidator）互补——一个查模板缺不缺元素，一个查数据缺不缺必填值。
 /// 必填字段/表格缺失报 Error；契约外字段、类型不匹配只告警放行。
-/// </summary>
+/// </remarks>
 public sealed class TemplateDataValidator
 {
-    /// <summary>校验数据与契约是否匹配。</summary>
+    /// <summary>Validates whether the data matches the contract.</summary>
     public TemplateValidationResult Validate(FillData data, TemplateContract contract)
     {
         Guard.ThrowIfNull(data, nameof(data));

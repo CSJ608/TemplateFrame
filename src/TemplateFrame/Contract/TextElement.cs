@@ -1,11 +1,11 @@
 namespace TemplateFrame.Contract;
 
-/// <summary>文本元素：单个标量字段。<para>English: A text element — a single scalar field.</para></summary>
+/// <summary>A text element — a single scalar field.</summary>
 public sealed record TextElement : TemplateElement
 {
-    /// <summary>值类型：string / decimal / DateTime / bool 等（填充时按此转换并格式化）。</summary>
+    /// <summary>Target value type: string / decimal / DateTime / bool etc. (conversion and formatting on fill).</summary>
     public Type ValueType { get; init; } = typeof(string);
 
-    /// <summary>格式化串，如 "yyyy-MM-dd" / "N2"（填充时格式化，可空）。</summary>
+    /// <summary>Format string such as "yyyy-MM-dd" / "N2" (applied on fill; optional).</summary>
     public string? Format { get; init; }
 }

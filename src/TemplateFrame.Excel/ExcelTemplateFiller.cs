@@ -12,26 +12,27 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel;
 
-/// <summary>
-/// Excel 填充器（设计文档 §5.2 / §5.3）：文本写类型化值 + 数字格式（日期存序列号）；
+/// <summary>Excel filler (§5.2/§5.3) — fills an .xlsx template from FillData, with fill-time soft validation.</summary>
+/// <remarks>
+/// 文本写类型化值 + 数字格式（日期存序列号）；
 /// 图片按锚定格替换 part + 关系（尺寸继承占位）；表格行 deepcopy 示例行 N-1 次，
 /// 逐行填值后把列命名区域重指到整个数据块，并把表格下方命名区域/合并区域整体下移。
-/// </summary>
+/// </remarks>
 public sealed class ExcelTemplateFiller
 {
     private readonly TemplateFillOptions _options;
 
-    /// <summary>以默认配置创建填充器（缺失必填元素默认抛错）。</summary>
+    /// <summary>Creates the filler with default options (missing required elements throw).</summary>
     public ExcelTemplateFiller()
         : this(new TemplateFillOptions())
     {
     }
 
-    /// <summary>以指定配置创建填充器。</summary>
+    /// <summary>Creates the filler with the given options.</summary>
     public ExcelTemplateFiller(TemplateFillOptions options)
         => _options = options ?? throw new ArgumentNullException(nameof(options));
 
-    /// <summary>填充 .xlsx：模板 + FillData → 新文件流（不改动传入的模板流）。</summary>
+    /// <summary>Fills an .xlsx: template + FillData → a new stream (the input stream is not modified).</summary>
     public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
     {
         Guard.ThrowIfNull(template, nameof(template));

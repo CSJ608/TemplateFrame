@@ -57,6 +57,9 @@ public sealed class AutoMappingRecordingEngine : ITemplateEngine
                 ],
             },
         };
+
+    public TemplateParseResult ParseDetailed(Stream template, TemplateContract contract)
+        => new() { Data = Parse(template, contract) };
 }
 
 public sealed class TemplateServiceAutoMappingTests

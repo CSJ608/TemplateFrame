@@ -3,29 +3,28 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace TemplateFrame.Excel;
 
-/// <summary>命名区域（defined name）定位结果：名称 + 原始引用。</summary>
+/// <summary>A named-range (defined name) match — name plus raw reference.</summary>
 public sealed record NamedRangeMatch(string Name, string Reference);
 
-/// <summary>
-/// 按命名区域定位（对应 Word 插件的 SdtLocator 定位逻辑）：
-/// 约定前缀 <c>TF_</c>，标量元素 <c>TF_&lt;Key&gt;</c> → 单元格；
-/// 表格列 <c>TF_&lt;TableKey&gt;_&lt;ColumnKey&gt;</c> → 示例行单元格。
-/// 定位 = 一次 workbook.xml definedNames 遍历 + 按名称过滤，无正则、无文本匹配。
-/// </summary>
+/// <summary>Locates by named ranges (the Excel counterpart of SdtLocator) — prefix TF_, one workbook.xml walk.</summary>
+/// <remarks>
+/// 标量元素 <c>TF_&lt;Key&gt;</c> → 单元格；表格列 <c>TF_&lt;TableKey&gt;_&lt;ColumnKey&gt;</c> → 示例行单元格。
+/// 无正则、无文本匹配。
+/// </remarks>
 public static class ExcelNamedRangeLocator
 {
-    /// <summary>命名区域统一前缀（避免与用户已有名称冲突）。</summary>
+    /// <summary>The unified named-range prefix (avoids clashing with user-defined names).</summary>
     public const string Prefix = "TF_";
 
-    /// <summary>标量元素命名区域名。</summary>
+    /// <summary>The named-range name of a scalar element.</summary>
     public static string ElementName(string key)
         => Prefix + key;
 
-    /// <summary>表格列命名区域名。</summary>
+    /// <summary>The named-range name of a table column.</summary>
     public static string TableColumnName(string tableKey, string columnKey)
         => Prefix + tableKey + "_" + columnKey;
 
-    /// <summary>枚举工作簿内全部 <see cref="Prefix"/> 开头的命名区域。</summary>
+    /// <summary>Enumerates every named range starting with <see cref="Prefix"/> in the workbook.</summary>
     public static IReadOnlyList<NamedRangeMatch> FindAll(WorkbookPart workbookPart)
     {
         Guard.ThrowIfNull(workbookPart, nameof(workbookPart));
@@ -46,13 +45,11 @@ public static class ExcelNamedRangeLocator
         return results;
     }
 
-    /// <summary>按名称定位命名区域。</summary>
+    /// <summary>Finds a named range by name.</summary>
     public static NamedRangeMatch? FindByName(WorkbookPart workbookPart, string name)
         => FindAll(workbookPart).FirstOrDefault(m => m.Name == name);
 
-    /// <summary>
-    /// 解析命名区域引用（Sheet1!$B$2 / '送货单'!$B$5:$B$9）→ 工作表名（去引号）+ 起止单元格（1 基）。
-    /// </summary>
+    /// <summary>Parses a reference (Sheet1!$B$2 / '送货单'!$B$5:$B$9) into sheet name (unquoted) + 1-based start/end cells.</summary>
     public static (string Sheet, (int Row, int Col) Start, (int Row, int Col) End) ParseReference(string reference)
     {
         Guard.ThrowIfNull(reference, nameof(reference));
@@ -87,7 +84,7 @@ public static class ExcelNamedRangeLocator
         return (sheet, startCell, endCell);
     }
 
-    /// <summary>构造命名区域引用（含必要的工作表名引号与绝对引用 $；单格不带冒号）。</summary>
+    /// <summary>Builds a reference (quoted sheet name and absolute $ as needed; single cells carry no colon).</summary>
     public static string BuildReference(string sheet, (int Row, int Col) start, (int Row, int Col) end)
     {
         var prefix = QuoteSheet(sheet)
@@ -103,7 +100,7 @@ public static class ExcelNamedRangeLocator
                + "$" + end.Row.ToString();
     }
 
-    /// <summary>工作表名是否需要引号包裹（含非字母数字/下划线的名字需要）。</summary>
+    /// <summary>Quotes the sheet name when it contains characters other than letters/digits/underscore.</summary>
     public static string QuoteSheet(string sheet)
     {
         if (string.IsNullOrEmpty(sheet))

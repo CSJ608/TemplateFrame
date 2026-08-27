@@ -68,6 +68,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - **表格行**：deepcopy 示例行 N 次，逐行按 tag 填值；**克隆后每个 SDT 重发唯一 `w:id`**。
 - **软校验**（填充前跑 Validate）：`Drifted`/`Extra` 只记告警继续；Missing 必填按策略（默认抛错，可配 `MissingElementPolicy.SkipAndWarn`）；`WrongType`/`Ambiguous`/`Invalid` 视为硬错误。
 - **告警出口**：`WordTemplateFiller.Fill` 返回 `TemplateFillResult`（输出流 + Warnings）；引擎/服务层可用 `FillDetailed`（`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`）拿到同样的软校验告警，`Fill` 保持只返回输出流。
+- **ParseDetailed（2.3.0）**：导入方向对称出口——值转换失败的字段保留原始文本，并以 `ConversionFailed`（Warning，表格列带数据行号）随 `TemplateParseResult` 返回；null 仍专指未填充，`Parse` 行为不变。
 - **收货前/收货后**：同一模板两次填充——收货前空字段传 `null`（显示为空），收货后补齐。
 
 ## 回读行为要点

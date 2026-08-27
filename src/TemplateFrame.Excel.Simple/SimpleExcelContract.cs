@@ -10,13 +10,13 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel.Simple;
 
-/// <summary>
-/// 简单表格的契约感知读写：把「标题行 + 数据行」接入 TemplateFrame 契约体系。
+/// <summary>Contract-aware read/write for simple tables — plugs "header + data rows" into the TemplateFrame contract system.</summary>
+/// <remarks>
 /// 契约必须是单个 <see cref="TableElement"/>（列 = 表头）；底层复用 <see cref="SimpleExcel"/>，
 /// 返回 / 接收 <see cref="FillData"/>，再配合基础包 DataPathMapper 完成强类型映射。
-/// Write 支持按文化生成表头并写每列定义名；Read/Validate 列定位**分级回退**
+/// Write 支持按文化生成表头并写每列定义名；Read/Validate 列定位分级回退
 /// （每列定义名 → TF_Table 区域 + 表头文本 → 第一个非空行 + 表头文本），框架产物回读语言无关。
-/// </summary>
+/// </remarks>
 public static class SimpleExcelContract
 {
     /// <summary>校验并取出契约中的唯一表格元素（SimpleExcel 只支持单个表格契约）。</summary>
@@ -45,11 +45,8 @@ public static class SimpleExcelContract
         return tables[0];
     }
 
-    /// <summary>
-    /// 导出：契约表格 + <see cref="FillData"/> → .xlsx。
-    /// <paramref name="culture"/> 非空时表头按语言解析（本地化键 = 列 Key，未注册覆盖回退 DisplayName/Key）；
-    /// 同时写每列定义名 <c>TF_&lt;TableName&gt;_&lt;ColumnKey&gt;</c> → 表头单元格（回读语言无关）。
-    /// </summary>
+    /// <summary>Export: contract table + <see cref="FillData"/> → .xlsx (localized headers, per-column defined names).</summary>
+    /// <remarks><paramref name="culture"/> 非空时表头按语言解析（本地化键 = 列 Key，未注册覆盖回退 DisplayName/Key）；同时写每列定义名（回读语言无关）。</remarks>
     public static void Write(
         Stream target,
         FillData data,
@@ -78,12 +75,11 @@ public static class SimpleExcelContract
             table.Columns.Select(c => c.Key).ToList());
     }
 
-    /// <summary>
-    /// 导入：.xlsx → <see cref="FillData"/>。列定位**分级回退**：
-    /// ① 每列定义名 <c>TF_&lt;TableName&gt;_&lt;ColumnKey&gt;</c>（框架产物，语言无关）→
-    /// ② <c>TF_Table</c> 区域 + 表头文本匹配 → ③ 第一个非空行 + 表头文本匹配。
+    /// <summary>Import: .xlsx → <see cref="FillData"/>, column location with graded fallback.</summary>
+    /// <remarks>
+    /// ① 每列定义名（框架产物，语言无关）→ ② TF_Table 区域 + 表头文本匹配 → ③ 第一个非空行 + 表头文本匹配。
     /// 多余列忽略；缺列整列补 null。
-    /// </summary>
+    /// </remarks>
     public static FillData Read(Stream source, TemplateContract contract, SimpleExcelOptions? options = null)
     {
         Guard.ThrowIfNull(source, nameof(source));
@@ -153,10 +149,8 @@ public static class SimpleExcelContract
         };
     }
 
-    /// <summary>
-    /// 校验：.xlsx 表头与契约列是否匹配（缺必填列报 Missing，可选列缺失告警，多余列告警）。
-    /// 列定位与 <see cref="Read"/> 相同的分级回退；重复列定义名报 Ambiguous。
-    /// </summary>
+    /// <summary>Validates whether .xlsx headers match the contract columns (Missing / Extra / Ambiguous).</summary>
+    /// <remarks>列定位与 <see cref="Read"/> 相同的分级回退；缺必填列报 Missing，可选列缺失与多余列告警，重复列定义名报 Ambiguous。</remarks>
     public static TemplateValidationResult Validate(Stream template, TemplateContract contract, SimpleExcelOptions? options = null)
     {
         Guard.ThrowIfNull(template, nameof(template));

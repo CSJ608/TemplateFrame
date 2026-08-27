@@ -10,12 +10,12 @@ using Sr = TemplateFrame.Word.Localization.Sr;
 
 namespace TemplateFrame.Word;
 
-/// <summary>
-/// Word 版式构建器：业务服务声明 <c>TemplateService&lt;TData, WordTemplateBuilder&gt;</c> 后，
-/// 在无参数 <c>BuildInitialTemplate()</c> 里直接调用本类的全部能力（页面设置 / 页眉页脚 / 布局表 /
-/// 文本格式 / 表格格式 / 图片 / 页码域），自由度最高；框架只认 <see cref="ITemplateBuilder.Save"/>。
+/// <summary>Word layout builder — the full-typography entry (page setup, header/footer, layout tables, text, tables, images, page numbers).</summary>
+/// <remarks>
+/// 业务服务声明 <c>TemplateService&lt;TData, WordTemplateBuilder&gt;</c> 后，在无参数 <c>BuildInitialTemplate()</c> 里直接调用本类的全部能力；
+/// 框架只认 <see cref="ITemplateBuilder.Save"/>。
 /// tag 全局唯一、每个 SDT 带唯一 w:id（正文/页眉/页脚/单元格共享分配器）。
-/// </summary>
+/// </remarks>
 public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 {
     private readonly MemoryStream _stream = new();
@@ -37,17 +37,14 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     private bool _saved;
     private bool _finalized;
 
-    /// <summary>创建一个空的 Word 文档构建器（正文），默认本地化器 + 中文文化（null = 中文默认）。</summary>
+    /// <summary>Creates an empty document builder (body); default localizer + Chinese culture.</summary>
     public WordTemplateBuilder()
         : this(null, null)
     {
     }
 
-    /// <summary>
-    /// 以本地化器与目标文化创建 Word 文档构建器（文档内容 i18n）。
-    /// <paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；
-    /// <paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。
-    /// </summary>
+    /// <summary>Creates the builder with a localizer and target culture (document content i18n).</summary>
+    /// <remarks><paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；<paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。</remarks>
     public WordTemplateBuilder(ITemplateLocalizer? localizer, CultureInfo? culture)
     {
         _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
@@ -62,7 +59,8 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         _ids = new SdtIdAllocator();
     }
 
-    /// <summary>页眉/页脚/单元格子构建器：共享同一文档与全局 w:id 分配器，图片 part 归属所在宿主。</summary>
+    /// <summary>Header/footer/cell sub-builder sharing the document and the global w:id allocator.</summary>
+    /// <remarks>图片 part 归属所在宿主。</remarks>
     private WordTemplateBuilder(WordTemplateBuilder owner, OpenXmlPart hostPart, OpenXmlCompositeElement container)
     {
         _document = owner._document;
@@ -76,14 +74,14 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         _pageSetup = owner._pageSetup;
     }
 
-    /// <summary>设置页面：纸张规格 + 方向 + 可选边距（A4/A5、横/纵）。</summary>
+    /// <summary>Sets up the page: paper size + orientation + optional margins (A4/A5, portrait/landscape).</summary>
     public WordTemplateBuilder SetPageSetup(PageSetup setup)
     {
         _pageSetup = setup ?? throw new ArgumentNullException(nameof(setup));
         return this;
     }
 
-    /// <summary>添加页眉（每节一个 default 引用），内容用同一构建器能力组装。</summary>
+    /// <summary>Adds a header (one default reference per section), composed with the same builder API.</summary>
     public void AddHeader(Action<WordTemplateBuilder> compose)
     {
         Guard.ThrowIfNull(compose, nameof(compose));
@@ -93,7 +91,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         AddPartReference(new HeaderReference { Type = HeaderFooterValues.Default, Id = _mainPart.GetIdOfPart(headerPart) });
     }
 
-    /// <summary>添加页脚（每节一个 default 引用），内容用同一构建器能力组装。</summary>
+    /// <summary>Adds a footer (one default reference per section), composed with the same builder API.</summary>
     public void AddFooter(Action<WordTemplateBuilder> compose)
     {
         Guard.ThrowIfNull(compose, nameof(compose));
@@ -103,7 +101,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         AddPartReference(new FooterReference { Type = HeaderFooterValues.Default, Id = _mainPart.GetIdOfPart(footerPart) });
     }
 
-    /// <summary>追加一个带样式的段落（style：如 "Title" / "Heading1" / "Normal" 或 null）。</summary>
+    /// <summary>Appends a styled paragraph (style e.g. "Title" / "Heading1" / "Normal", or null).</summary>
     public WordTemplateBuilder AddParagraph(string text, string? style = null)
     {
         var paragraph = new Paragraph(WordXmlFactory.CreateRun(text, WordXmlFactory.CreateStyleRunProperties(style)));
@@ -112,7 +110,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>追加一个带文本格式的段落（字体/字号/加粗/对齐）。</summary>
+    /// <summary>Appends a paragraph with text formatting (font / size / bold / alignment).</summary>
     public WordTemplateBuilder AddParagraph(string text, TextFormat format)
     {
         var paragraph = new Paragraph(WordXmlFactory.CreateRun(text, WordXmlFactory.CreateRunProperties(format)));
@@ -122,15 +120,15 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>追加一个按 i18n 键解析文案的段落（键 → 文案查找见 <see cref="ITemplateLocalizer"/>）。</summary>
+    /// <summary>Appends a paragraph whose copy is resolved from an i18n key (see <see cref="ITemplateLocalizer"/>).</summary>
     public WordTemplateBuilder AddParagraphKey(string key, string? style = null)
         => AddParagraph(_localizer.GetString(key, _culture), style);
 
-    /// <summary>追加一个按 i18n 键解析文案的段落（带文本格式）。</summary>
+    /// <summary>Appends a paragraph from an i18n key, with text formatting.</summary>
     public WordTemplateBuilder AddParagraphKey(string key, TextFormat format)
         => AddParagraph(_localizer.GetString(key, _culture), format);
 
-    /// <summary>在当前段落追加静态文本。</summary>
+    /// <summary>Appends static text to the current paragraph.</summary>
     public WordTemplateBuilder AddText(string text)
     {
         EnsureParagraph();
@@ -138,7 +136,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>在当前段落追加带格式的静态文本。</summary>
+    /// <summary>Appends formatted static text to the current paragraph.</summary>
     public WordTemplateBuilder AddText(string text, TextFormat format)
     {
         EnsureParagraph();
@@ -146,15 +144,15 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>在当前段落追加按 i18n 键解析的静态文本。</summary>
+    /// <summary>Appends static text resolved from an i18n key to the current paragraph.</summary>
     public WordTemplateBuilder AddTextKey(string key)
         => AddText(_localizer.GetString(key, _culture));
 
-    /// <summary>在当前段落追加按 i18n 键解析的带格式静态文本。</summary>
+    /// <summary>Appends formatted static text resolved from an i18n key.</summary>
     public WordTemplateBuilder AddTextKey(string key, TextFormat format)
         => AddText(_localizer.GetString(key, _culture), format);
 
-    /// <summary>在当前段落追加一个文本元素（内容控件，tag = key）。</summary>
+    /// <summary>Appends a text element (content control, tag = key) to the current paragraph.</summary>
     public WordTemplateBuilder AddElement(string key)
     {
         EnsureParagraph();
@@ -162,7 +160,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>在当前段落追加一个带格式的文本元素（内容控件，tag = key）。</summary>
+    /// <summary>Appends a formatted text element (content control, tag = key).</summary>
     public WordTemplateBuilder AddElement(string key, TextFormat format)
     {
         EnsureParagraph();
@@ -170,19 +168,16 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>追加一个独立段落，内容为静态文本（如签字行）。</summary>
+    /// <summary>Appends a standalone paragraph of static text (e.g. a signature line).</summary>
     public WordTemplateBuilder AddStaticText(string text)
         => AddParagraph(text);
 
-    /// <summary>追加一个独立段落，内容为按 i18n 键解析的静态文本。</summary>
+    /// <summary>Appends a standalone paragraph of static text resolved from an i18n key.</summary>
     public WordTemplateBuilder AddStaticTextKey(string key)
         => AddParagraphKey(key);
 
-    /// <summary>
-    /// 追加表格：首行表头（静态文本），第二行示例行（每格一个内容控件，tag = 列 Key）。
-    /// <paramref name="format"/> 控制表头/单元格格式、有无边框、对齐、列宽、垂直对齐；
-    /// <paramref name="headerStyle"/> 是旧式表头样式（仅当 format.HeaderFormat 为空时生效）。
-    /// </summary>
+    /// <summary>Appends a table: static header row + a sample row with one content control per cell (tag = column key).</summary>
+    /// <remarks><paramref name="format"/> 控制表头/单元格格式、边框、对齐、列宽、垂直对齐；<paramref name="headerStyle"/> 是旧式表头样式（仅当 format.HeaderFormat 为空时生效）。</remarks>
     public WordTemplateBuilder AddTable(
         string key,
         IReadOnlyList<string> columns,
@@ -190,10 +185,8 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         string? headerStyle = null)
         => AddTableCore(key, columns, format, headerStyle, localizeHeaders: false);
 
-    /// <summary>
-    /// 追加表格（i18n 键版）——<paramref name="columnKeys"/> 是本地化键，表头按语言解析；
-    /// 但每格内容控件 tag 仍是列 Key（不本地化，保证 Fill/Parse 按 tag 匹配）。
-    /// </summary>
+    /// <summary>Appends a table with i18n-key headers; cell tags stay the raw column keys so Fill/Parse match by tag.</summary>
+    /// <remarks><paramref name="columnKeys"/> 是本地化键，表头按语言解析。</remarks>
     public WordTemplateBuilder AddTableKeys(
         string key,
         IReadOnlyList<string> columnKeys,
@@ -252,7 +245,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>开始一个布局表格（如页眉/页脚"左中右"三栏），之后用 <see cref="AddCell"/> 按行优先填充。</summary>
+    /// <summary>Starts a layout table (e.g. a header's left/center/right zones); fill it with <see cref="AddCell"/>, row-first.</summary>
     public WordTemplateBuilder AddLayoutTable(int rows, int columns, TableFormat? format = null)
     {
         if (rows <= 0 || columns <= 0)
@@ -278,10 +271,8 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>
-    /// 填充当前布局表格单元格（从 (0,0) 开始，行优先；到列尾自动换行）。
-    /// <paramref name="columnSpan"/> 支持跨列（如页眉"平分/四份"布局），跨列单元格宽度为各列之和。
-    /// </summary>
+    /// <summary>Fills the next layout-table cell (row-first from (0,0), wrapping at the row end).</summary>
+    /// <remarks><paramref name="columnSpan"/> 支持跨列（如页眉"平分/四份"布局），跨列单元格宽度为各列之和。</remarks>
     public WordTemplateBuilder AddCell(Action<WordTemplateBuilder> compose, int columnSpan = 1)
     {
         Guard.ThrowIfNull(compose, nameof(compose));
@@ -332,7 +323,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>追加图片占位：占位图外包内容控件（tag = key）。</summary>
+    /// <summary>Appends an image placeholder: the placeholder image wrapped in a content control (tag = key).</summary>
     public WordTemplateBuilder AddImage(string key, string? placeholderPath = null, double? widthInches = null, double? heightInches = null)
     {
         EnsureParagraph();
@@ -352,11 +343,11 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>
-    /// 在当前段落追加页码域。默认 pattern 按语言解析（zh "第{page}页，总{total}页" / en "Page {page} of {total}"，
-    /// 可用 <see cref="DefaultTemplateLocalizer.PageNumberPatternKey"/> 业务覆盖）；
+    /// <summary>Appends a page-number field to the current paragraph (PAGE/NUMPAGES, localized pattern).</summary>
+    /// <remarks>
+    /// 默认 pattern 按语言解析（zh "第{page}页，总{total}页" / en "Page {page} of {total}"，可用 <see cref="DefaultTemplateLocalizer.PageNumberPatternKey"/> 业务覆盖）；
     /// <paramref name="pattern"/> 为 null 时取本地化默认，显式传入则原样使用（支持 {page} / {total} 占位符）。
-    /// </summary>
+    /// </remarks>
     public void AddPageNumber(string? pattern = null, TextFormat? format = null)
     {
         EnsureParagraph();

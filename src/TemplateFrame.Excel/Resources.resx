@@ -64,4 +64,10 @@
   <data name="Excel.Validation.XmlCorrupt" xml:space="preserve">
     <value>工作簿 XML 已损坏，无法解析：{0}</value>
   </data>
+  <data name="Excel.Parse.ConversionFailed" xml:space="preserve">
+    <value>元素 "{0}" 的值 "{1}" 无法转换为 {2}，已保留原始文本。</value>
+  </data>
+  <data name="Excel.Parse.TableConversionFailed" xml:space="preserve">
+    <value>表格列 "{0}" 工作表第 {1} 行的值 "{2}" 无法转换为 {3}，已保留原始文本。</value>
+  </data>
 </root>

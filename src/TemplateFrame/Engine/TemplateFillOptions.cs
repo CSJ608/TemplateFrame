@@ -1,21 +1,18 @@
 namespace TemplateFrame.Engine;
 
-/// <summary>填充时缺失必填元素的处理策略（见设计文档 §5.3）。</summary>
+/// <summary>Policy for missing required elements during fill (see design doc §5.3).</summary>
 public enum MissingElementPolicy
 {
-    /// <summary>默认：缺失必填元素时抛 <see cref="InvalidOperationException"/>，避免打印场景盲填。</summary>
+    /// <summary>Default: throws <see cref="InvalidOperationException"/> when a required element is missing.</summary>
     Throw,
 
-    /// <summary>缺失必填元素时跳过该元素并记录告警，填充继续。</summary>
+    /// <summary>Skips the missing element, records a warning, and continues filling.</summary>
     SkipAndWarn,
 }
 
-/// <summary>
-/// 填充选项（Word / Excel 插件共用）。
-/// <para>English: Fill options shared by the Word / Excel plugins.</para>
-/// </summary>
+/// <summary>Fill options shared by the Word / Excel plugins.</summary>
 public sealed record TemplateFillOptions
 {
-    /// <summary>缺失必填元素时的处理策略，默认 <see cref="MissingElementPolicy.Throw"/>。</summary>
+    /// <summary>Policy for missing required elements; defaults to <see cref="MissingElementPolicy.Throw"/>.</summary>
     public MissingElementPolicy MissingElementPolicy { get; init; } = MissingElementPolicy.Throw;
 }

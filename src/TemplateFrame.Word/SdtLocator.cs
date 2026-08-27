@@ -4,29 +4,27 @@ using DocumentFormat.OpenXml.Wordprocessing;
 
 namespace TemplateFrame.Word;
 
-/// <summary>内容控件所在的宿主区域。</summary>
+/// <summary>The host area a content control lives in.</summary>
 public enum SdtLocation
 {
-    /// <summary>正文。</summary>
+    /// <summary>Document body.</summary>
     Body,
 
-    /// <summary>页眉。</summary>
+    /// <summary>Header.</summary>
     Header,
 
-    /// <summary>页脚。</summary>
+    /// <summary>Footer.</summary>
     Footer,
 }
 
-/// <summary>一次定位结果：内容控件元素 + 所在区域。</summary>
+/// <summary>A single location match — the control element plus its host area.</summary>
 public sealed record SdtMatch(SdtElement Element, SdtLocation Location);
 
-/// <summary>
-/// 按 tag 定位内容控件（SDT）。定位 = 一次文档树遍历 + 按 tag 过滤，无正则、无文本匹配；
-/// 覆盖正文 / 页眉 / 页脚，tag 必须在文档内全局唯一（见设计文档 §5.1）。
-/// </summary>
+/// <summary>Locates content controls (SDT) by tag — one tree walk + tag filter; tags are globally unique (§5.1).</summary>
+/// <remarks>覆盖正文 / 页眉 / 页脚；无正则、无文本匹配。</remarks>
 public static class SdtLocator
 {
-    /// <summary>枚举文档内全部内容控件（正文 + 页眉 + 页脚）。</summary>
+    /// <summary>Enumerates every content control in the document (body + headers + footers).</summary>
     public static IReadOnlyList<SdtMatch> FindAll(WordprocessingDocument document)
     {
         Guard.ThrowIfNull(document, nameof(document));
@@ -62,15 +60,15 @@ public static class SdtLocator
         return results;
     }
 
-    /// <summary>按 tag 定位（正文 / 页眉 / 页脚都查）。</summary>
+    /// <summary>Finds controls by tag (body, headers and footers are all searched).</summary>
     public static IReadOnlyList<SdtMatch> FindByTag(WordprocessingDocument document, string tag)
         => FindAll(document).Where(m => GetTag(m.Element) == tag).ToList();
 
-    /// <summary>读取内容控件的 tag（w:sdtPr/w:tag）。</summary>
+    /// <summary>Reads a control's tag (w:sdtPr/w:tag).</summary>
     public static string? GetTag(SdtElement? sdt)
         => sdt?.SdtProperties?.GetFirstChild<Tag>()?.Val?.Value;
 
-    /// <summary>读取内容控件的 w:id（w:sdtPr/w:id），缺失返回 null。</summary>
+    /// <summary>Reads a control's w:id (w:sdtPr/w:id); null when absent.</summary>
     public static int? GetId(SdtElement? sdt)
         => sdt?.SdtProperties?.GetFirstChild<SdtId>()?.Val?.Value;
 

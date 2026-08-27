@@ -12,29 +12,29 @@ using A = DocumentFormat.OpenXml.Drawing;
 
 namespace TemplateFrame.Word;
 
-/// <summary>
-/// Word 填充器（设计文档 §5.2 / §5.3）：
+/// <summary>Word filler (§5.2/§5.3) — fills a .docx template from FillData, with fill-time soft validation.</summary>
+/// <remarks>
 /// 文本改 sdtContent 内第一个 w:r/w:t（保留 run 格式，首尾空格补 xml:space="preserve"）；
 /// 图片往包内加图片 part + 关系拿新 rId，替换 SDT 内 &lt;a:blip r:embed&gt;（尺寸/位置/环绕继承占位图）；
 /// 表格行 deepcopy 示例行 N 次，逐行按 tag 填值，克隆后每个 SDT 重发唯一 w:id（设计文档 §9）。
 /// 填充前先跑一遍 <see cref="WordTemplateValidator"/>（软校验）：Drifted/Extra 告警继续，
 /// Missing 必填元素按 <see cref="MissingElementPolicy"/> 抛错或跳过并告警。
-/// </summary>
+/// </remarks>
 public sealed class WordTemplateFiller
 {
     private readonly TemplateFillOptions _options;
 
-    /// <summary>以默认配置创建填充器（缺失必填元素默认抛错）。</summary>
+    /// <summary>Creates the filler with default options (missing required elements throw).</summary>
     public WordTemplateFiller()
         : this(new TemplateFillOptions())
     {
     }
 
-    /// <summary>以指定配置创建填充器。</summary>
+    /// <summary>Creates the filler with the given options.</summary>
     public WordTemplateFiller(TemplateFillOptions options)
         => _options = options ?? throw new ArgumentNullException(nameof(options));
 
-    /// <summary>填充 .docx：模板 + FillData → 新文件流（不改动传入的模板流）。</summary>
+    /// <summary>Fills a .docx: template + FillData → a new stream (the input stream is not modified).</summary>
     public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
     {
         Guard.ThrowIfNull(template, nameof(template));

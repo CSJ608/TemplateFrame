@@ -8,27 +8,25 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Word;
 
-/// <summary>
-/// Word 引擎：实现 <see cref="ITemplateEngine"/>，把契约 + 数据形状翻译成 .docx。
+/// <summary>Word engine — implements <see cref="ITemplateEngine"/>, translating a contract + data shape into .docx.</summary>
+/// <remarks>
 /// 可注入 <see cref="ITemplateLocalizer"/>（文档内容 i18n），
 /// 生成模板时按文化解析占位符 / 页码 / 版式 i18n 键，回读时把已知占位符规范化为 null。
-/// </summary>
+/// </remarks>
 public sealed class WordTemplateEngine : ITemplateEngine
 {
     private readonly WordTemplateFiller _filler;
     private readonly WordTemplateParser _parser;
     private readonly ITemplateLocalizer _localizer;
 
-    /// <summary>创建默认引擎（缺失必填元素时填充抛错，默认本地化器）。</summary>
+    /// <summary>Creates the default engine (missing required elements throw on fill; default localizer).</summary>
     public WordTemplateEngine()
         : this(null, null)
     {
     }
 
-    /// <summary>
-    /// 以指定填充配置创建引擎（可配置缺失必填元素的处理策略，见设计文档 §5.3）。
-    /// <paramref name="localizer"/>：文档内容本地化器（null = <see cref="DefaultTemplateLocalizer.Instance"/>）。
-    /// </summary>
+    /// <summary>Creates the engine with the given fill options (missing-element policy, §5.3).</summary>
+    /// <remarks><paramref name="localizer"/>：文档内容本地化器（null = <see cref="DefaultTemplateLocalizer.Instance"/>）。</remarks>
     public WordTemplateEngine(TemplateFillOptions? options = null, ITemplateLocalizer? localizer = null)
     {
         _filler = new WordTemplateFiller(options ?? new TemplateFillOptions());
@@ -59,4 +57,8 @@ public sealed class WordTemplateEngine : ITemplateEngine
     /// <inheritdoc />
     public FillData Parse(Stream template, TemplateContract contract)
         => _parser.Parse(template, contract);
+
+    /// <inheritdoc />
+    public TemplateParseResult ParseDetailed(Stream template, TemplateContract contract)
+        => _parser.ParseDetailed(template, contract);
 }

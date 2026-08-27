@@ -8,18 +8,17 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel.Simple;
 
-/// <summary>
-/// SimpleExcel 场景服务的轻量基类：依赖契约（单个表格）获得强类型
-/// <c>BuildTemplate / Validate / Fill / Parse</c>，无需 Builder / Engine。
+/// <summary>Lightweight service base for SimpleExcel — typed BuildTemplate / Validate / Fill / Parse from a contract, no Builder/Engine.</summary>
+/// <remarks>
 /// 契约表格与列声明 <see cref="TemplateElement.DataPath"/> 后，映射走 <see cref="DataPathMapper"/> 自动完成；
 /// TData 本身为 <c>List&lt;T&gt;</c> 等集合时，表格 DataPath 留空即按「根集合」直接填充 / 解析；
 /// 也可重写 <see cref="MapToData"/> / <see cref="MapFromData"/> 手工映射。
-/// </summary>
+/// </remarks>
 public abstract class SimpleExcelTemplateService<TData>
 {
     private readonly Lazy<TemplateContract> _contract;
 
-    /// <summary>以业务服务创建（构造时惰性校验契约：单个表格 + 表格声明 DataPath；TData 为根集合时可留空）。</summary>
+    /// <summary>Creates the service (the contract is lazily validated: a single table, DataPath as needed).</summary>
     protected SimpleExcelTemplateService()
     {
         _contract = new Lazy<TemplateContract>(() =>
@@ -39,12 +38,10 @@ public abstract class SimpleExcelTemplateService<TData>
     /// <summary>当前契约（惰性求值，来自 <see cref="DefineContract"/>）。</summary>
     public TemplateContract Contract => _contract.Value;
 
-    /// <summary>声明契约：单个表格（列 = 表头）。</summary>
+    /// <summary>Declares the contract: a single table (columns = headers).</summary>
     protected abstract TemplateContract DefineContract();
 
-    /// <summary>
-    /// 生成初始模板流（仅表头；<paramref name="culture"/> 非空时表头按语言解析，并写每列定义名，模板自描述）。
-    /// </summary>
+    /// <summary>Generates the initial template stream (header-only; localized headers + per-column defined names).</summary>
     public Stream BuildTemplate(SimpleExcelOptions? options = null, CultureInfo? culture = null, ITemplateLocalizer? localizer = null)
     {
         var stream = new MemoryStream();
@@ -53,11 +50,11 @@ public abstract class SimpleExcelTemplateService<TData>
         return stream;
     }
 
-    /// <summary>校验模板表头与契约列是否匹配。</summary>
+    /// <summary>Validates whether the template headers match the contract columns.</summary>
     public TemplateValidationResult Validate(Stream template, SimpleExcelOptions? options = null)
         => SimpleExcelContract.Validate(template, Contract, options);
 
-    /// <summary>填充：强类型数据 → .xlsx（表头 + 数据行；<paramref name="culture"/> 非空时表头按语言解析）。</summary>
+    /// <summary>Fills: typed data → .xlsx (header + data rows; localized headers when culture is given).</summary>
     public Stream Fill(TData data, SimpleExcelOptions? options = null, CultureInfo? culture = null, ITemplateLocalizer? localizer = null)
     {
         var stream = new MemoryStream();
@@ -66,7 +63,7 @@ public abstract class SimpleExcelTemplateService<TData>
         return stream;
     }
 
-    /// <summary>回读：已填充 .xlsx → 强类型数据（表头 → 契约列 → 自动映射）。</summary>
+    /// <summary>Parses a filled .xlsx back into typed data (headers → contract columns → auto-mapping).</summary>
     public TData Parse(Stream source, SimpleExcelOptions? options = null)
         => MapFromData(SimpleExcelContract.Read(source, Contract, options));
 

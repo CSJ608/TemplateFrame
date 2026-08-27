@@ -8,21 +8,20 @@ using TemplateFrame.Localization;
 
 namespace TemplateFrame.Mapping;
 
-/// <summary>
-/// 自动映射器：按契约元素的 <see cref="TemplateElement.DataPath"/> 反射完成 TData ⇄ FillData 双向映射。
-/// <para>English: Auto-mapper — reflects TData ⇄ FillData by the DataPath declared on contract elements.</para>
+/// <summary>Auto-mapper — reflects TData ⇄ FillData by the DataPath declared on contract elements.</summary>
+/// <remarks>
 /// 显式 DataPath 为主：标量 / 图片用单级属性路径，表格用「集合属性 + 列属性」两级路径；
 /// 数据对象本身就是集合（<c>List&lt;T&gt;</c> / <c>IReadOnlyList&lt;T&gt;</c> / 数组）时，表格 DataPath 留空即按「根集合」映射。
 /// 未声明 DataPath 的元素不参与自动映射（可对个别字段手写映射，或重写业务服务的映射方法）。
 /// 属性解析按（契约, 数据类型）缓存，只在首次映射时反射一次。
-/// </summary>
+/// </remarks>
 public static class DataPathMapper
 {
     // 缓存以契约实例为 key（契约通常是场景服务内的固定实例，随服务存活）；
     // 动态生成大量一次性契约的场景不适合自动映射，请手写 MapToData/MapFromData。
     private static readonly ConcurrentDictionary<(TemplateContract Contract, Type DataType), ContractMapping> Cache = new();
 
-    /// <summary>正向：强类型数据 → <see cref="FillData"/>（只映射声明了 DataPath 的元素）。</summary>
+    /// <summary>Forward mapping: typed data → <see cref="FillData"/> (only elements with DataPath).</summary>
     public static FillData ToFillData<TData>(TData data, TemplateContract contract)
     {
         // data 为 null 统一抛 ArgumentNullException：此前根集合模式静默导出仅表头的空文件、
@@ -50,12 +49,19 @@ public static class DataPathMapper
         return new FillData { Values = values, Tables = tables };
     }
 
-    /// <summary>
-    /// 反向：<see cref="FillData"/> → 强类型数据（容器类型需有无参构造；缺失/空值字段保持默认）。
-    /// 根集合模式（TData 本身是集合、表格 DataPath 留空）直接返回行集合；接口集合
-    /// （<c>IReadOnlyList&lt;T&gt;</c> / <c>IEnumerable&lt;T&gt;</c>）由 <c>List&lt;T&gt;</c> 承载。
-    /// </summary>
+    /// <summary>Reverse mapping: <see cref="FillData"/> → typed data (containers need a parameterless constructor).</summary>
+    /// <remarks>
+    /// 缺失/空值字段保持默认。根集合模式（TData 本身是集合、表格 DataPath 留空）直接返回行集合；
+    /// 接口集合（<c>IReadOnlyList&lt;T&gt;</c> / <c>IEnumerable&lt;T&gt;</c>）由 <c>List&lt;T&gt;</c> 承载。
+    /// </remarks>
     public static TData FromFillData<TData>(FillData data, TemplateContract contract)
+        => FromFillData<TData>(data, contract, lenientConversion: false);
+
+    /// <summary>
+    /// 宽容模式（服务层 <c>ParseDetailed</c> 用）：值转换失败的字段保持默认值、不抛错——
+    /// 转换失败已由引擎层以 ConversionFailed 告警标明位置，映射层不再重复报错。
+    /// </summary>
+    internal static TData FromFillData<TData>(FillData data, TemplateContract contract, bool lenientConversion)
     {
         Guard.ThrowIfNull(data, nameof(data));
         Guard.ThrowIfNull(contract, nameof(contract));
@@ -69,7 +75,7 @@ public static class DataPathMapper
                 case TemplateElement scalar when (scalar is TextElement or ImageElement) && scalar.DataPath is { Length: > 0 }
                     && data.Values.TryGetValue(scalar.Key, out var scalarValue):
                     instance ??= CreateInstance(typeof(TData));
-                    SetValue(mapping.Scalars[scalar.Key], instance, scalarValue, scalar as TextElement);
+                    SetValue(mapping.Scalars[scalar.Key], instance, scalarValue, scalar as TextElement, lenientConversion);
                     break;
 
                 case TableElement table when mapping.Tables.TryGetValue(table.Key, out var tableMapping):
@@ -78,7 +84,7 @@ public static class DataPathMapper
                         if (collectionProperty is null)
                         {
                             data.Tables.TryGetValue(table.Key, out var rootRows);
-                            return (TData)MapTableFromData(tableMapping, rootRows ?? [], typeof(TData));
+                            return (TData)MapTableFromData(tableMapping, rootRows ?? [], typeof(TData), lenientConversion);
                         }
 
                         if (data.Tables.TryGetValue(table.Key, out var rows))
@@ -86,7 +92,7 @@ public static class DataPathMapper
                             instance ??= CreateInstance(typeof(TData));
                             collectionProperty.SetValue(
                                 instance,
-                                MapTableFromData(tableMapping, rows, collectionProperty.PropertyType));
+                                MapTableFromData(tableMapping, rows, collectionProperty.PropertyType, lenientConversion));
                         }
 
                         break;
@@ -296,7 +302,8 @@ public static class DataPathMapper
     private static object MapTableFromData(
         TableMapping tableMapping,
         IReadOnlyList<IReadOnlyDictionary<string, object?>> rows,
-        Type destinationType)
+        Type destinationType,
+        bool lenientConversion)
     {
         var elementType = tableMapping.ElementType;
         if (destinationType.IsArray)
@@ -304,7 +311,7 @@ public static class DataPathMapper
             var array = Array.CreateInstance(elementType, rows.Count);
             for (var i = 0; i < rows.Count; i++)
             {
-                array.SetValue(CreateLine(tableMapping, rows[i]), i);
+                array.SetValue(CreateLine(tableMapping, rows[i], lenientConversion), i);
             }
 
             return array;
@@ -313,7 +320,7 @@ public static class DataPathMapper
         var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType))!;
         foreach (var row in rows)
         {
-            list.Add(CreateLine(tableMapping, row));
+            list.Add(CreateLine(tableMapping, row, lenientConversion));
         }
 
         return list;
@@ -321,21 +328,27 @@ public static class DataPathMapper
 
     private static object CreateLine(
         TableMapping tableMapping,
-        IReadOnlyDictionary<string, object?> row)
+        IReadOnlyDictionary<string, object?> row,
+        bool lenientConversion)
     {
         var line = Activator.CreateInstance(tableMapping.ElementType)!;
         foreach (var column in tableMapping.Columns)
         {
             if (row.TryGetValue(column.Key, out var value))
             {
-                SetValue(column.Value, line, value, null);
+                SetValue(column.Value, line, value, null, lenientConversion);
             }
         }
 
         return line;
     }
 
-    private static void SetValue(PropertyInfo property, object instance, object? value, TextElement? element)
+    private static void SetValue(
+        PropertyInfo property,
+        object instance,
+        object? value,
+        TextElement? element,
+        bool lenientConversion)
     {
         object? converted;
         try
@@ -345,6 +358,12 @@ public static class DataPathMapper
         catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException or ArgumentException
                                    or InvalidOperationException) // Convert.ChangeType 对不支持的转换恰抛该类型
         {
+            if (lenientConversion)
+            {
+                // ParseDetailed 宽容模式：保持默认值跳过赋值（引擎层已以 ConversionFailed 告警标明位置）
+                return;
+            }
+
             // 转换失败带上属性名（裸 FormatException 不知道错在哪个字段）
             throw new InvalidOperationException(
                 Sr.Get("Mapping.SetFailed", property.Name, value?.GetType().Name ?? "null", ex.Message), ex);

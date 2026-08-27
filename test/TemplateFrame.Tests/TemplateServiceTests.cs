@@ -89,6 +89,9 @@ public sealed class RecordingEngine : ITemplateEngine
         LastParseContract = contract;
         return new FillData { Values = new Dictionary<string, object?> { ["A"] = "parsed" } };
     }
+
+    public TemplateParseResult ParseDetailed(Stream template, TemplateContract contract)
+        => new() { Data = Parse(template, contract) };
 }
 
 /// <summary>提供带告警 FillDetailed 的假引擎（验证服务层告警出口，迭代 15）。</summary>
@@ -105,6 +108,8 @@ public sealed class WarningEngine : ITemplateEngine
         => new MemoryStream([7, 8, 9]);
 
     public FillData Parse(Stream template, TemplateContract contract) => new();
+
+    public TemplateParseResult ParseDetailed(Stream template, TemplateContract contract) => new();
 
     public TemplateFillResult FillDetailed(Stream template, TemplateContract contract, FillData data)
         => new()
@@ -279,6 +284,8 @@ public sealed class WrongBuilderEngine : ITemplateEngine
 
     public FillData Parse(Stream template, TemplateContract contract)
         => new();
+
+    public TemplateParseResult ParseDetailed(Stream template, TemplateContract contract) => new();
 }
 
 /// <summary>另一个构建器实现（用于类型不匹配测试）。</summary>

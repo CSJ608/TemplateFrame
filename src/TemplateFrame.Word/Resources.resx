@@ -82,4 +82,10 @@
   <data name="Word.Validation.XmlCorrupt" xml:space="preserve">
     <value>文档 XML 已损坏，无法解析：{0}</value>
   </data>
+  <data name="Word.Parse.ConversionFailed" xml:space="preserve">
+    <value>元素 "{0}" 的值 "{1}" 无法转换为 {2}，已保留原始文本。</value>
+  </data>
+  <data name="Word.Parse.TableConversionFailed" xml:space="preserve">
+    <value>表格列 "{0}" 第 {1} 行数据的值 "{2}" 无法转换为 {3}，已保留原始文本。</value>
+  </data>
 </root>
