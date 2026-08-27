@@ -253,6 +253,7 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 - 与 `Fill` **共享同一套元素定位逻辑**，只是方向相反。
 - 引擎产出 `FillData` 形状，业务服务映射回强类型 `TData`。
 - 用途：把"用户填好并打印过的单据"回读成结构化数据，供导入业务复用；也是未来 Excel 导入（按表头列名解析）的同一个模式。
+- **ParseDetailed（迭代 20）**：导入方向的告警出口，与 `FillDetailed`（§5.3）对称。值转换失败的字段在 `FillData` 中**保留原始文本**（与 `Parse` 的兜底一致），并以 `ConversionFailed`（Warning，`TemplateValidationIssue` 形状，表格列带行号）随 `TemplateParseResult` 返回——「null = 未填充」与「转换失败」从此可区分；`Parse` 行为不变。服务层 `ParseDetailed` 走宽容映射（`DataPathMapper` lenient 模式）：转换失败的字段保持默认值不抛错（引擎层告警已标明位置），返回 `TemplateParseResult<TData>`。注意：`ITemplateEngine` 新增了 `ParseDetailed` 成员（沿用 `FillDetailed` 先例），**自行实现该接口的业务方需补该成员**。
 
 ---
 
@@ -340,6 +341,7 @@ TemplateFrame/
 | 已归档 | **17** | 评审落地：Excel Drifted 修复 + API 简化（`MissingElementPolicy` / `TemplateFillOptions` 下沉、删除插件空壳类型）+ 插件去重 + 大文件拆分（全库无 500+ 行文件）+ 损坏流异常契约 + 测试补强（290 用例）+ 基建（editorconfig / Directory.Build.props / 包图标 / CI 矩阵与覆盖率）+ 文档"上手优先"重构 | ✅ 完成（2026-08-24，随 **2.0.0** 发布） |
 | 已归档 | **18** | 多目标框架支持：四包统一 `netstandard2.0;net462;net8.0`（2.1.0） | ✅ 完成（2026-08-25） |
 | 已归档 | **19** | 评审落地（第二轮）：布尔回读 / Word schema 三处 / 发布测试门禁（合并发布工作流）/ XML 损坏泄漏 / 回退列定位 / SetSheetName 时序 / 同位置定义名 / 异常契约统一 + `ValidationApplier`/`ContractValueConverter` 下沉 + 往返矩阵与 schema 校验护栏测试（310 用例） | ✅ 完成（2026-08-27，随 **2.2.0** 发布） |
+| 已归档 | **20** | ParseDetailed（导入方向告警出口，`ConversionFailed`）+ XML 注释双语规则（英文 summary + 中文 remarks）+ 插件 README 中英 | ✅ 完成（2026-08-27） |
 
 ---
 

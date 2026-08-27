@@ -109,7 +109,7 @@ filled.CopyTo(file);
 - **Contract = element list**: `TemplateContract` declares the elements of a scenario (`TextElement` / `ImageElement` / `TableElement`). Column names, validation rules, and mapping keys all come from this single declaration.
 - **Layout belongs to the application**: the contract does not produce layout. Your service composes the layout in `BuildInitialTemplate()` with the plugin's typed builder; or let a designer build the file in Word and let `Validate` check it.
 - **`FillData` shape**: a plugin-agnostic weakly-typed container. Declare `DataPath` on contract elements for automatic mapping (the default), or hand-write `MapToData` / `MapFromData` for full control.
-- **Tiered validation**: `Validate` fails hard on upload (Missing / WrongType / Ambiguous; missing optional fields only warn). `Fill` validates softly (`Drifted` / `Extra` become warnings and continue; a missing required element throws by default — configurable via `MissingElementPolicy.SkipAndWarn`). Use `FillDetailed` when you need the warning list.
+- **Tiered validation**: `Validate` fails hard on upload (Missing / WrongType / Ambiguous; missing optional fields only warn). `Fill` validates softly (`Drifted` / `Extra` become warnings and continue; a missing required element throws by default — configurable via `MissingElementPolicy.SkipAndWarn`). For warning lists use `FillDetailed` on export (stream + Warnings) and `ParseDetailed` on import (data + conversion warnings; failed fields keep their raw text, null still means not filled).
 
 ## Word / Excel flexible layouts
 
