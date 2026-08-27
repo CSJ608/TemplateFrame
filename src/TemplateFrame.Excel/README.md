@@ -77,6 +77,8 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
 - **软校验**（填充前跑 Validate）：`Drifted`/`Extra` 只记告警继续；Missing 必填按策略（默认抛错，可配 `SkipAndWarn`）；
   `WrongType`/`Ambiguous`/`Invalid` 视为硬错误。
 - **告警出口**：`ExcelTemplateFiller.Fill` 返回 `TemplateFillResult`（输出流 + Warnings）；引擎/服务层可用 `FillDetailed`（`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`）拿到同样的软校验告警，`Fill` 保持只返回输出流。
+- **0 行数据**：示例行占位符被清空（保留表头 + 空白行结构），导出单据不留"待填充"。
+- **二次填充**：`Fill` 假定输入是**未填充的原始模板**——对已填充文档再次 Fill 时表格区域已指向整个数据块、首行会被当作示例行，会得到错位结果；需要重新生成请从原始模板 Fill。
 - **ParseDetailed（2.3.0）**：导入方向对称出口——值转换失败的字段保留原始文本，并以 `ConversionFailed`（Warning，表格列带工作表行号）随 `TemplateParseResult` 返回；null 仍专指未填充，`Parse` 行为不变。
 
 ## 回读行为要点

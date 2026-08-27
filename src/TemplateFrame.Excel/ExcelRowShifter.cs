@@ -1,11 +1,12 @@
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
+using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
 
 namespace TemplateFrame.Excel;
 
 /// <summary>
 /// 表格克隆后的行平移（ExcelTemplateFiller 内部用）：克隆示例行并重写行号/单元格引用、
-/// 示例行下方既有行整体下移、表格下方命名区域与合并区域同步下移——等价于 Excel 的"插入行"。
+/// 示例行下方既有行整体下移、表格下方命名区域与合并区域与图片锚点同步下移——等价于 Excel 的"插入行"。
 /// </summary>
 internal static class ExcelRowShifter
 {
@@ -64,7 +65,7 @@ internal static class ExcelRowShifter
         return clones;
     }
 
-    /// <summary>把起始行在示例行下方的命名区域与合并区域整体下移 delta 行。</summary>
+    /// <summary>把起始行在示例行下方的命名区域、合并区域与图片锚点整体下移 delta 行。</summary>
     internal static void ShiftBelow(WorkbookPart workbookPart, WorksheetPart worksheetPart, string sheet, int sampleRow, int delta)
     {
         foreach (var match in ExcelNamedRangeLocator.FindAll(workbookPart))
@@ -88,29 +89,65 @@ internal static class ExcelRowShifter
         }
 
         var mergeCells = worksheetPart.Worksheet?.GetFirstChild<MergeCells>();
-        if (mergeCells is null)
+        if (mergeCells is not null)
+        {
+            foreach (var mergeCell in mergeCells.Elements<MergeCell>().ToList())
+            {
+                if (mergeCell.Reference?.Value is not { } range)
+                {
+                    continue;
+                }
+
+                var colon = range.IndexOf(':');
+                var startCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range.Substring(0, colon));
+                var endCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range.Substring(colon + 1));
+                if (startCell.Row <= sampleRow)
+                {
+                    continue;
+                }
+
+                mergeCell.Reference = ExcelAddressHelper.CellReference(startCell.Row + delta, startCell.Col)
+                                      + ":"
+                                      + ExcelAddressHelper.CellReference(endCell.Row + delta, endCell.Col);
+            }
+        }
+
+        // 表格下方的图片锚点同步下移（不随行下移会与新数据行重叠错位——印章/签名图常放在表格下方）
+        ShiftDrawingAnchorsBelow(worksheetPart, sampleRow, delta);
+    }
+
+    /// <summary>把起始行在示例行下方的图片锚点（oneCell/twoCell 的行标记）整体下移 delta 行。</summary>
+    private static void ShiftDrawingAnchorsBelow(WorksheetPart worksheetPart, int sampleRow, int delta)
+    {
+        var drawing = ExcelDrawingHelper.GetDrawingsPart(worksheetPart)?.WorksheetDrawing;
+        if (drawing is null)
         {
             return;
         }
 
-        foreach (var mergeCell in mergeCells.Elements<MergeCell>().ToList())
+        foreach (var anchor in drawing.Elements<Xdr.OneCellAnchor>())
         {
-            if (mergeCell.Reference?.Value is not { } range)
+            ShiftMarker(anchor.FromMarker, sampleRow, delta);
+        }
+
+        foreach (var anchor in drawing.Elements<Xdr.TwoCellAnchor>())
+        {
+            ShiftMarker(anchor.FromMarker, sampleRow, delta);
+            ShiftMarker(anchor.ToMarker, sampleRow, delta);
+        }
+
+        static void ShiftMarker(Xdr.MarkerType? marker, int sampleRow, int delta)
+        {
+            if (marker?.RowId?.Text is not { } rowText || !int.TryParse(rowText, out var row))
             {
-                continue;
+                return;
             }
 
-            var colon = range.IndexOf(':');
-            var startCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range.Substring(0, colon));
-            var endCell = ExcelAddressHelper.ParseCell(colon < 0 ? range : range.Substring(colon + 1));
-            if (startCell.Row <= sampleRow)
+            // 行标记 0 基；命名区域平移条件是 1 基起始行 > sampleRow，等价 0 基 row >= sampleRow
+            if (row >= sampleRow)
             {
-                continue;
+                marker.RowId.Text = (row + delta).ToString();
             }
-
-            mergeCell.Reference = ExcelAddressHelper.CellReference(startCell.Row + delta, startCell.Col)
-                                  + ":"
-                                  + ExcelAddressHelper.CellReference(endCell.Row + delta, endCell.Col);
         }
     }
 

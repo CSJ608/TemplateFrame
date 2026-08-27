@@ -70,6 +70,8 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - **Warning outlet**: `WordTemplateFiller.Fill` returns a `TemplateFillResult` (output stream + Warnings); the engine/service layer offers `FillDetailed` (`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`) for the same soft-validation warnings, while `Fill` keeps returning only the output stream.
 - **ParseDetailed (2.3.0)**: the import-side counterpart — fields whose conversion fails keep their raw text and are reported as `ConversionFailed` (Warning, table columns carry the data row number) in a `TemplateParseResult`; null still means not filled, `Parse` is unchanged.
 - **Before/after receipt**: the same template filled twice — pass `null` for empty fields before receipt (rendered empty), fill them in after.
+- **Zero data rows**: sample-row placeholders are cleared (header + blank row kept) so exports carry no "To be filled".
+- **Re-filling**: `Fill` expects a **pristine, unfilled template** — re-filling an already-filled document re-uses the first data row as the sample row and produces misplaced output; regenerate from the original template instead.
 
 ## Parse behavior notes
 

@@ -132,7 +132,8 @@ public sealed class WordTemplateParser
             return (false, null);
         }
 
-        var text = string.Concat(match.Element.Descendants<Text>().Select(t => t.Text ?? string.Empty));
+        // 只拼接控件直属的 w:t：嵌套内层控件的文本归内层元素自己，不混入外层值
+        var text = string.Concat(SdtLocator.OwnTexts(match.Element).Select(t => t.Text ?? string.Empty));
         if (_localizer.IsPlaceholderText(text))
         {
             return (true, null);
@@ -247,7 +248,7 @@ public sealed class WordTemplateParser
                         continue;
                     }
 
-                    var text = string.Concat(sdt.Descendants<Text>().Select(t => t.Text ?? string.Empty));
+                    var text = string.Concat(SdtLocator.OwnTexts(sdt).Select(t => t.Text ?? string.Empty));
                     rowValues[column.Key] = _localizer.IsPlaceholderText(text)
                         ? null
                         : ConvertCell(text, column, issues, column.Key, dataRowNumber);

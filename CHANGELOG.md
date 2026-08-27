@@ -2,6 +2,18 @@
 
 本项目的所有重要变更都会记录在此文件中，格式遵循 [Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)。
 
+## [Unreleased]
+
+### 修复
+- **嵌套 SDT 填外层吞内层文本（Word，手工模板场景）**：`SetSdtText` 此前按 `Descendants<Text>()` 改一个删其余——控件嵌套（富文本控件套普通控件，Word 手工模板常见）时填外层会删光内层控件的全部文本。现填充与回读都只触碰**控件直属**的 w:t（内层文本归内层元素自己），Filler / Parser 对称修复
+- **0 行数据导出残留占位符（Word / Excel）**：此前表格数据为空时整段跳过，产出单据里还留着示例行「待填充」。现清空示例行各列占位（保留表头 + 空白行结构），打印不留占位符
+- **Excel 行下移不平移图片锚点**：表格下方放印章/签名图（单据典型版式）时，插入 N-1 行数据后图片原地不动、与新数据行重叠错位。现 `ShiftBelow` 同步平移 oneCell/twoCell 锚点的行标记（与命名区域同条件）
+- **数值精度：decimal / long 写入不再经 double 中转（Excel 插件 / Simple）**：28-29 位 decimal 此前静默截到 15 位、> 2^53 的 long 失真；double/float 改用 `"R"` 往返格式（netfx 默认 G15 不可往返，且与 net8 最短往返规则不一致）。读取端 `ContractValueConverter` 补 long / double / float 目标类型（此前这类列转换失败只回原文）。注意：Simple 读侧按公开契约仍返回 double（与 Excel 一致），全精度往返用 Excel 插件的 decimal 列
+- **Word 多图 docPr Id 重复**：硬编码 1U，多图文档 id 重复（规范要求文档内唯一，严格阅读器会丢图）；现经构建器全局分配器下发唯一 id（正文/页眉/页脚共享）
+
+### 文档
+- Word / Excel 插件 README（中英）补两条行为说明：0 行数据的清空行为；`Fill` 假定输入为未填充原始模板（对已填充文档二次 Fill 会错位）
+
 ## [2.3.0] - 2026-08-27
 
 ### 新增

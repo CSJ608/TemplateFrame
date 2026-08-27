@@ -335,7 +335,7 @@ internal static class WordXmlFactory
         yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldChar { FieldCharType = FieldCharValues.End });
     }
 
-    internal static Drawing CreateDrawing(string relId, double? widthInches, double? heightInches, string extension)
+    internal static Drawing CreateDrawing(string relId, double? widthInches, double? heightInches, string extension, uint drawingId)
     {
         const long emuPerInch = 914400;
         var cx = (long)((widthInches ?? 2.0) * emuPerInch);
@@ -343,13 +343,14 @@ internal static class WordXmlFactory
 
         var inline = new DW.Inline(
             new DW.Extent { Cx = cx, Cy = cy },
-            new DW.DocProperties { Id = 1U, Name = "Placeholder." + extension },
+            // docPr Id 必须文档内唯一（此前硬编码 1，多图文档 id 重复——严格阅读器会丢图）；经构建器全局分配器下发
+            new DW.DocProperties { Id = drawingId, Name = "Placeholder." + extension },
             new DW.NonVisualGraphicFrameDrawingProperties(new A.GraphicFrameLocks { NoChangeAspect = true }),
             new A.Graphic(
                 new A.GraphicData(
                     new PIC.Picture(
                         new PIC.NonVisualPictureProperties(
-                            new PIC.NonVisualDrawingProperties { Id = 0U, Name = "placeholder." + extension },
+                            new PIC.NonVisualDrawingProperties { Id = drawingId, Name = "placeholder." + extension },
                             new PIC.NonVisualPictureDrawingProperties(
                                 new A.PictureLocks { NoChangeAspect = true, NoChangeArrowheads = true })),
                         new PIC.BlipFill(

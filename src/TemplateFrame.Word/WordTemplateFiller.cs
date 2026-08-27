@@ -98,9 +98,17 @@ public sealed class WordTemplateFiller
                     break;
 
                 case TableElement table:
-                    if (data.Tables.TryGetValue(table.Key, out var rows) && rows.Count > 0)
+                    if (data.Tables.TryGetValue(table.Key, out var rows))
                     {
-                        FillTableRows(document, table, rows);
+                        if (rows.Count > 0)
+                        {
+                            FillTableRows(document, table, rows);
+                        }
+                        else
+                        {
+                            // 0 行数据：清空示例行占位符（保留表头 + 空白行，打印不留"待填充"）
+                            ClearTablePlaceholders(document, table);
+                        }
                     }
 
                     break;
@@ -121,7 +129,8 @@ public sealed class WordTemplateFiller
 
     private static void SetSdtText(SdtElement sdt, string value)
     {
-        var texts = sdt.Descendants<Text>().ToList();
+        // 只触碰控件直属的 w:t：嵌套内层控件的文本不动（手工模板控件嵌套时，填外层不吞内层）
+        var texts = SdtLocator.OwnTexts(sdt);
         if (texts.Count > 0)
         {
             // 改第一个 w:r/w:t 的文本（保留 run 格式），移除多余 w:t
@@ -226,6 +235,24 @@ public sealed class WordTemplateFiller
 
             var column = table.Columns.FirstOrDefault(c => c.Key == tag);
             SetSdtText(sdt, FormatValue(value, column ?? new TextElement()));
+        }
+    }
+
+    /// <summary>清空示例行各列控件的占位文本（0 行数据填充时保留表格结构、不留"待填充"）。</summary>
+    private static void ClearTablePlaceholders(WordprocessingDocument document, TableElement table)
+    {
+        var (_, templateRow) = FindTemplateRow(document, table);
+        if (templateRow is null)
+        {
+            return; // 行模板缺失已由软校验兜底
+        }
+
+        foreach (var sdt in templateRow.Descendants<SdtElement>())
+        {
+            if (SdtLocator.GetTag(sdt) is { } tag && table.Columns.Any(c => c.Key == tag))
+            {
+                SetSdtText(sdt, string.Empty);
+            }
         }
     }
 

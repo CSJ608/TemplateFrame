@@ -31,6 +31,27 @@ internal static class ContractValueConverter
             return true;
         }
 
+        if (valueType == typeof(long)
+            && long.TryParse(text, NumberStyles.Integer, CultureInfo.InvariantCulture, out var longValue))
+        {
+            value = longValue;
+            return true;
+        }
+
+        if (valueType == typeof(double)
+            && double.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var doubleValue))
+        {
+            value = doubleValue;
+            return true;
+        }
+
+        if (valueType == typeof(float)
+            && float.TryParse(text, NumberStyles.Float, CultureInfo.InvariantCulture, out var floatValue))
+        {
+            value = floatValue;
+            return true;
+        }
+
         if (valueType == typeof(DateTime)
             && DateTime.TryParse(text, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dateTimeValue))
         {

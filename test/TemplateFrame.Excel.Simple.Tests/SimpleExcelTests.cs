@@ -1,3 +1,6 @@
+using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
+using System.Globalization;
 using TemplateFrame.Excel.Simple;
 using Xunit;
 
@@ -204,6 +207,33 @@ public sealed class SimpleExcelTests
         Assert.Single(loaded.Rows);
         Assert.Equal("M1", loaded.Rows[0][0]);
         Assert.Equal("物料一", loaded.Rows[0][1]);
+    }
+
+    /// <summary>
+    /// 迭代 21（B-13）：decimal / long 写入不再经 double 中转——此前 28-29 位 decimal 静默截到 15 位、
+    /// &gt; 2^53 的 long 失真。读侧按公开契约仍返回 double（与 Excel 一致），故直接断言单元格 XML 文本。
+    /// </summary>
+    [Fact]
+    public void Write_DecimalAndLongHighPrecision_PreservesFullCellText()
+    {
+        var amount = 123456789.123456789012345678m;
+        var big = 9_007_199_254_740_993L; // 2^53 + 1
+        using var stream = new MemoryStream();
+        SimpleExcel.Write(stream, new SimpleExcelTable
+        {
+            Headers = ["金额", "数量"],
+            Rows = [[amount, big]],
+        });
+
+        stream.Position = 0;
+        using var document = SpreadsheetDocument.Open(stream, false);
+        var cells = document.WorkbookPart!.WorksheetParts.First().Worksheet
+            .GetFirstChild<SheetData>()!.Descendants<Cell>()
+            .Where(c => c.DataType?.Value == CellValues.Number)
+            .ToList();
+
+        Assert.Equal(amount.ToString(CultureInfo.InvariantCulture), cells[0].CellValue?.Text);
+        Assert.Equal(big.ToString(CultureInfo.InvariantCulture), cells[1].CellValue?.Text);
     }
 }
 

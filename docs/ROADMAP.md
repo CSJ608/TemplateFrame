@@ -28,6 +28,7 @@
 | **18** | **多目标框架支持：netstandard2.0 + net462 + net8.0（2.1.0，非破坏性）** | ✅ 已完成（见下） |
 | **19** | **评审落地（第二轮）：布尔回读 / Word schema 三处 / 发布测试门禁 / XML 损坏泄漏 / 回退列定位 / SetSheetName 时序 / 同位置定义名 / 异常契约统一 + 公共代码下沉（2.2.0）** | ✅ 已完成（见下） |
 | **20** | **ParseDetailed（导入方向告警出口，`ConversionFailed`）+ XML 注释双语规则（英文 summary + 中文 remarks）+ 插件 README 中英（2.3.0）** | ✅ 已完成（见下） |
+| **21** | **真实场景正确性收尾：嵌套 SDT / 0 行占位 / 图片锚点平移 / 数值精度 / docPr 唯一** | ✅ 已完成（见下） |
 
 > 迭代 10（PDF）/ 迭代 11（图片）已搁置（2026-08-07），如需重启按对应小节范围继续。
 
@@ -415,6 +416,26 @@
 - **XML 注释双语规则落地**：四包全部 public API 的 summary 改为一句英文、中文原说明移入 remarks（参数细节保持中文）；基础包原「中文 summary + `<para>English:`」半成品格式一并收敛。internal 成员不动
 - **文档**：DESIGN §5.4 补 ParseDetailed 语义（含 ITemplateEngine 新成员的迁移注记）；README（中英）软校验段落与 Word/Excel 插件 README（中英）补告警出口说明；CHANGELOG Unreleased
 - **测试（310 → 318）**：Word/Excel 各一组 ParseDetailedTests（转换失败告警与原文保留、`Parse` 行为不变、干净往返零告警）+ 服务层端到端（宽容映射默认值 + 强类型往返）
+
+---
+
+## 迭代 21：真实场景正确性收尾 —— 已完成
+
+> **状态**：✅ 已完成（2026-08-27）。327 用例 × 2 TFM 全绿；`dotnet format --verify-no-changes` 通过。
+> 立项依据：两轮评审中标记 P1/P2 但延后处理的「会咬到真实用户」项——手工模板嵌套控件、单据印章图版式、0 行导出、高精度数值。
+
+### 落地内容
+- **B-5 嵌套 SDT**：填充 / 回读只触碰控件**直属** w:t（`SdtLocator.OwnTexts`：从 Text 向上到控件本体之间经过嵌套 SDT 即归属内层）——填外层不再删光内层文本，外层值不再混入内层文本；Filler / Parser 对称
+- **0 行数据**：Word / Excel Fill 表格数据为空时清空示例行各列占位（保留表头 + 空白行结构），导出单据不留「待填充」
+- **B-6 图片锚点平移**：`ExcelRowShifter.ShiftBelow` 同步平移 oneCell/twoCell 锚点行标记（0 基条件 row >= sampleRow，与命名区域 1 基 start.Row > sampleRow 等价）——表格下方印章/签名图不再与新数据行重叠
+- **B-13 数值精度**：decimal / long 写入直写 invariant 文本不经 double 中转（Excel 插件 / Simple 双端）；double / float 用 "R" 往返格式；读取端 `ContractValueConverter` 补 long / double / float。Simple 读侧按公开契约仍返回 double（已注记）
+- **B-7 docPr 唯一**：`CreateDrawing` 经构建器全局分配器（`_ids`，正文/页眉/页脚共享）下发唯一 drawing id
+- **B-10 文档化**：Word / Excel 插件 README（中英）补「0 行清空」与「Fill 假定原始模板（二次 Fill 会错位）」行为说明
+- **测试 +9（318 → 327）**：嵌套 SDT 填充/解析、空表清占位（Word/Excel）、图片锚点随行下移、decimal 27 位与 long 2^53+1 往返、Simple 写入精度、三图 docPr 唯一
+
+### 明确不做（本轮）
+- `FillTableRow` 的 `Descendants<SdtElement>()` 扫描嵌套表格列——示例行内再嵌表格属极端场景，等真实反馈
+- Simple 读侧全精度（改公开契约「数字按 double 返回」不值当；全精度路径用 Excel 插件 decimal 列）
 
 ---
 

@@ -162,11 +162,6 @@ public sealed class ExcelTemplateFiller
         TableElement table,
         IReadOnlyList<IReadOnlyDictionary<string, object?>> rows)
     {
-        if (rows.Count == 0)
-        {
-            return;
-        }
-
         // 列命名区域 → 示例行（取第一列起始行）
         var columnRanges = new List<(TextElement Column, (int Row, int Col) Start)>();
         string sheet = string.Empty;
@@ -200,6 +195,22 @@ public sealed class ExcelTemplateFiller
         var sampleRowElement = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex?.Value == sampleRow);
         if (sampleRowElement is null)
         {
+            return;
+        }
+
+        if (rows.Count == 0)
+        {
+            // 0 行数据：清空示例行各列占位符（保留表头 + 空白行，打印不留"待填充"）
+            foreach (var (_, start) in columnRanges)
+            {
+                var reference = ExcelAddressHelper.CellReference(start.Row, start.Col);
+                var cell = sampleRowElement.Elements<Cell>().FirstOrDefault(c => c.CellReference?.Value == reference);
+                if (cell is not null)
+                {
+                    SetInlineString(cell, string.Empty);
+                }
+            }
+
             return;
         }
 
@@ -299,11 +310,25 @@ public sealed class ExcelTemplateFiller
                 break;
 
             case decimal decimalValue:
+                // decimal 直写 invariant 文本：28-29 位精度不经 double 中转、全 TFM 输出一致
+                cell.DataType = CellValues.Number;
+                cell.RemoveAllChildren();
+                cell.AppendChild(new CellValue(decimalValue.ToString(CultureInfo.InvariantCulture)));
+                ExcelNumberFormat.ApplyToCell(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
+                break;
+
             case double doubleValue:
+                // "R" 全 TFM 保证往返（netfx 默认 G15 不可往返）
+                cell.DataType = CellValues.Number;
+                cell.RemoveAllChildren();
+                cell.AppendChild(new CellValue(doubleValue.ToString("R", CultureInfo.InvariantCulture)));
+                ExcelNumberFormat.ApplyToCell(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
+                break;
+
             case float floatValue:
                 cell.DataType = CellValues.Number;
                 cell.RemoveAllChildren();
-                cell.AppendChild(new CellValue(Convert.ToDecimal(value, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture)));
+                cell.AppendChild(new CellValue(floatValue.ToString("R", CultureInfo.InvariantCulture)));
                 ExcelNumberFormat.ApplyToCell(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
                 break;
 

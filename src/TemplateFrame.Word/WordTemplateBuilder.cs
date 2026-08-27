@@ -330,7 +330,7 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 
         var (bytes, extension) = PlaceholderImage.Load(placeholderPath);
         var relId = AddImagePart(bytes, extension);
-        var run = new Run(WordXmlFactory.CreateDrawing(relId, widthInches, heightInches, extension));
+        var run = new Run(WordXmlFactory.CreateDrawing(relId, widthInches, heightInches, extension, (uint)_ids.Next()));
 
         var sdt = new SdtRun(
             new SdtProperties(

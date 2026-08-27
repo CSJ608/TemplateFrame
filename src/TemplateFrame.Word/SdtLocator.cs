@@ -72,6 +72,40 @@ public static class SdtLocator
     public static int? GetId(SdtElement? sdt)
         => sdt?.SdtProperties?.GetFirstChild<SdtId>()?.Val?.Value;
 
+    /// <summary>
+    /// Enumerates the w:t texts belonging directly to this control (texts inside nested SDTs excluded).
+    /// <para>中文：控件直属的 w:t 文本（不含嵌套内层控件的文本）——手工模板的控件嵌套场景，
+    /// 外层控件的填充 / 回读只触碰自己的文本，不吞内层内容。</para>
+    /// </summary>
+    internal static List<Text> OwnTexts(SdtElement sdt)
+    {
+        var result = new List<Text>();
+        foreach (var text in sdt.Descendants<Text>())
+        {
+            if (IsInsideNestedSdt(text, sdt))
+            {
+                continue;
+            }
+
+            result.Add(text);
+        }
+
+        return result;
+
+        static bool IsInsideNestedSdt(Text text, SdtElement owner)
+        {
+            for (var parent = text.Parent; parent is not null && !ReferenceEquals(parent, owner); parent = parent.Parent)
+            {
+                if (parent is SdtElement)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+    }
+
     /// <summary>枚举文档内全部表格（正文 + 页眉 + 页脚；插件内 Filler / Parser / Validator 共用）。</summary>
     internal static IEnumerable<Table> EnumerateTables(WordprocessingDocument document)
     {

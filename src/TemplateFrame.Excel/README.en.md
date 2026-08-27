@@ -77,6 +77,8 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
 - **Soft validation** (Validate runs before filling): `Drifted`/`Extra` only record warnings and continue; missing required elements follow the policy (throw by default, configurable via `SkipAndWarn`);
   `WrongType`/`Ambiguous`/`Invalid` are hard errors.
 - **Warning outlet**: `ExcelTemplateFiller.Fill` returns a `TemplateFillResult` (output stream + Warnings); the engine/service layer offers `FillDetailed` (`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`) for the same soft-validation warnings, while `Fill` keeps returning only the output stream.
+- **Zero data rows**: sample-row placeholders are cleared (header + blank row kept) so exports carry no "To be filled".
+- **Re-filling**: `Fill` expects a **pristine, unfilled template** — re-filling an already-filled document re-uses the first data row as the sample row and produces misplaced output; regenerate from the original template instead.
 - **ParseDetailed (2.3.0)**: the import-side counterpart — fields whose conversion fails keep their raw text and are reported as `ConversionFailed` (Warning, table columns carry the worksheet row number) in a `TemplateParseResult`; null still means not filled, `Parse` is unchanged.
 
 ## Parse behavior notes

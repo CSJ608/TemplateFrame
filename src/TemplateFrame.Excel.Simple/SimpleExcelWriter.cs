@@ -153,10 +153,32 @@ internal static class SimpleExcelWriter
                 cell.InlineString = new InlineString(new Text(text) { Space = SpaceProcessingModeValues.Preserve });
                 break;
 
+            case decimal decimalValue:
+                // decimal 直写 invariant 文本：28-29 位精度不经 double 中转（double 中转会静默截到 15 位）
+                cell.DataType = CellValues.Number;
+                cell.CellValue = new CellValue(decimalValue.ToString(CultureInfo.InvariantCulture));
+                break;
+
+            case long longValue:
+                // long 直写：> 2^53 的整数经 double 中转会失真
+                cell.DataType = CellValues.Number;
+                cell.CellValue = new CellValue(longValue.ToString(CultureInfo.InvariantCulture));
+                break;
+
+            case double doubleValue:
+                // "R" 全 TFM 保证往返（netfx 默认 G15 不可往返）
+                cell.DataType = CellValues.Number;
+                cell.CellValue = new CellValue(doubleValue.ToString("R", CultureInfo.InvariantCulture));
+                break;
+
+            case float floatValue:
+                cell.DataType = CellValues.Number;
+                cell.CellValue = new CellValue(floatValue.ToString("R", CultureInfo.InvariantCulture));
+                break;
+
             case IFormattable number:
                 cell.DataType = CellValues.Number;
-                cell.CellValue = new CellValue(
-                    Convert.ToDouble(number, CultureInfo.InvariantCulture).ToString(CultureInfo.InvariantCulture));
+                cell.CellValue = new CellValue(Convert.ToString(number, CultureInfo.InvariantCulture) ?? "0");
                 break;
 
             default:
