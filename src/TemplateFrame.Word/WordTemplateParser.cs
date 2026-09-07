@@ -151,7 +151,7 @@ public sealed class WordTemplateParser
         TextElement element,
         List<TemplateValidationIssue>? issues,
         string key,
-        int? rowNumber)
+        int? rowNumber, string? tableKey = null, int? dataRowNumber = null)
     {
         if (ContractValueConverter.TryConvert(text, element.ValueType, out var value))
         {
@@ -168,6 +168,10 @@ public sealed class WordTemplateParser
             {
                 Code = TemplateValidationIssueCode.ConversionFailed,
                 Key = key,
+                TableKey = tableKey,
+                DataRowNumber = dataRowNumber,
+                RawValue = text,
+                TargetType = element.ValueType.ToString(),
                 Severity = TemplateValidationSeverity.Warning,
                 MessageKey = messageKey,
                 MessageArgs = args,
@@ -251,7 +255,7 @@ public sealed class WordTemplateParser
                     var text = string.Concat(SdtLocator.OwnTexts(sdt).Select(t => t.Text ?? string.Empty));
                     rowValues[column.Key] = _localizer.IsPlaceholderText(text)
                         ? null
-                        : ConvertCell(text, column, issues, column.Key, dataRowNumber);
+                        : ConvertCell(text, column, issues, column.Key, dataRowNumber, table.Key, dataRowNumber);
                 }
 
                 rows.Add(rowValues);

@@ -73,4 +73,10 @@
   <data name="Document.PageNumberPattern" xml:space="preserve">
     <value>第{page}页，总{total}页</value>
   </data>
+  <data name="Mapping.ConversionFailed" xml:space="preserve">
+    <value>字段“{0}”映射到属性“{1}”失败：值“{2}”无法转换为 {3}。</value>
+  </data>
+  <data name="Service.RecursiveBuild" xml:space="preserve">
+    <value>不支持在同一服务实例中递归生成模板。</value>
+  </data>
 </root>

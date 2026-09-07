@@ -1,4 +1,5 @@
 using System.Globalization;
+using System.Reflection;
 using TemplateFrame.Builder;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
@@ -21,6 +22,8 @@ public abstract class TemplateService<TData, TBuilder>
     private readonly ITemplateEngine _engine;
     private readonly ITemplateLocalizer _localizer;
     private readonly Lazy<TemplateContract> _contract;
+    private readonly bool _hasCustomMapFromData;
+    private readonly object _buildLock = new();
 
     /// <summary>Creates the service with a plugin engine (e.g. <c>WordTemplateEngine</c>).</summary>
     /// <remarks><paramref name="localizer"/> 为 null 时使用 <see cref="DefaultTemplateLocalizer.Instance"/>。</remarks>
@@ -29,6 +32,7 @@ public abstract class TemplateService<TData, TBuilder>
         _engine = engine ?? throw new ArgumentNullException(nameof(engine));
         _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
         _contract = new Lazy<TemplateContract>(DefineContract);
+        _hasCustomMapFromData = HasCustomMapFromData(GetType());
     }
 
     /// <summary>The current contract (lazily evaluated from <see cref="DefineContract"/>).</summary>
@@ -47,24 +51,46 @@ public abstract class TemplateService<TData, TBuilder>
     protected abstract void BuildInitialTemplate();
 
     /// <summary>Generates the initial template file stream (with content controls).</summary>
-    /// <remarks><paramref name="culture"/>：模板内容语言（占位符 / 页码 / 版式 i18n 键按此解析）；null = 中文默认。</remarks>
+    /// <remarks>
+    /// <paramref name="culture"/>：模板内容语言（占位符 / 页码 / 版式 i18n 键按此解析）；null = 中文默认。
+    /// 同一实例的生成调用串行执行，覆盖创建、组装、保存和释放；不同实例不共享锁。
+    /// 版式回调须同步完成，不得等待同一实例的另一生成调用，也不得递归生成。
+    /// 返回流由调用方释放；此保护不代表业务子类或其他服务方法均线程安全。
+    /// </remarks>
     public Stream BuildInitialTemplateFile(CultureInfo? culture = null)
     {
-        var builder = _engine.CreateBuilder(_localizer, culture) as TBuilder
-            ?? throw new InvalidOperationException(Sr.Get("Service.WrongBuilderType", _engine.GetType().Name, typeof(TBuilder).Name));
-        Builder = builder;
-        try
+        lock (_buildLock)
         {
-            BuildInitialTemplate();
-            var stream = new MemoryStream();
-            Builder.Save(stream);
-            stream.Position = 0;
-            return stream;
-        }
-        finally
-        {
-            Builder = null!;
-            (builder as IDisposable)?.Dispose();
+            // Monitor locks are reentrant: reject recursion before replacing the active builder.
+            if (Builder != null)
+                throw new InvalidOperationException(Sr.Get("Service.RecursiveBuild"));
+
+            var builder = _engine.CreateBuilder(_localizer, culture) as TBuilder
+                ?? throw new InvalidOperationException(Sr.Get("Service.WrongBuilderType", _engine.GetType().Name, typeof(TBuilder).Name));
+            Builder = builder;
+            MemoryStream? stream = null;
+            try
+            {
+                try
+                {
+                    BuildInitialTemplate();
+                    stream = new MemoryStream();
+                    builder.Save(stream);
+                    stream.Position = 0;
+                }
+                finally
+                {
+                    // Keep the active builder until disposal completes (including reentrancy checks).
+                    try { (builder as IDisposable)?.Dispose(); }
+                    finally { Builder = null!; }
+                }
+                return stream;
+            }
+            catch
+            {
+                stream?.Dispose();
+                throw;
+            }
         }
     }
 
@@ -105,26 +131,72 @@ public abstract class TemplateService<TData, TBuilder>
     /// <remarks>
     /// 回读并返回转换告警——FillDetailed 在导入方向的对称出口。
     /// 值转换失败的字段以 <see cref="Validation.TemplateValidationIssueCode.ConversionFailed"/>（Warning）随结果返回；
+    /// 默认自动映射失败保持属性默认值，诊断包含属性路径、输入值和目标类型，并保留引擎告警。
+    /// 自定义业务映射的异常照常传播。
     /// 仅需数据时用 <see cref="Parse"/>（行为不变）。
     /// </remarks>
     public TemplateParseResult<TData> ParseDetailed(Stream template)
     {
         var result = _engine.ParseDetailed(template, Contract);
+        var warnings = result.Warnings.ToList();
+        var data = new FillData
+        {
+            Values = result.Data.Values,
+            Tables = result.Data.Tables,
+            MappingWarning = warning =>
+            {
+                // Match structured locations, never localized messages or column keys alone.
+                var index = warnings.FindIndex(existing =>
+                    existing.Code == TemplateValidationIssueCode.ConversionFailed
+                    && !string.IsNullOrEmpty(existing.TargetType)
+                    && existing.Key == warning.Key && existing.TableKey == warning.TableKey
+                    && existing.DataRowNumber == warning.DataRowNumber
+                    && Equals(existing.RawValue, warning.RawValue));
+                if (index < 0)
+                    warnings.Add(warning);
+                else
+                    warnings[index] = warnings[index] with
+                    {
+                        DataPath = warning.DataPath,
+                        TargetType = warning.TargetType,
+                    };
+            },
+        };
         return new TemplateParseResult<TData>
         {
-            Data = MapFromDataDetailed(result.Data),
-            Warnings = result.Warnings,
+            Data = MapFromDataDetailed(data),
+            Warnings = warnings,
         };
     }
 
-    /// <summary>Mapping used by ParseDetailed — failed conversions keep the property default instead of throwing.</summary>
+    /// <summary>Mapping used by ParseDetailed — honors custom mapping, otherwise uses lenient auto-mapping.</summary>
     /// <remarks>
-    /// 未重写时走自动映射的宽容模式，业务重写 <see cref="MapFromData"/> 后默认回落到严格映射（可按需一并重写）。
+    /// 业务直接或继承重写 <see cref="MapFromData"/> 时沿用其行为（异常照常传播）；
+    /// 否则走自动映射的宽容模式，转换失败保持属性默认值并向 ParseDetailed 结果补充诊断。
+    /// 可重写本方法定制详细解析映射；调用 base 时仍收集自动映射诊断。
     /// </remarks>
     protected virtual TData MapFromDataDetailed(FillData data)
-        => ContractHasDataPath
+        => !_hasCustomMapFromData && ContractHasDataPath
             ? DataPathMapper.FromFillData<TData>(data, Contract, lenientConversion: true)
             : MapFromData(data);
+
+    private static bool HasCustomMapFromData(Type serviceType)
+    {
+        var baseType = typeof(TemplateService<TData, TBuilder>);
+        // Inspect the original virtual slot, including inherited overrides. A hidden
+        // method or an overload does not replace the mapping used by Parse.
+        for (var type = serviceType; type != null && type != baseType; type = type.BaseType)
+        {
+            if (type.GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.DeclaredOnly)
+                .Any(method => method.Name == nameof(MapFromData)
+                    && method.GetBaseDefinition().DeclaringType == baseType))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <summary>TData → FillData: auto-mapped when elements declare DataPath; override otherwise.</summary>
     protected virtual FillData MapToData(TData data)

@@ -55,6 +55,7 @@ public sealed class ExcelTemplateParser
 
         var values = new Dictionary<string, object?>();
         var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
+        var lookup = new CellLookup();
 
         try
         {
@@ -63,7 +64,7 @@ public sealed class ExcelTemplateParser
                 switch (element)
                 {
                     case TextElement text:
-                        var (found, textValue) = ReadText(workbookPart, text, issues);
+                        var (found, textValue) = ReadText(workbookPart, text, issues, lookup);
                         if (found)
                         {
                             values[text.Key] = textValue; // 占位符 → null（未填充），元素缺失 → 键省略
@@ -81,7 +82,7 @@ public sealed class ExcelTemplateParser
                         break;
 
                     case TableElement table:
-                        var rows = ReadTableRows(workbookPart, table, issues);
+                        var rows = ReadTableRows(workbookPart, table, issues, lookup);
                         if (rows is not null)
                         {
                             tables[table.Key] = rows;
@@ -127,7 +128,8 @@ public sealed class ExcelTemplateParser
     private (bool Found, object? Value) ReadText(
         WorkbookPart workbookPart,
         TextElement element,
-        List<TemplateValidationIssue>? issues)
+        List<TemplateValidationIssue>? issues,
+        CellLookup lookup)
     {
         var match = ExcelNamedRangeLocator.FindByName(workbookPart, ExcelNamedRangeLocator.ElementName(element.Key));
         if (match is null)
@@ -137,7 +139,7 @@ public sealed class ExcelTemplateParser
 
         var (sheet, start, _) = ExcelNamedRangeLocator.ParseReference(match.Reference);
         var worksheetPart = ExcelTemplateValidator.ResolveWorksheetPart(workbookPart, sheet);
-        var cell = FindCell(worksheetPart, start.Row, start.Col);
+        var cell = lookup.FindCell(worksheetPart, start.Row, start.Col);
         return cell is null
             ? (false, null)
             : (true, ReadCellValue(workbookPart, cell, element, issues, element.Key, null));
@@ -169,7 +171,8 @@ public sealed class ExcelTemplateParser
     private IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(
         WorkbookPart workbookPart,
         TableElement table,
-        List<TemplateValidationIssue>? issues)
+        List<TemplateValidationIssue>? issues,
+        CellLookup lookup)
     {
         var columnRanges = new List<(TextElement Column, (int Row, int Col) Start, (int Row, int Col) End)>();
         string sheet = string.Empty;
@@ -206,10 +209,10 @@ public sealed class ExcelTemplateParser
             var rowValues = new Dictionary<string, object?>();
             foreach (var (column, start, _) in columnRanges)
             {
-                var cell = FindCell(worksheetPart, start.Row + r, start.Col);
+                var cell = lookup.FindCell(worksheetPart, start.Row + r, start.Col);
                 rowValues[column.Key] = cell is null
                     ? null
-                    : ReadCellValue(workbookPart, cell, column, issues, column.Key, start.Row + r);
+                    : ReadCellValue(workbookPart, cell, column, issues, column.Key, start.Row + r, table.Key, r + 1);
             }
 
             rows.Add(rowValues);
@@ -218,21 +221,49 @@ public sealed class ExcelTemplateParser
         return rows;
     }
 
-    private static Cell? FindCell(WorksheetPart? worksheetPart, int rowIndex, int colIndex)
+    // Owned by one ParseCore call: no worksheet/DOM references survive the parse.
+    // Index rows once per accessed sheet and cells once per accessed row.
+    private sealed class CellLookup
     {
-        if (worksheetPart?.Worksheet?.GetFirstChild<SheetData>() is not { } sheetData)
-        {
-            return null;
-        }
+        private readonly Dictionary<WorksheetPart, Dictionary<uint, Row>> _rows = new();
+        private readonly Dictionary<Row, Dictionary<string, Cell>> _cells = new();
 
-        var row = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
-        if (row is null)
+        public Cell? FindCell(WorksheetPart? worksheetPart, int rowIndex, int colIndex)
         {
-            return null;
-        }
+            if (worksheetPart is null || rowIndex < 0)
+                return null;
 
-        var reference = ExcelAddressHelper.CellReference(rowIndex, colIndex);
-        return row.Elements<Cell>().FirstOrDefault(c => c.CellReference?.Value == reference);
+            if (!_rows.TryGetValue(worksheetPart, out var rows))
+            {
+                rows = new Dictionary<uint, Row>();
+                if (worksheetPart.Worksheet?.GetFirstChild<SheetData>() is { } sheetData)
+                {
+                    foreach (var candidate in sheetData.Elements<Row>())
+                    {
+                        if (candidate.RowIndex?.Value is { } index && !rows.ContainsKey(index))
+                            rows.Add(index, candidate); // Preserve first-match behavior.
+                    }
+                }
+                _rows.Add(worksheetPart, rows);
+            }
+
+            if (!rows.TryGetValue((uint)rowIndex, out var row))
+                return null;
+
+            if (!_cells.TryGetValue(row, out var cells))
+            {
+                cells = new Dictionary<string, Cell>(StringComparer.Ordinal);
+                foreach (var candidate in row.Elements<Cell>())
+                {
+                    if (candidate.CellReference?.Value is { } reference && !cells.ContainsKey(reference))
+                        cells.Add(reference, candidate);
+                }
+                _cells.Add(row, cells);
+            }
+
+            return cells.TryGetValue(ExcelAddressHelper.CellReference(rowIndex, colIndex), out var cell)
+                ? cell : null;
+        }
     }
 
     /// <summary>按单元格数据读值并转换到目标类型：bool/数字（日期序列号）/字符串/共享字符串；已知占位符 → null。</summary>
@@ -242,7 +273,7 @@ public sealed class ExcelTemplateParser
         TextElement element,
         List<TemplateValidationIssue>? issues,
         string issueKey,
-        int? rowNumber)
+        int? rowNumber, string? tableKey = null, int? dataRowNumber = null)
     {
         var dataType = cell.DataType?.Value;
         if (dataType == CellValues.Boolean)
@@ -277,7 +308,7 @@ public sealed class ExcelTemplateParser
                 return DateTime.FromOADate(serial);
             }
 
-            return ConvertCell(numberText, element, issues, issueKey, rowNumber);
+            return ConvertCell(numberText, element, issues, issueKey, rowNumber, tableKey, dataRowNumber);
         }
 
         if (dataType == CellValues.SharedString)
@@ -295,7 +326,7 @@ public sealed class ExcelTemplateParser
 
             return _localizer.IsPlaceholderText(sharedText)
                 ? null
-                : ConvertCell(sharedText, element, issues, issueKey, rowNumber);
+                : ConvertCell(sharedText, element, issues, issueKey, rowNumber, tableKey, dataRowNumber);
         }
 
         var text = cell.InlineString?.Text?.Text
@@ -303,7 +334,7 @@ public sealed class ExcelTemplateParser
                    ?? string.Empty;
         return _localizer.IsPlaceholderText(text)
             ? null
-            : ConvertCell(text, element, issues, issueKey, rowNumber);
+            : ConvertCell(text, element, issues, issueKey, rowNumber, tableKey, dataRowNumber);
     }
 
     /// <summary>
@@ -315,7 +346,7 @@ public sealed class ExcelTemplateParser
         TextElement element,
         List<TemplateValidationIssue>? issues,
         string key,
-        int? rowNumber)
+        int? rowNumber, string? tableKey = null, int? dataRowNumber = null)
     {
         if (ContractValueConverter.TryConvert(text, element.ValueType, out var value))
         {
@@ -332,6 +363,10 @@ public sealed class ExcelTemplateParser
             {
                 Code = TemplateValidationIssueCode.ConversionFailed,
                 Key = key,
+                TableKey = tableKey,
+                DataRowNumber = dataRowNumber,
+                RawValue = text,
+                TargetType = element.ValueType.ToString(),
                 Severity = TemplateValidationSeverity.Warning,
                 MessageKey = messageKey,
                 MessageArgs = args,

@@ -23,9 +23,18 @@
     <ProjectReference Include="..\..\src\TemplateFrame.Excel\TemplateFrame.Excel.csproj" />
   </ItemGroup>
 
+  <!-- JSON regression tests use the runtime serializer on net8.0 and its package on net472. -->
+  <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
+    <PackageReference Include="System.Text.Json" Version="8.0.5" />
+  </ItemGroup>
+
   <!-- net472 下 ZipArchive（损坏流测试构造 zip-valid-xml-corrupt 样本）需要显式引用框架程序集 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net472'">
     <Reference Include="System.IO.Compression" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Include="..\Shared\TemplateServiceConcurrencyTests.cs" Link="TemplateServiceConcurrencyTests.cs" />
   </ItemGroup>
 
 </Project>

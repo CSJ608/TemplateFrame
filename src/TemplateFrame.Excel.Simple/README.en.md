@@ -151,7 +151,7 @@ var parsed = service.Parse(filled);      // directly yields List<MaterialLine>
 
 ## Performance and dependencies
 
-- Measured on an ordinary dev machine (scales linearly with rows): write / read of 1,000 rows ~30ms, 10,000 rows ~0.3–0.5s; contract-path read of 10,000 rows ~0.6–0.9s.
+- Historical snapshot (2026-08-24; sample-specific, with no guarantee of linear scaling or current-version timings): write / read of 1,000 rows ~30ms, 10,000 rows ~0.3–0.5s; contract-path read of 10,000 rows ~0.6–0.9s.
 - Snapshots in `docs/PERFORMANCE.md`; benchmark project `test/TemplateFrame.Benchmarks` (reproducible with `dotnet run -c Release`).
 - Target frameworks `netstandard2.0 / net462 / net8.0` (NuGet picks per runtime automatically); depends on `DocumentFormat.OpenXml` (3.3.x).
 

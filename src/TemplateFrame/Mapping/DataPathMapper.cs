@@ -2,9 +2,11 @@ using System.Collections;
 using System.Collections.Concurrent;
 using System.Globalization;
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
 using TemplateFrame.Localization;
+using TemplateFrame.Validation;
 
 namespace TemplateFrame.Mapping;
 
@@ -13,13 +15,12 @@ namespace TemplateFrame.Mapping;
 /// 显式 DataPath 为主：标量 / 图片用单级属性路径，表格用「集合属性 + 列属性」两级路径；
 /// 数据对象本身就是集合（<c>List&lt;T&gt;</c> / <c>IReadOnlyList&lt;T&gt;</c> / 数组）时，表格 DataPath 留空即按「根集合」映射。
 /// 未声明 DataPath 的元素不参与自动映射（可对个别字段手写映射，或重写业务服务的映射方法）。
-/// 属性解析按（契约, 数据类型）缓存，只在首次映射时反射一次。
+/// 属性解析按（契约实例, 数据类型）缓存；弱关联不延长契约生命周期。
 /// </remarks>
 public static class DataPathMapper
 {
-    // 缓存以契约实例为 key（契约通常是场景服务内的固定实例，随服务存活）；
-    // 动态生成大量一次性契约的场景不适合自动映射，请手写 MapToData/MapFromData。
-    private static readonly ConcurrentDictionary<(TemplateContract Contract, Type DataType), ContractMapping> Cache = new();
+    // 按引用身份关联；契约不再被外部使用时，其类型字典和映射可随之回收。
+    private static readonly ConditionalWeakTable<TemplateContract, ConcurrentDictionary<Type, ContractMapping>> Cache = new();
 
     /// <summary>Forward mapping: typed data → <see cref="FillData"/> (only elements with DataPath).</summary>
     public static FillData ToFillData<TData>(TData data, TemplateContract contract)
@@ -58,8 +59,7 @@ public static class DataPathMapper
         => FromFillData<TData>(data, contract, lenientConversion: false);
 
     /// <summary>
-    /// 宽容模式（服务层 <c>ParseDetailed</c> 用）：值转换失败的字段保持默认值、不抛错——
-    /// 转换失败已由引擎层以 ConversionFailed 告警标明位置，映射层不再重复报错。
+    /// 宽容模式（服务层 <c>ParseDetailed</c> 用）：转换失败保持默认值，并通过本次数据的诊断回调报告。
     /// </summary>
     internal static TData FromFillData<TData>(FillData data, TemplateContract contract, bool lenientConversion)
     {
@@ -75,7 +75,8 @@ public static class DataPathMapper
                 case TemplateElement scalar when (scalar is TextElement or ImageElement) && scalar.DataPath is { Length: > 0 }
                     && data.Values.TryGetValue(scalar.Key, out var scalarValue):
                     instance ??= CreateInstance(typeof(TData));
-                    SetValue(mapping.Scalars[scalar.Key], instance, scalarValue, scalar as TextElement, lenientConversion);
+                    SetValue(mapping.Scalars[scalar.Key], instance, scalarValue, scalar as TextElement,
+                        lenientConversion, data.MappingWarning, scalar.Key, null, null, scalar.DataPath!);
                     break;
 
                 case TableElement table when mapping.Tables.TryGetValue(table.Key, out var tableMapping):
@@ -84,7 +85,7 @@ public static class DataPathMapper
                         if (collectionProperty is null)
                         {
                             data.Tables.TryGetValue(table.Key, out var rootRows);
-                            return (TData)MapTableFromData(tableMapping, rootRows ?? [], typeof(TData), lenientConversion);
+                            return (TData)MapTableFromData(tableMapping, rootRows ?? [], typeof(TData), lenientConversion, data.MappingWarning, table);
                         }
 
                         if (data.Tables.TryGetValue(table.Key, out var rows))
@@ -92,7 +93,7 @@ public static class DataPathMapper
                             instance ??= CreateInstance(typeof(TData));
                             collectionProperty.SetValue(
                                 instance,
-                                MapTableFromData(tableMapping, rows, collectionProperty.PropertyType, lenientConversion));
+                                MapTableFromData(tableMapping, rows, collectionProperty.PropertyType, lenientConversion, data.MappingWarning, table));
                         }
 
                         break;
@@ -108,7 +109,11 @@ public static class DataPathMapper
            ?? throw new InvalidOperationException(Sr.Get("Mapping.CreateInstanceFailed", type.Name));
 
     private static ContractMapping GetMapping(TemplateContract contract, Type dataType)
-        => Cache.GetOrAdd((contract, dataType), static key => BuildMapping(key.Contract, key.DataType));
+    {
+        var mappings = Cache.GetValue(contract, static _ => new ConcurrentDictionary<Type, ContractMapping>());
+        // GetOrAdd 可能并发构建候选，但只发布一个完整映射；失败不缓存，后续调用可重试。
+        return mappings.GetOrAdd(dataType, type => BuildMapping(contract, type));
+    }
 
     private static ContractMapping BuildMapping(TemplateContract contract, Type dataType)
     {
@@ -303,7 +308,9 @@ public static class DataPathMapper
         TableMapping tableMapping,
         IReadOnlyList<IReadOnlyDictionary<string, object?>> rows,
         Type destinationType,
-        bool lenientConversion)
+        bool lenientConversion,
+        Action<TemplateValidationIssue>? reportWarning,
+        TableElement table)
     {
         var elementType = tableMapping.ElementType;
         if (destinationType.IsArray)
@@ -311,16 +318,16 @@ public static class DataPathMapper
             var array = Array.CreateInstance(elementType, rows.Count);
             for (var i = 0; i < rows.Count; i++)
             {
-                array.SetValue(CreateLine(tableMapping, rows[i], lenientConversion), i);
+                array.SetValue(CreateLine(tableMapping, rows[i], lenientConversion, reportWarning, table, i), i);
             }
 
             return array;
         }
 
         var list = (IList)Activator.CreateInstance(typeof(List<>).MakeGenericType(elementType))!;
-        foreach (var row in rows)
+        for (var i = 0; i < rows.Count; i++)
         {
-            list.Add(CreateLine(tableMapping, row, lenientConversion));
+            list.Add(CreateLine(tableMapping, rows[i], lenientConversion, reportWarning, table, i));
         }
 
         return list;
@@ -329,14 +336,18 @@ public static class DataPathMapper
     private static object CreateLine(
         TableMapping tableMapping,
         IReadOnlyDictionary<string, object?> row,
-        bool lenientConversion)
+        bool lenientConversion,
+        Action<TemplateValidationIssue>? reportWarning,
+        TableElement table,
+        int rowIndex)
     {
         var line = Activator.CreateInstance(tableMapping.ElementType)!;
         foreach (var column in tableMapping.Columns)
         {
             if (row.TryGetValue(column.Key, out var value))
             {
-                SetValue(column.Value, line, value, null, lenientConversion);
+                SetValue(column.Value, line, value, null, lenientConversion, reportWarning,
+                    column.Key, table.Key, rowIndex + 1, table.DataPath ?? string.Empty);
             }
         }
 
@@ -348,7 +359,12 @@ public static class DataPathMapper
         object instance,
         object? value,
         TextElement? element,
-        bool lenientConversion)
+        bool lenientConversion,
+        Action<TemplateValidationIssue>? reportWarning,
+        string key,
+        string? tableKey,
+        int? dataRowNumber,
+        string dataPath)
     {
         object? converted;
         try
@@ -360,7 +376,30 @@ public static class DataPathMapper
         {
             if (lenientConversion)
             {
-                // ParseDetailed 宽容模式：保持默认值跳过赋值（引擎层已以 ConversionFailed 告警标明位置）
+                // User implementations of IConvertible / ToString may throw business
+                // exceptions. Only tolerate failures for framework-owned input types.
+                if (value != null && value is not string && value is not byte[]
+                    && value is not decimal && value is not DateTime && !value.GetType().IsPrimitive)
+                    throw;
+
+                var propertyPath = dataRowNumber is { } row
+                    ? $"{dataPath}[{row - 1}].{property.Name}"
+                    : dataPath;
+                var args = new object?[] { key, propertyPath, value, property.PropertyType.FullName };
+                reportWarning?.Invoke(new TemplateValidationIssue
+                {
+                    Code = TemplateValidationIssueCode.ConversionFailed,
+                    Severity = TemplateValidationSeverity.Warning,
+                    Key = key,
+                    TableKey = tableKey,
+                    DataRowNumber = dataRowNumber,
+                    DataPath = propertyPath,
+                    RawValue = value,
+                    TargetType = property.PropertyType.ToString(),
+                    MessageKey = "Mapping.ConversionFailed",
+                    MessageArgs = args,
+                    Message = Sr.Get("Mapping.ConversionFailed", args),
+                });
                 return;
             }
 

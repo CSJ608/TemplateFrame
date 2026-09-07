@@ -65,7 +65,7 @@ public class ExcelBenchmarks
         return output.ToArray();
     }
 
-    private static void ComposeTemplate(Stream target)
+    internal static void ComposeTemplate(Stream target)
     {
         var builder = new ExcelTemplateBuilder();
         builder.SetSheetName("送货单");

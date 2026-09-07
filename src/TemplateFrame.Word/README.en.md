@@ -68,7 +68,9 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - **Table rows**: deep-copies the sample row N times and fills by tag per row; **every SDT gets a fresh unique `w:id` after cloning**.
 - **Soft validation** (Validate runs before filling): `Drifted`/`Extra` only record warnings and continue; missing required elements follow the policy (throw by default, configurable via `MissingElementPolicy.SkipAndWarn`); `WrongType`/`Ambiguous`/`Invalid` are hard errors.
 - **Warning outlet**: `WordTemplateFiller.Fill` returns a `TemplateFillResult` (output stream + Warnings); the engine/service layer offers `FillDetailed` (`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`) for the same soft-validation warnings, while `Fill` keeps returning only the output stream.
-- **ParseDetailed (2.3.0)**: the import-side counterpart — fields whose conversion fails keep their raw text and are reported as `ConversionFailed` (Warning, table columns carry the data row number) in a `TemplateParseResult`; null still means not filled, `Parse` is unchanged.
+- **Engine ParseDetailed (2.3.0)**: the import-side counterpart — fields whose conversion fails keep their raw text and are reported as `ConversionFailed` (Warning, table columns carry the data row number) in a `TemplateParseResult`; null still means not filled, `Parse` is unchanged.
+- **Service mapping and lifetime (2.4.0)**: `ParseDetailed` honors direct and inherited `MapFromData` overrides; an explicit `MapFromDataDetailed` override takes precedence. Default auto-mapping adds conversion diagnostics while keeping property defaults; custom mapping exceptions propagate. `BuildInitialTemplateFile` serializes the entire builder lifetime per instance; callbacks must not wait for another build on that instance, and recursive builds during layout/save/disposal throw. Other methods and business state are not covered by this lock.
+- Structured conversion diagnostics expose `TableKey`, one-based `DataRowNumber`, `DataPath` with zero-based collection indices, failed input `RawValue`, and string `TargetType` (a type description supported by default JSON serialization).
 - **Before/after receipt**: the same template filled twice — pass `null` for empty fields before receipt (rendered empty), fill them in after.
 - **Zero data rows**: sample-row placeholders are cleared (header + blank row kept) so exports carry no "To be filled".
 - **Re-filling**: `Fill` expects a **pristine, unfilled template** — re-filling an already-filled document re-uses the first data row as the sample row and produces misplaced output; regenerate from the original template instead.
@@ -83,7 +85,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - Target frameworks `netstandard2.0 / net462 / net8.0` (NuGet picks per runtime automatically).
 - Depends on `DocumentFormat.OpenXml` (3.3.x).
 - Tests in `test/TemplateFrame.Word.Tests`: generate → validate → fill → parse → assert (including header/footer, multi-table, batch, spanning layout, header image part ownership edge cases).
-- Performance (measured on an ordinary dev machine, scales linearly with rows): 1k-row detail fill ~150ms, parse ~125ms, build <1ms; snapshots in `docs/PERFORMANCE.md`, benchmark project `test/TemplateFrame.Benchmarks`.
+- Historical snapshot (2026-08-24; sample-specific, with no guarantee of linear scaling or current-version timings): 1k-row detail fill ~150ms, parse ~125ms, build <1ms; snapshots in `docs/PERFORMANCE.md`, benchmark project `test/TemplateFrame.Benchmarks`.
 
 ## Full example
 

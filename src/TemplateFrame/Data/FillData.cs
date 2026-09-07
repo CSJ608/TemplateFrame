@@ -7,6 +7,9 @@ namespace TemplateFrame.Data;
 /// </remarks>
 public sealed class FillData
 {
+    // Per-call sink carried by the service's shallow copy, never by engine-owned data.
+    internal Action<TemplateFrame.Validation.TemplateValidationIssue>? MappingWarning { get; init; }
+
     /// <summary>Scalar fields: key (content-control tag) → value.</summary>
     public IReadOnlyDictionary<string, object?> Values { get; init; }
         = new Dictionary<string, object?>();

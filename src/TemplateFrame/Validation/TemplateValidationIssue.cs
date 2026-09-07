@@ -31,4 +31,20 @@ public sealed record TemplateValidationIssue
 
     /// <summary>Message arguments paired with <see cref="MessageKey"/> (optional).</summary>
     public IReadOnlyList<object?>? MessageArgs { get; init; }
+
+    /// <summary>Table key for a conversion failure; null for a scalar.</summary>
+    public string? TableKey { get; init; }
+
+    /// <summary>One-based row in FillData.Tables (not the worksheet row); null for a scalar.</summary>
+    public int? DataRowNumber { get; init; }
+
+    /// <summary>Mapped property path, with zero-based collection indices, when available.</summary>
+    public string? DataPath { get; init; }
+
+    /// <summary>Value that failed conversion, when available.</summary>
+    public object? RawValue { get; init; }
+
+    /// <summary>Assembly-independent target type description (Type.ToString()), e.g. "System.Int32".</summary>
+    /// <remarks>可直接 JSON 序列化的字符串；服务合并映射告警时为 DTO 属性类型名称，未知时为 null。</remarks>
+    public string? TargetType { get; init; }
 }

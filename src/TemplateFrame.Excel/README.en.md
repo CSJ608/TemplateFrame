@@ -79,7 +79,9 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
 - **Warning outlet**: `ExcelTemplateFiller.Fill` returns a `TemplateFillResult` (output stream + Warnings); the engine/service layer offers `FillDetailed` (`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`) for the same soft-validation warnings, while `Fill` keeps returning only the output stream.
 - **Zero data rows**: sample-row placeholders are cleared (header + blank row kept) so exports carry no "To be filled".
 - **Re-filling**: `Fill` expects a **pristine, unfilled template** — re-filling an already-filled document re-uses the first data row as the sample row and produces misplaced output; regenerate from the original template instead.
-- **ParseDetailed (2.3.0)**: the import-side counterpart — fields whose conversion fails keep their raw text and are reported as `ConversionFailed` (Warning, table columns carry the worksheet row number) in a `TemplateParseResult`; null still means not filled, `Parse` is unchanged.
+- **Engine ParseDetailed (2.3.0)**: the import-side counterpart — fields whose conversion fails keep their raw text and are reported as `ConversionFailed` (Warning, table columns carry the worksheet row number) in a `TemplateParseResult`; null still means not filled, `Parse` is unchanged.
+- **Service mapping and lifetime (2.4.0)**: `ParseDetailed` honors direct and inherited `MapFromData` overrides; an explicit `MapFromDataDetailed` override takes precedence. Default auto-mapping adds conversion diagnostics while keeping property defaults; custom mapping exceptions propagate. `BuildInitialTemplateFile` serializes the entire builder lifetime per instance; callbacks must not wait for another build on that instance, and recursive builds during layout/save/disposal throw. Other methods and business state are not covered by this lock.
+- Structured conversion diagnostics expose `TableKey`, one-based `DataRowNumber`, `DataPath` with zero-based collection indices, failed input `RawValue`, and string `TargetType` (a type description supported by default JSON serialization); Excel message arguments still use absolute worksheet row numbers.
 
 ## Parse behavior notes
 
@@ -90,7 +92,7 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
 
 - Target frameworks `netstandard2.0 / net462 / net8.0` (NuGet picks per runtime automatically).
 - Depends on `DocumentFormat.OpenXml` (3.3.x, same as the Word plugin).
-- Performance (measured on an ordinary dev machine, scales linearly with rows): 1k-row detail fill ~60ms, parse ~115ms, build ~1ms; snapshots in `docs/PERFORMANCE.md`, benchmark project `test/TemplateFrame.Benchmarks`.
+- Historical snapshot (2026-08-24; sample-specific, with no guarantee of linear scaling or current-version timings): 1k-row detail fill ~60ms, parse ~115ms, build ~1ms; snapshots in `docs/PERFORMANCE.md`, benchmark project `test/TemplateFrame.Benchmarks`.
 - Tests in `test/TemplateFrame.Excel.Tests`: generate → validate → fill → parse → assert (including named-range inventories, typed values,
   range re-pointing after row cloning, elements below shifted down, image replacement, unfilled placeholders and other edge cases).
 
@@ -103,3 +105,5 @@ dotnet run --project samples/TemplateFrame.Demo.Excel
 ```
 
 Design doc: `docs/DESIGN.md`; usage guide: the repository root `README.md` (Chinese) / `README.en.md` (English).
+
+See the R5 section of repository `docs/PERFORMANCE.md` for the Excel lookup optimization and three-size comparison. Historical timings do not promise current performance; cumulative managed allocation is not peak memory.

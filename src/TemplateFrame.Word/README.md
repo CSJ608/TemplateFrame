@@ -68,7 +68,9 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - **表格行**：deepcopy 示例行 N 次，逐行按 tag 填值；**克隆后每个 SDT 重发唯一 `w:id`**。
 - **软校验**（填充前跑 Validate）：`Drifted`/`Extra` 只记告警继续；Missing 必填按策略（默认抛错，可配 `MissingElementPolicy.SkipAndWarn`）；`WrongType`/`Ambiguous`/`Invalid` 视为硬错误。
 - **告警出口**：`WordTemplateFiller.Fill` 返回 `TemplateFillResult`（输出流 + Warnings）；引擎/服务层可用 `FillDetailed`（`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`）拿到同样的软校验告警，`Fill` 保持只返回输出流。
-- **ParseDetailed（2.3.0）**：导入方向对称出口——值转换失败的字段保留原始文本，并以 `ConversionFailed`（Warning，表格列带数据行号）随 `TemplateParseResult` 返回；null 仍专指未填充，`Parse` 行为不变。
+- **引擎 ParseDetailed（2.3.0）**：导入方向对称出口——值转换失败的字段保留原始文本，并以 `ConversionFailed`（Warning，表格列带数据行号）随 `TemplateParseResult` 返回；null 仍专指未填充，`Parse` 行为不变。
+- **服务映射与生命周期（2.4.0）**：`ParseDetailed` 保留直接或继承的 `MapFromData` 重写，显式 `MapFromDataDetailed` 重写优先；默认自动映射失败保留属性默认值并补充转换诊断，业务映射异常照常传播。`BuildInitialTemplateFile` 按实例串行保护 Builder 全生命周期；回调不得等待同实例另一生成调用，版式/保存/释放期间递归生成会抛错。此锁不保护其他方法或业务状态。
+- 结构化转换诊断提供 `TableKey`、从 1 开始的数据行号 `DataRowNumber`、集合索引从 0 开始的 `DataPath`、失败输入 `RawValue` 和字符串 `TargetType`（默认 JSON 可序列化的类型描述）。
 - **收货前/收货后**：同一模板两次填充——收货前空字段传 `null`（显示为空），收货后补齐。
 - **0 行数据**：示例行占位符被清空（保留表头 + 空白行结构），导出单据不留"待填充"。
 - **二次填充**：`Fill` 假定输入是**未填充的原始模板**——对已填充文档再次 Fill 时表格区域已指向整个数据块、首行会被当作示例行，会得到错位结果；需要重新生成请从原始模板 Fill。
@@ -83,7 +85,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - 目标框架 `netstandard2.0 / net462 / net8.0`（NuGet 按运行时自动选择）。
 - 依赖 `DocumentFormat.OpenXml`（3.3.x）。
 - 测试 `test/TemplateFrame.Word.Tests`：生成 → 校验 → 填充 → 回读 → 断言（含页眉页脚、多表、批量、跨列布局、页眉图片 part 归属等边界）。
-- 性能（普通开发机实测，随行数线性伸缩）：千行明细填充 ~150ms、回读 ~125ms、构建 <1ms；快照见仓库 `docs/PERFORMANCE.md`，基准项目 `test/TemplateFrame.Benchmarks`。
+- 历史性能快照（2026-08-24，仅描述当时样本，不保证线性伸缩或当前版本耗时）：千行明细填充 ~150ms、回读 ~125ms、构建 <1ms；快照见仓库 `docs/PERFORMANCE.md`，基准项目 `test/TemplateFrame.Benchmarks`。
 
 ## 完整示例
 

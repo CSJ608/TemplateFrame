@@ -73,4 +73,10 @@
   <data name="Document.PageNumberPattern" xml:space="preserve">
     <value>Page {page} of {total}</value>
   </data>
+  <data name="Mapping.ConversionFailed" xml:space="preserve">
+    <value>Field "{0}" could not be mapped to property "{1}": value "{2}" cannot be converted to {3}.</value>
+  </data>
+  <data name="Service.RecursiveBuild" xml:space="preserve">
+    <value>Recursive template generation on the same service is not supported.</value>
+  </data>
 </root>

@@ -167,6 +167,22 @@ public abstract class TemplateService<TData, TBuilder> where TBuilder : class, I
 }
 ```
 
+### 3.4.1 服务生命周期与模板生成并发
+
+同一 `TemplateService<TData, TBuilder>` 实例的 `BuildInitialTemplateFile` 使用私有实例锁串行执行，保护范围包含 Builder 创建、版式组装、Save、Dispose 和状态清空。每次调用拥有独立 Builder 和输出流；成功返回的流由调用方释放，失败时框架释放已创建的输出流并清空 Builder，后续调用可以继续生成。引擎工厂在返回 Builder 前失败时，工厂负责释放尚未移交的资源。
+
+保留现有无参 `BuildInitialTemplate()` 和类型化 `Builder` API，不要求消费方迁移。代价是共享实例生成模板的吞吐串行化；需要并行组装时可使用不同服务实例，它们不共享生成锁。未采用异步局部独立上下文，以避免改变现有 Builder 属性语义及引入上下文流转约束。
+
+版式回调应同步完成，仅在回调内使用 Builder，不应将它缓存或交给后台任务。回调不得等待同一实例的另一生成调用，否则会相互等待；同线程在版式/保存/释放阶段递归生成会抛出 `InvalidOperationException`，保留外层 Builder。此生成锁不保护 Fill/Parse/Validate，也不保证业务子类可变字段、自定义引擎或本地化器线程安全。共享服务实例仍需按这些依赖与业务状态评估生命周期；不同调用不得同时操作同一输入/输出流。
+
+### 3.4.2 自动映射缓存生命周期
+
+`DataPathMapper` 使用 `ConditionalWeakTable<TemplateContract, ConcurrentDictionary<Type, ContractMapping>>`，兼容 netstandard2.0 / net462 / net8.0，无新增包。外层按契约引用身份关联，不使用 record 值相等判断；内容相同的不同契约实例分别缓存。业务不再持有契约后，缓存不会阻止契约、元素集合和关联映射被 GC 回收，不要求服务注册为单例。
+
+活跃契约的同一 DTO 类型复用已发布映射，不同 DTO 类型使用独立条目。两层容器均支持并发访问；首次竞争允许重复构建候选映射，但构建完成后才发布，同一键的调用返回同一个获胜映射，后续只读。构建失败不缓存异常，后续可重试。转换值、输出集合和诊断仍按调用隔离，不放入缓存。
+
+这是弱关联缓存，不是容量上限：仍活跃的契约会保留其访问过的 DTO 类型及映射；GC 决定失活条目的实际回收时机。契约首次映射后不得修改其元素/列集合，缓存不提供变更失效机制；这延续既有约束，也不保证业务 DTO 在并发修改时安全。
+
 ### 3.5 四个操作
 
 | 操作 | 谁负责 | 说明 |
@@ -253,7 +269,25 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 - 与 `Fill` **共享同一套元素定位逻辑**，只是方向相反。
 - 引擎产出 `FillData` 形状，业务服务映射回强类型 `TData`。
 - 用途：把"用户填好并打印过的单据"回读成结构化数据，供导入业务复用；也是未来 Excel 导入（按表头列名解析）的同一个模式。
-- **ParseDetailed（迭代 20）**：导入方向的告警出口，与 `FillDetailed`（§5.3）对称。值转换失败的字段在 `FillData` 中**保留原始文本**（与 `Parse` 的兜底一致），并以 `ConversionFailed`（Warning，`TemplateValidationIssue` 形状，表格列带行号）随 `TemplateParseResult` 返回——「null = 未填充」与「转换失败」从此可区分；`Parse` 行为不变。服务层 `ParseDetailed` 走宽容映射（`DataPathMapper` lenient 模式）：转换失败的字段保持默认值不抛错（引擎层告警已标明位置），返回 `TemplateParseResult<TData>`。注意：`ITemplateEngine` 新增了 `ParseDetailed` 成员（沿用 `FillDetailed` 先例），**自行实现该接口的业务方需补该成员**。
+- **ParseDetailed（迭代 20）**：导入方向的告警出口，与 `FillDetailed`（§5.3）对称。值转换失败的字段在 `FillData` 中**保留原始文本**（与 `Parse` 的兜底一致），并以 `ConversionFailed`（Warning，`TemplateValidationIssue` 形状，表格列带行号）随 `TemplateParseResult` 返回——「null = 未填充」与「转换失败」从此可区分；`Parse` 行为不变。服务层 `ParseDetailed` 返回 `TemplateParseResult<TData>`：默认自动映射宽容处理内置值的转换失败，属性保持默认值，映射阶段独有失败也进入最终告警；普通强类型 `Parse` 仍严格抛错。直接或继承的业务 `MapFromData` 重写继续生效，显式 `MapFromDataDetailed` 重写优先（调用 base 可收集默认映射诊断）；业务异常、属性 setter 异常及自定义值转换方法的异常不被伪装成成功。注意：`ITemplateEngine` 新增了 `ParseDetailed` 成员（沿用 `FillDetailed` 先例），**自行实现该接口的业务方需补该成员**。
+
+详细解析的转换诊断使用 `TemplateValidationIssue`，新增可选结构化属性：
+
+| 属性 | 语义 |
+|---|---|
+| `Key` | 标量字段键或表格列键（已有属性） |
+| `TableKey` | 表格键；标量为 null |
+| `DataRowNumber` | `FillData.Tables` 内从 1 开始的数据行号；标量为 null。Excel 原告警消息及 `MessageArgs` 继续使用工作表绝对行号 |
+| `DataPath` | 自动映射失败的 DTO 属性路径，如 `Count`、`Items[0].Amount`；索引从 0 开始 |
+| `RawValue` | 失败转换的输入值；引擎失败时为原文，映射独有失败时为 FillData 中的值（可能已是 long 等类型） |
+| `TargetType` | 可 JSON 序列化的目标类型名称字符串（`Type.ToString()`，如 `System.Int32`、``System.Nullable`1[System.Int32]``；不含程序集版本）；服务合并映射失败时补充为 DTO 属性类型名称，未知为 null |
+
+映射独有失败使用 `MessageKey = "Mapping.ConversionFailed"`，`MessageArgs` 依次为字段键、属性路径、输入值、目标类型全名，并提供中英文本。服务按字段键、表格键、数据行号和输入值匹配已有的结构化 `ConversionFailed`，匹配后保留引擎的 Code/Severity/Message/MessageKey/MessageArgs，仅补充 DataPath/TargetType；同一位置不机械重复报错，不同数据行不合并。引擎契约目标类型仍可从原 MessageArgs 读取。其他引擎告警原样保留。公开 TargetType 不暴露 System.Type，默认 System.Text.Json 可直接序列化这些解析告警结果，无需忽略目标类型或注册转换器。
+
+诊断收集器放在本次解析的 FillData 浅副本中，字典及行数据沿用原引用；不修改引擎返回的数据/告警列表，不设置服务实例上的临时模式。业务显式重写若自行构造新的 FillData 或完全自定义映射，需自行处理该映射的结果与异常。第三方引擎若未提供结构化定位及 RawValue/TargetType，已有告警仍保留，但框架不会猜测本地化消息来去重。
+
+兼容性：新增可选诊断属性会改变默认 JSON 的字段集合，也会参与 `TemplateValidationIssue` 的 record 相等比较；调用方不应假定告警数或序列化字段集合与旧版本完全相同。默认 JSON 回归覆盖内置 Word/Excel 诊断及测试 DTO，不保证业务自定义 `RawValue` 对象均可序列化。`MapFromData` 重写恢复执行后，其业务逻辑及异常会生效；调用 `base.MapFromData` 仍使用严格转换。
+
 
 ---
 

@@ -107,7 +107,8 @@ filled.CopyTo(file);
 - **契约 = 元素清单**：`TemplateContract` 描述场景有哪些元素（`TextElement` / `ImageElement` / `TableElement`），可序列化、可版本化。表头列名、校验规则、导入导出的键，都从这一份声明来。
 - **模板归业务应用**：契约不产出版式。业务服务在 `BuildInitialTemplate()` 里用插件的类型化构建器组装版式（标题、表格、图片占位、页眉页脚）；也可以让设计师直接用 Word 做，`Validate` 统一兜底。
 - **数据形状 `FillData`**：与插件无关的弱类型容器。契约元素声明 `DataPath` 后由 `DataPathMapper` 自动映射（默认），或手写 `MapToData` / `MapFromData` 完全掌控。
-- **软校验分级**：`Validate` 上传时强校验（Missing / WrongType / Ambiguous 报错，可选字段缺失只告警）；`Fill` 前软校验（`Drifted` / `Extra` 记告警继续；必填缺失默认抛错，可配 `MissingElementPolicy.SkipAndWarn`）。需要拿到告警清单：导出用 `FillDetailed`（输出流 + Warnings），导入用 `ParseDetailed`（数据 + 转换告警，失败字段保留原始文本、null 仍专指未填充）。
+- **软校验分级**：`Validate` 上传时强校验（Missing / WrongType / Ambiguous 报错，可选字段缺失只告警）；`Fill` 前软校验（`Drifted` / `Extra` 记告警继续；必填缺失默认抛错，可配 `MissingElementPolicy.SkipAndWarn`）。需要拿到告警清单：导出用 `FillDetailed`（输出流 + Warnings），导入用 `ParseDetailed`（数据 + 转换告警：引擎层失败字段保留原文；服务层默认自动映射失败保留属性默认值并返回含属性路径、输入值及目标类型名称字符串的诊断（可直接用默认 System.Text.Json 序列化）；业务映射异常照常传播）。
+- **服务映射与生命周期（2.4.0）**：`ParseDetailed` 保留直接或继承的 `MapFromData` 重写，显式 `MapFromDataDetailed` 重写优先；默认自动映射失败保留属性默认值并补充转换诊断，业务映射异常照常传播。`BuildInitialTemplateFile` 按实例串行保护 Builder 全生命周期；回调不得等待同实例另一生成调用，版式/保存/释放期间递归生成会抛错。此锁不保护其他方法或业务状态。
 
 ## Word / Excel 灵活版式
 

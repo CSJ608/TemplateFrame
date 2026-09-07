@@ -28,6 +28,7 @@ public sealed record TemplateParseResult<TData>
     /// <summary>The mapped business data.</summary>
     public TData Data { get; init; } = default!;
 
-    /// <summary>Conversion warnings collected during parse (empty when everything converted).</summary>
+    /// <summary>Engine and default auto-mapping warnings; duplicate failures at the same location are merged.</summary>
+    /// <remarks>映射失败时 DataPath/TargetType 指向 DTO 属性；原引擎消息及参数保留。正常数据无告警。</remarks>
     public IReadOnlyList<TemplateValidationIssue> Warnings { get; init; } = [];
 }

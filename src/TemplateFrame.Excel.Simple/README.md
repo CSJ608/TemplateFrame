@@ -151,7 +151,7 @@ var parsed = service.Parse(filled);      // 直接得到 List<MaterialLine>
 
 ## 性能与依赖
 
-- 普通开发机实测（随行数线性伸缩）：写 / 读 1000 行 ~30ms，1 万行 ~0.3–0.5s；契约路径读 1 万行 ~0.6–0.9s。
+- 历史性能快照（2026-08-24，仅描述当时样本，不保证线性伸缩或当前版本耗时）：写 / 读 1000 行 ~30ms，1 万行 ~0.3–0.5s；契约路径读 1 万行 ~0.6–0.9s。
 - 快照见仓库 `docs/PERFORMANCE.md`，基准项目 `test/TemplateFrame.Benchmarks`（`dotnet run -c Release` 可复现）。
 - 目标框架 `netstandard2.0 / net462 / net8.0`（NuGet 按运行时自动选择），依赖 `DocumentFormat.OpenXml`（3.3.x）。
 
