@@ -4,31 +4,37 @@ using TemplateFrame.Validation;
 namespace TemplateFrame.Engine;
 
 /// <summary>
-/// Result of one detailed parse — the parsed data plus conversion warnings.
-/// <para>中文：一次回读的结果——解析数据 + 转换告警。</para>
-/// 由 <see cref="ITemplateEngine.ParseDetailed"/> 返回；只关心数据时仍可用 <c>Parse</c>（向后兼容）。
-/// 告警是 <see cref="TemplateValidationIssueCode.ConversionFailed"/>（Warning 级）：值转换失败的字段在
-/// <see cref="Data"/> 中保留原始文本，null 仍专指「未填充」——两者从此可区分。
+/// Parsed data and conversion warnings.
 /// </summary>
+/// <remarks>
+/// 由 <see cref="ITemplateEngine.ParseDetailed"/> 返回。
+/// 内置引擎的文本转换失败时，Data 保留原文并报告 ConversionFailed 告警；
+/// 已知占位符转为 null。null 也可能来自缺失单元格等读取分支，不能单独用于判断转换是否成功。
+/// </remarks>
 public sealed record TemplateParseResult
 {
-    /// <summary>The parsed data (raw text kept for cells whose conversion failed).</summary>
+    /// <summary>The parsed data.</summary>
+    /// <remarks>内置引擎在文本转换失败时保留原文。</remarks>
     public FillData Data { get; init; } = new();
 
-    /// <summary>Conversion warnings collected during parse (empty when everything converted).</summary>
+    /// <summary>Conversion warnings collected during parsing.</summary>
+    /// <remarks>未收集到转换告警时为空。</remarks>
     public IReadOnlyList<TemplateValidationIssue> Warnings { get; init; } = [];
 }
 
 /// <summary>
-/// Strongly-typed variant returned by <c>TemplateService&lt;TData, TBuilder&gt;.ParseDetailed</c>.
-/// <para>中文：服务层强类型回读结果——已映射的 TData + 转换告警（与 FillDetailed 对称）。</para>
+/// Mapped business data and conversion warnings.
 /// </summary>
+/// <remarks>由服务层 ParseDetailed 返回，包含映射后的业务数据与告警。</remarks>
 public sealed record TemplateParseResult<TData>
 {
     /// <summary>The mapped business data.</summary>
     public TData Data { get; init; } = default!;
 
-    /// <summary>Engine and default auto-mapping warnings; duplicate failures at the same location are merged.</summary>
-    /// <remarks>映射失败时 DataPath/TargetType 指向 DTO 属性；原引擎消息及参数保留。正常数据无告警。</remarks>
+    /// <summary>Engine and mapping warnings.</summary>
+    /// <remarks>
+    /// 默认服务映射按结构化位置及输入值合并重复转换告警，保留原引擎消息及参数；
+    /// 映射失败时 DataPath/TargetType 指向 DTO 属性。自定义映射决定其诊断行为。
+    /// </remarks>
     public IReadOnlyList<TemplateValidationIssue> Warnings { get; init; } = [];
 }

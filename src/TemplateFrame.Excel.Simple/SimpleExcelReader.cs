@@ -227,7 +227,7 @@ internal static class SimpleExcelReader
         return GetInlineStringText(cell.InlineString) ?? cell.CellValue?.Text;
     }
 
-    /// <summary>共享字符串表物化：索引 → 文本。直接 &lt;t&gt; 优先；富文本项（多 &lt;r&gt; 片段）拼接所有片段文本（P3）。</summary>
+    /// <summary>共享字符串表物化：索引 → 文本。直接 &lt;t&gt; 优先；富文本项（多 &lt;r&gt; 片段）拼接所有片段文本。</summary>
     internal static IReadOnlyList<string> MaterializeSharedStrings(WorkbookPart workbookPart)
     {
         var sharedStringTable = workbookPart.SharedStringTablePart?.SharedStringTable;
@@ -289,7 +289,7 @@ internal static class SimpleExcelReader
         return sb.ToString();
     }
 
-    /// <summary>行索引推断：优先显式 r 属性；缺失按"前一行的下一行"推断（ECMA-376：r 属性可选，P4）。</summary>
+    /// <summary>行索引推断：优先显式 r 属性；缺失按"前一行的下一行"推断（r 属性可省略）。</summary>
     internal static int GetRowIndex(IReadOnlyList<Row> rows, int index)
     {
         var current = 0;
@@ -301,7 +301,7 @@ internal static class SimpleExcelReader
         return current;
     }
 
-    /// <summary>行索引 → Row 查找表：RowIndex 缺失时按文档顺序推断（P4），行定位不再依赖显式 r 属性。</summary>
+    /// <summary>行索引 → Row 查找表：RowIndex 缺失时按文档顺序推断；重复行号保留首个匹配。</summary>
     internal static Dictionary<int, Row> BuildRowLookup(IReadOnlyList<Row> rows)
     {
         var lookup = new Dictionary<int, Row>();

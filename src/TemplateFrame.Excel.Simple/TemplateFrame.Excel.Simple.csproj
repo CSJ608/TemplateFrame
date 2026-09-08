@@ -6,7 +6,7 @@
     <LangVersion>latest</LangVersion>
     <RootNamespace>TemplateFrame.Excel.Simple</RootNamespace>
     <AssemblyName>TemplateFrame.Excel.Simple</AssemblyName>
-    <Description>TemplateFrame 的简化 Excel 插件：只支持「标题行 + 数据行」的表格导入/导出（无命名区域/合并/图片/页面设置）</Description>
+    <Description>TemplateFrame 的简化 Excel 插件：支持「标题行 + 数据行」的表格导入/导出，通过命名区域及列定义名定位，不支持合并、图片或页面设置。</Description>
 
     <PackageId>TemplateFrame.Excel.Simple</PackageId>
     <PackageTags>template;excel;xlsx;simple;table;office</PackageTags>

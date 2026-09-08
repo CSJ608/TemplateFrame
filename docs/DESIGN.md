@@ -1,5 +1,7 @@
 # TemplateFrame 设计文档
 
+本文的当前行为以源码为准：§3 为公共服务与映射规则，§4 为格式差异，§5 为 Word 定位及 Word/Excel 共用的校验、详细解析规则。§7 仅提供状态入口，§9 保留历史决策及当时范围，§10 为未决事项；历史选型和规划不表示当前已实现，也不构成后续交付承诺。版本变更统一查 [CHANGELOG](../CHANGELOG.md)。
+
 ## 1. 背景与目标
 
 ### 1.1 业务场景
@@ -33,8 +35,8 @@ TemplateFrame 是它的演进：**把契约显式化、把模板从"手写占位
 ### 1.4 范围约束（当前）
 
 - 已支持 **Microsoft Office**：Word（`.docx`，内容控件 SDT）与 Excel（`.xlsx`，灵活版式 + 简单表格），均基于 DocumentFormat.OpenXml 直写。
-- WPS 等通过**独立插件**在未来支持（见 §4），暂未开始。
-- 自动化发布（GitHub Release / NuGet）**已启用**：打 `v*` tag 即触发（见 §8、docs/PUBLISHING.md）。
+- WPS 独立插件属于规划（见 §4），暂未开始；当前不作 WPS 编辑保存兼容性保证。
+- 自动化发布（GitHub Release / NuGet）**已启用**：向远端推送 `v*` tag 即触发（见 §8、[PUBLISHING](PUBLISHING.md)）。
 
 ---
 
@@ -95,13 +97,13 @@ public sealed record ImageElement : TemplateElement
 
 public sealed record TableElement : TemplateElement
 {
-    public List<TextElement> Columns { get; init; } = [];  // 行模板字段
+    public IReadOnlyList<TextElement> Columns { get; init; } = [];  // 行模板字段
 }
 ```
 
-元素类型当前为 `Text` / `Image` / `Table`，预留 `Label`（未来标签模板）。
+元素类型当前为 `Text` / `Image` / `Table`；`Label` 仅为历史规划，未实现。
 
-**契约要版本化**：存模板时连同契约版本一起存；`Validate` / `Fill` / `Parse` 使用模板对应的契约版本（或最新契约 + 漂移检测），这支撑"产品升级加了字段、存量客户模板缺元素"的软校验（§5.3）。
+**业务应管理契约版本**：存模板时连同契约版本一起存；`Validate` / `Fill` / `Parse` 使用模板对应的契约版本（或最新契约 + 漂移检测），这支撑"产品升级加了字段、存量客户模板缺元素"的软校验（§5.3）。
 
 ### 3.2 初始模板归业务应用（Builder）
 
@@ -112,15 +114,15 @@ public sealed record TableElement : TemplateElement
 - 两条路径都成立，`Validate` 保证模板与契约匹配。
 
 ```csharp
-// 业务服务组装初始模板
-protected override void BuildInitialTemplate(ITemplateBuilder builder)
+// Word 业务服务中的版式回调；字段/列 Key 须与 DefineContract 一致
+protected override void BuildInitialTemplate()
 {
-    builder.AddParagraph("示例单据", style: Heading);
-    builder.AddText("单号：").AddElement("OrderNo");
-    builder.AddText("客户：").AddElement("CustomerName");
-    builder.AddTable("Lines", columns: ["MC", "MName", "Qty"], headerStyle: ...);
-    builder.AddImage("Logo", placeholder: ..., size: ...);
-    builder.AddStaticText("签字：____________");
+    Builder.AddParagraph("示例单据");
+    Builder.AddText("单号：").AddElement("OrderNo");
+    Builder.AddText("客户：").AddElement("CustomerName");
+    Builder.AddTable("Lines", ["MC", "MName", "Qty"]);
+    Builder.AddImage("Logo", widthInches: 0.6, heightInches: 0.6);
+    Builder.AddStaticText("签字：____________");
 }
 ```
 
@@ -138,11 +140,13 @@ public sealed class FillData
 ```
 
 - 不需要 `:` 嵌套路径：Word 内容控件 tag 是扁平键，嵌套对象在服务层映射时展平（如 `Customer.Name` → tag `CustomerName`）；
-- 跨插件（Word / Excel / Label）消费同一形状，天然一致；
-- **类型转换发生在业务服务边界**：
+- Word / Excel / Simple 契约 API 消费同一形状，具体定位与值语义见 §4.1；
+- **DTO 类型转换发生在业务服务边界**（Word/Excel 引擎另按契约 ValueType 转换）：
   - 手写映射：`MapToData(TData)` 返回 `FillData`（显式、可读）；
   - 自动映射（可选）：契约元素声明 `DataPath`，`DataPathMapper.ToFillData(data, contract)`（反射 + 按（契约, 数据类型）缓存）读取属性生成 `FillData`；
   - `Parse` 反向：引擎产出 `FillData` 形状，服务层映射回 `TData`（或字典 → POCO 映射器）。
+
+自动映射只解析显式声明的单级公共属性名（忽略大小写），不按 Key 自动推断属性，也不支持 `Customer.Name` 嵌套路径；嵌套对象需手写映射展平。表格 DataPath 指向集合属性，列 DataPath 指向行对象属性。根集合模式下表格 DataPath 留空，支持 `List<T>` / `IReadOnlyList<T>` / `IEnumerable<T>` / `T[]`，接口集合由 `List<T>` 承载。
 
 ### 3.4 通用基类 TemplateService&lt;TData, TBuilder&gt;
 
@@ -164,8 +168,12 @@ public abstract class TemplateService<TData, TBuilder> where TBuilder : class, I
     public Stream Fill(Stream template, TData data);        // 向后兼容；软校验告警见 FillDetailed
     public TemplateFillResult FillDetailed(Stream template, TData data);  // 输出流 + 软校验告警
     public TData Parse(Stream template);
+    public TemplateParseResult<TData> ParseDetailed(Stream template);
+    protected virtual TData MapFromDataDetailed(FillData data);
 }
 ```
+
+<a id="service-lifetime"></a>
 
 ### 3.4.1 服务生命周期与模板生成并发
 
@@ -210,14 +218,43 @@ public abstract class TemplateService<TData, TBuilder> where TBuilder : class, I
 插件职责：把"契约元素"翻译成具体格式的"可定位元素"。
 
 - **Word 插件**：`Text` → 内容控件（SDT）tag；`Image` → 占位图外包 SDT；`Table` → 行模板（每格 SDT）。
-- 定位一律靠 **tag**，不靠位置 → 用户随便移动/改样式都不影响。
+- Word 定位依赖 **tag**；编辑时须保留控件标记与表格结构。Excel 依赖命名区域引用，移动后须保留有效引用；`Validate` 检查契约匹配，不验证视觉版式或打印效果。
 - 未来 **Label 插件**：契约元素映射到标签工具的字段对象。
 
 > WPS 单独做插件的原因：WPS 对内容控件（SDT）的支持不完整，直接用 Word 插件可能出现"用户用 WPS 打开另存后 tag 丢失"。WPS 插件内部可以走"文本占位符 + 格式约定"或 WPS 原生字段，核心契约模型不变。
 
+
+<a id="format-differences"></a>
+
+### 4.1 Excel 与 Simple 的格式规则
+
+| 项目 | Word / Excel 灵活版式 | Excel.Simple |
+|---|---|---|
+| 服务 | `TemplateService<TData, TBuilder>`，业务组装 Builder | 独立 `SimpleExcelTemplateService<TData>`，无 Builder/Engine |
+| 导出 | `BuildInitialTemplateFile` 生成模板；`Fill(template, data)` 填充原始模板 | `BuildTemplate` 生成仅表头文件；`Fill(data)` 新写表头和数据 |
+| 校验/诊断 | `Validate` / `ValidateData` / `FillDetailed` / `ParseDetailed` | `Validate` / `Parse`，无两个 Detailed 入口；不套用 §3.4.1 的 Builder 生成锁 |
+| 结构 | 标量、图片、明细表 | 契约仅支持一个 `TableElement`，不支持标量、图片、多表、合并或页面设置 |
+
+**Excel 灵活版式**：标量 `TF_<Key>` 指向单元格；表格列 `TF_<TableKey>_<ColumnKey>` 指向示例行，填充后重指整个数据块。插入数据行时平移下方行、命名区域、合并区域和图片锚点。文本填充保留单元格格式；日期写序列号及日期格式，布尔写 0/1，decimal/long 写入不经 double 中转。回读按契约 ValueType 转换，各列按范围起点和长度取值；未填充的已知占位符归一为 null。Builder 提供列宽、行高、合并、图片和格式，不提供页面设置；`SetRowHeight` 写入行高及 customHeight，阅读器最终渲染仍需实测。
+
+Excel 解析的行/单元格索引在单次 Parse 内创建并复用，不跨文档缓存 DOM。实测范围及空间成本见 [PERFORMANCE 的 R5 比较](PERFORMANCE.md)，不能由查找优化推导全路径线性伸缩或峰值内存下降。
+
+**Simple 的表头与数据区**：底层 `SimpleExcel.Write/Read` 可独立使用，默认 `TF_Table` 标记区域，`TableName` / `StartCell` 可配置。Read 优先取区域表头；区域缺失或表头为空时回退到第一个至少两个非空单元格的行。数据读到工作表末行并跳过全空行，区域下方其他非空内容也可能被读入。支持共享字符串与富文本拼接；缺 RowIndex 时按顺序推断，不支持缺单元格引用的输入。
+
+契约路径优先用每列定义名 `<TableName>_<ColumnKey>` 定位（`ColumnDefinedName` 仅拼接表名与列 Key，不额外添加 `TF_`；默认如 `TF_Table_Code`）。定义名布局不可用时，先按上述规则定位表头，再分别执行以下文本匹配（表头去除首尾空白，按 Ordinal 区分大小写）：
+
+- **`SimpleExcelContract.Validate`**：`FindHeader` 先尝试匹配 DisplayName，未匹配再尝试 Key；两者均未匹配才报告缺列。
+- **`SimpleExcelContract.Read`**：`BuildColumnLookup` 为每列仅登记一个名称：Trim 后非空的 DisplayName，否则为 Trim 后的 Key。DisplayName 非空但未匹配时，不再尝试 Key；未匹配列不会写入返回行字典。
+
+因此名称不一致时可能出现**“校验通过，但回读缺字段”**：例如列 Key 为 `Code`、DisplayName 为“编码”，文件表头只有 `Code` 而无可用列定义名；Validate 可按 Key 接受该列，Read 却只按“编码”查找，结果行中缺少 `Code`。若其他列正常，整个校验也可以通过；这不保证该列能够回读。此处描述既有行为，不表示已修复名称匹配差异。
+
+定义名保留时不依赖表头语言；缺必填列 Validate 报 Missing Error，可选缺列/多余列告警，重复列定义名报 Ambiguous Error。Read 忽略多余列，缺列不提供有效值；默认映射保留属性默认值。`SimpleExcelContract.Read` 保留底层值形状，数值为 double、日期格式值为 DateTime、缺格为 null；它不按 ValueType 提供 Word/Excel 的转换告警，强类型 Parse 由 DataPathMapper 严格转换。写入 decimal/long 无 double 中转不等于 Simple 数值回读能保持同等精度。
+
+本地化表头使用列 Key，业务覆盖未命中时回退 DisplayName/Key；可通过 Write 或服务 Fill 的 culture/localizer 参数指定。根集合及缓存规则见 §3.3、§3.4.2。
+
 ---
 
-## 5. Word 插件设计
+## 5. Word 定位与共用处理规则
 
 ### 5.1 定位：内容控件（SDT）
 
@@ -239,39 +276,41 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 ```
 
 - 定位 = 一次文档树遍历 + 按 tag 过滤（`Descendants<SdtElement>()`），O(控件数)，无正则、无文本匹配。
-- **tag 必须在文档内全局唯一**（正文/页眉/页脚），否则视为 `Ambiguous`。
+- 契约 Key（含列 Key）须全局唯一；正文/页眉/页脚中的标量 tag 重复会报 `Ambiguous`。表格填充后列 tag 按数据行重复，由表格行定位；每个 SDT 的 `w:id` 仍须全局唯一。
 - 内容控件是"一个元素"，不会像文本占位符那样被 Word 拆进多个 run → 从根上规避了 TemplateFiller 里 run 拆分处理的难题。
 
 ### 5.2 三种元素怎么填
 
-- **文本**：定位 SDT → 改 `sdtContent` 里第一个 `w:r/w:t` 的文本（保留 run 格式）；首尾空格补 `xml:space="preserve"`。
-- **图片**：模板里放一张占位图并外包 SDT（tag=`Logo`）。填充 = 往包里加图片 part + 在 `word/_rels/document.xml.rels` 加关系拿到新 `rId` → 把 SDT 内 `<a:blip r:embed>` 换成新 `rId`。尺寸/位置/环绕继承占位图。
+- **文本**：定位 SDT → 仅改当前 SDT 直属文本的第一个 `w:t` 并清理其余直属文本（保留 run 格式，不吞嵌套 SDT 的文本）；首尾空格补 `xml:space="preserve"`。
+- **图片**：模板里放一张占位图并外包 SDT（tag=`Logo`）。填充 = 往包里加图片 part + 在对应正文/页眉/页脚宿主 part 的 rels 加关系拿到新 `rId` → 把 SDT 内 `<a:blip r:embed>` 换成新 `rId`。尺寸/位置/环绕继承占位图。
 - **表格行**：
   - 首选：模板里放一行"示例行"（每格一个 SDT），填充时 deepcopy 示例行 N 次，逐行按 tag 填值。**克隆后必须给每个 SDT 重新分配唯一 `w:id`**。
-  - 后续可选：Word 2013+ 原生"重复节内容控件"（`w15:repeatingSection`），客户可在 Word 里直接加/删行。
+
+Word/Excel 的 Fill 输入应为未填充的原始模板；收货前后分别从原始模板生成，不把前一次输出当作下一次模板。零行数据会清空示例行占位，保留表头和空白行结构。
 
 ### 5.3 校验模型
 
-| 问题 | 含义 | 处理 |
-|---|---|---|
-| `Missing` | 契约要求、模板里没有 | 上传时拒绝 |
-| `WrongType` | 元素在但类型不对（如 Image 里没图片） | 上传时拒绝 |
-| `Extra` | 模板里多了契约外元素 | 默认放行（告警），策略由业务决定 |
-| `Ambiguous` | tag 重复 | 拒绝 |
-| `Drifted` | 契约升级后，存量模板缺新元素 | **填充时软校验**：告警不中断，或按业务策略处理 |
+以下规则由 Word/Excel 共用的 `ValidationApplier` 应用；Simple 的独立校验见 §4.1。
 
-- **上传时强校验**（`Validate`）：Missing/WrongType/Ambiguous 直接失败，给出元素清单。
-- **填充时软校验**：先跑一遍 `Validate`，有 `Drifted`/`Extra` 只记录 warning，填充继续；Missing 必填元素时按业务策略（可配置：抛错 / 跳过并告警）。
+| 问题 | Validate / Fill 处理 |
+|---|---|
+| `Missing` | 必填缺失为 Error，可选缺失为 Warning；Fill 对可选缺失转为 Drifted，必填缺失默认抛错，配置 `MissingElementPolicy.SkipAndWarn` 可跳过并告警 |
+| `WrongType` / `Ambiguous` / `Invalid` | 类型不符、定位歧义或无效模板；Fill 视为硬错误抛出 |
+| `Extra` / `Drifted` | Fill 保留告警继续；不是自动迁移契约版本的机制 |
+
+`Validate` 返回问题清单，由业务决定是否接受上传；不是主动执行上传拒绝。填充器 Fill 返回 `TemplateFillResult`（Output + Warnings）；引擎/服务的 `FillDetailed` 暴露该结果，`Fill` 只返回输出流。输出流由调用者释放。
+
+<a id="parse-diagnostics"></a>
 
 ### 5.4 反向导入（Parse）
 
 - 对"已填充"的模板按契约回读：Text 读 `w:t` 文本 → 按 `ValueType` 转换；Table 找到示例行克隆区 → 逐行读出字段；Image 读回图片流（可选）。
 - 与 `Fill` **共享同一套元素定位逻辑**，只是方向相反。
 - 引擎产出 `FillData` 形状，业务服务映射回强类型 `TData`。
-- 用途：把"用户填好并打印过的单据"回读成结构化数据，供导入业务复用；也是未来 Excel 导入（按表头列名解析）的同一个模式。
+- 用途：把"用户填好并打印过的单据"回读成结构化数据，供导入业务复用；Excel/Simple 的定位差异见 §4.1。
 - **ParseDetailed（迭代 20）**：导入方向的告警出口，与 `FillDetailed`（§5.3）对称。值转换失败的字段在 `FillData` 中**保留原始文本**（与 `Parse` 的兜底一致），并以 `ConversionFailed`（Warning，`TemplateValidationIssue` 形状，表格列带行号）随 `TemplateParseResult` 返回——「null = 未填充」与「转换失败」从此可区分；`Parse` 行为不变。服务层 `ParseDetailed` 返回 `TemplateParseResult<TData>`：默认自动映射宽容处理内置值的转换失败，属性保持默认值，映射阶段独有失败也进入最终告警；普通强类型 `Parse` 仍严格抛错。直接或继承的业务 `MapFromData` 重写继续生效，显式 `MapFromDataDetailed` 重写优先（调用 base 可收集默认映射诊断）；业务异常、属性 setter 异常及自定义值转换方法的异常不被伪装成成功。注意：`ITemplateEngine` 新增了 `ParseDetailed` 成员（沿用 `FillDetailed` 先例），**自行实现该接口的业务方需补该成员**。
 
-详细解析的转换诊断使用 `TemplateValidationIssue`，新增可选结构化属性：
+详细解析的转换诊断使用 `TemplateValidationIssue`，可选结构化属性如下：
 
 | 属性 | 语义 |
 |---|---|
@@ -282,7 +321,7 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 | `RawValue` | 失败转换的输入值；引擎失败时为原文，映射独有失败时为 FillData 中的值（可能已是 long 等类型） |
 | `TargetType` | 可 JSON 序列化的目标类型名称字符串（`Type.ToString()`，如 `System.Int32`、``System.Nullable`1[System.Int32]``；不含程序集版本）；服务合并映射失败时补充为 DTO 属性类型名称，未知为 null |
 
-映射独有失败使用 `MessageKey = "Mapping.ConversionFailed"`，`MessageArgs` 依次为字段键、属性路径、输入值、目标类型全名，并提供中英文本。服务按字段键、表格键、数据行号和输入值匹配已有的结构化 `ConversionFailed`，匹配后保留引擎的 Code/Severity/Message/MessageKey/MessageArgs，仅补充 DataPath/TargetType；同一位置不机械重复报错，不同数据行不合并。引擎契约目标类型仍可从原 MessageArgs 读取。其他引擎告警原样保留。公开 TargetType 不暴露 System.Type，默认 System.Text.Json 可直接序列化这些解析告警结果，无需忽略目标类型或注册转换器。
+映射独有失败使用 `MessageKey = "Mapping.ConversionFailed"`，`MessageArgs` 依次为字段键、属性路径、输入值、目标类型全名，并提供中英文本。服务按字段键、表格键、数据行号和输入值匹配已有的结构化 `ConversionFailed`，匹配后保留引擎的 Code/Severity/Message/MessageKey/MessageArgs，仅补充 DataPath/TargetType；同一位置不机械重复报错，不同数据行不合并。引擎契约目标类型仍可从原 MessageArgs 读取。其他引擎告警原样保留。公开 TargetType 不暴露 System.Type，默认 System.Text.Json 可序列化内置诊断中的目标类型描述，无需忽略目标类型或注册转换器；业务 RawValue 的限制见下文。
 
 诊断收集器放在本次解析的 FillData 浅副本中，字典及行数据沿用原引用；不修改引擎返回的数据/告警列表，不设置服务实例上的临时模式。业务显式重写若自行构造新的 FillData 或完全自定义映射，需自行处理该映射的结果与异常。第三方引擎若未提供结构化定位及 RawValue/TargetType，已有告警仍保留，但框架不会猜测本地化消息来去重。
 
@@ -357,26 +396,7 @@ TemplateFrame/
 
 ## 7. 迭代计划
 
-> 详细路线图（已归档 + 规划）见 [docs/ROADMAP.md](ROADMAP.md)；每个迭代都跑 `dotnet build TemplateFrame.slnx` + `dotnet test`。
-
-| 阶段 | 迭代 | 主题 | 状态 |
-|---|---|---|---|
-| 已归档 | 0–6 | 仓库骨架 → 契约引擎 → Word 插件（生成/校验/填充/回读）→ 健壮性 → Demo → 自动化发布 | ✅ 完成（v1.0.0 / v1.0.1 已发布） |
-| 已归档 | **7** | Demo 收尾：Word 插件标识 + 回读示例 | ✅ 完成 |
-| 已归档 | **8** | Excel 插件 `TemplateFrame.Excel`（OpenXML 直写 + 命名区域定位；修订：不提供页面设置 + drawing 兼容修复 + 拆分 `TemplateFrame.Excel.Simple` 简单表格插件） | ✅ 完成（含修订） |
-| 已归档 | **9** | 自动映射（DataPath）+ SimpleExcel 强类型接入 | ✅ 完成 |
-| 搁置 | **10** | PDF 插件 `TemplateFrame.Pdf`（PdfSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
-| 搁置 | **11** | 图片插件 `TemplateFrame.Image`（SkiaSharp） | ⏸ 已搁置（2026-08-07，用户决定暂时放弃） |
-| 已归档 | **12** | 国际化（i18n）：运行时消息中英双语（中文默认 + en 卫星按 CurrentUICulture 自动） | ✅ 完成（2026-08-08） |
-| 已归档 | **13** | 文档内容 i18n：模板多语言（占位符 / 页码 / 版式文本 / 表头按语言；Parse 占位符→null 规范化） | ✅ 完成（2026-08-08） |
-| 已归档 | **14** | Excel 版式 i18n 键 + SimpleExcel 列定义名定位（回读语言无关，文本匹配回退） | ✅ 完成（2026-08-08） |
-| 已归档 | **15** | 工程化收尾：文档同步 + 公共代码下沉（StreamUtil / ImageTypeDetector / TemplateFillResult）+ 填充告警出口 `FillDetailed` + 发布版本校验 | ✅ 完成（2026-08-08） |
-| 已归档 | **16** | SimpleExcel 根集合：`List<T>` 直接填充/解析 | ✅ 完成（随 v1.0.6 发布） |
-| 已归档 | **17** | 评审落地：Excel Drifted 修复 + API 简化（`MissingElementPolicy` / `TemplateFillOptions` 下沉、删除插件空壳类型）+ 插件去重 + 大文件拆分（全库无 500+ 行文件）+ 损坏流异常契约 + 测试补强（290 用例）+ 基建（editorconfig / Directory.Build.props / 包图标 / CI 矩阵与覆盖率）+ 文档"上手优先"重构 | ✅ 完成（2026-08-24，随 **2.0.0** 发布） |
-| 已归档 | **18** | 多目标框架支持：四包统一 `netstandard2.0;net462;net8.0`（2.1.0） | ✅ 完成（2026-08-25） |
-| 已归档 | **19** | 评审落地（第二轮）：布尔回读 / Word schema 三处 / 发布测试门禁（合并发布工作流）/ XML 损坏泄漏 / 回退列定位 / SetSheetName 时序 / 同位置定义名 / 异常契约统一 + `ValidationApplier`/`ContractValueConverter` 下沉 + 往返矩阵与 schema 校验护栏测试（310 用例） | ✅ 完成（2026-08-27，随 **2.2.0** 发布） |
-| 已归档 | **20** | ParseDetailed（导入方向告警出口，`ConversionFailed`）+ XML 注释双语规则（英文 summary + 中文 remarks）+ 插件 README 中英 | ✅ 完成（2026-08-27，随 **2.3.0** 发布） |
-| 已归档 | **21** | 真实场景正确性收尾：嵌套 SDT 不吞内层 / 0 行清空占位 / 行下移平移图片锚点 / decimal・long 全精度 / 多图 docPr 唯一 / 二次 Fill 文档化 | ✅ 完成（2026-08-27，随 **2.3.1** 发布） |
+迭代归档与后续规划见 [ROADMAP](ROADMAP.md)，已发布版本及兼容性变更统一见 [CHANGELOG](../CHANGELOG.md)。整改状态与验收证据见 [评审台账](reviews/2026-09-07-review.md)。此处不另行维护版本或迭代列表。
 
 ---
 
@@ -386,17 +406,16 @@ TemplateFrame/
 
 | 文件 | 触发 | 作用 | 状态 |
 |---|---|---|---|
-| `ci.yml` | push / PR（main） | format 校验（`dotnet format --verify-no-changes`）+ build（三 TFM）+ test，**ubuntu / windows 双矩阵**（ubuntu 仅测 net8.0，windows 测全部目标框架），测试收集行覆盖率（coverlet） | 已启用 |
-| `release.yml` | tag `v*` | `test` job（windows 全 TFM 测试门禁，含版本校验）→ `needs: test` 的 `release` job：build + pack → OIDC Trusted Publishing 推 nuget.org + GitHub Release（附 nupkg/snupkg）。2.2.0 起合并原 `publish-nuget.yml`：发布必须先过测试门禁，netfx 资产在发布链路上也有测试覆盖 | 已启用（v1.0.0 起） |
+| `ci.yml` | push main / 所有 pull_request | format 校验（`dotnet format --verify-no-changes`）+ build（三 TFM）+ test，**ubuntu / windows 双矩阵**（ubuntu 仅测 net8.0，windows 测全部目标框架），测试收集行覆盖率（coverlet） | 已启用 |
+| `release.yml` | tag `v*` | `test` job（windows 全 TFM 测试门禁，含版本校验）→ `needs: test` 的 `release` job：build + pack → OIDC Trusted Publishing 推 nuget.org + GitHub Release（附 nupkg/snupkg）；发布必须先过测试门禁，netfx 测试也在发布链路内 | 已启用（v1.0.0 起） |
 
-**发布说明**：
-- 推送 `v*` tag 即触发 `release.yml`：先测试（windows 全部目标框架），通过后 GitHub Release + 推送 nuget.org；
-- NuGet 发布依赖一次性前置配置（nuget.org Trusted Publisher + 仓库变量 `NUGET_USER`），详见 `docs/PUBLISHING.md`；
-- 已发布版本：v1.0.0 – v1.0.7、2.0.0、2.1.0、2.2.0、2.3.0、2.3.1（详见 [CHANGELOG](../CHANGELOG.md) 与 [ROADMAP](ROADMAP.md) 状态总览）。
+日常发布、首次配置与四包验证见 [PUBLISHING](PUBLISHING.md)；发布版本与说明只在 [CHANGELOG](../CHANGELOG.md) 维护。
 
 ---
 
 ## 9. 风险与决策记录
+
+以下保留各迭代当时的决策语境，包括后来扩展或搁置的方案。例如 Simple 的“只做 Write/Read”是迭代 8 的范围，当前契约服务与定义名回退规则见 §4.1；当前公共服务、缓存和诊断行为见 §3、§5。历史库选型不代表依赖已引入或未来必定实现。
 
 | 项 | 说明 | 决策 |
 |---|---|---|

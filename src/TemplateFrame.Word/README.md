@@ -3,25 +3,25 @@
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Word.svg)](https://www.nuget.org/packages/TemplateFrame.Word)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Word)](https://www.nuget.org/packages/TemplateFrame.Word)
 
-> 中文 · [English](README.en.md)
+> 中文 · [English](https://github.com/CSJ608/TemplateFrame/blob/main/src/TemplateFrame.Word/README.en.md)
 
 TemplateFrame 的 **MS Word 插件**：把基础包的"契约 + 数据形状"翻译成 `.docx`。
 基于内容控件（SDT / Structured Document Tag）实现**生成 → 定位 → 填充 → 回读 → 校验**全链路，
-只支持 Microsoft Office 的 `.docx`（WPS 兼容性见设计文档 §1.4）。
+只支持 Microsoft Office 的 `.docx`（WPS 边界见 [DESIGN](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md)）。
 
 ## 核心能力
 
 | 组件 | 职责 |
 |---|---|
 | `WordTemplateBuilder` | 组装带 SDT 的 .docx：页面设置、页眉/页脚、布局表格、明细表、文本/图片元素、页码域 |
-| `SdtLocator` | 按 tag 定位内容控件（正文/页眉/页脚，tag 全局唯一） |
+| `SdtLocator` | 按 tag 定位内容控件（正文/页眉/页脚，标量 tag 唯一，表格列按行定位） |
 | `WordTemplateFiller` | 填充：文本（保留 run 格式）、图片（换包内 part + 关系）、表格行克隆（重发唯一 w:id）；填充前软校验 |
 | `WordTemplateParser` | 回读：按契约把已填充模板读回 `FillData`（文本按 ValueType 转换、表格多行、图片字节） |
 | `WordTemplateValidator` | 校验：Missing / WrongType / Ambiguous / Extra（可选字段缺失只告警） |
 
 ## 快速开始
 
-业务服务声明所用插件构建器类型，`BuildInitialTemplate()` 无参数、直接用 `Builder` 实例组装：
+业务服务声明所用插件构建器类型，`BuildInitialTemplate()` 无参数、直接用 `Builder` 实例组装。以下为结构片段（省略 DTO、契约与映射实现），完整可运行示例见文末：
 
 ```csharp
 public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrderData, WordTemplateBuilder>
@@ -57,35 +57,24 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - **布局表**：`AddLayoutTable(rows, cols, TableFormat?)` + `AddCell(compose, columnSpan)` — 页眉"左中右/平分/四份"（gridSpan 跨列）
 - **文本**：`AddParagraph(text[, style|TextFormat])` / `AddText` / `AddElement(key[, TextFormat])`（元素=内容控件，占位文本按语言：默认 zh "待填充" / en "To be filled"，经 `ITemplateLocalizer` 解析，业务可覆盖）
 - **表格**：`AddTable(key, columns, TableFormat?, headerStyle?)` — 表头 + 示例行（每格一个 SDT）；`TableFormat` 支持表头/单元格字体、有无边框、表格对齐、列宽（cm）、垂直对齐
-- **图片**：`AddImage(key, placeholder?, widthIn?, heightIn?)` — 占位图外包 SDT，填充时换 `byte[]`
+- **图片**：`AddImage(key, placeholderPath?, widthInches?, heightInches?)` — 占位图外包 SDT，填充时换 `byte[]`
 - **页码**：`AddPageNumber(pattern? = null, TextFormat?)` — PAGE/NUMPAGES 域；pattern 为 null 时按语言取默认（zh "第{page}页，总{total}页" / en "Page {page} of {total}"）
 - `TextFormat`：`FontName`（黑体/宋体）/ `SizePt` / `Bold` / `Alignment` / `Underline`
 
-## 填充行为要点
+## 格式要点
 
-- **文本**：改 `sdtContent` 内第一个 `w:r/w:t`（保留 run 格式），首尾空格补 `xml:space="preserve"`。
-- **图片**：往包内加图片 part + 关系拿新 `rId`，替换 SDT 内 `<a:blip r:embed>`；尺寸/位置/环绕继承占位图；**页眉/页脚里的图片 part 归属对应 Header/Footer rels**。
-- **表格行**：deepcopy 示例行 N 次，逐行按 tag 填值；**克隆后每个 SDT 重发唯一 `w:id`**。
-- **软校验**（填充前跑 Validate）：`Drifted`/`Extra` 只记告警继续；Missing 必填按策略（默认抛错，可配 `MissingElementPolicy.SkipAndWarn`）；`WrongType`/`Ambiguous`/`Invalid` 视为硬错误。
-- **告警出口**：`WordTemplateFiller.Fill` 返回 `TemplateFillResult`（输出流 + Warnings）；引擎/服务层可用 `FillDetailed`（`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`）拿到同样的软校验告警，`Fill` 保持只返回输出流。
-- **引擎 ParseDetailed（2.3.0）**：导入方向对称出口——值转换失败的字段保留原始文本，并以 `ConversionFailed`（Warning，表格列带数据行号）随 `TemplateParseResult` 返回；null 仍专指未填充，`Parse` 行为不变。
-- **服务映射与生命周期（2.4.0）**：`ParseDetailed` 保留直接或继承的 `MapFromData` 重写，显式 `MapFromDataDetailed` 重写优先；默认自动映射失败保留属性默认值并补充转换诊断，业务映射异常照常传播。`BuildInitialTemplateFile` 按实例串行保护 Builder 全生命周期；回调不得等待同实例另一生成调用，版式/保存/释放期间递归生成会抛错。此锁不保护其他方法或业务状态。
-- 结构化转换诊断提供 `TableKey`、从 1 开始的数据行号 `DataRowNumber`、集合索引从 0 开始的 `DataPath`、失败输入 `RawValue` 和字符串 `TargetType`（默认 JSON 可序列化的类型描述）。
-- **收货前/收货后**：同一模板两次填充——收货前空字段传 `null`（显示为空），收货后补齐。
-- **0 行数据**：示例行占位符被清空（保留表头 + 空白行结构），导出单据不留"待填充"。
-- **二次填充**：`Fill` 假定输入是**未填充的原始模板**——对已填充文档再次 Fill 时表格区域已指向整个数据块、首行会被当作示例行，会得到错位结果；需要重新生成请从原始模板 Fill。
+- SDT tag 定位正文、页眉与页脚字段；文本修改保留嵌套控件，图片关系归属对应宿主 part，克隆 SDT 重发唯一 `w:id`。
+- 收货前后各自从未填充的原始模板 Fill；零行数据清空示例占位，保留表头和空白行。
+- Parse 回读文本、表格与图片字节，已知占位符归一为 null。Word 转换消息使用数据行号，Excel 消息使用工作表行号；两者结构化 `DataRowNumber` 均从 1 开始。
 
-## 回读行为要点
-
-- 文本按 `TextElement.ValueType` 转换（string/decimal/int/DateTime/bool）；表格找到示例行克隆区逐行读回；图片读回字节。
-- **Parse 规范化**：未填充模板回读已知占位符（默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 **null**（null=未填充、""=有意留空）。
+用 `FillDetailed` / `ParseDetailed` 获取告警；引擎失败保留原文，默认强类型映射保留属性默认值。完整[校验、映射与诊断规则](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#parse-diagnostics)和[服务生命周期规则](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#service-lifetime)集中在 DESIGN；Simple 的独立 API 见[格式差异](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences)。
 
 ## 依赖与测试
 
 - 目标框架 `netstandard2.0 / net462 / net8.0`（NuGet 按运行时自动选择）。
 - 依赖 `DocumentFormat.OpenXml`（3.3.x）。
 - 测试 `test/TemplateFrame.Word.Tests`：生成 → 校验 → 填充 → 回读 → 断言（含页眉页脚、多表、批量、跨列布局、页眉图片 part 归属等边界）。
-- 历史性能快照（2026-08-24，仅描述当时样本，不保证线性伸缩或当前版本耗时）：千行明细填充 ~150ms、回读 ~125ms、构建 <1ms；快照见仓库 `docs/PERFORMANCE.md`，基准项目 `test/TemplateFrame.Benchmarks`。
+- 历史性能快照（2026-08-24，仅描述当时样本，不保证线性伸缩或当前版本耗时）：千行明细填充 ~150ms、回读 ~125ms、构建 <1ms；快照见仓库 [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md)，基准项目 [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md)。
 
 ## 完整示例
 
@@ -95,4 +84,4 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 dotnet run --project samples/TemplateFrame.Demo.Word
 ```
 
-设计文档见 `docs/DESIGN.md`，使用说明见仓库根 `README.md`。
+完整规则见 [DESIGN](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md)，上手说明见[根 README](https://github.com/CSJ608/TemplateFrame/blob/main/README.md)。。

@@ -5,14 +5,18 @@ using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
 namespace TemplateFrame.Excel;
 
 /// <summary>
-/// 表格克隆后的行平移（ExcelTemplateFiller 内部用）：克隆示例行并重写行号/单元格引用、
-/// 示例行下方既有行整体下移、表格下方命名区域与合并区域与图片锚点同步下移——等价于 Excel 的"插入行"。
+/// Clones table rows and adjusts selected worksheet references and drawing markers.
 /// </summary>
+/// <remarks>
+/// 克隆示例行并调整行号及单元格地址；下方既有行按新增行数平移。
+/// 区域和绘图标记的调整范围见各方法；不重写公式，也不维护所有工作表关联结构。
+/// </remarks>
 internal static class ExcelRowShifter
 {
     /// <summary>
-    /// 克隆示例行 2..N 次（重写行号与单元格引用）并把示例行下方的既有行整体下移 delta 行。
-    /// 返回数据行序列（首项为示例行本身）；delta 为 0 时仅返回示例行。
+    /// 克隆示例行以生成第 2 至 dataRowCount 行，并把示例行下方的既有行下移 dataRowCount - 1 行。
+    /// 返回数据行序列（首项为示例行本身）；dataRowCount 不大于 1 时仅返回示例行。
+    /// 只重写 RowIndex 和已有 CellReference，克隆及移动单元格中的公式文本保持原样。
     /// </summary>
     internal static List<Row> CloneAndShiftRows(SheetData sheetData, Row sampleRowElement, int sampleRow, int dataRowCount)
     {
@@ -46,7 +50,6 @@ internal static class ExcelRowShifter
             clones.Add(clone);
         }
 
-        // 既有行下移 delta（行号/单元格引用同步 +delta）
         foreach (var belowRow in belowRowsToShift)
         {
             var oldIndex = belowRow.RowIndex!.Value;
@@ -65,7 +68,13 @@ internal static class ExcelRowShifter
         return clones;
     }
 
-    /// <summary>把起始行在示例行下方的命名区域、合并区域与图片锚点整体下移 delta 行。</summary>
+    /// <summary>调整示例行下方的框架命名区域、合并区域及绘图行标记。</summary>
+    /// <remarks>
+    /// 仅处理 TF_ 前缀且解析后表名等于 sheet 的命名区域，以及 worksheetPart 的合并区域；
+    /// 起始行大于 sampleRow 时两个端点均加 delta，起始行不满足条件的跨界区域不扩展。
+    /// 定义名按名称更新首个匹配项，不按局部工作表作用域区分。
+    /// oneCell/twoCell 锚点逐个判断行标记；不调整 absoluteAnchor、偏移量或尺寸。
+    /// </remarks>
     internal static void ShiftBelow(WorkbookPart workbookPart, WorksheetPart worksheetPart, string sheet, int sampleRow, int delta)
     {
         foreach (var match in ExcelNamedRangeLocator.FindAll(workbookPart))
@@ -112,11 +121,15 @@ internal static class ExcelRowShifter
             }
         }
 
-        // 表格下方的图片锚点同步下移（不随行下移会与新数据行重叠错位——印章/签名图常放在表格下方）
+        // 绘图标记不随 RowIndex 自动移动，需单独调整以免与新增数据行重叠。
         ShiftDrawingAnchorsBelow(worksheetPart, sampleRow, delta);
     }
 
-    /// <summary>把起始行在示例行下方的图片锚点（oneCell/twoCell 的行标记）整体下移 delta 行。</summary>
+    /// <summary>将 oneCell 的 FromMarker、twoCell 的 FromMarker/ToMarker 中符合条件的行号分别加 delta。</summary>
+    /// <remarks>
+    /// 可解析的零基行号不小于 sampleRow 时才移动；缺失或无法解析的行号保持原样。
+    /// 跨越示例行的 twoCell 锚点可能只移动 ToMarker，因而并非总是整体平移。
+    /// </remarks>
     private static void ShiftDrawingAnchorsBelow(WorksheetPart worksheetPart, int sampleRow, int delta)
     {
         var drawing = ExcelDrawingHelper.GetDrawingsPart(worksheetPart)?.WorksheetDrawing;
@@ -151,7 +164,7 @@ internal static class ExcelRowShifter
         }
     }
 
-    /// <summary>按名重指定义名引用（不存在时忽略）。</summary>
+    /// <summary>更新名称相等的首个定义名引用；不存在时忽略，不区分局部作用域。</summary>
     internal static void SetDefinedName(WorkbookPart workbookPart, string name, string reference)
     {
         if (workbookPart.Workbook?.DefinedNames is not { } definedNames)

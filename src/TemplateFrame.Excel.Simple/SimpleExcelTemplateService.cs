@@ -18,7 +18,8 @@ public abstract class SimpleExcelTemplateService<TData>
 {
     private readonly Lazy<TemplateContract> _contract;
 
-    /// <summary>Creates the service (the contract is lazily validated: a single table, DataPath as needed).</summary>
+    /// <summary>Creates a table template service.</summary>
+    /// <remarks>首次访问 Contract 时校验单表约束；非根集合数据还要求表格声明 DataPath。</remarks>
     protected SimpleExcelTemplateService()
     {
         _contract = new Lazy<TemplateContract>(() =>
@@ -35,13 +36,15 @@ public abstract class SimpleExcelTemplateService<TData>
         });
     }
 
-    /// <summary>当前契约（惰性求值，来自 <see cref="DefineContract"/>）。</summary>
+    /// <summary>The service contract.</summary>
+    /// <remarks>首次访问时调用 DefineContract 并校验，结果由当前实例缓存。</remarks>
     public TemplateContract Contract => _contract.Value;
 
     /// <summary>Declares the contract: a single table (columns = headers).</summary>
     protected abstract TemplateContract DefineContract();
 
-    /// <summary>Generates the initial template stream (header-only; localized headers + per-column defined names).</summary>
+    /// <summary>Generates a table template stream.</summary>
+    /// <remarks>生成表头和列定义名，支持表头本地化；返回流由调用方释放。</remarks>
     public Stream BuildTemplate(SimpleExcelOptions? options = null, CultureInfo? culture = null, ITemplateLocalizer? localizer = null)
     {
         var stream = new MemoryStream();
@@ -54,7 +57,8 @@ public abstract class SimpleExcelTemplateService<TData>
     public TemplateValidationResult Validate(Stream template, SimpleExcelOptions? options = null)
         => SimpleExcelContract.Validate(template, Contract, options);
 
-    /// <summary>Fills: typed data → .xlsx (header + data rows; localized headers when culture is given).</summary>
+    /// <summary>Writes business data to a workbook stream.</summary>
+    /// <remarks>生成表头和数据行；culture 非空时本地化表头。返回流由调用方释放。</remarks>
     public Stream Fill(TData data, SimpleExcelOptions? options = null, CultureInfo? culture = null, ITemplateLocalizer? localizer = null)
     {
         var stream = new MemoryStream();
@@ -67,11 +71,13 @@ public abstract class SimpleExcelTemplateService<TData>
     public TData Parse(Stream source, SimpleExcelOptions? options = null)
         => MapFromData(SimpleExcelContract.Read(source, Contract, options));
 
-    /// <summary>TData → FillData（默认自动映射；可重写手工映射）。</summary>
+    /// <summary>Maps business data to FillData.</summary>
+    /// <remarks>默认使用 DataPathMapper；可重写以定制映射。</remarks>
     protected virtual FillData MapToData(TData data)
         => DataPathMapper.ToFillData(data, Contract);
 
-    /// <summary>FillData → TData（默认自动映射；可重写手工映射）。</summary>
+    /// <summary>Maps FillData to business data.</summary>
+    /// <remarks>默认使用 DataPathMapper 的严格转换；可重写以定制映射。</remarks>
     protected virtual TData MapFromData(FillData data)
         => DataPathMapper.FromFillData<TData>(data, Contract);
 }

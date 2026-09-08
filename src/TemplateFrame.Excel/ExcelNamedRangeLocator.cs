@@ -6,10 +6,10 @@ namespace TemplateFrame.Excel;
 /// <summary>A named-range (defined name) match — name plus raw reference.</summary>
 public sealed record NamedRangeMatch(string Name, string Reference);
 
-/// <summary>Locates by named ranges (the Excel counterpart of SdtLocator) — prefix TF_, one workbook.xml walk.</summary>
+/// <summary>Locates framework named ranges in a workbook.</summary>
 /// <remarks>
 /// 标量元素 <c>TF_&lt;Key&gt;</c> → 单元格；表格列 <c>TF_&lt;TableKey&gt;_&lt;ColumnKey&gt;</c> → 示例行单元格。
-/// 无正则、无文本匹配。
+/// 每次 FindAll 遍历工作簿定义名，按 TF_ 前缀筛选；FindByName 返回名称相等的首项，不区分局部作用域。
 /// </remarks>
 public static class ExcelNamedRangeLocator
 {
@@ -49,7 +49,11 @@ public static class ExcelNamedRangeLocator
     public static NamedRangeMatch? FindByName(WorkbookPart workbookPart, string name)
         => FindAll(workbookPart).FirstOrDefault(m => m.Name == name);
 
-    /// <summary>Parses a reference (Sheet1!$B$2 / '送货单'!$B$5:$B$9) into sheet name (unquoted) + 1-based start/end cells.</summary>
+    /// <summary>Parses a sheet and cell range reference.</summary>
+    /// <remarks>
+    /// 支持 Sheet1!$B$2 或 '送货单'!$B$5:$B$9 形式，返回去引号的表名及一基行列号；无表名时返回空字符串。
+    /// 按首个感叹号及冒号拆分，不是完整的 Excel 公式或引用语法解析器。
+    /// </remarks>
     public static (string Sheet, (int Row, int Col) Start, (int Row, int Col) End) ParseReference(string reference)
     {
         Guard.ThrowIfNull(reference, nameof(reference));
@@ -84,7 +88,8 @@ public static class ExcelNamedRangeLocator
         return (sheet, startCell, endCell);
     }
 
-    /// <summary>Builds a reference (quoted sheet name and absolute $ as needed; single cells carry no colon).</summary>
+    /// <summary>Builds an absolute cell range reference.</summary>
+    /// <remarks>表名按 QuoteSheet 规则加引号；行列号加 $，起止位置相同时省略冒号及终点。</remarks>
     public static string BuildReference(string sheet, (int Row, int Col) start, (int Row, int Col) end)
     {
         var prefix = QuoteSheet(sheet)
@@ -100,7 +105,11 @@ public static class ExcelNamedRangeLocator
                + "$" + end.Row.ToString();
     }
 
-    /// <summary>Quotes the sheet name when it contains characters other than letters/digits/underscore.</summary>
+    /// <summary>Quotes a sheet name when needed.</summary>
+    /// <remarks>
+    /// ASCII 字母或下划线开头、其余仅含 ASCII 字母、数字、下划线或点时不加引号；
+    /// 其他非空名称加单引号，并将内部单引号转义为两个单引号。空值返回空字符串。
+    /// </remarks>
     public static string QuoteSheet(string sheet)
     {
         if (string.IsNullOrEmpty(sheet))

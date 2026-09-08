@@ -3,12 +3,12 @@
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Excel.Simple.svg)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Excel.Simple)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
 
-> 中文 · [English](README.en.md)
+> 中文 · [English](https://github.com/CSJ608/TemplateFrame/blob/main/src/TemplateFrame.Excel.Simple/README.en.md)
 
 TemplateFrame 的**简化 Excel 插件**：只支持「标题行 + 数据行」的表格导入/导出。
 
 大多数 Excel 导入/导出的形态就是"标题行，然后一列一路下去"。对这种简单需求，不需要
-[TemplateFrame.Excel](../TemplateFrame.Excel/README.md) 的合并单元格 / 图片 / 版式能力——
+[TemplateFrame.Excel](https://github.com/CSJ608/TemplateFrame/blob/main/src/TemplateFrame.Excel/README.md) 的合并单元格 / 图片 / 版式能力——
 两个插件把两种不同的需求拆开：
 
 | 插件 | 定位 | 能力 |
@@ -31,20 +31,18 @@ var table = new SimpleExcelTable
         ["SS-M8", "不锈钢螺栓 M8×30", 500m],
     ],
 };
-using var stream = File.Create("items.xlsx");
-SimpleExcel.Write(stream, table, new SimpleExcelOptions { SheetName = "物料清单" });
+using (var stream = File.Create("items.xlsx"))
+{
+    SimpleExcel.Write(stream, table, new SimpleExcelOptions { SheetName = "物料清单" });
+}
 
 // 导入（优先按命名区域 TF_Table 定位表头；区域不存在/表头行为空时回退"第一个多单元格非空行"）
 using var input = File.OpenRead("items.xlsx");
 var loaded = SimpleExcel.Read(input); // Headers + Rows（string / bool / DateTime / double / null）
 ```
 
-- 单元格值支持：`string` / `bool` / `DateTime`（写为日期序列号 + `yyyy-mm-dd`）/ 数值 / `null`。
-- **命名区域定位**：`Write` 把表格区域写成一个命名区域（默认 `TF_Table` → `'物料清单'!$A$1:$C$3`，可用 `TableName` 自定义、`StartCell` 指定起始格）；`Read` 优先按它定位表头，区域不存在**或表头行为空（区域错位）**时回退"第一个多单元格非空行"（跳过仅 1 个非空单元格的标题/装饰行）。
-- **数据区容错**：数据行统一顺延到工作表最后一行（全空行跳过）——命名区域只盖住表头、或用户在 Excel 里手工在区域外补数据时，不再静默丢数据。注意：区域下方若有其他非空内容（如下方第二个表格）会被一并读入。
-- 兼容常见外部文件：共享字符串表头（Excel/WPS 默认写法）解析为真实文本；富文本单元格（部分加粗/着色）拼接全部片段文本；行缺 `RowIndex(r)` 属性时按文档顺序推断（单元格缺 `r` 引用的极端写法不支持——Excel/WPS 均恒写单元格引用，实际文件不会出现）。
-- 数字按 `double` 返回，日期格式单元格按 `DateTime` 返回；全空行跳过、缺列补 null。
-- 不提供页面设置 / 合并单元格 / 图片——保持"简单表格"的最小形态。
+- `Write/Read` 处理表头和数据行，不提供合并、图片或页面设置。数值回读为 `double`，日期格式值为 `DateTime`，缺格为 null；decimal/long 写入不经 double 中转不等于回读同等精度。
+- Read 优先按命名区域定位，区域缺失或表头为空时回退；数据读到工作表末行并跳过空行，下方无关内容也可能被读入。完整[定位、回退和数值规则](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences)集中在 DESIGN。
 
 ## 契约 + 强类型服务
 
@@ -92,6 +90,7 @@ public sealed class MaterialsTemplateService : SimpleExcelTemplateService<Materi
 }
 
 // 使用：依赖契约 → 强类型（表格与列声明 DataPath 后自动映射，无需手写 MapToData / MapFromData）
+var data = new MaterialsData { Items = [new MaterialLine { Code = "M001", Name = "Bolt", Qty = 10m }] };
 var service = new MaterialsTemplateService();
 using var template = service.BuildTemplate();          // 仅表头
 var validation = service.Validate(template);           // 表头 ↔ 契约列校验（缺必填列 Error / 多余列 Warning）
@@ -99,60 +98,18 @@ using var filled = service.Fill(data);                 // 强类型数据 → xl
 var parsed = service.Parse(filled);                    // xlsx → 强类型 MaterialsData
 ```
 
-- **契约形态**：只支持**单个 `TableElement`**（列 = 表头）；含标量/图片元素或多个表格会抛清晰错误（那是 `TemplateFrame.Excel` 灵活版式的活）。
-- **列定位（分级回退）**：读/校验先按**每列定义名**（`TF_<TableName>_<ColumnKey>` → 表头单元格，框架产物写时自动生成）定位列——**回读与表头语言解耦（语言无关）**；定义名不可用时回退表头文本匹配（`DisplayName` → `Key`）。多余列忽略、缺列整列补 null；`Validate` 对缺必填列报 `Missing`（Error）、可选列缺失与多余列报 `Warning`、重复列定义名报 `Ambiguous`（Error）。
-- **按语言表头**：`SimpleExcelContract.Write(..., culture, localizer)` 或 `service.Fill(data, options, culture, localizer)` 可写本地化表头（本地化键 = 列 Key，未注册覆盖回退 `DisplayName`/`Key`）；回读仍语言无关（定义名定位）。
-- **底层 API**：也可直接用 `SimpleExcelContract.Write / Read / Validate`（基于 `FillData`），再配合基础包 `DataPathMapper` 自行映射。
-- **向后兼容**：原有 `SimpleExcel.Write / Read`（`SimpleExcelTable`）保持不变。
+- 契约仅含一个 `TableElement`；用 `Validate` 检查必填缺列、多余列和定位歧义。有效的每列定义名让回读不依赖表头语言。回退文本匹配时，`Validate` 先尝试 DisplayName，再尝试 Key；`Read` 只用 Trim 后非空的 DisplayName，否则用 Key。表头仅匹配 Key 时，可能“校验通过，但回读缺字段”。详见[分支规则与示例](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences)。
+- `SimpleExcelTemplateService` 独立于 Word/Excel 服务：没有 Builder/Engine、`FillDetailed` / `ParseDetailed`，也不套用 Builder 生成锁；默认 Parse 映射严格转换。详见 [Simple 规则](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences)及[映射/缓存规则](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md)。
+- Fill 可传 `culture` / `localizer` 生成本地化表头；底层可用接收 `FillData` 的 `SimpleExcelContract.Write / Read / Validate`。
 
-## 根集合：List<T> 直接填充 / 解析
+## 根集合
 
-如果场景数据就是一个列表（不需要再包一层容器对象），把 `TData` 直接声明为集合类型，表格 `DataPath` 留空即可——行数据自动取根对象本身：
-
-```csharp
-public sealed class MaterialListService : SimpleExcelTemplateService<List<MaterialLine>>
-{
-    protected override TemplateContract DefineContract()
-        => new()
-        {
-            Name = "Materials",
-            Version = "1.0",
-            Elements =
-            [
-                new TableElement
-                {
-                    Key = "Materials",
-                    DisplayName = "物料清单",
-                    // DataPath 留空 = 根集合：TData（List<MaterialLine>）本身就是行集合
-                    Columns =
-                    [
-                        new TextElement { Key = "编码", DisplayName = "编码", DataPath = "Code", Required = true },
-                        new TextElement { Key = "名称", DisplayName = "名称", DataPath = "Name", Required = true },
-                        new TextElement { Key = "数量", DisplayName = "数量", DataPath = "Qty", ValueType = typeof(decimal) },
-                    ],
-                },
-            ],
-        };
-}
-
-var service = new MaterialListService();
-using var filled = service.Fill(
-[
-    new MaterialLine { Code = "AL-6063", Name = "铝型材 6063-T5", Qty = 120.5m },
-    new MaterialLine { Code = "SS-M8", Name = "不锈钢螺栓 M8×30", Qty = 500m },
-]);
-var parsed = service.Parse(filled);      // 直接得到 List<MaterialLine>
-```
-
-- **支持的根集合类型**：`List<T>` / `IReadOnlyList<T>` / `IEnumerable<T>` / 数组 `T[]`（`Parse` 返回与声明一致；接口集合由 `List<T>` 承载）。
-- 根集合时表格 `DataPath` **必须留空**（声明了会抛清晰错误）；列 `DataPath` 仍指向行元素属性。
-- 容器对象写法（`MaterialsData.Items`）与 `SimpleExcelTable` 底层 API 均保持不变，完全向后兼容。
-- i18n 与容器对象版一致：`Fill(..., culture, localizer)` 写本地化表头，定义名回读语言无关（示例见 `samples/TemplateFrame.Demo.Excel.Simple.I18n` 的根集合章节）。
+只有列表数据时，继承 `SimpleExcelTemplateService<List<MaterialLine>>`，保留上面的列声明并将表格 DataPath 留空；Fill 直接接收列表，Parse 返回声明的集合类型。支持类型与约束见 [DESIGN §3.3](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md)，可运行本地化示例见 [Simple.I18n](https://github.com/CSJ608/TemplateFrame/tree/main/samples/TemplateFrame.Demo.Excel.Simple.I18n)。
 
 ## 性能与依赖
 
 - 历史性能快照（2026-08-24，仅描述当时样本，不保证线性伸缩或当前版本耗时）：写 / 读 1000 行 ~30ms，1 万行 ~0.3–0.5s；契约路径读 1 万行 ~0.6–0.9s。
-- 快照见仓库 `docs/PERFORMANCE.md`，基准项目 `test/TemplateFrame.Benchmarks`（`dotnet run -c Release` 可复现）。
+- 快照见仓库 [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md)，基准项目 [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md)（复现命令见该页）。
 - 目标框架 `netstandard2.0 / net462 / net8.0`（NuGet 按运行时自动选择），依赖 `DocumentFormat.OpenXml`（3.3.x）。
 
 ## Demo

@@ -10,11 +10,11 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Mapping;
 
-/// <summary>Auto-mapper — reflects TData ⇄ FillData by the DataPath declared on contract elements.</summary>
+/// <summary>Maps between business data and FillData using contract paths.</summary>
 /// <remarks>
 /// 显式 DataPath 为主：标量 / 图片用单级属性路径，表格用「集合属性 + 列属性」两级路径；
 /// 数据对象本身就是集合（<c>List&lt;T&gt;</c> / <c>IReadOnlyList&lt;T&gt;</c> / 数组）时，表格 DataPath 留空即按「根集合」映射。
-/// 未声明 DataPath 的元素不参与自动映射（可对个别字段手写映射，或重写业务服务的映射方法）。
+/// 除根集合表格外，未声明 DataPath 的元素不参与自动映射；可重写业务服务的映射方法。
 /// 属性解析按（契约实例, 数据类型）缓存；弱关联不延长契约生命周期。
 /// </remarks>
 public static class DataPathMapper
@@ -22,11 +22,10 @@ public static class DataPathMapper
     // 按引用身份关联；契约不再被外部使用时，其类型字典和映射可随之回收。
     private static readonly ConditionalWeakTable<TemplateContract, ConcurrentDictionary<Type, ContractMapping>> Cache = new();
 
-    /// <summary>Forward mapping: typed data → <see cref="FillData"/> (only elements with DataPath).</summary>
+    /// <summary>Maps business data to FillData.</summary>
+    /// <remarks>按契约 DataPath 映射；根集合的表格路径留空。data 或 contract 为 null 时抛出 ArgumentNullException。</remarks>
     public static FillData ToFillData<TData>(TData data, TemplateContract contract)
     {
-        // data 为 null 统一抛 ArgumentNullException：此前根集合模式静默导出仅表头的空文件、
-        // 容器模式抛裸反射异常——同一输入错误应有同一行为
         Guard.ThrowIfNull(data, nameof(data));
         Guard.ThrowIfNull(contract, nameof(contract));
         var mapping = GetMapping(contract, typeof(TData));
@@ -50,9 +49,12 @@ public static class DataPathMapper
         return new FillData { Values = values, Tables = tables };
     }
 
-    /// <summary>Reverse mapping: <see cref="FillData"/> → typed data (containers need a parameterless constructor).</summary>
+    /// <summary>Maps FillData to business data.</summary>
     /// <remarks>
-    /// 缺失/空值字段保持默认。根集合模式（TData 本身是集合、表格 DataPath 留空）直接返回行集合；
+    /// 容器和行元素须能通过无参构造创建。缺失字段不赋值；null 输入将非空值类型赋为该类型默认值，其余属性赋 null。
+    /// 空白字符串映射到非 string 属性时视为空值，其中非空值类型跳过赋值，保留构造后的属性值。
+    /// 转换失败抛出带属性名的 InvalidOperationException；data 或 contract 为 null 时抛出 ArgumentNullException。
+    /// 根集合模式（TData 本身是集合、表格 DataPath 留空）直接返回行集合；
     /// 接口集合（<c>IReadOnlyList&lt;T&gt;</c> / <c>IEnumerable&lt;T&gt;</c>）由 <c>List&lt;T&gt;</c> 承载。
     /// </remarks>
     public static TData FromFillData<TData>(FillData data, TemplateContract contract)
@@ -228,10 +230,11 @@ public static class DataPathMapper
         return property;
     }
 
-    /// <summary>
-    /// 类型是否为可映射的集合（数组或泛型 <c>IEnumerable&lt;T&gt;</c>；string 除外）。
-    /// 根集合模式（数据对象本身就是集合）据此识别。
-    /// </summary>
+    /// <summary>Checks whether a type has a collection shape.</summary>
+    /// <remarks>
+    /// 识别数组或泛型 IEnumerable&lt;T&gt;（排除 string），用于判断根集合模式；
+    /// 不保证该集合类型可由反向映射构造或赋值。type 为 null 时抛出 ArgumentNullException。
+    /// </remarks>
     public static bool IsCollectionDataType(Type type)
     {
         Guard.ThrowIfNull(type, nameof(type));
@@ -372,7 +375,7 @@ public static class DataPathMapper
             converted = ConvertValue(value, property.PropertyType, element);
         }
         catch (Exception ex) when (ex is FormatException or InvalidCastException or OverflowException or ArgumentException
-                                   or InvalidOperationException) // Convert.ChangeType 对不支持的转换恰抛该类型
+                                   or InvalidOperationException) // ConvertValue 对不支持的目标类型抛出此异常。
         {
             if (lenientConversion)
             {

@@ -41,11 +41,11 @@ public interface ITemplateEngine
     /// <summary>Parses a filled template back into FillData (multi-row tables included, §5.4).</summary>
     FillData Parse(Stream template, TemplateContract contract);
 
-    /// <summary>Parses and returns conversion warnings — the parse-side counterpart of <see cref="FillDetailed"/>.</summary>
+    /// <summary>Reads template data with conversion warnings.</summary>
     /// <remarks>
-    /// 回读并返回转换告警（推荐）——FillDetailed 在导入方向的对称出口。
+    /// 返回解析数据和转换告警。
     /// 值转换失败的字段在 Data 中保留原始文本，并以 <see cref="TemplateValidationIssueCode.ConversionFailed"/>
-    /// （Warning）随结果返回；null 仍专指「未填充」。仅需数据时用 <see cref="Parse"/>（行为不变）。
+    /// （Warning）随结果返回。内置引擎将已知占位符转为 null；缺失单元格等读取分支也可能返回 null。
     /// </remarks>
     TemplateParseResult ParseDetailed(Stream template, TemplateContract contract);
 }

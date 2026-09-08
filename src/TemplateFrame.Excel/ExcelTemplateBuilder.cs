@@ -194,8 +194,7 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         Guard.ThrowIfNull(key, nameof(key));
         var (row, col) = ExcelAddressHelper.ParseCell(anchorCell);
         var (bytes, _) = PlaceholderImage.Load(placeholderPath);
-        // 占位图按魔数探测 MIME（与 Filler 一致）：用户可传 GIF/BMP/TIFF 占位图（PlaceholderImage.Load 支持），
-        // 此前只映射 jpg/png，其余会以错误的 image/png 存入
+        // 占位图也支持 GIF/BMP/TIFF，按实际字节选择 MIME，避免扩展名与内容不符。
         var contentType = ImageTypeDetector.DetectContentType(bytes);
 
         _drawingsPart ??= _worksheetPart!.AddNewPart<DrawingsPart>();

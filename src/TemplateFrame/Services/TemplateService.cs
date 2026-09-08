@@ -10,7 +10,7 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Services;
 
-/// <summary>Generic base class for business scene services — strongly-typed Build / Validate / Fill / FillDetailed / Parse / ParseDetailed.</summary>
+/// <summary>Provides template operations for typed business data.</summary>
 /// <remarks>
 /// 继承时声明所用的插件构建器类型（如 <c>TemplateService&lt;DeliveryOrderData, WordTemplateBuilder&gt;</c>），
 /// 在 <see cref="BuildInitialTemplate"/> 里用类型化的 <see cref="Builder"/> 组装版式；
@@ -35,13 +35,16 @@ public abstract class TemplateService<TData, TBuilder>
         _hasCustomMapFromData = HasCustomMapFromData(GetType());
     }
 
-    /// <summary>The current contract (lazily evaluated from <see cref="DefineContract"/>).</summary>
+    /// <summary>The service contract.</summary>
+    /// <remarks>首次访问时调用 DefineContract，结果由当前实例缓存。</remarks>
     public TemplateContract Contract => _contract.Value;
 
-    /// <summary>The current localizer (layout i18n keys / placeholders / page numbers; business-injectable).</summary>
+    /// <summary>The template content localizer.</summary>
+    /// <remarks>用于版式文本、占位符和页码；可通过构造函数注入。</remarks>
     protected ITemplateLocalizer Localizer => _localizer;
 
-    /// <summary>The concrete plugin builder — valid only inside <see cref="BuildInitialTemplate"/>.</summary>
+    /// <summary>The active plugin builder.</summary>
+    /// <remarks>供 BuildInitialTemplate 同步组装版式使用；资源由服务创建并释放，不应由业务代码保留或释放。</remarks>
     protected TBuilder Builder { get; private set; } = null!;
 
     /// <summary>Declares the contract: which elements this scene has.</summary>
@@ -50,7 +53,7 @@ public abstract class TemplateService<TData, TBuilder>
     /// <summary>Composes the initial layout using the concrete <see cref="Builder"/> instance.</summary>
     protected abstract void BuildInitialTemplate();
 
-    /// <summary>Generates the initial template file stream (with content controls).</summary>
+    /// <summary>Generates an initial template stream.</summary>
     /// <remarks>
     /// <paramref name="culture"/>：模板内容语言（占位符 / 页码 / 版式 i18n 键按此解析）；null = 中文默认。
     /// 同一实例的生成调用串行执行，覆盖创建、组装、保存和释放；不同实例不共享锁。
@@ -94,24 +97,26 @@ public abstract class TemplateService<TData, TBuilder>
         }
     }
 
-    /// <summary>Validates that the template matches the contract (Missing / WrongType / Ambiguous).</summary>
+    /// <summary>Validates the template against the contract.</summary>
     public TemplateValidationResult Validate(Stream template)
         => _engine.Validate(template, Contract);
 
-    /// <summary>Validates the data against the contract (missing required fields/tables, type mismatches, extra fields).</summary>
+    /// <summary>Validates business data against the contract.</summary>
+    /// <remarks>先通过 MapToData 映射，再检查必填项、类型和额外字段。</remarks>
     public TemplateValidationResult ValidateData(TData data)
     {
         FillData fillData = MapToData(data);
         return new TemplateDataValidator().Validate(fillData, Contract);
     }
 
-    /// <summary>Fills: template + typed data → a new document stream (see <see cref="FillDetailed"/> for warnings).</summary>
+    /// <summary>Fills a template with business data.</summary>
+    /// <remarks>返回流由调用方释放；需要告警时使用 FillDetailed。</remarks>
     public Stream Fill(Stream template, TData data)
         => FillDetailed(template, data).Output;
 
-    /// <summary>Fills and returns the result including soft-validation warnings (Extra / Drifted / skipped Missing).</summary>
+    /// <summary>Fills a template and returns validation warnings.</summary>
     /// <remarks>
-    /// 填充并返回软校验告警（推荐）：模板 + 强类型数据 → <see cref="TemplateFillResult"/>（输出流 + Warnings）。
+    /// 返回输出流及软校验告警；输出流由调用方释放。
     /// 引擎填充器先跑软校验，硬错误照常抛错；告警随结果返回（见设计文档 §5.3）。
     /// </remarks>
     public TemplateFillResult FillDetailed(Stream template, TData data)
@@ -127,13 +132,13 @@ public abstract class TemplateService<TData, TBuilder>
         return MapFromData(fillData);
     }
 
-    /// <summary>Parses and returns conversion warnings (recommended) — the parse-side counterpart of <see cref="FillDetailed"/>.</summary>
+    /// <summary>Reads business data with conversion warnings.</summary>
     /// <remarks>
-    /// 回读并返回转换告警——FillDetailed 在导入方向的对称出口。
+    /// 读取模板并映射为业务数据。
     /// 值转换失败的字段以 <see cref="Validation.TemplateValidationIssueCode.ConversionFailed"/>（Warning）随结果返回；
     /// 默认自动映射失败保持属性默认值，诊断包含属性路径、输入值和目标类型，并保留引擎告警。
     /// 自定义业务映射的异常照常传播。
-    /// 仅需数据时用 <see cref="Parse"/>（行为不变）。
+    /// Parse 使用普通映射，默认自动映射遇到转换失败会抛错。
     /// </remarks>
     public TemplateParseResult<TData> ParseDetailed(Stream template)
     {
@@ -169,11 +174,11 @@ public abstract class TemplateService<TData, TBuilder>
         };
     }
 
-    /// <summary>Mapping used by ParseDetailed — honors custom mapping, otherwise uses lenient auto-mapping.</summary>
+    /// <summary>Maps data for detailed parsing.</summary>
     /// <remarks>
     /// 业务直接或继承重写 <see cref="MapFromData"/> 时沿用其行为（异常照常传播）；
-    /// 否则走自动映射的宽容模式，转换失败保持属性默认值并向 ParseDetailed 结果补充诊断。
-    /// 可重写本方法定制详细解析映射；调用 base 时仍收集自动映射诊断。
+    /// 无业务重写且契约声明 DataPath 时使用宽容自动映射，转换失败保持属性默认值并补充诊断；否则调用 MapFromData。
+    /// 可重写本方法定制详细解析映射；调用 base 时沿用上述分派与诊断规则。
     /// </remarks>
     protected virtual TData MapFromDataDetailed(FillData data)
         => !_hasCustomMapFromData && ContractHasDataPath
@@ -198,7 +203,8 @@ public abstract class TemplateService<TData, TBuilder>
         return false;
     }
 
-    /// <summary>TData → FillData: auto-mapped when elements declare DataPath; override otherwise.</summary>
+    /// <summary>Maps business data to FillData.</summary>
+    /// <remarks>契约声明 DataPath 时自动映射；否则须重写本方法，默认抛出 NotSupportedException。</remarks>
     protected virtual FillData MapToData(TData data)
     {
         if (ContractHasDataPath)
@@ -209,7 +215,8 @@ public abstract class TemplateService<TData, TBuilder>
         throw new NotSupportedException(Sr.Get("Service.MapToDataNotImplemented"));
     }
 
-    /// <summary>FillData → TData: auto-mapped when elements declare DataPath; override otherwise.</summary>
+    /// <summary>Maps FillData to business data.</summary>
+    /// <remarks>契约声明 DataPath 时严格自动映射；否则须重写本方法，默认抛出 NotSupportedException。</remarks>
     protected virtual TData MapFromData(FillData data)
     {
         if (ContractHasDataPath)

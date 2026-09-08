@@ -341,9 +341,9 @@ internal static class WordXmlFactory
         var cx = (long)((widthInches ?? 2.0) * emuPerInch);
         var cy = (long)((heightInches ?? 1.0) * emuPerInch);
 
+        // docPr Id 须在正文、页眉和页脚间保持唯一，由构建器统一分配，避免严格阅读器丢图。
         var inline = new DW.Inline(
             new DW.Extent { Cx = cx, Cy = cy },
-            // docPr Id 必须文档内唯一（此前硬编码 1，多图文档 id 重复——严格阅读器会丢图）；经构建器全局分配器下发
             new DW.DocProperties { Id = drawingId, Name = "Placeholder." + extension },
             new DW.NonVisualGraphicFrameDrawingProperties(new A.GraphicFrameLocks { NoChangeAspect = true }),
             new A.Graphic(

@@ -1,81 +1,79 @@
 # 发布指南
 
-> **当前状态：已启用。** 2026-08-07 首次发布 `v1.0.0` 成功（GitHub Release + nuget.org）。
-> - 打 `v*` tag 即触发 `release.yml`：`test` job（windows 全部目标框架测试门禁）→ 通过后 `release` job（打包 + GitHub Release + OIDC 推送 nuget.org）；2.1.1 起合并原 `publish-nuget.yml`；
-> - 以下"一次性前置配置"已全部完成。
+发布入口是 [release.yml](../.github/workflows/release.yml)：向远端推送 `v*` tag 后，先执行 Windows 测试门禁，通过后在 Ubuntu 构建四包、推送 nuget.org，再创建 GitHub Release。发布历史见 [CHANGELOG](../CHANGELOG.md)，已核验的发布结果见 [评审台账](reviews/2026-09-07-review.md)。
 
-## 发布流程
+## 首次配置（仓库或发布身份变更时复核）
 
-打 `v*` 标签 → GitHub Actions 自动构建、建 GitHub Release、推 nuget.org。
+- 在 nuget.org 为发布身份配置本仓库 `CSJ608/TemplateFrame` 的 Trusted Publisher，对应工作流文件 `release.yml`。当前工作流由 `v*` tag 触发，未指定 GitHub Environment；配置需与实际仓库和工作流身份匹配。
+- 在 GitHub 仓库 Settings → Secrets and variables → Actions → **Variables** 配置 `NUGET_USER`，值为 nuget.org 用户名。工作流读取的是 `vars.NUGET_USER`，不是同名 Secret。
+- 工作流声明 `id-token: write` 与 `contents: write`，通过 `NuGet/login@v1` 换取短时 API key。账号权限、Trusted Publisher 和变量值需发布者在平台上确认，不能仅凭仓库文件认定配置已完成。
 
-## 一次性的前置配置
+## 日常发布：版本与说明
 
-### 1. nuget.org 注册 Trusted Publisher（浏览器，一次）
+在仓库根目录操作。以下命令使用 **PowerShell**；`$ReleaseVersion` 是本次待发布版本，读取已由发布准备步骤确定的共享配置，不在示例里写死版本号：
 
-登录 nuget.org → Account → API Keys → **Trusted Publishers** → Register Publisher：
+```powershell
+[xml]$ReleaseProps = Get-Content -Raw src/Directory.Build.props
+$ReleaseVersion = [string]$ReleaseProps.Project.PropertyGroup.Version
+if ([string]::IsNullOrWhiteSpace($ReleaseVersion)) { throw '共享 Version 不能为空' }
+$ReleaseTag = "v$ReleaseVersion"
+$ReleaseTag
+```
 
-- **GitHub Account**: `CSJ608`
-- **GitHub Repository**: `TemplateFrame`
-- **Environment**: 留空
-- **Subject Identifier**: `repo:CSJ608/TemplateFrame:ref:refs/tags/v*`
+发布前逐项核对：
 
-> 该 subject 仅信任以 `v` 开头的 tag 推送。若为个人账号，nuget.org 会要求验证仓库所有权。
+1. 四包 `TemplateFrame`、`TemplateFrame.Word`、`TemplateFrame.Excel`、`TemplateFrame.Excel.Simple` 的版本统一来自 [src/Directory.Build.props](../src/Directory.Build.props) 的 `<Version>`，各项目不另行覆盖。
+2. 将本次 Unreleased 内容归档为 `## [版本号] - YYYY-MM-DD`，其中版本号等于 `$ReleaseVersion`；保留新的 `## [Unreleased]` 供后续修改记录。不要改动历史版本段。
+3. 共享 `Version`、CHANGELOG 版本段和去掉 `v` 前缀的 tag 必须一致。工作流强制校验 **Version ↔ tag**；CHANGELOG 段缺失时会回退到自动生成 Release 正文，因此 CHANGELOG 一致性仍需人工检查。
+4. 审阅最终差异，完成下面的本地验证。确认待发布提交、远端 CI 结果及 tag 尚未使用，再执行发布动作。
 
-### 2. GitHub 仓库变量 `NUGET_USER`（浏览器，一次）
+## 本地验证（四包）
 
-仓库 → Settings → Secrets and variables → Actions → **Variables** → New repository variable：
+使用支持 `.slnx` 的 SDK；工作流使用 .NET SDK `9.0.x`。在 Windows 执行下面的全目标验证（测试目标 `net8.0` / `net472`；库资产为 `netstandard2.0` / `net462` / `net8.0`）。每步成功后再继续：
 
-- **Name**: `NUGET_USER`
-- **Value**: 你的 nuget.org 用户名
+```powershell
+dotnet restore TemplateFrame.slnx
+dotnet format TemplateFrame.slnx --verify-no-changes --no-restore
+dotnet build TemplateFrame.slnx -c Release --no-restore
+dotnet test TemplateFrame.slnx -c Release --no-build
 
-## 日常发布流程（打 tag 即发布）
+$PackageOutput = "artifacts/release-check-$ReleaseVersion"
+dotnet pack src/TemplateFrame/TemplateFrame.csproj -c Release --no-build -o $PackageOutput
+dotnet pack src/TemplateFrame.Word/TemplateFrame.Word.csproj -c Release --no-build -o $PackageOutput
+dotnet pack src/TemplateFrame.Excel/TemplateFrame.Excel.csproj -c Release --no-build -o $PackageOutput
+dotnet pack src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj -c Release --no-build -o $PackageOutput
+```
 
-```bash
-git add -A && git commit -m "..." && git push origin main
-git tag -a v1.0.0 -m "描述"
-git push origin v1.0.0
+Linux 本地测试使用 `dotnet test TemplateFrame.slnx -c Release --no-build -f net8.0`，不能代替发布工作流的 Windows 全目标门禁。
+
+打包后分别核对四包，而不是仅检查核心与 Word：
+
+| 包 ID | README 来源 | 预期产物 |
+|---|---|---|
+| `TemplateFrame` | [根 README](../README.md) | `TemplateFrame.<版本>.nupkg` / `.snupkg` |
+| `TemplateFrame.Word` | [Word README](../src/TemplateFrame.Word/README.md) | `TemplateFrame.Word.<版本>.nupkg` / `.snupkg` |
+| `TemplateFrame.Excel` | [Excel README](../src/TemplateFrame.Excel/README.md) | `TemplateFrame.Excel.<版本>.nupkg` / `.snupkg` |
+| `TemplateFrame.Excel.Simple` | [Simple README](../src/TemplateFrame.Excel.Simple/README.md) | `TemplateFrame.Excel.Simple.<版本>.nupkg` / `.snupkg` |
+
+- 本次版本应有 4 个 nupkg 和 4 个 snupkg；检查输出目录，避免把其他版本旧包当成本次结果。
+- 按 ZIP 查看每个包：nuspec 的 ID/版本/依赖组正确，普通包包含三个目标的 DLL、XML 文档、en 卫星程序集，以及对应 README 和 icon；符号包包含三个目标的 PDB。
+- README 与工作区来源一致；没有测试依赖、测试文件、日志或临时验证文件混入。只有最终提交的发布工作流产物才作为正式制品，本地包用于验证。
+
+## 发布动作（单独执行）
+
+最终内容完成审阅、提交并推送，且该提交的 CI 成功后，在同一 PowerShell 会话重新核对 `$ReleaseVersion` / `$ReleaseTag` 与提交内容。下面的 tag 推送会触发真实发布：
+
+```powershell
+git tag -a $ReleaseTag -m "Release $ReleaseVersion"
+git push origin $ReleaseTag
 gh run list --workflow release.yml
 ```
 
-## release.yml 的两个 job
+## 工作流与发布后核验
 
-| Job | 运行环境 | 作用 |
+| Job | 环境 | 实际顺序 |
 |---|---|---|
-| `test` | windows（全部目标框架） | 版本校验（`src/Directory.Build.props` ↔ tag）+ build + **测试门禁**：失败则不进入发布 |
-| `release`（`needs: test`） | ubuntu | build + pack，`NuGet/login@v1` 用 OIDC 换短时 API key，推 nuget.org（`--skip-duplicate` 幂等）；创建 GitHub Release 并附 `*.nupkg` / `*.snupkg`，正文从 CHANGELOG 提取当前版本段 |
+| `test` | Windows | Version/tag 校验 → restore → Release build → 全目标测试 |
+| `release`（`needs: test`） | Ubuntu | build → 四包 pack → 检查 NUGET_USER → OIDC 登录 → NuGet push → 提取 CHANGELOG 段 → 创建 GitHub Release，附 nupkg/snupkg |
 
-## 版本号约定
-
-- 四包版本统一写在 `src/Directory.Build.props` 的 `<Version>`（2.0.0 起单一来源，各 csproj 不再重复），与 git tag 一致（如 `2.0.0` ↔ `v2.0.0`）。
-- 核心与插件包（`TemplateFrame`、`TemplateFrame.Word`…）当前都发布为同一版本。
-- release.yml 会在打 `v*` tag 时自动校验 `<Version>` 与 tag 一致，不一致直接失败（本地提交前请自行核对）。
-
-## CHANGELOG 约定
-
-维护 [CHANGELOG.md](../CHANGELOG.md)（[Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/) 格式）：
-- 每次改动记录到 `## [Unreleased]` 段，按 `新增` / `修复` / `变更` 分类。
-- 发版时 `release.yml` 自动提取当前 tag 对应版本段落作为 Release 正文；找不到则回退到 GitHub 自动生成。
-
-## 发布检查清单
-
-发布前请按顺序确认：
-
-1. **工作流已就绪**：`.github/workflows/release.yml` 已在仓库（触发条件：`v*` tag）。
-2. **一次性前置配置**（浏览器）：
-   - nuget.org → Account → API Keys → **Trusted Publishers** → Register Publisher（仓库 `CSJ608/TemplateFrame`，subject `repo:CSJ608/TemplateFrame:ref:refs/tags/v*`）；
-   - GitHub 仓库 → Settings → Secrets and variables → Actions → **Variables** → 新建 `NUGET_USER`（你的 nuget.org 用户名）。
-3. **CHANGELOG**：把 `## [Unreleased]` 改为 `## [1.0.0]`（release.yml 提取该段作为 Release 正文）。
-4. **版本号一致**：`src/Directory.Build.props` 的 `<Version>` 与 git tag 一致（当前 `2.0.0` ↔ `v2.0.0`）。
-5. **本地兜底**：`dotnet build TemplateFrame.slnx` + `dotnet test TemplateFrame.slnx` + `dotnet pack` 均通过。
-6. **打 tag 发布**：`git tag -a v1.0.0 -m "..." && git push origin v1.0.0`（触发 release；push 前请确认前置配置已完成）。
-
-> 注意：前置配置（Trusted Publisher / NUGET_USER）需仓库账号操作，未完成前**不要**推送 `v*` tag，否则 NuGet 推送会失败。
-
-## 本地验证
-
-```bash
-dotnet build TemplateFrame.slnx -c Release
-dotnet test  TemplateFrame.slnx -c Release
-dotnet pack   src/TemplateFrame/TemplateFrame.csproj -c Release -o artifacts
-dotnet pack   src/TemplateFrame.Word/TemplateFrame.Word.csproj -c Release -o artifacts
-```
+NuGet push 使用 `--skip-duplicate` 跳过已存在包，不代表已存在包与本次构建内容相同。发布后核对 Actions 的提交与结果、GitHub Release 的四包及四符号包，以及 nuget.org 四包的实际版本和元数据；只看到 tag 或工作流启动不等于发布完成。

@@ -3,25 +3,25 @@
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Word.svg)](https://www.nuget.org/packages/TemplateFrame.Word)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Word)](https://www.nuget.org/packages/TemplateFrame.Word)
 
-> [中文](README.md) · English
+> [中文](https://github.com/CSJ608/TemplateFrame/blob/main/src/TemplateFrame.Word/README.md) · English
 
 The **MS Word plugin** for TemplateFrame: translates the base package's "contract + data shape" into `.docx`.
 Built on content controls (SDT / Structured Document Tags) for the full **generate → locate → fill → parse → validate** pipeline.
-Only Microsoft Office `.docx` is supported (for WPS compatibility see the design doc §1.4).
+Only Microsoft Office `.docx` is supported (for WPS scope see [DESIGN](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md)).
 
 ## Core components
 
 | Component | Responsibility |
 |---|---|
 | `WordTemplateBuilder` | Assembles an SDT-tagged .docx: page setup, header/footer, layout tables, detail tables, text/image elements, page number fields |
-| `SdtLocator` | Locates content controls by tag (body/header/footer; tags are globally unique) |
+| `SdtLocator` | Locates content controls by tag (body/header/footer; scalar tags are unique, table columns are located per row) |
 | `WordTemplateFiller` | Fill: text (preserving run formatting), images (swap package part + relationship), table row cloning (re-issuing unique w:id); soft validation before filling |
 | `WordTemplateParser` | Parse: reads a filled template back into `FillData` per the contract (text converted by ValueType, multi-row tables, image bytes) |
 | `WordTemplateValidator` | Validate: Missing / WrongType / Ambiguous / Extra (missing optional fields only warn) |
 
 ## Quick start
 
-Your scenario service declares the plugin builder type; `BuildInitialTemplate()` takes no arguments and composes directly with the `Builder` instance:
+Your scenario service declares the plugin builder type; `BuildInitialTemplate()` takes no arguments and composes directly with the `Builder` instance. This fragment omits the DTO, contract and mapping; see the runnable example below:
 
 ```csharp
 public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrderData, WordTemplateBuilder>
@@ -57,35 +57,24 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 - **Layout table**: `AddLayoutTable(rows, cols, TableFormat?)` + `AddCell(compose, columnSpan)` — header "left/center/right / equal split / four cells" (gridSpan column spanning)
 - **Text**: `AddParagraph(text[, style|TextFormat])` / `AddText` / `AddElement(key[, TextFormat])` (element = content control; placeholder text follows the language: default zh "待填充" / en "To be filled", resolved via `ITemplateLocalizer`, overridable)
 - **Table**: `AddTable(key, columns, TableFormat?, headerStyle?)` — header + sample row (one SDT per cell); `TableFormat` supports header/cell fonts, borders on/off, table alignment, column widths (cm), vertical alignment
-- **Image**: `AddImage(key, placeholder?, widthIn?, heightIn?)` — placeholder image wrapped in an SDT; filling swaps in `byte[]`
+- **Image**: `AddImage(key, placeholderPath?, widthInches?, heightInches?)` — placeholder image wrapped in an SDT; filling swaps in `byte[]`
 - **Page number**: `AddPageNumber(pattern? = null, TextFormat?)` — PAGE/NUMPAGES fields; a null pattern picks the language default (zh "第{page}页，总{total}页" / en "Page {page} of {total}")
 - `TextFormat`: `FontName` / `SizePt` / `Bold` / `Alignment` / `Underline`
 
-## Fill behavior notes
+## Format notes
 
-- **Text**: replaces the first `w:r/w:t` inside `sdtContent` (preserving run formatting); leading/trailing spaces get `xml:space="preserve"`.
-- **Images**: adds an image part + relationship to the package for a new `rId` and replaces the `<a:blip r:embed>` inside the SDT; size/position/wrapping inherit the placeholder; **image parts inside headers/footers belong to the corresponding Header/Footer rels**.
-- **Table rows**: deep-copies the sample row N times and fills by tag per row; **every SDT gets a fresh unique `w:id` after cloning**.
-- **Soft validation** (Validate runs before filling): `Drifted`/`Extra` only record warnings and continue; missing required elements follow the policy (throw by default, configurable via `MissingElementPolicy.SkipAndWarn`); `WrongType`/`Ambiguous`/`Invalid` are hard errors.
-- **Warning outlet**: `WordTemplateFiller.Fill` returns a `TemplateFillResult` (output stream + Warnings); the engine/service layer offers `FillDetailed` (`ITemplateEngine.FillDetailed` / `TemplateService<TData, TBuilder>.FillDetailed`) for the same soft-validation warnings, while `Fill` keeps returning only the output stream.
-- **Engine ParseDetailed (2.3.0)**: the import-side counterpart — fields whose conversion fails keep their raw text and are reported as `ConversionFailed` (Warning, table columns carry the data row number) in a `TemplateParseResult`; null still means not filled, `Parse` is unchanged.
-- **Service mapping and lifetime (2.4.0)**: `ParseDetailed` honors direct and inherited `MapFromData` overrides; an explicit `MapFromDataDetailed` override takes precedence. Default auto-mapping adds conversion diagnostics while keeping property defaults; custom mapping exceptions propagate. `BuildInitialTemplateFile` serializes the entire builder lifetime per instance; callbacks must not wait for another build on that instance, and recursive builds during layout/save/disposal throw. Other methods and business state are not covered by this lock.
-- Structured conversion diagnostics expose `TableKey`, one-based `DataRowNumber`, `DataPath` with zero-based collection indices, failed input `RawValue`, and string `TargetType` (a type description supported by default JSON serialization).
-- **Before/after receipt**: the same template filled twice — pass `null` for empty fields before receipt (rendered empty), fill them in after.
-- **Zero data rows**: sample-row placeholders are cleared (header + blank row kept) so exports carry no "To be filled".
-- **Re-filling**: `Fill` expects a **pristine, unfilled template** — re-filling an already-filled document re-uses the first data row as the sample row and produces misplaced output; regenerate from the original template instead.
+- SDT tags locate fields in the body, headers and footers. Text updates preserve nested controls; images use relationships in their owning part. Cloned SDTs receive unique `w:id` values.
+- Fill from the original unfilled template each time, including before/after-receipt outputs. Zero rows clear sample placeholders while preserving the header and a blank row.
+- Parse reads text, table rows and image bytes. Known placeholders normalize to null. Word conversion messages use data row numbers; Excel messages use worksheet row numbers. Structured `DataRowNumber` is one-based in both plugins.
 
-## Parse behavior notes
-
-- Text converts by `TextElement.ValueType` (string/decimal/int/DateTime/bool); tables read back row by row from the cloned sample-row region; images read back as bytes.
-- **Parse normalization**: known placeholders in unfilled templates (default zh "待填充" / en "To be filled", independent of the template language) normalize to **null** (null = not filled, "" = intentionally blank).
+Use `FillDetailed` / `ParseDetailed` for warnings. Engine failures retain raw text; default typed mapping retains property defaults. Full [validation, mapping and diagnostic rules](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#parse-diagnostics) and [service lifetime rules](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#service-lifetime) are maintained in DESIGN (Chinese). See [format differences](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences) for the separate Simple API.
 
 ## Dependencies and tests
 
 - Target frameworks `netstandard2.0 / net462 / net8.0` (NuGet picks per runtime automatically).
 - Depends on `DocumentFormat.OpenXml` (3.3.x).
 - Tests in `test/TemplateFrame.Word.Tests`: generate → validate → fill → parse → assert (including header/footer, multi-table, batch, spanning layout, header image part ownership edge cases).
-- Historical snapshot (2026-08-24; sample-specific, with no guarantee of linear scaling or current-version timings): 1k-row detail fill ~150ms, parse ~125ms, build <1ms; snapshots in `docs/PERFORMANCE.md`, benchmark project `test/TemplateFrame.Benchmarks`.
+- Historical snapshot (2026-08-24; sample-specific, with no guarantee of linear scaling or current-version timings): 1k-row detail fill ~150ms, parse ~125ms, build <1ms; snapshots in [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md), benchmark project [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md).
 
 ## Full example
 
@@ -95,4 +84,4 @@ See the **delivery order** in `samples/TemplateFrame.Demo.Word` (two-tier header
 dotnet run --project samples/TemplateFrame.Demo.Word
 ```
 
-Design doc: `docs/DESIGN.md`; usage guide: the repository root `README.md` (Chinese) / `README.en.md` (English).
+Design: [DESIGN](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md) (Chinese); getting started: [English README](https://github.com/CSJ608/TemplateFrame/blob/main/README.en.md) / [中文 README](https://github.com/CSJ608/TemplateFrame/blob/main/README.md).

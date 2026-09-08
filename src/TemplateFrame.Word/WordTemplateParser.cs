@@ -14,28 +14,34 @@ using Sr = TemplateFrame.Word.Localization.Sr;
 
 namespace TemplateFrame.Word;
 
-/// <summary>Word parser (§5.4) — reads a filled template back into <see cref="FillData"/> per the contract.</summary>
+/// <summary>Reads Word template data using a contract.</summary>
 /// <remarks>
 /// 与 <see cref="WordTemplateFiller"/> 共享同一套按 tag 定位逻辑（<see cref="SdtLocator"/>），只是方向相反。
 /// Text 读 w:t 文本并按 <see cref="TextElement.ValueType"/> 转换；Table 找到示例行克隆区逐行读出字段；
 /// Image 读回占位/填充后的图片字节（可选能力）。
 /// Parse 规范化：已知占位符（默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 null
-/// （null=未填充、""=有意留空）；控件缺失仍保持"键省略"语义。
+/// （空字符串保留为空字符串）；控件缺失仍保持"键省略"语义。
 /// </remarks>
 public sealed class WordTemplateParser
 {
     private readonly ITemplateLocalizer _localizer;
 
-    /// <summary>Creates the parser (localizer defaults to <see cref="DefaultTemplateLocalizer.Instance"/>).</summary>
+    /// <summary>Creates a template parser.</summary>
+    /// <remarks>localizer 为 null 时使用 DefaultTemplateLocalizer.Instance。</remarks>
     public WordTemplateParser(ITemplateLocalizer? localizer = null)
         => _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
 
-    /// <summary>Parses a .docx: template + contract → FillData (the input stream is not modified).</summary>
+    /// <summary>Reads template data using the contract.</summary>
+    /// <remarks>不改写输入内容，也不释放输入流；可定位流先归零，读取后不恢复原位置。</remarks>
     public FillData Parse(Stream template, TemplateContract contract)
         => ParseCore(template, contract, null).Data;
 
-    /// <summary>Parses and returns conversion warnings; failed fields keep their raw text.</summary>
-    /// <remarks>回读并返回转换告警：值转换失败的字段保留原始文本，并以 ConversionFailed（Warning）随结果返回（null 仍专指未填充）；<see cref="Parse"/> 行为不变。</remarks>
+    /// <summary>Reads template data with conversion warnings.</summary>
+    /// <remarks>
+    /// 文本转换失败时保留原文，并报告 ConversionFailed（Warning）；已知占位符转为 null。
+    /// null 也可能来自缺失单元格等读取分支，告警不覆盖所有无法读取的值。
+    /// 输入流的所有权和位置行为与 Parse 相同。
+    /// </remarks>
     public TemplateParseResult ParseDetailed(Stream template, TemplateContract contract)
         => ParseCore(template, contract, []);
 
@@ -144,7 +150,7 @@ public sealed class WordTemplateParser
 
     /// <summary>
     /// 转换并（可选）收集失败告警：失败时保留原始文本（与 <see cref="Parse"/> 的兜底一致），
-    /// <paramref name="issues"/> 为 null 时不收集（逐字节等价于旧行为）。
+    /// <paramref name="issues"/> 为 null 时不收集告警。
     /// </summary>
     private object? ConvertCell(
         string text,
