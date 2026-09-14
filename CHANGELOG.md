@@ -4,6 +4,9 @@
 
 ## [Unreleased]
 
+### 修复
+- Excel.Simple：无可用列定义名时，Read 与 Validate 统一先匹配 DisplayName、未命中才回退 Key（Trim / Ordinal）；两者同时存在时 DisplayName 优先且与列序无关，修复仅有 Key 表头时校验通过但回读缺字段的问题。保留有效定义名优先、契约列首次占用及重复物理表头后值覆盖规则，不新增文本冲突诊断。
+
 ## [2.4.1] - 2026-09-08
 
 ### 文档

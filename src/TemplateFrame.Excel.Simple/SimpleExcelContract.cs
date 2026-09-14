@@ -122,7 +122,7 @@ public static class SimpleExcelContract
         }
 
         var loaded = SimpleExcel.Read(source, options.TableName);
-        var columnByHeader = BuildColumnLookup(table);
+        var columnByHeader = BuildColumnLookup(table, loaded.Headers);
 
         var rows = new List<IReadOnlyDictionary<string, object?>>();
         for (var r = 0; r < loaded.Rows.Count; r++)
@@ -506,26 +506,19 @@ public static class SimpleExcelContract
         return null;
     }
 
-    private static Dictionary<string, TextElement> BuildColumnLookup(TableElement table)
+    private static Dictionary<string, TextElement> BuildColumnLookup(TableElement table, IReadOnlyList<string> loadedHeaders)
     {
+        var headers = new HashSet<string>(
+            loadedHeaders.Select(h => h?.Trim()).Where(h => h is { Length: > 0 })!,
+            StringComparer.Ordinal);
         var lookup = new Dictionary<string, TextElement>(StringComparer.Ordinal);
         foreach (var column in table.Columns)
         {
-            var display = column.DisplayName?.Trim();
-            if (display is { Length: > 0 })
+            // Resolve against the workbook first, so DisplayName wins regardless of physical column order.
+            var header = FindHeader(column, headers);
+            if (header is not null && !lookup.ContainsKey(header))
             {
-                if (!lookup.ContainsKey(display))
-                {
-                    lookup[display] = column;
-                }
-            }
-            else if (column.Key is { Length: > 0 })
-            {
-                var key = column.Key.Trim();
-                if (!lookup.ContainsKey(key))
-                {
-                    lookup[key] = column;
-                }
+                lookup[header] = column;
             }
         }
 

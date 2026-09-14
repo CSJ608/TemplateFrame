@@ -241,12 +241,11 @@ Excel 解析的行/单元格索引在单次 Parse 内创建并复用，不跨文
 
 **Simple 的表头与数据区**：底层 `SimpleExcel.Write/Read` 可独立使用，默认 `TF_Table` 标记区域，`TableName` / `StartCell` 可配置。Read 优先取区域表头；区域缺失或表头为空时回退到第一个至少两个非空单元格的行。数据读到工作表末行并跳过全空行，区域下方其他非空内容也可能被读入。支持共享字符串与富文本拼接；缺 RowIndex 时按顺序推断，不支持缺单元格引用的输入。
 
-契约路径优先用每列定义名 `<TableName>_<ColumnKey>` 定位（`ColumnDefinedName` 仅拼接表名与列 Key，不额外添加 `TF_`；默认如 `TF_Table_Code`）。定义名布局不可用时，先按上述规则定位表头，再分别执行以下文本匹配（表头去除首尾空白，按 Ordinal 区分大小写）：
+契约路径优先用每列定义名 `<TableName>_<ColumnKey>` 定位（`ColumnDefinedName` 仅拼接表名与列 Key，不额外添加 `TF_`；默认如 `TF_Table_Code`）。定义名布局不可用时，先按上述规则定位表头，再执行统一的文本名称选择（表头去除首尾空白，按 Ordinal 区分大小写）：
 
-- **`SimpleExcelContract.Validate`**：`FindHeader` 先尝试匹配 DisplayName，未匹配再尝试 Key；两者均未匹配才报告缺列。
-- **`SimpleExcelContract.Read`**：`BuildColumnLookup` 为每列仅登记一个名称：Trim 后非空的 DisplayName，否则为 Trim 后的 Key。DisplayName 非空但未匹配时，不再尝试 Key；未匹配列不会写入返回行字典。
-
-因此名称不一致时可能出现**“校验通过，但回读缺字段”**：例如列 Key 为 `Code`、DisplayName 为“编码”，文件表头只有 `Code` 而无可用列定义名；Validate 可按 Key 接受该列，Read 却只按“编码”查找，结果行中缺少 `Code`。若其他列正常，整个校验也可以通过；这不保证该列能够回读。此处描述既有行为，不表示已修复名称匹配差异。
+- `SimpleExcelContract.Validate` 与 `Read` 逐契约列通过 `FindHeader` 先匹配 Trim 后非空的 DisplayName，未命中才匹配 Trim 后的 Key；两者均未匹配时 Validate 报缺列，Read 不写入该字段。
+- DisplayName 和 Key 同时出现时优先选择 DisplayName，不受物理列顺序影响。例如 Key=`Code`、DisplayName=“编码”，仅有 `Code` 表头时校验与回读均接受；两种表头同时出现则取“编码”列的值，未被其他契约列使用的 `Code` 表头仍报 Extra Warning。
+- 不同契约列选择同一表头时，Read 保留契约声明顺序中首次占用者，不再为后续列另选 Key。Validate 仍独立检查各列是否存在，不新增文本冲突诊断；因此存在名称碰撞时，校验通过不保证每个契约字段都被写入。重复物理表头仍按遍历顺序由后列值覆盖。有效列定义名优先路径不变。
 
 定义名保留时不依赖表头语言；缺必填列 Validate 报 Missing Error，可选缺列/多余列告警，重复列定义名报 Ambiguous Error。Read 忽略多余列，缺列不提供有效值；默认映射保留属性默认值。`SimpleExcelContract.Read` 保留底层值形状，数值为 double、日期格式值为 DateTime、缺格为 null；它不按 ValueType 提供 Word/Excel 的转换告警，强类型 Parse 由 DataPathMapper 严格转换。写入 decimal/long 无 double 中转不等于 Simple 数值回读能保持同等精度。
 
