@@ -98,7 +98,7 @@ using var filled = service.Fill(data);                 // 强类型数据 → xl
 var parsed = service.Parse(filled);                    // xlsx → 强类型 MaterialsData
 ```
 
-- 契约仅含一个 `TableElement`；用 `Validate` 检查必填缺列、多余列和定位歧义。有效的每列定义名让回读不依赖表头语言。回退文本匹配时，`Validate` 先尝试 DisplayName，再尝试 Key；`Read` 只用 Trim 后非空的 DisplayName，否则用 Key。表头仅匹配 Key 时，可能“校验通过，但回读缺字段”。详见[分支规则与示例](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences)。
+- 契约仅含一个 `TableElement`；用 `Validate` 检查必填缺列、多余列和定位歧义。有效的每列定义名让回读不依赖表头语言。回退文本匹配时，`Validate` 与 `Read` 均先匹配 Trim 后非空的 DisplayName，未命中才匹配 Trim 后的 Key，按 Ordinal 区分大小写；两者同时出现时 DisplayName 优先，与物理列顺序无关。契约列命中同一表头时，Read 保留首次声明列占用；同名重复物理表头仍由后列覆盖。缺列不伪造值，不新增文本歧义诊断。详见[匹配规则与边界](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences)。
 - `SimpleExcelTemplateService` 独立于 Word/Excel 服务：没有 Builder/Engine、`FillDetailed` / `ParseDetailed`，也不套用 Builder 生成锁；默认 Parse 映射严格转换。详见 [Simple 规则](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences)及[映射/缓存规则](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md)。
 - Fill 可传 `culture` / `localizer` 生成本地化表头；底层可用接收 `FillData` 的 `SimpleExcelContract.Write / Read / Validate`。
 
