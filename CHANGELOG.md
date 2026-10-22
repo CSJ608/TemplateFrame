@@ -4,6 +4,13 @@
 
 ## [Unreleased]
 
+### 安全与依赖
+- Open XML SDK 升至 3.5.1；更新测试 SDK、xUnit runner、coverlet、BenchmarkDotNet、ValueTuple 及 net472 测试 JSON 补丁。保留 xUnit v2 与 QRCoder 1.6.0；不将无已知漏洞命中误报为安全修复。
+- 固定 .NET SDK 10.0.402；测试新增 net10.0，样例和基准迁至 net10.0；库继续提供 netstandard2.0 / net462 / net8.0 资产。
+- 新增可配置 `TemplateResourceLimits`，限制输入包、实际展开量、XML、图片、累计表数据与克隆 XML。默认有限额会拒绝超大输入；原入口签名保留，业务可显式调大，配置与边界见 [安全说明](docs/SECURITY.md)。
+- Excel.Simple 按实际行遍历，避免稀疏行号导致大量空扫描；标准 Excel 保留空行语义并在物化前检查累计范围预算。拒绝越界坐标，缓存共享字符串索引，并限制模板整行复制放大。
+- CI/发布固定 Actions SHA、按 job 最小授权、保留 OIDC；全传递 NuGet 审计与独立 OSV 检查设置失败门禁，过期漏洞源显式告警；增加定期依赖更新检查。
+
 ### 修复
 - Excel.Simple：无可用列定义名时，Read 与 Validate 统一先匹配 DisplayName、未命中才回退 Key（Trim / Ordinal）；两者同时存在时 DisplayName 优先且与列序无关，修复仅有 Key 表头时校验通过但回读缺字段的问题。保留有效定义名优先、契约列首次占用及重复物理表头后值覆盖规则，不新增文本冲突诊断。
 

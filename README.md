@@ -164,6 +164,8 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 
 ## 构建与测试
 
+开发使用 `global.json` 固定的 .NET 10 SDK；测试覆盖 net8.0 / net472 / net10.0，样例运行于 .NET 10。输入文档默认启用可配置资源限额，部署补丁、调用示例和审计命令见 [安全与开发环境说明](docs/SECURITY.md)。项目本地 SDK 使用 `./eng/dotnet.ps1` 包装命令。
+
 ```bash
 dotnet build TemplateFrame.slnx
 dotnet test  TemplateFrame.slnx

@@ -1,3 +1,4 @@
+using System.Globalization;
 using TemplateFrame.Excel.Simple.Localization;
 
 namespace TemplateFrame.Excel.Simple;
@@ -5,6 +6,9 @@ namespace TemplateFrame.Excel.Simple;
 /// <summary>单元格地址与命名区域引用的解析/构造（SimpleExcel 内部共用）。</summary>
 internal static class SimpleExcelAddress
 {
+    internal const int MaxRow = 1_048_576;
+    internal const int MaxColumn = 16_384;
+
     internal readonly record struct TableRange(string Sheet, int StartRow, int StartCol, int EndRow, int EndCol);
 
     internal static bool TryParseReference(string reference, out TableRange range)
@@ -34,7 +38,37 @@ internal static class SimpleExcelAddress
             return false;
         }
 
+        if (endRow < startRow || endCol < startCol)
+        {
+            return false;
+        }
+
         range = new TableRange(sheet, startRow, startCol, endRow, endCol);
+        return true;
+    }
+
+    // Unsupported formulas/#REF! can use the documented header fallback; invalid A1 coordinates cannot.
+    internal static bool LooksLikeCellReference(string reference)
+    {
+        var cellPart = reference.Substring(reference.LastIndexOf('!') + 1).Trim().TrimStart('=');
+        var cells = cellPart.Split(':');
+        if (cells.Length > 2)
+        {
+            return false;
+        }
+
+        foreach (var cell in cells)
+        {
+            var text = cell.Trim().Replace("$", string.Empty);
+            var index = 0;
+            while (index < text.Length && IsAsciiLetter(text[index])) index++;
+            if (index == 0 || index == text.Length) return false;
+            if (text[index] is '+' or '-') index++;
+            var numberStart = index;
+            while (index < text.Length && text[index] >= '0' && text[index] <= '9') index++;
+            if (index == numberStart || index != text.Length) return false;
+        }
+
         return true;
     }
 
@@ -42,29 +76,27 @@ internal static class SimpleExcelAddress
     {
         col = 0;
         row = 0;
-        cell = cell.Replace("$", string.Empty);
+        cell = cell.Trim().Replace("$", string.Empty);
         var i = 0;
-        while (i < cell.Length && char.IsLetter(cell[i]))
+        while (i < cell.Length && IsAsciiLetter(cell[i]))
         {
-            col = col * 26 + (char.ToUpperInvariant(cell[i]) - 'A' + 1);
+            col = checked(col * 26 + (char.ToUpperInvariant(cell[i]) - 'A' + 1));
+            if (col > MaxColumn)
+            {
+                return false;
+            }
+
             i++;
         }
 
-        return col > 0 && int.TryParse(cell.Substring(i), out row) && row > 0;
+        return col > 0
+            && int.TryParse(cell.Substring(i), NumberStyles.None, CultureInfo.InvariantCulture, out row)
+            && row > 0 && row <= MaxRow;
     }
 
     internal static (int Row, int Col) ParseCellAddress(string address)
     {
-        var trimmed = address.Trim();
-        var i = 0;
-        var col = 0;
-        while (i < trimmed.Length && char.IsLetter(trimmed[i]))
-        {
-            col = col * 26 + (char.ToUpperInvariant(trimmed[i]) - 'A' + 1);
-            i++;
-        }
-
-        if (col <= 0 || !int.TryParse(trimmed.Substring(i), out var row) || row <= 0)
+        if (!TryParseCell(address, out var col, out var row))
         {
             throw new ArgumentException(Sr.Get("SimpleExcel.InvalidCellAddress", address), nameof(address));
         }

@@ -101,7 +101,8 @@ public sealed class RealScenarioTests
         using var filled = new ExcelTemplateEngine().Fill(template, contract, data);
 
         using var document = SpreadsheetDocument.Open(filled, false);
-        var sheetData = document.WorkbookPart!.WorksheetParts.First().Worksheet.GetFirstChild<SheetData>()!;
+        var worksheet = Assert.IsType<Worksheet>(document.WorkbookPart?.WorksheetParts.First().Worksheet);
+        var sheetData = Assert.IsType<SheetData>(worksheet.GetFirstChild<SheetData>());
 
         // 打印不留"待填充"；示例行（第 4 行）保留为空白行
         Assert.DoesNotContain(sheetData.Descendants<Cell>(), c => c.InlineString?.Text?.Text?.Contains("待填充") == true);

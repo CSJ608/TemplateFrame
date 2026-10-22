@@ -6,7 +6,7 @@
 
 - 在 nuget.org 为发布身份配置本仓库 `CSJ608/TemplateFrame` 的 Trusted Publisher，对应工作流文件 `release.yml`。当前工作流由 `v*` tag 触发，未指定 GitHub Environment；配置需与实际仓库和工作流身份匹配。
 - 在 GitHub 仓库 Settings → Secrets and variables → Actions → **Variables** 配置 `NUGET_USER`，值为 nuget.org 用户名。工作流读取的是 `vars.NUGET_USER`，不是同名 Secret。
-- 工作流声明 `id-token: write` 与 `contents: write`，通过 `NuGet/login@v1` 换取短时 API key。账号权限、Trusted Publisher 和变量值需发布者在平台上确认，不能仅凭仓库文件认定配置已完成。
+- 仅发布 job 声明 `id-token: write` 与 `contents: write`，通过固定 SHA 的 `NuGet/login`（v1.2.0） 换取短时 API key。账号权限、Trusted Publisher 和变量值需发布者在平台上确认，不能仅凭仓库文件认定配置已完成。
 
 ## 日常发布：版本与说明
 
@@ -29,10 +29,11 @@ $ReleaseTag
 
 ## 本地验证（四包）
 
-使用支持 `.slnx` 的 SDK；工作流使用 .NET SDK `9.0.x`。在 Windows 执行下面的全目标验证（测试目标 `net8.0` / `net472`；库资产为 `netstandard2.0` / `net462` / `net8.0`）。每步成功后再继续：
+使用 `global.json` 固定的 .NET SDK `10.0.402`；CI 另安装 `8.0.426` 提供已修补的 net8 运行时。项目本地安装使用 `./eng/dotnet.ps1` 替代下文 `dotnet`，参见 [安全与开发环境](SECURITY.md)。在 Windows 执行下面的全目标验证（测试目标 `net8.0` / `net472` / `net10.0`；库资产为 `netstandard2.0` / `net462` / `net8.0`）。每步成功后再继续：
 
 ```powershell
 dotnet restore TemplateFrame.slnx
+./eng/audit-dependencies.ps1
 dotnet format TemplateFrame.slnx --verify-no-changes --no-restore
 dotnet build TemplateFrame.slnx -c Release --no-restore
 dotnet test TemplateFrame.slnx -c Release --no-build
@@ -44,7 +45,7 @@ dotnet pack src/TemplateFrame.Excel/TemplateFrame.Excel.csproj -c Release --no-b
 dotnet pack src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj -c Release --no-build -o $PackageOutput
 ```
 
-Linux 本地测试使用 `dotnet test TemplateFrame.slnx -c Release --no-build -f net8.0`，不能代替发布工作流的 Windows 全目标门禁。
+Linux 本地测试分别使用 `dotnet test TemplateFrame.slnx -c Release --no-build -f net8.0` 和 `-f net10.0`，不能代替发布工作流的 Windows 全目标门禁。
 
 打包后分别核对四包，而不是仅检查核心与 Word：
 
@@ -73,7 +74,7 @@ gh run list --workflow release.yml
 
 | Job | 环境 | 实际顺序 |
 |---|---|---|
-| `test` | Windows | Version/tag 校验 → restore → Release build → 全目标测试 |
-| `release`（`needs: test`） | Ubuntu | build → 四包 pack → 检查 NUGET_USER → OIDC 登录 → NuGet push → 提取 CHANGELOG 段 → 创建 GitHub Release，附 nupkg/snupkg |
+| `test` | Windows | Version/tag 校验 → restore → 独立依赖审计 → Release build → 全目标测试 |
+| `release`（`needs: test`） | Ubuntu | restore → 独立依赖审计 → build → 四包 pack → 检查 NUGET_USER → OIDC 登录 → NuGet push → 提取 CHANGELOG 段 → 创建 GitHub Release，附 nupkg/snupkg |
 
 NuGet push 使用 `--skip-duplicate` 跳过已存在包，不代表已存在包与本次构建内容相同。发布后核对 Actions 的提交与结果、GitHub Release 的四包及四符号包，以及 nuget.org 四包的实际版本和元数据；只看到 tag 或工作流启动不等于发布完成。

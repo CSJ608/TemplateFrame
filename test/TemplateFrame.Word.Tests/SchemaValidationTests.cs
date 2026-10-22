@@ -38,7 +38,8 @@ public sealed class SchemaValidationTests
         using var template = BuildDemoOrderTemplate();
 
         using var document = WordprocessingDocument.Open(template, false);
-        Assert.IsType<SectionProperties>(document.MainDocumentPart!.Document.Body!.LastChild);
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        Assert.IsType<SectionProperties>(body.LastChild);
     }
 
     [Fact]

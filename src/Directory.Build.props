@@ -1,5 +1,7 @@
 <Project>
 
+  <Import Project="$(MSBuildThisFileDirectory)..\Directory.Build.props" Condition="Exists('$(MSBuildThisFileDirectory)..\Directory.Build.props')" />
+
   <!-- 四个包共享的作者与打包元数据（版本与 git tag 一致，见 docs/PUBLISHING.md）；
        各包差异项（PackageId / Description / PackageTags / README）保留在各自 csproj。 -->
   <PropertyGroup>
@@ -27,7 +29,7 @@
 
   <!-- net462 需 NuGet 版 ValueTuple（.NET Framework 4.7+ 才内置），仅 net462 资产可见 -->
   <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
-    <PackageReference Include="System.ValueTuple" Version="4.5.0" />
+    <PackageReference Include="System.ValueTuple" Version="4.6.2" />
   </ItemGroup>
 
 </Project>

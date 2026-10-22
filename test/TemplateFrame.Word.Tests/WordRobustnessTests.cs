@@ -98,7 +98,8 @@ public sealed class WordRobustnessTests
         using var filled = new WordTemplateFiller().Fill(template, contract, data).Output;
         using var document = WordprocessingDocument.Open(filled, false);
 
-        var tables = document.MainDocumentPart!.Document.Body!.Descendants<Table>().ToList();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var tables = body.Descendants<Table>().ToList();
         Assert.Equal(2, tables.Count);
         Assert.Equal(2, tables[0].Elements<TableRow>().Count()); // 静态表不变
         Assert.Equal(3, tables[1].Elements<TableRow>().Count()); // 明细表：表头 + 2 数据行
@@ -146,7 +147,8 @@ public sealed class WordRobustnessTests
         Assert.Equal("乙", parsed.Tables["Notes"][0]["N2"]);
 
         using var document = WordprocessingDocument.Open(filled, false);
-        var tables = document.MainDocumentPart!.Document.Body!.Descendants<Table>().ToList();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var tables = body.Descendants<Table>().ToList();
         Assert.Equal(2, tables.Count);
         Assert.All(tables, t => Assert.Equal(2, t.Elements<TableRow>().Count())); // 各表头 + 1 数据行
     }
@@ -189,7 +191,8 @@ public sealed class WordRobustnessTests
         using var filled = new WordTemplateFiller().Fill(template, contract, data).Output;
         using var document = WordprocessingDocument.Open(filled, false);
 
-        var table = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var table = body.Descendants<Table>().Single();
         Assert.Equal(1 + rowCount, table.Elements<TableRow>().Count()); // 表头 + N 数据行
 
         var matches = SdtLocator.FindAll(document);

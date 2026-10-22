@@ -72,7 +72,7 @@ Use `FillDetailed` / `ParseDetailed` for warnings. Engine failures retain raw te
 ## Dependencies and tests
 
 - Target frameworks `netstandard2.0 / net462 / net8.0` (NuGet picks per runtime automatically).
-- Depends on `DocumentFormat.OpenXml` (3.3.x).
+- Depends on `DocumentFormat.OpenXml` (3.5.1).
 - Tests in `test/TemplateFrame.Word.Tests`: generate → validate → fill → parse → assert (including header/footer, multi-table, batch, spanning layout, header image part ownership edge cases).
 - Historical snapshot (2026-08-24; sample-specific, with no guarantee of linear scaling or current-version timings): 1k-row detail fill ~150ms, parse ~125ms, build <1ms; snapshots in [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md), benchmark project [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md).
 
@@ -85,3 +85,5 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 ```
 
 Design: [DESIGN](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md) (Chinese); getting started: [English README](https://github.com/CSJ608/TemplateFrame/blob/main/README.en.md) / [中文 README](https://github.com/CSJ608/TemplateFrame/blob/main/README.md).
+
+Input packages, XML, images and table data use configurable finite resource budgets. Validate does not sanitize macros or external relationships. See the [security guidance](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md) for configuration and boundaries.

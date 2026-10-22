@@ -4,33 +4,43 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using System.Globalization;
 using System.Text;
 using System.Xml;
+using TemplateFrame.Engine;
 using TemplateFrame.Excel.Simple.Localization;
+using TemplateFrame.Internal;
 
 namespace TemplateFrame.Excel.Simple;
 
 /// <summary>
-/// SimpleExcel 导入实现（公共入口见 <see cref="SimpleExcel.Read"/>）：共享字符串物化、
+/// SimpleExcel 导入实现（公共入口见 <see cref="SimpleExcel.Read(Stream, string)"/>）：共享字符串物化、
 /// 行/单元格定位、定义名查找与单元格取值（SimpleExcelContract 复用）。
 /// </summary>
 internal static class SimpleExcelReader
 {
-    internal static SimpleExcelTable Read(Stream source, string? tableName = null)
+    internal static SimpleExcelTable Read(Stream source, string? tableName, TemplateResourceLimits limits, bool packageChecked = false)
     {
         Guard.ThrowIfNull(source, nameof(source));
+        Guard.ThrowIfNull(limits, nameof(limits));
+        limits.Validate();
         try
         {
-            return ReadCore(source, tableName);
+            using var buffered = source.CanSeek ? null : new MemoryStream(StreamUtil.ReadAllBytes(source, limits), writable: false);
+            return ReadCore(buffered ?? source, tableName, limits, packageChecked || buffered is not null);
         }
         catch (XmlException ex)
         {
             // zip 有效但 sheet XML 损坏：惰性 DOM 在首次树访问时才抛（OpenWorkbook 的 catch 罩不到这里）
             throw new InvalidOperationException(Sr.Get("SimpleExcel.Read.XmlCorrupt", ex.Message), ex);
         }
+        catch (Exception ex) when (ex is FormatException or OverflowException)
+        {
+            throw new InvalidOperationException(Sr.Get("SimpleExcel.Read.CannotOpen", ex.Message), ex);
+        }
     }
 
-    private static SimpleExcelTable ReadCore(Stream source, string? tableName)
+    private static SimpleExcelTable ReadCore(Stream source, string? tableName, TemplateResourceLimits limits, bool packageChecked)
     {
-        using var document = OpenWorkbook(source);
+        using var document = OpenWorkbook(source, limits, packageChecked);
+        var budget = new TemplateResourceBudget(limits);
         var workbookPart = document.WorkbookPart;
         if (workbookPart is null)
         {
@@ -53,6 +63,11 @@ internal static class SimpleExcelReader
 
         var rows = sheetData.Elements<Row>().ToList();
         var rowLookup = BuildRowLookup(rows);
+
+        if (tableRange is { } requestedRange)
+        {
+            new TemplateResourceBudget(limits).AddCells((long)requestedRange.EndCol - requestedRange.StartCol + 1);
+        }
 
         int headerRow;
         int colStart;
@@ -91,9 +106,7 @@ internal static class SimpleExcelReader
             }
         }
 
-        // P1/P1-3：endRow 统一顺延到工作表最后一个行元素（与回退路径一致；全空行在数据循环中被跳过）。
-        var endRow = rows.Count > 0 ? rowLookup.Keys.Max() : headerRow;
-
+        budget.AddCells(colCount);
         var headers = new List<string>();
         for (var c = 0; c < colCount; c++)
         {
@@ -102,8 +115,10 @@ internal static class SimpleExcelReader
         }
 
         var result = new List<IReadOnlyList<object?>>();
-        for (var r = headerRow + 1; r <= endRow; r++)
+        // Missing rows are already omitted from the result; visit only physical rows in row-number order.
+        foreach (var r in rowLookup.Keys.Where(r => r > headerRow).OrderBy(r => r))
         {
+            budget.AddRows(1, colCount);
             var values = new List<object?>();
             for (var c = 0; c < colCount; c++)
             {
@@ -295,7 +310,7 @@ internal static class SimpleExcelReader
         var current = 0;
         for (var i = 0; i <= index; i++)
         {
-            current = rows[i].RowIndex?.Value is { } explicitIndex ? (int)explicitIndex : current + 1;
+            current = NextRowIndex(rows[i], current);
         }
 
         return current;
@@ -308,14 +323,7 @@ internal static class SimpleExcelReader
         var current = 0;
         foreach (var row in rows)
         {
-            if (row.RowIndex?.Value is { } explicitIndex)
-            {
-                current = (int)explicitIndex;
-            }
-            else
-            {
-                current++;
-            }
+            current = NextRowIndex(row, current);
 
             if (!lookup.ContainsKey(current))
             {
@@ -324,6 +332,17 @@ internal static class SimpleExcelReader
         }
 
         return lookup;
+    }
+
+    private static int NextRowIndex(Row row, int previous)
+    {
+        var index = row.RowIndex?.Value is { } explicitIndex ? (long)explicitIndex : (long)previous + 1;
+        if (index < 1 || index > SimpleExcelAddress.MaxRow)
+        {
+            throw new FormatException(Sr.Get("SimpleExcel.InvalidCellAddress", index));
+        }
+
+        return checked((int)index);
     }
 
     /// <summary>
@@ -400,7 +419,17 @@ internal static class SimpleExcelReader
             return null;
         }
 
-        return SimpleExcelAddress.TryParseReference(reference, out var range) ? range : null;
+        if (SimpleExcelAddress.TryParseReference(reference.TrimStart('='), out var range))
+        {
+            return range;
+        }
+
+        if (SimpleExcelAddress.LooksLikeCellReference(reference))
+        {
+            throw new FormatException(Sr.Get("SimpleExcel.InvalidCellAddress", reference));
+        }
+
+        return null; // Unusable names, e.g. #REF! or formulas, retain header-text fallback.
     }
 
     internal static WorksheetPart? ResolveWorksheetPart(WorkbookPart workbookPart, string sheet)
@@ -418,11 +447,16 @@ internal static class SimpleExcelReader
     }
 
     /// <summary>打开工作簿：损坏流（非 OOXML / 截断 zip）统一包装为 <see cref="InvalidOperationException"/> + 本地化消息。</summary>
-    private static SpreadsheetDocument OpenWorkbook(Stream source)
+    private static SpreadsheetDocument OpenWorkbook(Stream source, TemplateResourceLimits limits, bool packageChecked)
     {
         try
         {
-            return SpreadsheetDocument.Open(source, false);
+            if (!packageChecked)
+            {
+                StreamUtil.ValidatePackage(source, limits);
+            }
+            return SpreadsheetDocument.Open(source, false,
+                new OpenSettings { MaxCharactersInPart = limits.MaxXmlCharactersPerPart });
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or FileFormatException)
         {

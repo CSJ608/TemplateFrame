@@ -72,8 +72,8 @@ public sealed class DefinedNameColumnTests
         Assert.Equal(["Code", "Name", "Qty"], raw.Headers);
 
         using var document = SpreadsheetDocument.Open(stream, false);
-        var names = document.WorkbookPart!.Workbook.DefinedNames!
-            .Elements<DefinedName>()
+        var definedNames = Assert.IsType<DefinedNames>(document.WorkbookPart?.Workbook?.DefinedNames);
+        var names = definedNames.Elements<DefinedName>()
             .Select(d => d.Name!.Value!)
             .ToList();
         Assert.Contains("TF_Table", names);

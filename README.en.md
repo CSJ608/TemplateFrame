@@ -166,6 +166,8 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 
 ## Build & test
 
+Use the .NET 10 SDK selected by `global.json`. Tests target net8.0 / net472 / net10.0; demos run on .NET 10. Office inputs have configurable resource limits. See [security and development guidance](docs/SECURITY.md) for budgets, deployment boundaries and audit commands. Use `./eng/dotnet.ps1` when a project-local SDK is installed.
+
 ```bash
 dotnet build TemplateFrame.slnx
 dotnet test  TemplateFrame.slnx

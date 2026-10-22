@@ -200,6 +200,28 @@ public abstract class TemplateService<TData, TBuilder> where TBuilder : class, I
 | `Fill` | `service.Fill(template, TData)` | 强类型入口；内部 `engine.Fill(template, FillData)` |
 | `Parse` | `service.Parse(template) → TData` | 强类型出口；内部引擎回读 + 映射 |
 
+<a id="resource-limits"></a>
+
+### 3.6 输入资源限额与所有权
+
+`TemplateResourceLimits` 为 Word、Excel 与 Excel.Simple 提供有限默认预算。引擎通过 `TemplateFillOptions.ResourceLimits` 将同一配置用于 Validate、Fill 和 Parse；独立 Parser / Validator 可显式传入限额，Simple 的契约读写通过 `SimpleExcelOptions.ResourceLimits` 配置，直接 Read 也提供相应重载。原入口签名保留；默认限额会拒绝此前可能接受的超大输入，可信大文档业务需要按容量明确调整。
+
+| 预算 | 默认值 | 含义 |
+|---|---|---|
+| `MaxInputBytes` | 64 MiB | 压缩输入包字节数 |
+| `MaxPackageEntries` | 4,096 | 输入包条目数 |
+| `MaxPackageEntryBytes` / `MaxExpandedBytes` | 64 MiB / 256 MiB | 单条目 / 整包实际展开字节数 |
+| `MaxXmlCharactersPerPart` | 16 Mi 字符 | 每个 XML part 的读取上限 |
+| `MaxImageBytes` | 16 MiB | 单张读取或填入图片 |
+| `MaxTableRows` / `MaxTableCells` | 100,000 / 1,000,000 | 单次操作累计处理的数据行 / 单元格；Simple 也计表头 |
+| `MaxClonedXmlCharacters` | 16 Mi 字符 | 填充时新增模板行副本的累计 XML 字符数 |
+
+配置值必须大于零；`Default` 不可变，计数器属于单次操作，不在引擎实例的多个调用间累计。打开输入前检查包体积和条目，并实际读取 ZIP 条目计量展开量；XML 与图片读取另受各自上限限制。表数据物化、模板行复制前预留预算，整行复制还计入契约以外的静态 XML 和额外模板单元格。具体配置示例与维护入口见 [SECURITY](SECURITY.md)。
+
+输入超限时，Parse / Fill / Read / Write 抛出 `InvalidOperationException`；Validate 将输入资源问题报告为 `Invalid`，不伪造部分成功数据。行列预算约束实际处理工作：Word Validate 的结构检查不等于完整 Parse，也不保证后续业务数据量一定可填。调用方仍拥有输入流；不可定位流在限额内复制到框架自有缓冲区，可定位流的位置按各 API 约定处理，不承诺恢复读取前位置。低层 Builder 面向受信任程序调用，不承担上传文档检查。
+
+资源限额不是进程峰值内存、执行时间或并发总量的硬保证，ZIP 预检本身也有 IO/CPU 成本。Validate 不净化宏、OLE 或外部关系；Fill 会保留其他包内容和旧图片资源。本库不执行宏或公式，也不主动获取外部关系 URL。上传拒绝、活动内容策略及并发隔离由宿主应用负责；源码或项目本地工具链更新不代表系统、容器或生产宿主已更新。
+
 ---
 
 ## 4. 插件化
@@ -237,9 +259,11 @@ public abstract class TemplateService<TData, TBuilder> where TBuilder : class, I
 
 **Excel 灵活版式**：标量 `TF_<Key>` 指向单元格；表格列 `TF_<TableKey>_<ColumnKey>` 指向示例行，填充后重指整个数据块。插入数据行时平移下方行、命名区域、合并区域和图片锚点。文本填充保留单元格格式；日期写序列号及日期格式，布尔写 0/1，decimal/long 写入不经 double 中转。回读按契约 ValueType 转换，各列按范围起点和长度取值；未填充的已知占位符归一为 null。Builder 提供列宽、行高、合并、图片和格式，不提供页面设置；`SetRowHeight` 写入行高及 customHeight，阅读器最终渲染仍需实测。
 
-Excel 解析的行/单元格索引在单次 Parse 内创建并复用，不跨文档缓存 DOM。实测范围及空间成本见 [PERFORMANCE 的 R5 比较](PERFORMANCE.md)，不能由查找优化推导全路径线性伸缩或峰值内存下降。
+Excel 解析的行、单元格及共享字符串索引在单次 Parse 内创建并复用，不跨文档缓存 DOM。命名范围内的空行及各列原有起点偏移语义保留；在分配返回行集合前，按所有契约表累计检查行/单元格预算。坐标须位于 1–1,048,576 行、A–XFD 列内，范围必须正向；合法坐标也可能超出业务预算。历史实测范围及空间成本见 [PERFORMANCE 的 R5 比较](PERFORMANCE.md)，本轮新增预检与限额后的性能需另测，不能由查找优化推导全路径线性伸缩或峰值内存下降。
 
-**Simple 的表头与数据区**：底层 `SimpleExcel.Write/Read` 可独立使用，默认 `TF_Table` 标记区域，`TableName` / `StartCell` 可配置。Read 优先取区域表头；区域缺失或表头为空时回退到第一个至少两个非空单元格的行。数据读到工作表末行并跳过全空行，区域下方其他非空内容也可能被读入。支持共享字符串与富文本拼接；缺 RowIndex 时按顺序推断，不支持缺单元格引用的输入。
+**Simple 的表头与数据区**：底层 `SimpleExcel.Write/Read` 可独立使用，默认 `TF_Table` 标记区域，`TableName` / `StartCell` 可配置。Read 优先取区域表头；区域缺失、`#REF!` / 不支持的公式定义名，或区域表头为空时保留表头回退：优先第一个至少两个非空单元格的行，没有这样的行时取首个非空行。无效的 A1 坐标、越界或反向范围直接拒绝，不靠回退掩盖。
+
+数据仍读到工作表末行并跳过全空行，区域下方其他非空内容也可能被读入；实现按实际存在的行号排序遍历，不再为稀疏行号之间的缺失行分配临时行数据。重复行号保留首次出现的行，缺 RowIndex 时按前一行加一推断；不支持缺单元格引用的输入。共享字符串与富文本拼接保持原语义，读取内复用共享字符串索引。定义名与文本回退读路均使用资源预算；表头也计入 Simple 的单元格预算。
 
 契约路径优先用每列定义名 `<TableName>_<ColumnKey>` 定位（`ColumnDefinedName` 仅拼接表名与列 Key，不额外添加 `TF_`；默认如 `TF_Table_Code`）。定义名布局不可用时，先按上述规则定位表头，再执行统一的文本名称选择（表头去除首尾空白，按 Ordinal 区分大小写）：
 
@@ -285,7 +309,7 @@ Word 内容控件在 OOXML 里是 `<w:sdt>`，用 `<w:tag>` 作为机器可读�
 - **表格行**：
   - 首选：模板里放一行"示例行"（每格一个 SDT），填充时 deepcopy 示例行 N 次，逐行按 tag 填值。**克隆后必须给每个 SDT 重新分配唯一 `w:id`**。
 
-Word/Excel 的 Fill 输入应为未填充的原始模板；收货前后分别从原始模板生成，不把前一次输出当作下一次模板。零行数据会清空示例行占位，保留表头和空白行结构。
+Word/Excel 的 Fill 输入应为未填充的原始模板；收货前后分别从原始模板生成，不把前一次输出当作下一次模板。零行数据会清空示例行占位，保留表头和空白行结构。表格复制遵守 §3.6 的累计行、单元格和克隆 XML 预算，不能仅凭业务列少就无限复制模板中的静态大内容。输入模板不被改写，成功输出由调用方释放。
 
 ### 5.3 校验模型
 
@@ -297,7 +321,7 @@ Word/Excel 的 Fill 输入应为未填充的原始模板；收货前后分别从
 | `WrongType` / `Ambiguous` / `Invalid` | 类型不符、定位歧义或无效模板；Fill 视为硬错误抛出 |
 | `Extra` / `Drifted` | Fill 保留告警继续；不是自动迁移契约版本的机制 |
 
-`Validate` 返回问题清单，由业务决定是否接受上传；不是主动执行上传拒绝。填充器 Fill 返回 `TemplateFillResult`（Output + Warnings）；引擎/服务的 `FillDetailed` 暴露该结果，`Fill` 只返回输出流。输出流由调用者释放。
+`Validate` 返回问题清单，由业务决定是否接受上传；不是主动执行上传拒绝。填充器 Fill 返回 `TemplateFillResult`（Output + Warnings）；引擎/服务的 `FillDetailed` 暴露该结果，`Fill` 只返回输出流。输出流由调用者释放。资源超限属于 `Invalid` / 操作失败，具体边界见 §3.6；不能把契约校验通过解释为活动内容已净化或宿主资源已有硬隔离。
 
 <a id="parse-diagnostics"></a>
 
@@ -337,15 +361,17 @@ Word/Excel 的 Fill 输入应为未填充的原始模板；收货前后分别从
 TemplateFrame/
 ├─ TemplateFrame.slnx                  # 解决方案（src / test / samples 三组解决方案文件夹）
 ├─ .editorconfig                       # 全仓风格基线（CI 用 dotnet format --verify-no-changes 校验）
+├─ global.json / Directory.Build.props / NuGet.Config # SDK 选择、全传递依赖审计和官方包源
+├─ eng/                                # 项目本地 dotnet 包装与独立依赖审计脚本
 ├─ icon.png                            # NuGet 包图标（四包共用，经 src/Directory.Build.props 打入）
 ├─ src/Directory.Build.props           # 四包共享打包元数据单一来源（版本/作者/许可/图标/符号包）
 ├─ src/TemplateFrame/               # 基础包：契约模型 + 引擎抽象 + 数据形状（格式无关）
 │  ├─ Contract/                     # TemplateContract, TemplateElement, TextElement, ImageElement, TableElement
 │  ├─ Data/                         # FillData（数据形状）
 │  ├─ Mapping/                      # DataPathMapper（DataPath 自动映射）
-│  ├─ Engine/                       # ITemplateEngine（Validate/Fill/FillDetailed/Parse 抽象）+ TemplateFillResult / TemplateFillOptions / MissingElementPolicy
+│  ├─ Engine/                       # ITemplateEngine + TemplateFillResult / TemplateFillOptions / TemplateResourceLimits / MissingElementPolicy
 │  ├─ Builder/                      # ITemplateBuilder（版式组合抽象）
-│  ├─ Internal/                     # StreamUtil / ImageTypeDetector / PlaceholderImage（Word/Excel 共用，InternalsVisibleTo）
+│  ├─ Internal/                     # StreamUtil / TemplateResourceBudget / ImageTypeDetector / PlaceholderImage（插件共享内部工具）
 │  └─ Services/                     # TemplateService<TData, TBuilder>（泛型基类）
 ├─ src/TemplateFrame.Word/          # 插件：MS Word（DocumentFormat.OpenXml）
 │  ├─ WordTemplateBuilder.cs        # 组装带 SDT 的 .docx（版式由业务服务驱动）
@@ -384,7 +410,7 @@ TemplateFrame/
 ├─ samples/TemplateFrame.Demo.Excel.I18n/ # i18n 整体演示（Excel：AddTextKey/AddTableKeys 中英模板 + 回读）
 ├─ samples/TemplateFrame.Demo.Excel.Simple.I18n/ # i18n 整体演示（Excel.Simple：中英表头 + 定义名回读，语言无关）
 ├─ docs/DESIGN.md                   # 本文档
-├─ docs/ROADMAP.md / docs/DEMOS.md / docs/PUBLISHING.md
+├─ docs/ROADMAP.md / docs/DEMOS.md / docs/PUBLISHING.md / docs/SECURITY.md
 ├─ CHANGELOG.md
 └─ .github/workflows/               # ci.yml / release.yml
 ```
@@ -395,20 +421,22 @@ TemplateFrame/
 
 ## 7. 迭代计划
 
-迭代归档与后续规划见 [ROADMAP](ROADMAP.md)，已发布版本及兼容性变更统一见 [CHANGELOG](../CHANGELOG.md)。整改状态与验收证据见 [评审台账](reviews/2026-09-07-review.md)。此处不另行维护版本或迭代列表。
+迭代归档与后续规划见 [ROADMAP](ROADMAP.md)，已发布版本及兼容性变更统一见 [CHANGELOG](../CHANGELOG.md)。2026-10-22 安全维护的本地验证、待提交状态及剩余边界见[升级实施记录](reviews/2026-10-22-upgrade-completion.md)；历史整改与验收证据仍见[评审台账](reviews/2026-09-07-review.md)。本轮本地测试通过不等于最终提交独立验收、远端 CI 或发布完成；此处不另行维护版本或迭代列表。
 
 ---
 
 ## 8. CI 与发布（已启用）
 
-工作流文件已按 StreamFrame 的 .github/workflows 移植并适配：
+`global.json` 选择 SDK 10.0.402 或同 feature band 的更新补丁；CI 显式安装 SDK 8.0.426 和 10.0.402，提供 net8 与 net10 的补丁运行时。四库仍构建 `netstandard2.0 / net462 / net8.0` 资产，四个测试项目覆盖 `net8.0 / net472 / net10.0`，示例与基准使用 `net10.0`。本地工具链选择及宿主核验见 [SECURITY](SECURITY.md)。
 
-| 文件 | 触发 | 作用 | 状态 |
+| 文件 | 触发 | 作用 | 本轮状态 |
 |---|---|---|---|
-| `ci.yml` | push main / 所有 pull_request | format 校验（`dotnet format --verify-no-changes`）+ build（三 TFM）+ test，**ubuntu / windows 双矩阵**（ubuntu 仅测 net8.0，windows 测全部目标框架），测试收集行覆盖率（coverlet） | 已启用 |
-| `release.yml` | tag `v*` | `test` job（windows 全 TFM 测试门禁，含版本校验）→ `needs: test` 的 `release` job：build + pack → OIDC Trusted Publishing 推 nuget.org + GitHub Release（附 nupkg/snupkg）；发布必须先过测试门禁，netfx 测试也在发布链路内 | 已启用（v1.0.0 起） |
+| `ci.yml` | push main / 所有 pull_request / 手动 / 每周定时 | restore 全传递 NuGet 审计 + 独立 OSV 检查 → format → Release build → coverlet 测试；Ubuntu 测 net8.0 / net10.0，Windows 测 net8.0 / net472 / net10.0 | 配置已更新，远端尚未执行 |
+| `release.yml` | tag `v*` | Windows `test` job 校验版本、审计并执行三目标测试；通过后 Ubuntu `release` job 再审计、构建、四包 pack，再以 OIDC 推 nuget.org 并创建 GitHub Release | 发布机制已启用，本轮未触发 |
 
-日常发布、首次配置与四包验证见 [PUBLISHING](PUBLISHING.md)；发布版本与说明只在 [CHANGELOG](../CHANGELOG.md) 维护。
+Actions 固定完整提交 SHA，checkout 不保留凭据；测试 job 只有读取权限，仅发布 job 授予 `contents: write` 和 `id-token: write`。还原检查全部直接及传递依赖，审计失败和高危/严重 NuGet 告警阻断；独立脚本检查漏洞源时效，以已知有漏洞的包验证 OSV 阳性对照，命中、服务失败或结果不完整均阻断。过期 NuGet 数据源明确告警，不能用单次零告警代替完整判断；Dependabot 定期检查 NuGet 与 Actions 更新。
+
+日常发布、首次配置与四包验证见 [PUBLISHING](PUBLISHING.md)；发布版本与说明只在 [CHANGELOG](../CHANGELOG.md) 维护。当前本地验证及包检查不替代最终提交上的远端 CI，也不代表系统级 SDK/runtime 或生产环境已更新。
 
 ---
 

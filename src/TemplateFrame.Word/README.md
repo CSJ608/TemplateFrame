@@ -72,7 +72,7 @@ public sealed class DeliveryOrderTemplateService : TemplateService<DeliveryOrder
 ## 依赖与测试
 
 - 目标框架 `netstandard2.0 / net462 / net8.0`（NuGet 按运行时自动选择）。
-- 依赖 `DocumentFormat.OpenXml`（3.3.x）。
+- 依赖 `DocumentFormat.OpenXml`（3.5.1）。
 - 测试 `test/TemplateFrame.Word.Tests`：生成 → 校验 → 填充 → 回读 → 断言（含页眉页脚、多表、批量、跨列布局、页眉图片 part 归属等边界）。
 - 历史性能快照（2026-08-24，仅描述当时样本，不保证线性伸缩或当前版本耗时）：千行明细填充 ~150ms、回读 ~125ms、构建 <1ms；快照见仓库 [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md)，基准项目 [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md)。
 
@@ -85,3 +85,4 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 ```
 
 完整规则见 [DESIGN](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md)，上手说明见[根 README](https://github.com/CSJ608/TemplateFrame/blob/main/README.md)。。
+输入包、XML、图片和表数据默认启用可配置资源预算；超限会拒绝输入。Validate 不进行宏或外部关系净化。配置方式与适用边界见[安全说明](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md)。

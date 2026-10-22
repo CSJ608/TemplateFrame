@@ -126,8 +126,10 @@ public sealed class WordTemplateFillerTests
         // 新 rId 指向新加的图片 part，字节等于填充值
         var imagePart = Assert.IsAssignableFrom<ImagePart>(mainPart.GetPartById(blip.Embed!.Value!));
         using var partStream = imagePart.GetStream();
-        var bytes = new byte[partStream.Length];
-        partStream.Read(bytes, 0, bytes.Length);
+        var expectedLength = checked((int)partStream.Length);
+        using var reader = new BinaryReader(partStream);
+        var bytes = reader.ReadBytes(expectedLength);
+        Assert.Equal(expectedLength, bytes.Length);
         Assert.Equal(TestDocuments.TinyPng, bytes);
 
         // 尺寸/位置/环绕继承占位图（几何不变）
@@ -143,7 +145,8 @@ public sealed class WordTemplateFillerTests
         var result = new WordTemplateFiller().Fill(template, TestDocuments.DemoContract(), DemoData());
 
         using var document = WordprocessingDocument.Open(result.Output, false);
-        var table = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var table = body.Descendants<Table>().Single();
         var rows = table.Elements<TableRow>().ToList();
 
         // 表头 + 3 行数据
@@ -302,7 +305,8 @@ public sealed class WordTemplateFillerTests
 
         using var document = WordprocessingDocument.Open(result, false);
         Assert.Equal("PO-2026-0806-001", GetSdtText(document, "OrderNo"));
-        Assert.Equal(4, document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single().Elements<TableRow>().Count());
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        Assert.Equal(4, body.Descendants<Table>().Single().Elements<TableRow>().Count());
     }
 
     [Fact]
@@ -316,7 +320,8 @@ public sealed class WordTemplateFillerTests
 
         using var document = WordprocessingDocument.Open(filled, false);
         Assert.Equal("PO-9", GetSdtText(document, "OrderNo"));
-        Assert.Equal(3, document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single().Elements<TableRow>().Count());
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        Assert.Equal(3, body.Descendants<Table>().Single().Elements<TableRow>().Count());
     }
 
     private static string? GetSdtText(WordprocessingDocument document, string tag)

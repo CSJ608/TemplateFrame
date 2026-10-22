@@ -79,4 +79,13 @@
   <data name="Service.RecursiveBuild" xml:space="preserve">
     <value>Recursive template generation on the same service is not supported.</value>
   </data>
+  <data name="ResourceLimit.Exceeded" xml:space="preserve">
+    <value>Document processing exceeded the resource limit: {0}.</value>
+  </data>
+  <data name="ResourceLimit.InvalidPackage" xml:space="preserve">
+    <value>Cannot open the document package: {0}</value>
+  </data>
+  <data name="ResourceLimit.SeekRequired" xml:space="preserve">
+    <value>Package validation requires a seekable stream.</value>
+  </data>
 </root>

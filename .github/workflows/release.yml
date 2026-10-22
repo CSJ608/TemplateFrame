@@ -1,11 +1,5 @@
-# 打标签 v* 时：测试门禁（全目标框架）→ 构建 + 打包 → GitHub Release + OIDC Trusted Publishing 推送 nuget.org。
-# 2.1.1 起合并原 release.yml 与 publish-nuget.yml：
-#   - 发布（GitHub Release / nuget.org 均不可撤回）必须通过测试门禁（needs: test），tag 打在未跑过 CI 的提交上也无法绕过；
-#   - 测试在 windows 上跑全部目标框架（net472 需要 Windows 运行时），补齐原发布链路对 netfx 资产的零验证；
-#   - 消除两份工作流的重复 build/pack 步骤（历史上漏过一次少打包两个包）。
-# 前置（一次性，浏览器操作）：
-#   1. nuget.org 注册本仓库为 trusted publisher（见 docs/PUBLISHING.md）
-#   2. GitHub 仓库 Settings → Secrets and variables → Actions → Variables 添加 NUGET_USER
+# Tags must pass tests and dependency audits before GitHub / NuGet publishing.
+# Register the trusted publisher and NUGET_USER repository variable first.
 name: release
 
 on:
@@ -14,54 +8,77 @@ on:
       - "v*"
 
 permissions:
-  id-token: write   # OIDC Trusted Publishing
-  contents: write   # GitHub Release
+  contents: read
 
 jobs:
   test:
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
       - name: Verify version matches tag
-        shell: bash   # windows runner 默认 pwsh 不认 bash 语法
+        shell: bash
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          tag="${GITHUB_REF_NAME#v}"
+          tag="${RELEASE_TAG#v}"
           version="$(sed -n 's:.*<Version>\(.*\)</Version>.*:\1:p' src/Directory.Build.props)"
           if [ -z "$version" ] || [ "$version" != "$tag" ]; then
-            echo "::error::src/Directory.Build.props <Version>=$version does not match tag $GITHUB_REF_NAME (see docs/PUBLISHING.md)"
+            echo "::error::src/Directory.Build.props version does not match the release tag."
             exit 1
           fi
 
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+      - name: Set up .NET SDKs and test runtimes
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
-          dotnet-version: "9.0.x"
+          dotnet-version: |
+            8.0.426
+            10.0.402
 
-      - name: Restore
+      - name: Restore with transitive vulnerability audit
         run: dotnet restore TemplateFrame.slnx
+
+      - name: Verify audit feed freshness and check OSV
+        shell: pwsh
+        run: ./eng/audit-dependencies.ps1 -ReportPath artifacts/dependency-audit.json
 
       - name: Build
         run: dotnet build TemplateFrame.slnx -c Release --no-restore
 
-      - name: Test（windows 全部目标框架；发布门禁）
+      - name: Test all Windows target frameworks
         run: dotnet test TemplateFrame.slnx -c Release --no-build
 
   release:
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
+      id-token: write
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          dotnet-version: "9.0.x"
+          persist-credentials: false
+
+      - name: Set up .NET SDKs
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.426
+            10.0.402
+
+      - name: Restore with transitive vulnerability audit
+        run: dotnet restore TemplateFrame.slnx
+
+      - name: Verify audit feed freshness and check OSV
+        shell: pwsh
+        run: ./eng/audit-dependencies.ps1 -ReportPath artifacts/dependency-audit.json
 
       - name: Build
-        run: dotnet build TemplateFrame.slnx -c Release
+        run: dotnet build TemplateFrame.slnx -c Release --no-restore
 
       - name: Pack
         run: |
@@ -71,36 +88,35 @@ jobs:
           dotnet pack src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj -c Release --no-build -o artifacts
 
       - name: Verify NUGET_USER variable
-        run: |
-          echo "NUGET_USER length: ${#NUGET_USER}"
-          if [ -z "${NUGET_USER}" ]; then
-            echo "::error::NUGET_USER is EMPTY. Add it in Settings → Secrets and variables → Actions → Variables (not Secrets)."
-            exit 1
-          fi
         env:
           NUGET_USER: ${{ vars.NUGET_USER }}
+        run: |
+          if [ -z "$NUGET_USER" ]; then
+            echo "::error::NUGET_USER is empty. Add it as a repository Actions variable."
+            exit 1
+          fi
 
       - name: NuGet Login (OIDC)
         id: login
-        uses: NuGet/login@v1
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
         with:
           user: ${{ vars.NUGET_USER }}
 
       - name: Push to nuget.org
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: |
           dotnet nuget push "artifacts/*.nupkg" \
-            --api-key "${{ steps.login.outputs.NUGET_API_KEY }}" \
+            --api-key "$NUGET_API_KEY" \
             --source https://www.nuget.org/api/v2/package \
             --skip-duplicate
 
-      - name: Extract tag version
-        id: tag
-        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
-
       - name: Extract changelog section for this version
         id: notes
+        env:
+          RELEASE_TAG: ${{ github.ref_name }}
         run: |
-          version="${{ steps.tag.outputs.version }}"
+          version="${RELEASE_TAG#v}"
           awk -v header="## [$version]" '
             found == 0 && index($0, header) == 1 { found = 1; next }
             found == 1 && index($0, "## [") == 1 { exit }
@@ -114,7 +130,7 @@ jobs:
 
       - name: Create Release (from CHANGELOG)
         if: steps.notes.outputs.has_notes == 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}
@@ -125,7 +141,7 @@ jobs:
 
       - name: Create Release (auto-generated notes)
         if: steps.notes.outputs.has_notes != 'true'
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@efb35369e0ad2afab669f228072c1b0d510eae64 # v3.0.3
         with:
           tag_name: ${{ github.ref_name }}
           name: ${{ github.ref_name }}

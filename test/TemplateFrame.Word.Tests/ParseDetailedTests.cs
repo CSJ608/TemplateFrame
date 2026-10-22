@@ -49,7 +49,8 @@ public sealed class ParseDetailedTests
         buffer.Position = 0;
         using (var document = WordprocessingDocument.Open(buffer, true))
         {
-            var sdt = document.MainDocumentPart!.Document.Body!.Descendants<SdtElement>()
+            var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+            var sdt = body.Descendants<SdtElement>()
                 .Where(s => s.GetFirstChild<SdtProperties>()?.GetFirstChild<Tag>()?.Val?.Value == tag).ElementAt(occurrence);
             sdt.Descendants<Text>().First().Text = newText;
             document.Save();

@@ -20,7 +20,8 @@ public sealed class WordTemplateBuilderCapabilitiesTests
             b.SetPageSetup(new PageSetup { Size = Builder.PageSize.A5, Orientation = PageOrientation.Landscape }));
 
         using var document = WordprocessingDocument.Open(stream, false);
-        var section = document.MainDocumentPart!.Document.Body!.Elements<SectionProperties>().Single();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var section = body.Elements<SectionProperties>().Single();
         var pageSize = section.GetFirstChild<WPageSize>();
 
         Assert.Equal(11906U, pageSize!.Width!.Value); // A5 横版：210mm
@@ -84,7 +85,8 @@ public sealed class WordTemplateBuilderCapabilitiesTests
             }));
 
         using var document = WordprocessingDocument.Open(stream, false);
-        var paragraph = document.MainDocumentPart!.Document.Body!.Descendants<Paragraph>().Single();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var paragraph = body.Descendants<Paragraph>().Single();
         Assert.Equal(JustificationValues.Center, paragraph.ParagraphProperties!.Justification!.Val!.Value);
 
         var run = paragraph.Descendants<Run>().Single();
@@ -114,7 +116,8 @@ public sealed class WordTemplateBuilderCapabilitiesTests
             b.AddParagraph("____________", new TextFormat { Underline = true }));
 
         using var document = WordprocessingDocument.Open(stream, false);
-        var rPr = document.MainDocumentPart!.Document.Body!.Descendants<Run>().Single().RunProperties!;
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var rPr = body.Descendants<Run>().Single().RunProperties!;
         Assert.Equal(UnderlineValues.Single, rPr.Underline!.Val!.Value);
     }
 
@@ -131,7 +134,8 @@ public sealed class WordTemplateBuilderCapabilitiesTests
             }));
 
         using var document = WordprocessingDocument.Open(stream, false);
-        var table = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var table = body.Descendants<Table>().Single();
         var tblPr = table.GetFirstChild<TableProperties>();
 
         Assert.Null(tblPr!.TableBorders);
@@ -183,7 +187,8 @@ public sealed class WordTemplateBuilderCapabilitiesTests
         });
 
         using var document = WordprocessingDocument.Open(stream, false);
-        var table = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var table = body.Descendants<Table>().Single();
         var cells = table.Descendants<TableCell>().ToList();
 
         Assert.Equal(3, cells.Count);
@@ -211,8 +216,10 @@ public sealed class WordTemplateBuilderCapabilitiesTests
 
         var imagePart = Assert.IsAssignableFrom<ImagePart>(headerPart.GetPartById(blip.Embed!.Value!));
         using var stream = imagePart.GetStream();
-        var bytes = new byte[stream.Length];
-        stream.Read(bytes, 0, bytes.Length);
+        var expectedLength = checked((int)stream.Length);
+        using var reader = new BinaryReader(stream);
+        var bytes = reader.ReadBytes(expectedLength);
+        Assert.Equal(expectedLength, bytes.Length);
         Assert.Equal(TestDocuments.TinyPng, bytes);
     }
 
@@ -259,7 +266,8 @@ public sealed class WordTemplateBuilderCapabilitiesTests
             b.AddTable("Lines", ["MC", "Qty"], new TableFormat { ColumnWidthsCm = [3.0, 2.0] }));
 
         using var document = WordprocessingDocument.Open(stream, false);
-        var table = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var table = body.Descendants<Table>().Single();
         var cols = table.GetFirstChild<TableGrid>()!.Elements<GridColumn>().ToList();
 
         Assert.Equal(((int)Math.Round(3.0 / 2.54 * 1440.0)).ToString(), cols[0].Width!.Value);
@@ -278,7 +286,8 @@ public sealed class WordTemplateBuilderCapabilitiesTests
         });
 
         using var document = WordprocessingDocument.Open(stream, false);
-        var row = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single().Descendants<TableRow>().Single();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var row = body.Descendants<Table>().Single().Descendants<TableRow>().Single();
         var cells = row.Elements<TableCell>().ToList();
 
         Assert.Equal(2, cells.Count);
@@ -299,7 +308,8 @@ public sealed class WordTemplateBuilderCapabilitiesTests
             }));
 
         using var document = WordprocessingDocument.Open(stream, false);
-        var paragraphs = document.MainDocumentPart!.Document.Body!.Descendants<Table>().Single().Descendants<Paragraph>().ToList();
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var paragraphs = body.Descendants<Table>().Single().Descendants<Paragraph>().ToList();
         Assert.Equal(4, paragraphs.Count);
         Assert.All(paragraphs, p => Assert.Equal(JustificationValues.Center, p.ParagraphProperties!.Justification!.Val!.Value));
     }

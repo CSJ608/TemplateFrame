@@ -24,11 +24,22 @@ namespace TemplateFrame.Excel;
 public sealed class ExcelTemplateParser
 {
     private readonly ITemplateLocalizer _localizer;
+    private readonly TemplateResourceLimits _limits;
 
     /// <summary>Creates a template parser.</summary>
     /// <remarks>localizer 为 null 时使用 DefaultTemplateLocalizer.Instance。</remarks>
     public ExcelTemplateParser(ITemplateLocalizer? localizer = null)
-        => _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
+        : this(TemplateResourceLimits.Default, localizer)
+    {
+    }
+
+    /// <summary>Creates a parser with per-operation input and table budgets.</summary>
+    public ExcelTemplateParser(TemplateResourceLimits resourceLimits, ITemplateLocalizer? localizer)
+    {
+        _limits = resourceLimits ?? throw new ArgumentNullException(nameof(resourceLimits));
+        _limits.Validate();
+        _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
+    }
 
     /// <summary>Reads template data using the contract.</summary>
     /// <remarks>不改写输入内容，也不释放输入流；可定位流先归零，读取后不恢复原位置。</remarks>
@@ -52,7 +63,7 @@ public sealed class ExcelTemplateParser
         Guard.ThrowIfNull(template, nameof(template));
         Guard.ThrowIfNull(contract, nameof(contract));
 
-        var bytes = StreamUtil.ReadAllBytes(template);
+        var bytes = StreamUtil.ReadAllBytes(template, _limits);
         using var document = OpenDocument(bytes);
         if (document.WorkbookPart is not { } workbookPart)
         {
@@ -62,6 +73,7 @@ public sealed class ExcelTemplateParser
         var values = new Dictionary<string, object?>();
         var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
         var lookup = new CellLookup();
+        var budget = new TemplateResourceBudget(_limits);
 
         try
         {
@@ -88,7 +100,7 @@ public sealed class ExcelTemplateParser
                         break;
 
                     case TableElement table:
-                        var rows = ReadTableRows(workbookPart, table, issues, lookup);
+                        var rows = ReadTableRows(workbookPart, table, issues, lookup, budget);
                         if (rows is not null)
                         {
                             tables[table.Key] = rows;
@@ -103,6 +115,10 @@ public sealed class ExcelTemplateParser
             // zip 有效但 sheet/workbook XML 损坏：惰性 DOM 在首次树访问时才抛（OpenDocument 的 catch 罩不到这里）
             throw new InvalidOperationException(Sr.Get("Excel.Validation.XmlCorrupt", ex.Message), ex);
         }
+        catch (Exception ex) when (ex is FormatException or OverflowException)
+        {
+            throw new InvalidOperationException(Sr.Get("Excel.Validation.CannotOpen", ex.Message), ex);
+        }
 
         return new TemplateParseResult
         {
@@ -115,11 +131,12 @@ public sealed class ExcelTemplateParser
     /// 打开工作簿包：损坏流（非 OOXML / 截断 zip）统一包装为
     /// <see cref="InvalidOperationException"/> + 本地化消息（与 Validate / Fill 的异常契约一致）。
     /// </summary>
-    private static SpreadsheetDocument OpenDocument(byte[] bytes)
+    private SpreadsheetDocument OpenDocument(byte[] bytes)
     {
         try
         {
-            return SpreadsheetDocument.Open(new MemoryStream(bytes, writable: false), false);
+            return SpreadsheetDocument.Open(new MemoryStream(bytes, writable: false), false,
+                new OpenSettings { MaxCharactersInPart = _limits.MaxXmlCharactersPerPart });
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or FileFormatException)
         {
@@ -148,11 +165,11 @@ public sealed class ExcelTemplateParser
         var cell = lookup.FindCell(worksheetPart, start.Row, start.Col);
         return cell is null
             ? (false, null)
-            : (true, ReadCellValue(workbookPart, cell, element, issues, element.Key, null));
+            : (true, ReadCellValue(workbookPart, cell, element, lookup, issues, element.Key, null));
     }
 
     /// <summary>读取图片元素：锚定格 drawing 的图片字节；无图片或缺失返回 null。</summary>
-    private static byte[]? ReadImage(WorkbookPart workbookPart, string key)
+    private byte[]? ReadImage(WorkbookPart workbookPart, string key)
     {
         var match = ExcelNamedRangeLocator.FindByName(workbookPart, ExcelNamedRangeLocator.ElementName(key));
         if (match is null)
@@ -167,7 +184,7 @@ public sealed class ExcelTemplateParser
             return null;
         }
 
-        return ExcelDrawingHelper.ReadImageBytes(worksheetPart, start.Col - 1, start.Row - 1);
+        return ExcelDrawingHelper.ReadImageBytes(worksheetPart, start.Col - 1, start.Row - 1, _limits);
     }
 
     /// <summary>
@@ -178,7 +195,8 @@ public sealed class ExcelTemplateParser
         WorkbookPart workbookPart,
         TableElement table,
         List<TemplateValidationIssue>? issues,
-        CellLookup lookup)
+        CellLookup lookup,
+        TemplateResourceBudget budget)
     {
         var columnRanges = new List<(TextElement Column, (int Row, int Col) Start, (int Row, int Col) End)>();
         string sheet = string.Empty;
@@ -208,7 +226,14 @@ public sealed class ExcelTemplateParser
             return null;
         }
 
-        var rowCount = columnRanges.Max(c => c.End.Row - c.Start.Row + 1);
+        var rowCount = columnRanges.Max(c => checked(c.End.Row - c.Start.Row + 1));
+        if (columnRanges.Any(c => (long)c.Start.Row + rowCount - 1 > ExcelAddressHelper.MaxRow))
+        {
+            throw new FormatException(Sr.Get("Excel.Address.CannotParse", table.Key));
+        }
+
+        // Keep empty-row and per-column offset semantics, but reserve the entire expansion before allocating it.
+        budget.AddRows(rowCount, columnRanges.Count);
         var rows = new List<IReadOnlyDictionary<string, object?>>();
         for (var r = 0; r < rowCount; r++)
         {
@@ -218,7 +243,7 @@ public sealed class ExcelTemplateParser
                 var cell = lookup.FindCell(worksheetPart, start.Row + r, start.Col);
                 rowValues[column.Key] = cell is null
                     ? null
-                    : ReadCellValue(workbookPart, cell, column, issues, column.Key, start.Row + r, table.Key, r + 1);
+                    : ReadCellValue(workbookPart, cell, column, lookup, issues, column.Key, start.Row + r, table.Key, r + 1);
             }
 
             rows.Add(rowValues);
@@ -233,6 +258,20 @@ public sealed class ExcelTemplateParser
     {
         private readonly Dictionary<WorksheetPart, Dictionary<uint, Row>> _rows = new();
         private readonly Dictionary<Row, Dictionary<string, Cell>> _cells = new();
+        private IReadOnlyList<string?>? _sharedStrings;
+
+        public string? ReadSharedString(WorkbookPart workbookPart, string indexText)
+        {
+            if (!int.TryParse(indexText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index) || index < 0)
+            {
+                return null;
+            }
+
+            // Preserve direct <t> semantics (rich-text-only entries remain null), indexing once per Parse.
+            _sharedStrings ??= workbookPart.SharedStringTablePart?.SharedStringTable?.Elements<SharedStringItem>()
+                .Select(item => item.Text?.Text).ToArray() ?? [];
+            return index < _sharedStrings.Count ? _sharedStrings[index] : null;
+        }
 
         public Cell? FindCell(WorksheetPart? worksheetPart, int rowIndex, int colIndex)
         {
@@ -246,8 +285,13 @@ public sealed class ExcelTemplateParser
                 {
                     foreach (var candidate in sheetData.Elements<Row>())
                     {
-                        if (candidate.RowIndex?.Value is { } index && !rows.ContainsKey(index))
-                            rows.Add(index, candidate); // Preserve first-match behavior.
+                        if (candidate.RowIndex?.Value is { } index)
+                        {
+                            if (index < 1 || index > ExcelAddressHelper.MaxRow)
+                                throw new FormatException(Sr.Get("Excel.Address.CannotParse", index));
+                            if (!rows.ContainsKey(index))
+                                rows.Add(index, candidate); // Preserve first-match behavior.
+                        }
                     }
                 }
                 _rows.Add(worksheetPart, rows);
@@ -277,6 +321,7 @@ public sealed class ExcelTemplateParser
         WorkbookPart workbookPart,
         Cell cell,
         TextElement element,
+        CellLookup lookup,
         List<TemplateValidationIssue>? issues,
         string issueKey,
         int? rowNumber, string? tableKey = null, int? dataRowNumber = null)
@@ -324,7 +369,7 @@ public sealed class ExcelTemplateParser
                 return null;
             }
 
-            var sharedText = ReadSharedString(workbookPart, sharedIndexText);
+            var sharedText = lookup.ReadSharedString(workbookPart, sharedIndexText);
             if (sharedText is null)
             {
                 return null;
@@ -383,14 +428,4 @@ public sealed class ExcelTemplateParser
         return text;
     }
 
-    private static string? ReadSharedString(WorkbookPart workbookPart, string indexText)
-    {
-        if (workbookPart.SharedStringTablePart?.SharedStringTable is not { } sharedStrings
-            || !int.TryParse(indexText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index))
-        {
-            return null;
-        }
-
-        return sharedStrings.Elements<SharedStringItem>().ElementAtOrDefault(index)?.Text?.Text;
-    }
 }

@@ -68,7 +68,8 @@ public sealed class RealScenarioTests
         Assert.Equal("IN", parsed.Values["Inner"]);
         filled.Position = 0;
         using var document = WordprocessingDocument.Open(filled, false);
-        Assert.NotNull(document.MainDocumentPart!.Document.Body!.Descendants<SdtElement>()
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        Assert.NotNull(body.Descendants<SdtElement>()
             .FirstOrDefault(s => s.SdtProperties?.GetFirstChild<Tag>()?.Val?.Value == "Inner"));
     }
 
@@ -117,7 +118,7 @@ public sealed class RealScenarioTests
 
         filled.Position = 0;
         using var document = WordprocessingDocument.Open(filled, false);
-        var body = document.MainDocumentPart!.Document.Body!;
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
 
         // 打印不留"待填充"；表格结构保留（表头 + 空白示例行）
         Assert.DoesNotContain(body.Descendants<Text>(), t => t.Text?.Contains("待填充") == true);
@@ -138,7 +139,8 @@ public sealed class RealScenarioTests
         });
         using var document = WordprocessingDocument.Open(template, false);
 
-        var ids = document.MainDocumentPart!.Document.Body!.Descendants<DW.DocProperties>()
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        var ids = body.Descendants<DW.DocProperties>()
             .Select(p => p.Id?.Value)
             .ToList();
 

@@ -1,8 +1,13 @@
+using TemplateFrame.Engine;
+
 namespace TemplateFrame.Excel.Simple;
 
-/// <summary>Options for simple-table writing.</summary>
+/// <summary>Options for simple-table reading and writing.</summary>
 public sealed record SimpleExcelOptions
 {
+    /// <summary>Input budgets for reading/validation and table-work budgets for reading/writing workbooks.</summary>
+    public TemplateResourceLimits ResourceLimits { get; init; } = TemplateResourceLimits.Default;
+
     /// <summary>Worksheet name (default Sheet1).</summary>
     public string SheetName { get; init; } = "Sheet1";
 

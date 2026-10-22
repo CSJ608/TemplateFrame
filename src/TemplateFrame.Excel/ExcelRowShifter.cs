@@ -29,6 +29,12 @@ internal static class ExcelRowShifter
                 .ToList()
             : new List<Row>();
 
+        if (sampleRow < 1 || (long)sampleRow + Math.Max(dataRowCount - 1, 0) > ExcelAddressHelper.MaxRow
+            || belowRowsToShift.Any(row => (long)row.RowIndex!.Value + delta > ExcelAddressHelper.MaxRow))
+        {
+            throw new FormatException(Localization.Sr.Get("Excel.Address.CannotParse", sampleRow));
+        }
+
         var clones = new List<Row> { sampleRowElement };
         var anchor = sampleRowElement;
         for (var i = 1; i < dataRowCount; i++)

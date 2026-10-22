@@ -1,39 +1,57 @@
-# CI：push / PR 时构建 + 测试
 name: ci
 
 on:
   push:
     branches: [main]
   pull_request:
+  workflow_dispatch:
+  schedule:
+    - cron: "17 3 * * 1"
+
+permissions:
+  contents: read
 
 jobs:
   build:
+    timeout-minutes: 40
     strategy:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, windows-latest]
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Set up .NET
-        uses: actions/setup-dotnet@v4
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          dotnet-version: "9.0.x"
+          persist-credentials: false
 
-      - name: Restore
+      - name: Set up .NET SDKs and test runtimes
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: |
+            8.0.426
+            10.0.402
+
+      - name: Restore with transitive vulnerability audit
         run: dotnet restore TemplateFrame.slnx
 
+      - name: Verify audit feed freshness and check OSV
+        shell: pwsh
+        run: ./eng/audit-dependencies.ps1 -ReportPath artifacts/dependency-audit.json
+
       - name: Format
-        run: dotnet format TemplateFrame.slnx --verify-no-changes
+        run: dotnet format TemplateFrame.slnx --verify-no-changes --no-restore
 
       - name: Build
         run: dotnet build TemplateFrame.slnx -c Release --no-restore
 
-      - name: Test ubuntu（仅 net8.0，net472 需 Windows 运行时）
+      - name: Test Linux net8.0
         if: runner.os == 'Linux'
         run: dotnet test TemplateFrame.slnx -c Release --no-build -f net8.0 --collect:"XPlat Code Coverage"
 
-      - name: Test windows（全部目标框架）
+      - name: Test Linux net10.0
+        if: runner.os == 'Linux'
+        run: dotnet test TemplateFrame.slnx -c Release --no-build -f net10.0 --collect:"XPlat Code Coverage"
+
+      - name: Test Windows all target frameworks
         if: runner.os == 'Windows'
         run: dotnet test TemplateFrame.slnx -c Release --no-build --collect:"XPlat Code Coverage"

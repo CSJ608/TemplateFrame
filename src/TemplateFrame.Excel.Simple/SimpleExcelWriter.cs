@@ -2,6 +2,7 @@ using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Globalization;
+using TemplateFrame.Internal;
 
 namespace TemplateFrame.Excel.Simple;
 
@@ -16,8 +17,18 @@ internal static class SimpleExcelWriter
 
         var headers = table.Headers ?? [];
         var rows = table.Rows ?? [];
+        Guard.ThrowIfNull(options.ResourceLimits, nameof(options.ResourceLimits));
+        var budget = new TemplateResourceBudget(options.ResourceLimits);
+        budget.AddCells(headers.Count);
+        budget.AddRows(rows.Count, headers.Count);
         var sheetName = string.IsNullOrWhiteSpace(options.SheetName) ? "Sheet1" : options.SheetName.Trim();
         var (startRow, startCol) = SimpleExcelAddress.ParseCellAddress(string.IsNullOrWhiteSpace(options.StartCell) ? "A1" : options.StartCell.Trim());
+
+        if ((long)startCol + headers.Count - 1 > SimpleExcelAddress.MaxColumn
+            || (long)startRow + rows.Count > SimpleExcelAddress.MaxRow)
+        {
+            throw new InvalidOperationException(Localization.Sr.Get("SimpleExcel.InvalidCellAddress", options.StartCell));
+        }
 
         using var document = SpreadsheetDocument.Create(target, SpreadsheetDocumentType.Workbook);
         var workbookPart = document.AddWorkbookPart();

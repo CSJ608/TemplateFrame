@@ -1,5 +1,7 @@
 # TemplateFrame Demo 使用说明
 
+样例现运行于 .NET 10，构建 SDK 由根目录 `global.json` 固定；项目本地运行时可通过 `./eng/dotnet.ps1 run ...` 使用。
+
 仓库提供 8 个控制台 Demo，分三组：
 
 - **手动映射**（Word / Excel 各 1）：完整送货单版式（A5 横版双层页眉 / 3×9 网格版头 + LOGO 二维码），展示框架能做到的效果；

@@ -32,7 +32,11 @@ public sealed class WordTemplateFiller
 
     /// <summary>Creates the filler with the given options.</summary>
     public WordTemplateFiller(TemplateFillOptions options)
-        => _options = options ?? throw new ArgumentNullException(nameof(options));
+    {
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        Guard.ThrowIfNull(options.ResourceLimits, nameof(options.ResourceLimits));
+        options.ResourceLimits.Validate();
+    }
 
     /// <summary>Fills a .docx: template + FillData → a new stream (the input stream is not modified).</summary>
     public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
@@ -41,10 +45,11 @@ public sealed class WordTemplateFiller
         Guard.ThrowIfNull(contract, nameof(contract));
         Guard.ThrowIfNull(data, nameof(data));
 
-        var bytes = StreamUtil.ReadAllBytes(template);
+        var bytes = StreamUtil.ReadAllBytes(template, _options.ResourceLimits);
 
         // 填充前软校验：先跑一遍 Validate
-        var validation = new WordTemplateValidator().Validate(new MemoryStream(bytes, writable: false), contract);
+        using var validationInput = new MemoryStream(bytes, writable: false);
+        var validation = new WordTemplateValidator(_options.ResourceLimits).ValidateCheckedPackage(validationInput, contract);
         var warnings = ApplyValidation(validation, contract);
 
         // 在工作副本上填充，避免改动调用方传入的模板流。
@@ -53,7 +58,8 @@ public sealed class WordTemplateFiller
         working.Write(bytes, 0, bytes.Length);
         working.Position = 0;
         MemoryStream output;
-        using (var document = WordprocessingDocument.Open(working, true))
+        using (var document = WordprocessingDocument.Open(working, true,
+            new OpenSettings { MaxCharactersInPart = _options.ResourceLimits.MaxXmlCharactersPerPart }))
         {
             FillCore(document, contract, data);
         }
@@ -75,8 +81,9 @@ public sealed class WordTemplateFiller
             validation, contract, _options.MissingElementPolicy, "Word",
             (key, args) => Sr.Get(key, args));
 
-    private static void FillCore(WordprocessingDocument document, TemplateContract contract, FillData data)
+    private void FillCore(WordprocessingDocument document, TemplateContract contract, FillData data)
     {
+        var budget = new TemplateResourceBudget(_options.ResourceLimits);
         foreach (var element in contract.Elements)
         {
             switch (element)
@@ -100,9 +107,10 @@ public sealed class WordTemplateFiller
                 case TableElement table:
                     if (data.Tables.TryGetValue(table.Key, out var rows))
                     {
+                        budget.AddRows(rows.Count, table.Columns.Count);
                         if (rows.Count > 0)
                         {
-                            FillTableRows(document, table, rows);
+                            FillTableRows(document, table, rows, budget);
                         }
                         else
                         {
@@ -159,9 +167,9 @@ public sealed class WordTemplateFiller
         }
     }
 
-    private static void FillImageElement(WordprocessingDocument document, string tag, object? value)
+    private void FillImageElement(WordprocessingDocument document, string tag, object? value)
     {
-        var bytes = StreamUtil.ToBytes(value);
+        var bytes = StreamUtil.ToBytes(value, _options.ResourceLimits);
         if (bytes is null || bytes.Length == 0)
         {
             return; // 不是可识别的图片字节，保留占位图
@@ -192,13 +200,20 @@ public sealed class WordTemplateFiller
     private static void FillTableRows(
         WordprocessingDocument document,
         TableElement table,
-        IReadOnlyList<IReadOnlyDictionary<string, object?>> rows)
+        IReadOnlyList<IReadOnlyDictionary<string, object?>> rows,
+        TemplateResourceBudget budget)
     {
         var (_, templateRow) = FindTemplateRow(document, table);
         if (templateRow is null)
         {
             return; // 行模板缺失已由软校验兜底
         }
+
+        // A row can contain large static content or extra cells outside the contract.
+        // Reserve their full cloning cost before allocating any copies.
+        budget.AddClonedXml(templateRow.OuterXml.Length, rows.Count - 1);
+        var extraCells = Math.Max(0L, templateRow.Descendants<TableCell>().LongCount() - table.Columns.Count);
+        budget.AddCells(checked(extraCells * rows.Count));
 
         var nextId = NextSdtId(document);
         var anchor = templateRow;

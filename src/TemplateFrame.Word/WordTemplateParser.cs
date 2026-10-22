@@ -25,11 +25,23 @@ namespace TemplateFrame.Word;
 public sealed class WordTemplateParser
 {
     private readonly ITemplateLocalizer _localizer;
+    private readonly TemplateResourceLimits _limits;
 
     /// <summary>Creates a template parser.</summary>
     /// <remarks>localizer 为 null 时使用 DefaultTemplateLocalizer.Instance。</remarks>
     public WordTemplateParser(ITemplateLocalizer? localizer = null)
-        => _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
+        : this(TemplateResourceLimits.Default, localizer)
+    {
+    }
+
+    /// <summary>Creates a parser with explicit resource limits and an optional localizer.</summary>
+    public WordTemplateParser(TemplateResourceLimits limits, ITemplateLocalizer? localizer)
+    {
+        Guard.ThrowIfNull(limits, nameof(limits));
+        limits.Validate();
+        _limits = limits;
+        _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
+    }
 
     /// <summary>Reads template data using the contract.</summary>
     /// <remarks>不改写输入内容，也不释放输入流；可定位流先归零，读取后不恢复原位置。</remarks>
@@ -53,8 +65,10 @@ public sealed class WordTemplateParser
         Guard.ThrowIfNull(template, nameof(template));
         Guard.ThrowIfNull(contract, nameof(contract));
 
-        var bytes = StreamUtil.ReadAllBytes(template);
-        using var document = OpenDocument(bytes);
+        var bytes = StreamUtil.ReadAllBytes(template, _limits);
+        using var package = new MemoryStream(bytes, writable: false);
+        using var document = OpenDocument(package);
+        var budget = new TemplateResourceBudget(_limits);
 
         var values = new Dictionary<string, object?>();
         var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
@@ -84,7 +98,7 @@ public sealed class WordTemplateParser
                         break;
 
                     case TableElement table:
-                        var rows = ReadTableRows(document, table, issues);
+                        var rows = ReadTableRows(document, table, issues, budget);
                         if (rows is not null)
                         {
                             tables[table.Key] = rows;
@@ -94,7 +108,7 @@ public sealed class WordTemplateParser
                 }
             }
         }
-        catch (XmlException ex)
+        catch (Exception ex) when (ex is XmlException or OpenXmlPackageException or InvalidDataException or FileFormatException)
         {
             // zip 有效但 document.xml 损坏：惰性 DOM 在首次树访问时才抛（OpenDocument 的 catch 罩不到这里）
             throw new InvalidOperationException(Sr.Get("Word.Validation.XmlCorrupt", ex.Message), ex);
@@ -111,13 +125,13 @@ public sealed class WordTemplateParser
     /// 打开文档包：损坏流（非 OOXML / 截断 zip）统一包装为
     /// <see cref="InvalidOperationException"/> + 本地化消息（与 Validate / Fill 的异常契约一致）。
     /// </summary>
-    private static WordprocessingDocument OpenDocument(byte[] bytes)
+    private WordprocessingDocument OpenDocument(Stream package)
     {
         try
         {
-            return WordprocessingDocument.Open(new MemoryStream(bytes, writable: false), false);
+            return WordprocessingDocument.Open(package, false, new OpenSettings { MaxCharactersInPart = _limits.MaxXmlCharactersPerPart });
         }
-        catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or FileFormatException)
+        catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or FileFormatException or XmlException)
         {
             throw new InvalidOperationException(Sr.Get("Word.Validation.CannotOpen", ex.Message), ex);
         }
@@ -189,7 +203,7 @@ public sealed class WordTemplateParser
     }
 
     /// <summary>读取图片控件：blip r:embed 指向的图片 part 字节；无 blip 或控件缺失返回 null。</summary>
-    private static byte[]? ReadImage(WordprocessingDocument document, string tag)
+    private byte[]? ReadImage(WordprocessingDocument document, string tag)
     {
         var match = SdtLocator.FindByTag(document, tag).FirstOrDefault();
         if (match is null)
@@ -210,9 +224,7 @@ public sealed class WordTemplateParser
         }
 
         using var stream = imagePart.GetStream();
-        using var buffer = new MemoryStream();
-        stream.CopyTo(buffer);
-        return buffer.ToArray();
+        return StreamUtil.ReadImageBytes(stream, _limits);
     }
 
     /// <summary>
@@ -222,7 +234,8 @@ public sealed class WordTemplateParser
     private IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(
         WordprocessingDocument document,
         TableElement table,
-        List<TemplateValidationIssue>? issues)
+        List<TemplateValidationIssue>? issues,
+        TemplateResourceBudget budget)
     {
         var columnKeys = new HashSet<string>(table.Columns.Select(c => c.Key), StringComparer.Ordinal);
         foreach (var tbl in SdtLocator.EnumerateTables(document))
@@ -247,6 +260,7 @@ public sealed class WordTemplateParser
                     continue; // 表头等无列 SDT 的行不是数据行
                 }
 
+                budget.AddRows(1, table.Columns.Count);
                 dataRowNumber++;
                 var rowValues = new Dictionary<string, object?>();
                 foreach (var column in table.Columns)

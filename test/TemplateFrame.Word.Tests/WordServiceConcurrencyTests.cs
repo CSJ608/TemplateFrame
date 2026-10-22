@@ -1,6 +1,8 @@
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Wordprocessing;
 using TemplateFrame.Builder;
 using TemplateFrame.Engine;
+using Xunit;
 
 namespace TemplateFrame.Word.Tests;
 
@@ -12,6 +14,7 @@ public sealed class WordServiceConcurrencyTests : ConcurrencyTests.TemplateServi
     protected override string Read(Stream stream)
     {
         using var document = WordprocessingDocument.Open(stream, false);
-        return document.MainDocumentPart!.Document.Body!.InnerText;
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
+        return body.InnerText;
     }
 }

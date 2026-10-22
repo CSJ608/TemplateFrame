@@ -1,6 +1,8 @@
 using DocumentFormat.OpenXml.Packaging;
+using DocumentFormat.OpenXml.Spreadsheet;
 using TemplateFrame.Builder;
 using TemplateFrame.Engine;
+using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
 
@@ -12,6 +14,7 @@ public sealed class ExcelServiceConcurrencyTests : ConcurrencyTests.TemplateServ
     protected override string Read(Stream stream)
     {
         using var document = SpreadsheetDocument.Open(stream, false);
-        return document.WorkbookPart!.WorksheetParts.Single().Worksheet.Descendants<DocumentFormat.OpenXml.Spreadsheet.Cell>().Single().InnerText;
+        var worksheet = Assert.IsType<Worksheet>(document.WorkbookPart?.WorksheetParts.Single().Worksheet);
+        return worksheet.Descendants<Cell>().Single().InnerText;
     }
 }

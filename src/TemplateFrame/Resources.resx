@@ -79,4 +79,13 @@
   <data name="Service.RecursiveBuild" xml:space="preserve">
     <value>不支持在同一服务实例中递归生成模板。</value>
   </data>
+  <data name="ResourceLimit.Exceeded" xml:space="preserve">
+    <value>文档处理超出资源限额：{0}。</value>
+  </data>
+  <data name="ResourceLimit.InvalidPackage" xml:space="preserve">
+    <value>无法打开文档包：{0}</value>
+  </data>
+  <data name="ResourceLimit.SeekRequired" xml:space="preserve">
+    <value>文档包校验需要可定位的流。</value>
+  </data>
 </root>
