@@ -1,6 +1,6 @@
 # TemplateFrame Demo 使用说明
 
-样例现运行于 .NET 10，构建 SDK 由根目录 `global.json` 固定；项目本地运行时可通过 `./eng/dotnet.ps1 run ...` 使用。
+样例现运行于 .NET 10，构建 SDK 由根目录 `global.json` 固定；直接使用系统级 `dotnet run ...`。
 
 仓库提供 8 个控制台 Demo，分三组：
 

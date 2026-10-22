@@ -4,22 +4,20 @@
 
 ## 开发与验证
 
-`global.json` 要求 .NET SDK 10.0.402 或同 feature band 的更新补丁，并优先查找仓库的 `.dotnet` 目录。CI 显式安装 SDK 8.0.426 和 10.0.402，以提供 .NET 8.0.32 和 10.0.13 测试宿主。
+`global.json` 要求系统安装 .NET SDK 10.0.402 或同 feature band 的更新补丁，不再优先使用仓库内的 SDK。CI 显式安装 SDK 8.0.426 和 10.0.402，以提供 .NET 8.0.32 和 10.0.13 测试宿主。
 
-本机已在忽略目录 `.dotnet/` 安装官方 SDK 10.0.402 和 runtime 8.0.32，下载文件经过官方 release metadata 的 SHA512 校验。该目录不进入 Git，其他开发机需要自行安装满足要求的 SDK/runtime。本地副本不更新系统级 Visual Studio SDK、其他应用或生产服务器。
-
-若有项目本地 SDK，使用包装脚本可确保测试子进程也使用本地已修补运行时，而不是系统级旧宿主：
+使用系统级命令验证环境与项目：
 
 ```powershell
-./eng/dotnet.ps1 --info
-./eng/dotnet.ps1 restore TemplateFrame.slnx
+dotnet --info
+dotnet restore TemplateFrame.slnx
 ./eng/audit-dependencies.ps1
-./eng/dotnet.ps1 build TemplateFrame.slnx -c Release --no-restore
-./eng/dotnet.ps1 test TemplateFrame.slnx -c Release --no-build --collect:"XPlat Code Coverage"
-./eng/dotnet.ps1 format TemplateFrame.slnx --verify-no-changes --no-restore
+dotnet build TemplateFrame.slnx -c Release --no-restore
+dotnet test TemplateFrame.slnx -c Release --no-build --collect:"XPlat Code Coverage"
+dotnet format TemplateFrame.slnx --verify-no-changes --no-restore
 ```
 
-已全局安装合适 SDK/runtime 时可直接使用 `dotnet`。Linux 仅运行 `-f net8.0` 和 `-f net10.0`，net472 需要 Windows .NET Framework 环境。`sdk.paths` 只影响 SDK 查找，不会自动改变直接运行应用时的 runtime；以实际 `--info` 和测试宿主为准。
+Linux 仅运行 `-f net8.0` 和 `-f net10.0`，net472 需要 Windows .NET Framework 环境。核验系统安装时应检查 `dotnet --info` 的 SDK Base Path 与 runtime 路径，避免把其他目录里的副本当成系统更新。此次系统安装与实际验证记录见 [系统更新记录](reviews/2026-10-22-system-update.md)。
 
 还原启用全部传递依赖审计，审计失败及高危/严重 NuGet 告警会阻断构建。`eng/audit-dependencies.ps1` 仅检查 solution 内的项目，校验 NuGet 漏洞索引时效并独立查询 OSV；已知有漏洞的旧版包作为阳性对照。OSV 命中、服务失败、结果不完整或阳性对照失败均阻断。过期 NuGet 数据源会明确告警，不能凭一次无告警还原放行。报告输出到忽略目录 `artifacts/dependency-audit.json`。
 
@@ -80,4 +78,4 @@ Simple 回读按实际存在的行排序处理，保留跳过全空行与重复�
 
 Validate 校验模板契约，**不进行活动内容净化**。Fill 保留模板中的其他包内容，包括可能的宏、OLE、外部关系或旧图片资源。外部模板上传后再向他人分发的业务，需要独立的允许/拒绝策略；替换图片不能当作删除原始敏感字节。本库不执行宏或公式，也不主动获取外部关系 URL。
 
-部署更新与源码升级分开验收：framework-dependent 应用更新实际宿主，self-contained 应用重新发布，容器重新构建并部署已修补镜像。项目本地的 SDK/runtime 不会替这些环境打补丁。
+部署更新与源码升级分开验收：framework-dependent 应用更新实际宿主，self-contained 应用重新发布，容器重新构建并部署已修补镜像。开发机系统级更新不会替其他服务器或自包含应用打补丁。

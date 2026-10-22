@@ -362,7 +362,7 @@ TemplateFrame/
 ├─ TemplateFrame.slnx                  # 解决方案（src / test / samples 三组解决方案文件夹）
 ├─ .editorconfig                       # 全仓风格基线（CI 用 dotnet format --verify-no-changes 校验）
 ├─ global.json / Directory.Build.props / NuGet.Config # SDK 选择、全传递依赖审计和官方包源
-├─ eng/                                # 项目本地 dotnet 包装与独立依赖审计脚本
+├─ eng/                                # 独立依赖审计脚本
 ├─ icon.png                            # NuGet 包图标（四包共用，经 src/Directory.Build.props 打入）
 ├─ src/Directory.Build.props           # 四包共享打包元数据单一来源（版本/作者/许可/图标/符号包）
 ├─ src/TemplateFrame/               # 基础包：契约模型 + 引擎抽象 + 数据形状（格式无关）
@@ -436,7 +436,7 @@ TemplateFrame/
 
 Actions 固定完整提交 SHA，checkout 不保留凭据；测试 job 只有读取权限，仅发布 job 授予 `contents: write` 和 `id-token: write`。还原检查全部直接及传递依赖，审计失败和高危/严重 NuGet 告警阻断；独立脚本检查漏洞源时效，以已知有漏洞的包验证 OSV 阳性对照，命中、服务失败或结果不完整均阻断。过期 NuGet 数据源明确告警，不能用单次零告警代替完整判断；Dependabot 定期检查 NuGet 与 Actions 更新。
 
-日常发布、首次配置与四包验证见 [PUBLISHING](PUBLISHING.md)；发布版本与说明只在 [CHANGELOG](../CHANGELOG.md) 维护。当前本地验证及包检查不替代最终提交上的远端 CI，也不代表系统级 SDK/runtime 或生产环境已更新。
+日常发布、首次配置与四包验证见 [PUBLISHING](PUBLISHING.md)；发布版本与说明只在 [CHANGELOG](../CHANGELOG.md) 维护。当前本地验证及包检查不替代最终提交上的远端 CI。开发机系统级 SDK/runtime 更新另有[独立记录](reviews/2026-10-22-system-update.md)，不代表其他生产环境已更新。
 
 ---
 

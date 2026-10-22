@@ -29,7 +29,7 @@ $ReleaseTag
 
 ## 本地验证（四包）
 
-使用 `global.json` 固定的 .NET SDK `10.0.402`；CI 另安装 `8.0.426` 提供已修补的 net8 运行时。项目本地安装使用 `./eng/dotnet.ps1` 替代下文 `dotnet`，参见 [安全与开发环境](SECURITY.md)。在 Windows 执行下面的全目标验证（测试目标 `net8.0` / `net472` / `net10.0`；库资产为 `netstandard2.0` / `net462` / `net8.0`）。每步成功后再继续：
+使用 `global.json` 固定的 .NET SDK `10.0.402`；CI 另安装 `8.0.426` 提供已修补的 net8 运行时。使用系统级 `dotnet`，环境核验方式参见 [安全与开发环境](SECURITY.md)。在 Windows 执行下面的全目标验证（测试目标 `net8.0` / `net472` / `net10.0`；库资产为 `netstandard2.0` / `net462` / `net8.0`）。每步成功后再继续：
 
 ```powershell
 dotnet restore TemplateFrame.slnx

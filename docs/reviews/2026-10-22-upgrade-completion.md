@@ -1,6 +1,6 @@
 **TemplateFrame 升级实施记录 · 2026-10-22**
 
-产品实现已在 `codex/security-upgrade-20261022` 分支提交为 `1b46cbd`（`fix(security): bound Office processing and update dependencies`），使用 Conventional Commits；ROADMAP 当前入口与 DESIGN 已同步。该提交经过未参与实施者的独立静态审阅，未发现确定的 P1/P2 缺陷；发现的当前文档提交状态过时问题已在收尾中更正。静态审阅不替代远端 CI 或独立运行验收。系统级更新按用户后续要求单独推进，项目本地 SDK 不作为系统升级完成证据。
+产品实现已在 `codex/security-upgrade-20261022` 分支提交为 `1b46cbd`（`fix(security): bound Office processing and update dependencies`），使用 Conventional Commits；ROADMAP 当前入口与 DESIGN 已同步。该提交经过未参与实施者的独立静态审阅，未发现确定的 P1/P2 缺陷；发现的当前文档提交状态过时问题已在收尾中更正。静态审阅不替代远端 CI 或独立运行验收。系统级更新已按用户后续要求另行完成，见[系统更新记录](2026-10-22-system-update.md)；下文保留首次仓库升级阶段的验证记录。
 
 本轮已将安全评估中的优先修复与已验证依赖组合落到工作区。正式版本号仍为 2.4.1，变更记录在 CHANGELOG 的 Unreleased；未创建 tag、推送提交或发布 NuGet/GitHub Release。前置评估保留为提交 a4163fd 的历史快照。
 
@@ -34,6 +34,6 @@
 
 资源默认值、配置代码及完整开发命令见 [SECURITY.md](../SECURITY.md)。原入口签名保留，但有限默认预算会拒绝部分超大文件；可信大文档业务需要按容量显式配置。Validate 不负责宏、OLE、外部关系净化，也不提供进程峰值内存硬上限；低层 Builder 仍面向受信任调用。
 
-本机无管理员权限，因此补丁工具链安装在忽略目录 `.dotnet/`，使用 `./eng/dotnet.ps1` 可同时选择已修补宿主和测试子进程环境。系统级 Visual Studio SDK、PowerShell 自带 runtime、其他应用和生产服务器没有被修改。发布应用时仍须更新实际 runtime/self-contained 制品/容器镜像。
+首次验证阶段使用项目内临时补丁工具链。随后用户授权并完成了系统级 Visual Studio／.NET 更新；临时 SDK 已移出仓库，包装脚本和本地优先路径已删除，当前直接使用系统 `dotnet`。PowerShell 自带 runtime、其他应用和生产服务器不在本次操作范围；发布应用时仍须核验实际 runtime/self-contained 制品/容器镜像。
 
 本轮在 Windows 执行验证；Linux 与远程 GitHub Actions 已配置但没有实际执行。发布前仍按 [PUBLISHING.md](../PUBLISHING.md) 确定新版本号、归档 Unreleased 并验收远程 CI。

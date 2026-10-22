@@ -13,5 +13,3 @@ BenchmarkDotNet.Artifacts/
 coverlet/
 *.trx
 !**/packages/**
-# Project-local patched SDK/runtime
-.dotnet/
