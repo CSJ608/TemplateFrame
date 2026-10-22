@@ -30,7 +30,11 @@ public sealed class ExcelTemplateFiller
 
     /// <summary>Creates the filler with the given options.</summary>
     public ExcelTemplateFiller(TemplateFillOptions options)
-        => _options = options ?? throw new ArgumentNullException(nameof(options));
+    {
+        _options = options ?? throw new ArgumentNullException(nameof(options));
+        Guard.ThrowIfNull(_options.ResourceLimits, nameof(options.ResourceLimits));
+        _options.ResourceLimits.Validate();
+    }
 
     /// <summary>Fills an .xlsx: template + FillData → a new stream (the input stream is not modified).</summary>
     public TemplateFillResult Fill(Stream template, TemplateContract contract, FillData data)
@@ -38,11 +42,20 @@ public sealed class ExcelTemplateFiller
         Guard.ThrowIfNull(template, nameof(template));
         Guard.ThrowIfNull(contract, nameof(contract));
         Guard.ThrowIfNull(data, nameof(data));
+        var budget = new TemplateResourceBudget(_options.ResourceLimits);
+        foreach (var table in contract.Elements.OfType<TableElement>())
+        {
+            if (data.Tables.TryGetValue(table.Key, out var rows))
+            {
+                budget.AddRows(rows.Count, table.Columns.Count);
+            }
+        }
 
-        var bytes = StreamUtil.ReadAllBytes(template);
+        var bytes = StreamUtil.ReadAllBytes(template, _options.ResourceLimits);
 
         // 填充前软校验：先跑一遍 Validate
-        var validation = new ExcelTemplateValidator().Validate(new MemoryStream(bytes, writable: false), contract);
+        using var validationInput = new MemoryStream(bytes, writable: false);
+        var validation = new ExcelTemplateValidator(_options.ResourceLimits).ValidateCheckedPackage(validationInput, contract);
         var warnings = ApplyValidation(validation, contract);
 
         // 在工作副本上填充，避免改动调用方传入的模板流
@@ -50,16 +63,21 @@ public sealed class ExcelTemplateFiller
         working.Write(bytes, 0, bytes.Length);
         working.Position = 0;
         MemoryStream output;
-        using (var document = SpreadsheetDocument.Open(working, true))
+        using (var document = SpreadsheetDocument.Open(working, true,
+                   new OpenSettings { MaxCharactersInPart = _options.ResourceLimits.MaxXmlCharactersPerPart }))
         {
             try
             {
-                FillCore(document.WorkbookPart!, contract, data);
+                FillCore(document.WorkbookPart!, contract, data, budget);
             }
             catch (XmlException ex)
             {
                 // zip 有效但 sheet XML 损坏：校验器只读 workbook.xml（命名区域）发现不了，惰性 DOM 在这里才抛
                 throw new InvalidOperationException(Sr.Get("Excel.Validation.XmlCorrupt", ex.Message), ex);
+            }
+            catch (Exception ex) when (ex is FormatException or OverflowException)
+            {
+                throw new InvalidOperationException(Sr.Get("Excel.Validation.CannotOpen", ex.Message), ex);
             }
         }
 
@@ -81,7 +99,7 @@ public sealed class ExcelTemplateFiller
             validation, contract, _options.MissingElementPolicy, "Excel",
             (key, args) => Sr.Get(key, args));
 
-    private static void FillCore(WorkbookPart workbookPart, TemplateContract contract, FillData data)
+    private void FillCore(WorkbookPart workbookPart, TemplateContract contract, FillData data, TemplateResourceBudget budget)
     {
         foreach (var element in contract.Elements)
         {
@@ -106,7 +124,7 @@ public sealed class ExcelTemplateFiller
                 case TableElement table:
                     if (data.Tables.TryGetValue(table.Key, out var rows))
                     {
-                        FillTableRows(workbookPart, table, rows);
+                        FillTableRows(workbookPart, table, rows, budget);
                     }
 
                     break;
@@ -133,9 +151,9 @@ public sealed class ExcelTemplateFiller
         WriteValue(workbookPart, cell, element, value);
     }
 
-    private static void FillImageElement(WorkbookPart workbookPart, ImageElement element, object? value)
+    private void FillImageElement(WorkbookPart workbookPart, ImageElement element, object? value)
     {
-        var bytes = StreamUtil.ToBytes(value);
+        var bytes = StreamUtil.ToBytes(value, _options.ResourceLimits);
         if (bytes is null || bytes.Length == 0)
         {
             return; // 不是可识别的图片字节，保留占位图
@@ -160,7 +178,8 @@ public sealed class ExcelTemplateFiller
     private static void FillTableRows(
         WorkbookPart workbookPart,
         TableElement table,
-        IReadOnlyList<IReadOnlyDictionary<string, object?>> rows)
+        IReadOnlyList<IReadOnlyDictionary<string, object?>> rows,
+        TemplateResourceBudget budget)
     {
         // 列命名区域 → 示例行（取第一列起始行）
         var columnRanges = new List<(TextElement Column, (int Row, int Col) Start)>();
@@ -214,8 +233,16 @@ public sealed class ExcelTemplateFiller
             return;
         }
 
-        // 克隆示例行 2..N（重写行号/单元格引用）并把下方既有行整体下移（等价 Excel 插入行）
+        // The complete physical row is cloned, including cells outside the contract.
+        var extraCells = Math.Max(0, sampleRowElement.Elements<Cell>().Count() - table.Columns.Count);
+        budget.AddCells(checked((long)rows.Count * extraCells));
         var delta = rows.Count - 1;
+        if (delta > 0)
+        {
+            budget.AddClonedXml(sampleRowElement.OuterXml.Length, delta);
+        }
+
+        // 克隆示例行 2..N（重写行号/单元格引用）并把下方既有行整体下移（等价 Excel 插入行）
         var clones = ExcelRowShifter.CloneAndShiftRows(sheetData, sampleRowElement, sampleRow, rows.Count);
 
         // 逐行填值

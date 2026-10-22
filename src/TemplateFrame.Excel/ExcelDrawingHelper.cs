@@ -1,5 +1,7 @@
 using DocumentFormat.OpenXml;
 using DocumentFormat.OpenXml.Packaging;
+using TemplateFrame.Engine;
+using TemplateFrame.Internal;
 using A = DocumentFormat.OpenXml.Drawing;
 using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
 
@@ -83,7 +85,7 @@ internal static class ExcelDrawingHelper
         => anchor?.GetFirstChild<Xdr.Picture>()?.BlipFill?.Blip?.Embed?.Value;
 
     /// <summary>读锚定格图片字节；无 drawing / 无 blip 返回 null。</summary>
-    public static byte[]? ReadImageBytes(WorksheetPart worksheetPart, int col0, int row0)
+    public static byte[]? ReadImageBytes(WorksheetPart worksheetPart, int col0, int row0, TemplateResourceLimits limits)
     {
         var drawingsPart = GetDrawingsPart(worksheetPart);
         if (drawingsPart is null)
@@ -103,9 +105,7 @@ internal static class ExcelDrawingHelper
         }
 
         using var stream = imagePart.GetStream();
-        using var buffer = new MemoryStream();
-        stream.CopyTo(buffer);
-        return buffer.ToArray();
+        return StreamUtil.ReadImageBytes(stream, limits);
     }
 
     /// <summary>替换锚定格图片：新图片 part + 关系，更新 r:embed；尺寸/位置继承占位。</summary>

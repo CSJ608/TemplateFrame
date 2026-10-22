@@ -139,16 +139,16 @@ public sealed class DocumentContentLocalizationTests
     private static string CellText(Stream stream, string address)
     {
         using var document = SpreadsheetDocument.Open(stream, false);
-        var workbookPart = document.WorkbookPart!;
-        var worksheet = workbookPart.WorksheetParts.First().Worksheet;
+        var workbookPart = Assert.IsType<WorkbookPart>(document.WorkbookPart);
+        var worksheet = Assert.IsType<Worksheet>(workbookPart.WorksheetParts.First().Worksheet);
         var cell = worksheet.Descendants<Cell>().First(c =>
             string.Equals(c.CellReference?.Value, address, StringComparison.OrdinalIgnoreCase));
 
         if (cell.DataType?.Value == CellValues.SharedString && cell.CellValue?.Text is { } indexText
             && int.TryParse(indexText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index))
         {
-            return workbookPart.SharedStringTablePart?.SharedStringTable
-                .Elements<SharedStringItem>().ElementAtOrDefault(index)?.Text?.Text ?? string.Empty;
+            var sharedStrings = Assert.IsType<SharedStringTable>(workbookPart.SharedStringTablePart?.SharedStringTable);
+            return sharedStrings.Elements<SharedStringItem>().ElementAtOrDefault(index)?.Text?.Text ?? string.Empty;
         }
 
         return cell.InlineString?.Text?.Text ?? cell.CellValue?.Text ?? string.Empty;
@@ -176,8 +176,8 @@ public sealed class DocumentContentLocalizationTests
 
         // 命名区域仍用列 Key（不本地化），保证 Fill/Parse 按命名区域匹配
         using var document = SpreadsheetDocument.Open(stream, false);
-        var names = document.WorkbookPart!.Workbook.DefinedNames!
-            .Elements<DefinedName>()
+        var definedNames = Assert.IsType<DefinedNames>(document.WorkbookPart?.Workbook?.DefinedNames);
+        var names = definedNames.Elements<DefinedName>()
             .Select(d => d.Name!.Value!)
             .ToList();
         Assert.Contains("TF_Materials_Code", names);

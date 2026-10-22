@@ -1,0 +1,4193 @@
+{
+  "schema_version": 1,
+  "audit_date": "2026-10-22",
+  "timezone": "Asia/Shanghai",
+  "commit": "a4163fdeb78a8824fb0eec29ca3cb7e0239ddc30",
+  "assembled_at_utc": "2026-10-22T09:41:44.97148+08:00",
+  "source_artifact_root": "$TEMP/TemplateFrame-security-audit-20261022",
+  "scope": "TemplateFrame library, samples, tests, benchmarks, build SDK/runtime, GitHub Actions, bounded document-input probes; no production deployment changes.",
+  "source_snapshot": {
+    "path": "source-snapshot.zip",
+    "sha256": "c199e75dcccfe26df9a6f2ed992e10839daacdc304da057e4fec25a4a4d5e326",
+    "bytes": 487727
+  },
+  "current_packages": {
+    "inventory": [
+      {
+        "id": "BenchmarkDotNet.Annotations",
+        "version": "0.14.0"
+      },
+      {
+        "id": "BenchmarkDotNet",
+        "version": "0.14.0"
+      },
+      {
+        "id": "CommandLineParser",
+        "version": "2.9.1"
+      },
+      {
+        "id": "coverlet.collector",
+        "version": "6.0.4"
+      },
+      {
+        "id": "DocumentFormat.OpenXml.Framework",
+        "version": "3.3.0"
+      },
+      {
+        "id": "DocumentFormat.OpenXml",
+        "version": "3.3.0"
+      },
+      {
+        "id": "Gee.External.Capstone",
+        "version": "2.3.0"
+      },
+      {
+        "id": "Iced",
+        "version": "1.17.0"
+      },
+      {
+        "id": "Microsoft.Bcl.AsyncInterfaces",
+        "version": "1.1.0"
+      },
+      {
+        "id": "Microsoft.Bcl.AsyncInterfaces",
+        "version": "8.0.0"
+      },
+      {
+        "id": "Microsoft.CodeAnalysis.Analyzers",
+        "version": "3.3.3"
+      },
+      {
+        "id": "Microsoft.CodeAnalysis.Common",
+        "version": "4.1.0"
+      },
+      {
+        "id": "Microsoft.CodeAnalysis.CSharp",
+        "version": "4.1.0"
+      },
+      {
+        "id": "Microsoft.CodeCoverage",
+        "version": "17.14.1"
+      },
+      {
+        "id": "Microsoft.Diagnostics.NETCore.Client",
+        "version": "0.2.251802"
+      },
+      {
+        "id": "Microsoft.Diagnostics.Runtime",
+        "version": "2.2.332302"
+      },
+      {
+        "id": "Microsoft.Diagnostics.Tracing.TraceEvent",
+        "version": "3.1.8"
+      },
+      {
+        "id": "Microsoft.DotNet.PlatformAbstractions",
+        "version": "3.1.6"
+      },
+      {
+        "id": "Microsoft.Extensions.Configuration.Abstractions",
+        "version": "2.1.1"
+      },
+      {
+        "id": "Microsoft.Extensions.Configuration.Binder",
+        "version": "2.1.1"
+      },
+      {
+        "id": "Microsoft.Extensions.Configuration",
+        "version": "2.1.1"
+      },
+      {
+        "id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "version": "2.1.1"
+      },
+      {
+        "id": "Microsoft.Extensions.Logging.Abstractions",
+        "version": "2.1.1"
+      },
+      {
+        "id": "Microsoft.Extensions.Logging",
+        "version": "2.1.1"
+      },
+      {
+        "id": "Microsoft.Extensions.Options",
+        "version": "2.1.1"
+      },
+      {
+        "id": "Microsoft.Extensions.Primitives",
+        "version": "2.1.1"
+      },
+      {
+        "id": "Microsoft.NET.Test.Sdk",
+        "version": "17.14.1"
+      },
+      {
+        "id": "Microsoft.NETCore.Platforms",
+        "version": "1.1.0"
+      },
+      {
+        "id": "Microsoft.NETCore.Platforms",
+        "version": "5.0.0"
+      },
+      {
+        "id": "Microsoft.NETFramework.ReferenceAssemblies.net462",
+        "version": "1.0.3"
+      },
+      {
+        "id": "Microsoft.NETFramework.ReferenceAssemblies",
+        "version": "1.0.3"
+      },
+      {
+        "id": "Microsoft.TestPlatform.ObjectModel",
+        "version": "17.13.0"
+      },
+      {
+        "id": "Microsoft.TestPlatform.ObjectModel",
+        "version": "17.14.1"
+      },
+      {
+        "id": "Microsoft.TestPlatform.TestHost",
+        "version": "17.14.1"
+      },
+      {
+        "id": "Microsoft.Win32.Registry",
+        "version": "5.0.0"
+      },
+      {
+        "id": "NETStandard.Library",
+        "version": "2.0.3"
+      },
+      {
+        "id": "Newtonsoft.Json",
+        "version": "13.0.3"
+      },
+      {
+        "id": "Perfolizer",
+        "version": "0.3.17"
+      },
+      {
+        "id": "QRCoder",
+        "version": "1.6.0"
+      },
+      {
+        "id": "System.Buffers",
+        "version": "4.5.1"
+      },
+      {
+        "id": "System.CodeDom",
+        "version": "5.0.0"
+      },
+      {
+        "id": "System.Collections.Immutable",
+        "version": "1.5.0"
+      },
+      {
+        "id": "System.Collections.Immutable",
+        "version": "5.0.0"
+      },
+      {
+        "id": "System.Collections.Immutable",
+        "version": "8.0.0"
+      },
+      {
+        "id": "System.IO.Packaging",
+        "version": "8.0.1"
+      },
+      {
+        "id": "System.Management",
+        "version": "5.0.0"
+      },
+      {
+        "id": "System.Memory",
+        "version": "4.5.4"
+      },
+      {
+        "id": "System.Memory",
+        "version": "4.5.5"
+      },
+      {
+        "id": "System.Numerics.Vectors",
+        "version": "4.4.0"
+      },
+      {
+        "id": "System.Numerics.Vectors",
+        "version": "4.5.0"
+      },
+      {
+        "id": "System.Reflection.Metadata",
+        "version": "1.6.0"
+      },
+      {
+        "id": "System.Reflection.Metadata",
+        "version": "5.0.0"
+      },
+      {
+        "id": "System.Reflection.Metadata",
+        "version": "8.0.0"
+      },
+      {
+        "id": "System.Runtime.CompilerServices.Unsafe",
+        "version": "4.5.3"
+      },
+      {
+        "id": "System.Runtime.CompilerServices.Unsafe",
+        "version": "5.0.0"
+      },
+      {
+        "id": "System.Runtime.CompilerServices.Unsafe",
+        "version": "6.0.0"
+      },
+      {
+        "id": "System.Security.AccessControl",
+        "version": "5.0.0"
+      },
+      {
+        "id": "System.Security.Principal.Windows",
+        "version": "5.0.0"
+      },
+      {
+        "id": "System.Text.Encoding.CodePages",
+        "version": "4.5.1"
+      },
+      {
+        "id": "System.Text.Encodings.Web",
+        "version": "8.0.0"
+      },
+      {
+        "id": "System.Text.Json",
+        "version": "8.0.5"
+      },
+      {
+        "id": "System.Threading.Tasks.Extensions",
+        "version": "4.5.4"
+      },
+      {
+        "id": "System.ValueTuple",
+        "version": "4.5.0"
+      },
+      {
+        "id": "xunit.abstractions",
+        "version": "2.0.3"
+      },
+      {
+        "id": "xunit.analyzers",
+        "version": "1.18.0"
+      },
+      {
+        "id": "xunit.assert",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.core",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.extensibility.core",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.extensibility.execution",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.runner.visualstudio",
+        "version": "3.1.4"
+      },
+      {
+        "id": "xunit",
+        "version": "2.9.3"
+      }
+    ],
+    "package_version_pair_count": 71,
+    "inventory_artifact": {
+      "path": "resolved-packages.txt",
+      "sha256": "9f081f817fcdc050d47cc71c0fd1420eb28766773c7757d0dce0bcecb3ae8432",
+      "bytes": 2439
+    },
+    "osv": {
+      "source": "https://api.osv.dev/v1/querybatch",
+      "ecosystem": "NuGet",
+      "inventory_count": 71,
+      "response_count": 71,
+      "matched_result_count": 0,
+      "vulnerability_match_count": 0,
+      "raw_response": {
+        "results": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      "artifact": {
+        "path": "osv-audit.json",
+        "sha256": "96fb78a3aea88a17ee4a7752df8c1c597a646bf4aeb462fcea44c74187e5d017",
+        "bytes": 665
+      },
+      "scope_note": "Results apply to queried package/version pairs, not bundled runtimes, SDKs, or unknown vulnerabilities."
+    }
+  },
+  "osv_positive_controls": {
+    "source": "https://api.osv.dev/v1/querybatch",
+    "raw_response": {
+      "results": [
+        {
+          "vulns": [
+            {
+              "id": "GHSA-f32c-w444-8ppv",
+              "modified": "2025-03-31T13:42:04.626513Z"
+            },
+            {
+              "id": "GHSA-qj66-m88j-hmgj",
+              "modified": "2024-10-22T07:57:01.891079Z"
+            }
+          ]
+        },
+        {
+          "vulns": [
+            {
+              "id": "GHSA-8g4q-xg66-9fp4",
+              "modified": "2024-10-24T16:37:32.38091Z"
+            }
+          ]
+        }
+      ]
+    },
+    "response_count": 2,
+    "matched_result_count": 2,
+    "request_parameters": {
+      "queries": [
+        {
+          "version": "8.0.0",
+          "package": {
+            "name": "System.IO.Packaging",
+            "ecosystem": "NuGet"
+          }
+        },
+        {
+          "version": "8.0.4",
+          "package": {
+            "name": "System.Text.Json",
+            "ecosystem": "NuGet"
+          }
+        }
+      ]
+    },
+    "artifact": {
+      "path": "osv-positive-controls.json",
+      "sha256": "4cfb1eec45528909ba5a3bc16d46ac801cd7e49cecf0e6a4b7ab19197e6a5c50",
+      "bytes": 455
+    },
+    "request_artifact": {
+      "path": "osv-positive-controls-request.json",
+      "sha256": "fda3dddca6fa0e161d91f6b9a0519aa29f65a69155e49b3b31cd65707542252c",
+      "bytes": 305
+    },
+    "paired_results": [
+      {
+        "query": {
+          "version": "8.0.0",
+          "package": {
+            "name": "System.IO.Packaging",
+            "ecosystem": "NuGet"
+          }
+        },
+        "result": {
+          "vulns": [
+            {
+              "id": "GHSA-f32c-w444-8ppv",
+              "modified": "2025-03-31T13:42:04.626513Z"
+            },
+            {
+              "id": "GHSA-qj66-m88j-hmgj",
+              "modified": "2024-10-22T07:57:01.891079Z"
+            }
+          ]
+        }
+      },
+      {
+        "query": {
+          "version": "8.0.4",
+          "package": {
+            "name": "System.Text.Json",
+            "ecosystem": "NuGet"
+          }
+        },
+        "result": {
+          "vulns": [
+            {
+              "id": "GHSA-8g4q-xg66-9fp4",
+              "modified": "2024-10-24T16:37:32.38091Z"
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "nuget_audit": {
+    "command_result": {
+      "version": 1,
+      "parameters": "--vulnerable --include-transitive",
+      "sources": [
+        "https://api.nuget.org/v3/index.json"
+      ],
+      "projects": [
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/samples/TemplateFrame.Demo.Excel.AutoMapping/TemplateFrame.Demo.Excel.AutoMapping.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/samples/TemplateFrame.Demo.Excel.I18n/TemplateFrame.Demo.Excel.I18n.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/samples/TemplateFrame.Demo.Excel.Simple.I18n/TemplateFrame.Demo.Excel.Simple.I18n.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/samples/TemplateFrame.Demo.Excel.Simple/TemplateFrame.Demo.Excel.Simple.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/samples/TemplateFrame.Demo.Excel/TemplateFrame.Demo.Excel.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/samples/TemplateFrame.Demo.Word.AutoMapping/TemplateFrame.Demo.Word.AutoMapping.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/samples/TemplateFrame.Demo.Word.I18n/TemplateFrame.Demo.Word.I18n.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/samples/TemplateFrame.Demo.Word/TemplateFrame.Demo.Word.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/src/TemplateFrame.Excel/TemplateFrame.Excel.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/src/TemplateFrame.Word/TemplateFrame.Word.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/src/TemplateFrame/TemplateFrame.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/test/TemplateFrame.Benchmarks/TemplateFrame.Benchmarks.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/test/TemplateFrame.Tests/TemplateFrame.Tests.csproj"
+        },
+        {
+          "path": "C:/work/OpenCode/TemplateFrame/test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj"
+        }
+      ]
+    },
+    "artifact": {
+      "path": "vulnerable.json",
+      "sha256": "3adf31c59c252bb5b83cc8db15357a3b16422de6cb8c8d7ca36a8a254dbf294b",
+      "bytes": 2376
+    },
+    "vulnerability_index_source": "https://api.nuget.org/v3/vulnerabilities/index.json",
+    "vulnerability_index": [
+      {
+        "@name": "base",
+        "@id": "https://api.nuget.org/v3/vulnerabilities/vulnerability.base.json",
+        "@updated": "2023-12-13T00:48:47.5745986Z",
+        "comment": "The base data for vulnerability update periodically"
+      },
+      {
+        "@name": "update",
+        "@id": "https://api.nuget.org/v3/vulnerabilities/vulnerability.update.json",
+        "@updated": "2023-12-13T00:48:47.5745986Z",
+        "comment": "The patch data for the vulnerability. Contains all the vulnerabilities since base was last updated."
+      }
+    ],
+    "base_package_count": 402,
+    "base_contains_system_io_packaging": false,
+    "base_contains_system_text_json": false,
+    "update_payload": {},
+    "feed_artifacts": [
+      {
+        "path": "vulnerability-feed-index.json",
+        "sha256": "c26e36f35d20b43675e73a8a798ac0a41422aa6d1eb70abc32e036b374a80ad1",
+        "bytes": 521
+      },
+      {
+        "path": "vulnerability-feed-base.json",
+        "sha256": "7fbb610fce65859e2fac71f3feab09aa8cf109a897b00a1e76b9339df608e91c",
+        "bytes": 204489
+      },
+      {
+        "path": "vulnerability-feed-update.json",
+        "sha256": "e3566b3a06430868d71e9287dfd6c6c520a3da027aabea01951d407ee131dc2f",
+        "bytes": 4
+      }
+    ],
+    "limitation": "Both index timestamps are 2023-12-13. Known 2024 Packaging/Json advisories are absent from these fetched feeds. A zero NuGet audit result is therefore not sufficient on its own; OSV and official advisory queries provide independent evidence."
+  },
+  "runtime_evidence": {
+    "audit_date": "2026-10-22",
+    "provenance": "Selected exact fields transcribed from successful PowerShell Invoke-RestMethod/Invoke-WebRequest results in this task. A subsequent full re-fetch hit GitHub unauthenticated IP rate limits. No claims here depend on empty web-tool results.",
+    "sources": {
+      "release_index": "https://dotnetcli.blob.core.windows.net/dotnet/release-metadata/releases-index.json",
+      "runtime_advisories": "https://api.github.com/repos/dotnet/runtime/security-advisories?per_page=100",
+      "sdk_advisories": "https://api.github.com/repos/dotnet/sdk/security-advisories?per_page=100",
+      "openxml_releases": "https://api.github.com/repos/dotnet/Open-XML-SDK/releases?per_page=5",
+      "openxml_advisories": "https://api.github.com/repos/dotnet/Open-XML-SDK/security-advisories",
+      "framework_lifecycle": "https://learn.microsoft.com/en-us/lifecycle/products/microsoft-net-framework",
+      "nuget_vulnerability_index": "https://api.nuget.org/v3/vulnerabilities/index.json"
+    },
+    "release_channels": [
+      {
+        "channel-version": "10.0",
+        "latest-release": "10.0.13",
+        "latest-release-date": "2026-10-13",
+        "latest-sdk": "10.0.402",
+        "support-phase": "active",
+        "eol-date": "2028-11-14"
+      },
+      {
+        "channel-version": "9.0",
+        "latest-release": "9.0.21",
+        "latest-release-date": "2026-10-13",
+        "latest-sdk": "9.0.319",
+        "support-phase": "maintenance",
+        "eol-date": "2026-11-10"
+      },
+      {
+        "channel-version": "8.0",
+        "latest-release": "8.0.32",
+        "latest-release-date": "2026-10-13",
+        "latest-sdk": "8.0.426",
+        "support-phase": "maintenance",
+        "eol-date": "2026-11-10"
+      }
+    ],
+    "openxml_releases": [
+      {
+        "tag_name": "v3.5.1",
+        "published_at": "2026-03-18T18:21:55Z",
+        "html_url": "https://github.com/dotnet/Open-XML-SDK/releases/tag/v3.5.1",
+        "change_summary": "Office2016 chart classes and attributes added; release body does not identify a security fix."
+      },
+      {
+        "tag_name": "v3.4.1",
+        "published_at": "2026-01-06T19:30:12Z",
+        "html_url": "https://github.com/dotnet/Open-XML-SDK/releases/tag/v3.4.1",
+        "change_summary": "Performance, XML serialization, document error reporting, Office schemas and MP4 support; release body does not identify a security fix."
+      },
+      {
+        "tag_name": "v3.3.0",
+        "published_at": "2025-03-05T21:46:12Z",
+        "html_url": "https://github.com/dotnet/Open-XML-SDK/releases/tag/v3.3.0"
+      }
+    ],
+    "openxml_advisories": [],
+    "nuspec_dependencies": [
+      {
+        "version": "3.3.0",
+        "source": "https://api.nuget.org/v3-flatcontainer/documentformat.openxml.framework/3.3.0/documentformat.openxml.framework.nuspec",
+        "groups": {
+          "net6": "System.IO.Packaging >= 8.0.1",
+          "net8": "System.IO.Packaging >= 8.0.1",
+          "netstandard2": "System.IO.Packaging >= 8.0.1",
+          "net46": "WindowsBase framework assembly; no NuGet System.IO.Packaging dependency"
+        }
+      },
+      {
+        "version": "3.5.1",
+        "source": "https://api.nuget.org/v3-flatcontainer/documentformat.openxml.framework/3.5.1/documentformat.openxml.framework.nuspec",
+        "groups": {
+          "net6": "System.IO.Packaging >= 8.0.1",
+          "net8": "System.IO.Packaging >= 8.0.1",
+          "net10": "System.IO.Packaging >= 10.0.2",
+          "netstandard2": "System.IO.Packaging >= 8.0.1",
+          "net46": "WindowsBase framework assembly; no NuGet System.IO.Packaging dependency"
+        }
+      }
+    ],
+    "package_queries": [
+      {
+        "affects": "System.IO.Packaging@8.0.0",
+        "source": "https://api.github.com/advisories?ecosystem=nuget&affects=System.IO.Packaging%408.0.0",
+        "count": 2,
+        "cves": [
+          "CVE-2024-43483",
+          "CVE-2024-43484"
+        ]
+      },
+      {
+        "affects": "System.IO.Packaging@8.0.1",
+        "source": "https://api.github.com/advisories?ecosystem=nuget&affects=System.IO.Packaging%408.0.1",
+        "count": 0,
+        "cves": []
+      },
+      {
+        "affects": "DocumentFormat.OpenXml@3.3.0",
+        "source": "https://api.github.com/advisories?ecosystem=nuget&affects=DocumentFormat.OpenXml%403.3.0",
+        "count": 0,
+        "cves": []
+      },
+      {
+        "affects": "DocumentFormat.OpenXml.Framework@3.3.0",
+        "source": "https://api.github.com/advisories?ecosystem=nuget&affects=DocumentFormat.OpenXml.Framework%403.3.0",
+        "count": 0,
+        "cves": []
+      },
+      {
+        "affects": "System.Text.Json@8.0.5",
+        "source": "https://api.github.com/advisories?ecosystem=nuget&affects=System.Text.Json%408.0.5",
+        "count": 0,
+        "cves": []
+      },
+      {
+        "affects": "System.Text.Encodings.Web@8.0.0",
+        "source": "https://api.github.com/advisories?ecosystem=nuget&affects=System.Text.Encodings.Web%408.0.0",
+        "count": 0,
+        "cves": []
+      }
+    ],
+    "sdk_advisories": [
+      {
+        "cve_id": "CVE-2026-96957",
+        "ghsa_id": "GHSA-3j2c-jvf4-j49j",
+        "html_url": "https://github.com/dotnet/sdk/security/advisories/GHSA-3j2c-jvf4-j49j",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "Signature verification for .NET file-based apps can fail to enforce the expected trust decision.",
+        "severity": "high",
+        "vulnerabilities": [
+          {
+            "package": {
+              "ecosystem": "other",
+              "name": ".NET SDK"
+            },
+            "vulnerable_version_range": ">= 10.0.400, <= 10.0.401",
+            "patched_versions": "10.0.402"
+          }
+        ],
+        "selection_note": "Only the locally installed 10.0.400 feature-band entry retained; official advisory lists other feature bands too."
+      },
+      {
+        "cve_id": "CVE-2026-96238",
+        "ghsa_id": "GHSA-vc4g-h498-2rqx",
+        "html_url": "https://github.com/dotnet/sdk/security/advisories/GHSA-vc4g-h498-2rqx",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "`dotnet new install` can acquire a template package from a feed that is not permitted by NuGet Package Source Mapping, bypassing the configured feed trust boundary.",
+        "severity": "medium",
+        "vulnerabilities": [
+          {
+            "package": {
+              "ecosystem": "other",
+              "name": ".NET SDK"
+            },
+            "vulnerable_version_range": ">= 10.0.400, <= 10.0.401",
+            "patched_versions": "10.0.402"
+          }
+        ],
+        "selection_note": "Only the locally installed 10.0.400 feature-band entry retained; official advisory lists other feature bands too."
+      },
+      {
+        "cve_id": "CVE-2026-96237",
+        "ghsa_id": "GHSA-v2q5-pwqx-jvr4",
+        "html_url": "https://github.com/dotnet/sdk/security/advisories/GHSA-v2q5-pwqx-jvr4",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "SDK workload package downloads and integrity-repair paths can bypass NuGet Package Source Mapping, allowing packages to be reacquired from an unmapped attacker-controlled feed and potentially enabling remote code execution.",
+        "severity": "high",
+        "vulnerabilities": [
+          {
+            "package": {
+              "ecosystem": "other",
+              "name": ".NET SDK"
+            },
+            "vulnerable_version_range": ">= 10.0.400, <= 10.0.401",
+            "patched_versions": "10.0.402"
+          }
+        ],
+        "selection_note": "Only the locally installed 10.0.400 feature-band entry retained; official advisory lists other feature bands too."
+      },
+      {
+        "cve_id": "CVE-2026-70190",
+        "ghsa_id": "GHSA-8mq7-92wr-xrq3",
+        "html_url": "https://github.com/dotnet/sdk/security/advisories/GHSA-8mq7-92wr-xrq3",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "The elevated SDK workload installer can follow a junction or symlink under `%ProgramData%\\dotnet`, enabling local privilege escalation.",
+        "severity": "high",
+        "vulnerabilities": [
+          {
+            "package": {
+              "ecosystem": "other",
+              "name": ".NET SDK"
+            },
+            "vulnerable_version_range": ">= 10.0.400, <= 10.0.401",
+            "patched_versions": "10.0.402"
+          }
+        ],
+        "selection_note": "Only the locally installed 10.0.400 feature-band entry retained; official advisory lists other feature bands too."
+      },
+      {
+        "cve_id": "CVE-2026-70165",
+        "ghsa_id": "GHSA-5qg3-v78f-55j2",
+        "html_url": "https://github.com/dotnet/sdk/security/advisories/GHSA-5qg3-v78f-55j2",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "A junction planted over the workload startup-marker path can redirect an elevated write into the Windows Common Startup directory and enable code execution.",
+        "severity": "medium",
+        "vulnerabilities": [
+          {
+            "package": {
+              "ecosystem": "other",
+              "name": ".NET SDK"
+            },
+            "vulnerable_version_range": ">= 10.0.400, <= 10.0.401",
+            "patched_versions": "10.0.402"
+          }
+        ],
+        "selection_note": "Only the locally installed 10.0.400 feature-band entry retained; official advisory lists other feature bands too."
+      },
+      {
+        "cve_id": "CVE-2026-70161",
+        "ghsa_id": "GHSA-94x7-hcq2-4jcx",
+        "html_url": "https://github.com/dotnet/sdk/security/advisories/GHSA-94x7-hcq2-4jcx",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "An attacker-controlled workload manifest ID can traverse paths under `%ProgramData%\\dotnet` and import attacker-controlled MSBuild targets during elevated workload operations.",
+        "severity": "high",
+        "vulnerabilities": [
+          {
+            "package": {
+              "ecosystem": "other",
+              "name": ".NET SDK"
+            },
+            "vulnerable_version_range": ">= 10.0.400, <= 10.0.401",
+            "patched_versions": "10.0.402"
+          }
+        ],
+        "selection_note": "Only the locally installed 10.0.400 feature-band entry retained; official advisory lists other feature bands too."
+      }
+    ],
+    "runtime_advisories": [
+      {
+        "cve_id": "CVE-2026-58280",
+        "ghsa_id": "GHSA-mc4q-93x5-f6hj",
+        "html_url": "https://github.com/dotnet/runtime/security/advisories/GHSA-mc4q-93x5-f6hj",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "Signed XML fixes add input-depth and operation-count limits, prohibit DTD processing by default, validate entity references, bound encrypted-data candidate processing, and cap attributes and namespaces used by C14N transforms.",
+        "vulnerabilities": [
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 8.0.0, <= 8.0.31",
+            "patched_versions": "8.0.32"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 9.0.0, <= 9.0.20",
+            "patched_versions": "9.0.21"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 10.0.0, <= 10.0.12",
+            "patched_versions": "10.0.13"
+          }
+        ],
+        "selection_note": "Stable win-x64 entries retained; official advisory lists other architectures and preview versions too."
+      },
+      {
+        "cve_id": "CVE-2026-69651",
+        "ghsa_id": "GHSA-3rxq-g8rj-r2cf",
+        "html_url": "https://github.com/dotnet/runtime/security/advisories/GHSA-3rxq-g8rj-r2cf",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "Signed XML fixes add input-depth and operation-count limits, prohibit DTD processing by default, validate entity references, bound encrypted-data candidate processing, and cap attributes and namespaces used by C14N transforms.",
+        "vulnerabilities": [
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 8.0.0, <= 8.0.31",
+            "patched_versions": "8.0.32"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 9.0.0, <= 9.0.20",
+            "patched_versions": "9.0.21"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 10.0.0, <= 10.0.12",
+            "patched_versions": "10.0.13"
+          }
+        ],
+        "selection_note": "Stable win-x64 entries retained; official advisory lists other architectures and preview versions too."
+      },
+      {
+        "cve_id": "CVE-2026-96233",
+        "ghsa_id": "GHSA-87vj-4hqv-22p9",
+        "html_url": "https://github.com/dotnet/runtime/security/advisories/GHSA-87vj-4hqv-22p9",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "DateTime Hebrew-number parsing can read outside expected stack bounds and terminate the process.",
+        "vulnerabilities": [
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 8.0.0, <= 8.0.31",
+            "patched_versions": "8.0.32"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 9.0.0, <= 9.0.20",
+            "patched_versions": "9.0.21"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 10.0.0, <= 10.0.12",
+            "patched_versions": "10.0.13"
+          }
+        ],
+        "selection_note": "Stable win-x64 entries retained; official advisory lists other architectures and preview versions too."
+      },
+      {
+        "cve_id": "CVE-2026-70197",
+        "ghsa_id": "GHSA-4mpw-cpwj-hxxj",
+        "html_url": "https://github.com/dotnet/runtime/security/advisories/GHSA-4mpw-cpwj-hxxj",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "On Windows, reusing a `SocketAsyncEventArgs` instance across IPv4 and IPv6 datagram sockets can retain an undersized cached native address buffer, allowing an unauthenticated out-of-bounds write during `ReceiveFromAsync`.",
+        "vulnerabilities": [
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 8.0.0, <= 8.0.31",
+            "patched_versions": "8.0.32"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 9.0.0, <= 9.0.20",
+            "patched_versions": "9.0.21"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 10.0.0, <= 10.0.12",
+            "patched_versions": "10.0.13"
+          }
+        ],
+        "selection_note": "Stable win-x64 entries retained; official advisory lists other architectures and preview versions too."
+      },
+      {
+        "cve_id": "CVE-2026-66822",
+        "ghsa_id": "GHSA-wxxw-5cvc-53j7",
+        "html_url": "https://github.com/dotnet/runtime/security/advisories/GHSA-wxxw-5cvc-53j7",
+        "advisory_date": "2026-10-13",
+        "condition_from_description": "SocketsHttpHandler can retain a `Proxy-Authorization` header across an HTTP redirect and leak basic proxy credentials to the destination server.",
+        "vulnerabilities": [
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 8.0.0, <= 8.0.31",
+            "patched_versions": "8.0.32"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 9.0.0, <= 9.0.20",
+            "patched_versions": "9.0.21"
+          },
+          {
+            "package": "Microsoft.NETCore.App.Runtime.win-x64",
+            "vulnerable_version_range": ">= 10.0.0, <= 10.0.12",
+            "patched_versions": "10.0.13"
+          }
+        ],
+        "selection_note": "Stable win-x64 entries retained; official advisory lists other architectures and preview versions too."
+      }
+    ],
+    "package_history": [
+      {
+        "cve_id": "CVE-2024-43483",
+        "ghsa_id": "GHSA-qj66-m88j-hmgj",
+        "html_url": "https://github.com/advisories/GHSA-qj66-m88j-hmgj",
+        "package": "System.IO.Packaging",
+        "vulnerable_version_range": ">= 8.0.0-preview.1.23110.8, <= 8.0.0",
+        "first_patched_version": "8.0.1",
+        "summary": "Hostile input may cause hash flooding denial of service.",
+        "selection_note": "Relevant version line retained, other version lines omitted."
+      },
+      {
+        "cve_id": "CVE-2024-43484",
+        "ghsa_id": "GHSA-f32c-w444-8ppv",
+        "html_url": "https://github.com/advisories/GHSA-f32c-w444-8ppv",
+        "package": "System.IO.Packaging",
+        "vulnerable_version_range": ">= 8.0.0-preview.1.23110.8, <= 8.0.0",
+        "first_patched_version": "8.0.1",
+        "summary": "Untrusted inputs may influence algorithmically complex operations, leading to denial of service.",
+        "selection_note": "Relevant version line retained, other version lines omitted."
+      },
+      {
+        "cve_id": "CVE-2024-43485",
+        "ghsa_id": "GHSA-8g4q-xg66-9fp4",
+        "html_url": "https://github.com/advisories/GHSA-8g4q-xg66-9fp4",
+        "package": "System.Text.Json",
+        "vulnerable_version_range": ">= 8.0.0, <= 8.0.4",
+        "first_patched_version": "8.0.5",
+        "summary": "Denial of service.",
+        "selection_note": "Relevant version line retained, other version lines omitted."
+      },
+      {
+        "cve_id": "CVE-2024-30105",
+        "ghsa_id": "GHSA-hh2w-p6rv-4g7w",
+        "html_url": "https://github.com/advisories/GHSA-hh2w-p6rv-4g7w",
+        "package": "System.Text.Json",
+        "vulnerable_version_range": ">= 7.0.0, < 8.0.4",
+        "first_patched_version": "8.0.4",
+        "summary": "Denial of service.",
+        "selection_note": "Relevant version line retained, other version lines omitted."
+      },
+      {
+        "cve_id": "CVE-2021-26701",
+        "ghsa_id": "GHSA-ghhp-997w-qr28",
+        "html_url": "https://github.com/advisories/GHSA-ghhp-997w-qr28",
+        "package": "System.Text.Encodings.Web",
+        "vulnerabilities": [
+          {
+            "vulnerable_version_range": ">= 4.0.0, < 4.5.1",
+            "first_patched_version": "4.5.1"
+          },
+          {
+            "vulnerable_version_range": ">= 4.6.0, < 4.7.2",
+            "first_patched_version": "4.7.2"
+          },
+          {
+            "vulnerable_version_range": "= 5.0.0",
+            "first_patched_version": "5.0.1"
+          }
+        ],
+        "summary": ".NET Core Remote Code Execution Vulnerability",
+        "selection_note": "Latest historical entry returned by unversioned package query; older 2017 advisories not repeated."
+      }
+    ],
+    "limitations": [
+      "Zero advisory matches describe public indexed advisories, not a proof of absence of unknown vulnerabilities.",
+      "Runtime and SDK version presence does not prove application exploitability; conditions below require reachability analysis.",
+      "NuGet VulnerabilityInfo index returned both @updated values as 2023-12-13; known Packaging 2024 entries were absent in fetched base/update, so a zero NuGet audit result needs independent corroboration.",
+      "net462 is a compilation target; the installed Windows .NET Framework runtime and patches need independent verification."
+    ],
+    "package_history_sources": [
+      "https://api.github.com/advisories?ecosystem=nuget&affects=System.Text.Json",
+      "https://api.github.com/advisories?ecosystem=nuget&affects=System.Text.Encodings.Web"
+    ],
+    "framework_lifecycle": {
+      "net462_end_date_displayed_timezone": "America/Los_Angeles",
+      "net462_end_datetime_raw": "1/13/2027 6:59:59 AM",
+      "announced_calendar_end_date": "2027-01-12",
+      "source": "https://learn.microsoft.com/en-us/lifecycle/products/microsoft-net-framework"
+    }
+  },
+  "development_and_ci_evidence": {
+    "latest_stable_packages": [
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/microsoft.net.test.sdk/index.json",
+        "FetchedAtUtc": "2026-10-22T01:27:55.0459003Z",
+        "package": "microsoft.net.test.sdk",
+        "latest_stable": "18.11.0"
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/xunit/index.json",
+        "FetchedAtUtc": "2026-10-22T01:27:55.6268054Z",
+        "package": "xunit",
+        "latest_stable": "2.9.3"
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/xunit.v3/index.json",
+        "FetchedAtUtc": "2026-10-22T01:27:56.2281061Z",
+        "package": "xunit.v3",
+        "latest_stable": "4.0.2"
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/xunit.runner.visualstudio/index.json",
+        "FetchedAtUtc": "2026-10-22T01:27:56.7654327Z",
+        "package": "xunit.runner.visualstudio",
+        "latest_stable": "4.0.1"
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/coverlet.collector/index.json",
+        "FetchedAtUtc": "2026-10-22T01:27:57.2938808Z",
+        "package": "coverlet.collector",
+        "latest_stable": "10.1.0"
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/benchmarkdotnet/index.json",
+        "FetchedAtUtc": "2026-10-22T01:27:57.8189286Z",
+        "package": "benchmarkdotnet",
+        "latest_stable": "0.15.8"
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/qrcoder/index.json",
+        "FetchedAtUtc": "2026-10-22T01:27:58.3200905Z",
+        "package": "qrcoder",
+        "latest_stable": "1.8.1"
+      }
+    ],
+    "action_and_library_releases": [
+      {
+        "Url": "https://api.github.com/repos/actions/checkout/releases/latest",
+        "FetchedAtUtc": "2026-10-22T01:27:58.9664434Z",
+        "tag_name": "v7.0.1",
+        "published_at": "2026-07-20T15:10:05Z",
+        "html_url": "https://github.com/actions/checkout/releases/tag/v7.0.1",
+        "target_commitish": "main",
+        "prerelease": false,
+        "draft": false
+      },
+      {
+        "Url": "https://api.github.com/repos/actions/setup-dotnet/releases/latest",
+        "FetchedAtUtc": "2026-10-22T01:27:59.6237179Z",
+        "tag_name": "v6.0.0",
+        "published_at": "2026-07-16T02:56:10Z",
+        "html_url": "https://github.com/actions/setup-dotnet/releases/tag/v6.0.0",
+        "target_commitish": "main",
+        "prerelease": false,
+        "draft": false
+      },
+      {
+        "Url": "https://api.github.com/repos/softprops/action-gh-release/releases/latest",
+        "FetchedAtUtc": "2026-10-22T01:28:00.2784418Z",
+        "tag_name": "v3.0.3",
+        "published_at": "2026-08-30T00:30:08Z",
+        "html_url": "https://github.com/softprops/action-gh-release/releases/tag/v3.0.3",
+        "target_commitish": "master",
+        "prerelease": false,
+        "draft": false
+      },
+      {
+        "Url": "https://api.github.com/repos/NuGet/login/releases/latest",
+        "FetchedAtUtc": "2026-10-22T01:28:01.0093933Z",
+        "tag_name": "v1.2.0",
+        "published_at": "2026-04-24T18:30:23Z",
+        "html_url": "https://github.com/NuGet/login/releases/tag/v1.2.0",
+        "target_commitish": "releases/v1",
+        "prerelease": false,
+        "draft": false
+      },
+      {
+        "Url": "https://api.github.com/repos/coverlet-coverage/coverlet/releases/latest",
+        "FetchedAtUtc": "2026-10-22T01:28:01.6669455Z",
+        "tag_name": "v10.1.0",
+        "published_at": "2026-09-27T12:34:01Z",
+        "html_url": "https://github.com/coverlet-coverage/coverlet/releases/tag/v10.1.0",
+        "target_commitish": "master",
+        "prerelease": false,
+        "draft": false
+      },
+      {
+        "Url": "https://api.github.com/repos/dotnet/BenchmarkDotNet/releases/latest",
+        "FetchedAtUtc": "2026-10-22T01:28:02.3672413Z",
+        "tag_name": "v0.15.8",
+        "published_at": "2025-11-30T02:54:21Z",
+        "html_url": "https://github.com/dotnet/BenchmarkDotNet/releases/tag/v0.15.8",
+        "target_commitish": "master",
+        "prerelease": false,
+        "draft": false
+      },
+      {
+        "Url": "https://api.github.com/repos/Shane32/QRCoder/releases/latest",
+        "FetchedAtUtc": "2026-10-22T01:28:03.0336721Z",
+        "tag_name": "v1.8.1",
+        "published_at": "2026-10-13T03:48:44Z",
+        "html_url": "https://github.com/Shane32/QRCoder/releases/tag/v1.8.1",
+        "target_commitish": "master",
+        "prerelease": false,
+        "draft": false
+      },
+      {
+        "Url": "https://api.github.com/repos/xunit/visualstudio.xunit/releases/latest",
+        "FetchedAtUtc": "2026-10-22T01:28:03.7190012Z",
+        "tag_name": "4.0.1",
+        "published_at": "2026-10-09T17:15:31Z",
+        "html_url": "https://github.com/xunit/visualstudio.xunit/releases/tag/4.0.1",
+        "target_commitish": "main",
+        "prerelease": false,
+        "draft": false
+      }
+    ],
+    "package_dependency_metadata": [
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/microsoft.net.test.sdk/18.11.0/microsoft.net.test.sdk.nuspec",
+        "FetchedAtUtc": "2026-10-22T01:28:04.4346676Z",
+        "id": "Microsoft.NET.Test.Sdk",
+        "version": "18.11.0",
+        "description": "The MSbuild targets and properties for building .NET test projects.",
+        "dependency_groups": [
+          {
+            "target_framework": ".NETFramework4.6.2",
+            "dependencies": [
+              {
+                "id": "Microsoft.CodeCoverage",
+                "version": "18.11.0",
+                "include": "All"
+              }
+            ]
+          },
+          {
+            "target_framework": "net8.0",
+            "dependencies": [
+              {
+                "id": "Microsoft.CodeCoverage",
+                "version": "18.11.0",
+                "include": "All"
+              },
+              {
+                "id": "Microsoft.TestPlatform.TestHost",
+                "version": "18.11.0",
+                "include": "All"
+              }
+            ]
+          }
+        ],
+        "framework_assemblies": []
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/xunit.runner.visualstudio/4.0.1/xunit.runner.visualstudio.nuspec",
+        "FetchedAtUtc": "2026-10-22T01:28:05.0816952Z",
+        "id": "xunit.runner.visualstudio",
+        "version": "4.0.1",
+        "description": "Visual Studio 2022+ Test Explorer runner for the xUnit.net framework. Capable of running xUnit.net v1, v2, and v3 tests. Supports .NET 4.7.2 or later, and .NET 8 or later.",
+        "dependency_groups": [
+          {
+            "target_framework": ".NETFramework4.7.2",
+            "dependencies": [
+              {
+                "id": "Microsoft.TestPlatform.ObjectModel",
+                "version": "17.13.0"
+              }
+            ]
+          },
+          {
+            "target_framework": "net8.0",
+            "dependencies": []
+          }
+        ],
+        "framework_assemblies": [
+          {
+            "assemblyName": "mscorlib",
+            "targetFramework": ".NETFramework4.7.2"
+          }
+        ]
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/coverlet.collector/10.1.0/coverlet.collector.nuspec",
+        "FetchedAtUtc": "2026-10-22T01:28:05.5691863Z",
+        "id": "coverlet.collector",
+        "version": "10.1.0",
+        "description": "Coverlet is a cross platform code coverage library for .NET, with support for line, branch and method coverage.",
+        "dependency_groups": [],
+        "framework_assemblies": []
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/benchmarkdotnet/0.15.8/benchmarkdotnet.nuspec",
+        "FetchedAtUtc": "2026-10-22T01:28:06.0664941Z",
+        "id": "BenchmarkDotNet",
+        "version": "0.15.8",
+        "description": "Powerful .NET library for benchmarking",
+        "dependency_groups": [
+          {
+            "target_framework": "net6.0",
+            "dependencies": [
+              {
+                "id": "BenchmarkDotNet.Annotations",
+                "version": "0.15.8",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "CommandLineParser",
+                "version": "2.9.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Gee.External.Capstone",
+                "version": "2.3.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Iced",
+                "version": "1.21.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.CodeAnalysis.CSharp",
+                "version": "4.14.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.Diagnostics.Runtime",
+                "version": "3.1.512801",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.Diagnostics.Tracing.TraceEvent",
+                "version": "3.1.21",
+                "exclude": "Analyzers"
+              },
+              {
+                "id": "Microsoft.DotNet.PlatformAbstractions",
+                "version": "3.1.6",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Perfolizer",
+                "version": "[0.6.1]",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Management",
+                "version": "9.0.5",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net8.0",
+            "dependencies": [
+              {
+                "id": "BenchmarkDotNet.Annotations",
+                "version": "0.15.8",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "CommandLineParser",
+                "version": "2.9.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Gee.External.Capstone",
+                "version": "2.3.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Iced",
+                "version": "1.21.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.CodeAnalysis.CSharp",
+                "version": "4.14.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.Diagnostics.Runtime",
+                "version": "3.1.512801",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.Diagnostics.Tracing.TraceEvent",
+                "version": "3.1.21",
+                "exclude": "Analyzers"
+              },
+              {
+                "id": "Microsoft.DotNet.PlatformAbstractions",
+                "version": "3.1.6",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Perfolizer",
+                "version": "[0.6.1]",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Management",
+                "version": "9.0.5",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": ".NETStandard2.0",
+            "dependencies": [
+              {
+                "id": "BenchmarkDotNet.Annotations",
+                "version": "0.15.8",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "CommandLineParser",
+                "version": "2.9.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Gee.External.Capstone",
+                "version": "2.3.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Iced",
+                "version": "1.21.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.CodeAnalysis.CSharp",
+                "version": "4.14.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.Diagnostics.Runtime",
+                "version": "3.1.512801",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.Diagnostics.Tracing.TraceEvent",
+                "version": "3.1.21",
+                "exclude": "Analyzers"
+              },
+              {
+                "id": "Microsoft.DotNet.PlatformAbstractions",
+                "version": "3.1.6",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Microsoft.Win32.Registry",
+                "version": "5.0.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "Perfolizer",
+                "version": "[0.6.1]",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Management",
+                "version": "9.0.5",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Numerics.Vectors",
+                "version": "4.5.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Reflection.Emit",
+                "version": "4.7.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Reflection.Emit.Lightweight",
+                "version": "4.7.0",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Threading.Tasks.Extensions",
+                "version": "4.6.3",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          }
+        ],
+        "framework_assemblies": []
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/qrcoder/1.6.0/qrcoder.nuspec",
+        "FetchedAtUtc": "2026-10-22T01:28:06.548836Z",
+        "id": "QRCoder",
+        "version": "1.6.0",
+        "description": "QRCoder is a simple library, written in C#.NET, which enables you to create QR codes.",
+        "dependency_groups": [
+          {
+            "target_framework": ".NETFramework3.5",
+            "dependencies": []
+          },
+          {
+            "target_framework": ".NETFramework4.0",
+            "dependencies": []
+          },
+          {
+            "target_framework": ".NETStandard1.3",
+            "dependencies": [
+              {
+                "id": "NETStandard.Library",
+                "version": "1.6.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Text.Encoding.CodePages",
+                "version": "5.0.0",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net5.0",
+            "dependencies": [
+              {
+                "id": "System.Drawing.Common",
+                "version": "5.0.3",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net5.0-windows7.0",
+            "dependencies": [
+              {
+                "id": "System.Drawing.Common",
+                "version": "5.0.3",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net6.0",
+            "dependencies": []
+          },
+          {
+            "target_framework": "net6.0-windows7.0",
+            "dependencies": [
+              {
+                "id": "System.Drawing.Common",
+                "version": "6.0.0",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": ".NETStandard2.0",
+            "dependencies": [
+              {
+                "id": "System.Drawing.Common",
+                "version": "5.0.3",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Text.Encoding.CodePages",
+                "version": "5.0.0",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          }
+        ],
+        "framework_assemblies": [
+          {
+            "assemblyName": "PresentationCore",
+            "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+          },
+          {
+            "assemblyName": "PresentationFramework",
+            "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+          },
+          {
+            "assemblyName": "WindowsBase",
+            "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+          }
+        ]
+      },
+      {
+        "Url": "https://api.nuget.org/v3-flatcontainer/qrcoder/1.8.1/qrcoder.nuspec",
+        "FetchedAtUtc": "2026-10-22T01:28:07.4975628Z",
+        "id": "QRCoder",
+        "version": "1.8.1",
+        "description": "QRCoder is a simple library, written in C#.NET, which enables you to create QR codes.",
+        "dependency_groups": [
+          {
+            "target_framework": ".NETFramework3.5",
+            "dependencies": []
+          },
+          {
+            "target_framework": ".NETFramework4.0",
+            "dependencies": []
+          },
+          {
+            "target_framework": ".NETStandard1.3",
+            "dependencies": [
+              {
+                "id": "NETStandard.Library",
+                "version": "1.6.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Text.Encoding.CodePages",
+                "version": "5.0.0",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net5.0",
+            "dependencies": [
+              {
+                "id": "System.Drawing.Common",
+                "version": "5.0.3",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net6.0",
+            "dependencies": [
+              {
+                "id": "System.Drawing.Common",
+                "version": "6.0.0",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": ".NETStandard2.0",
+            "dependencies": [
+              {
+                "id": "System.Drawing.Common",
+                "version": "5.0.3",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Text.Encoding.CodePages",
+                "version": "5.0.0",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": ".NETStandard2.1",
+            "dependencies": [
+              {
+                "id": "System.Drawing.Common",
+                "version": "5.0.3",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.Text.Encoding.CodePages",
+                "version": "5.0.0",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          }
+        ],
+        "framework_assemblies": [
+          {
+            "assemblyName": "PresentationCore",
+            "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+          },
+          {
+            "assemblyName": "PresentationFramework",
+            "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+          },
+          {
+            "assemblyName": "WindowsBase",
+            "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+          }
+        ]
+      }
+    ],
+    "public_repository_advisories": [
+      {
+        "Url": "https://api.github.com/repos/actions/checkout/security-advisories",
+        "FetchedAtUtc": "2026-10-22T01:29:39.526801Z",
+        "count": 0,
+        "advisory_ids": [],
+        "limitation": "Repository advisory list only; does not prove no vulnerability or include all transitive package advisories."
+      },
+      {
+        "Url": "https://api.github.com/repos/actions/setup-dotnet/security-advisories",
+        "FetchedAtUtc": "2026-10-22T01:29:40.1869486Z",
+        "count": 0,
+        "advisory_ids": [],
+        "limitation": "Repository advisory list only; does not prove no vulnerability or include all transitive package advisories."
+      },
+      {
+        "Url": "https://api.github.com/repos/softprops/action-gh-release/security-advisories",
+        "FetchedAtUtc": "2026-10-22T01:29:40.8315005Z",
+        "count": 0,
+        "advisory_ids": [],
+        "limitation": "Repository advisory list only; does not prove no vulnerability or include all transitive package advisories."
+      },
+      {
+        "Url": "https://api.github.com/repos/NuGet/login/security-advisories",
+        "FetchedAtUtc": "2026-10-22T01:29:41.5598248Z",
+        "count": 0,
+        "advisory_ids": [],
+        "limitation": "Repository advisory list only; does not prove no vulnerability or include all transitive package advisories."
+      },
+      {
+        "Url": "https://api.github.com/repos/coverlet-coverage/coverlet/security-advisories",
+        "FetchedAtUtc": "2026-10-22T01:29:42.1648128Z",
+        "count": 0,
+        "advisory_ids": [],
+        "limitation": "Repository advisory list only; does not prove no vulnerability or include all transitive package advisories."
+      },
+      {
+        "Url": "https://api.github.com/repos/xunit/visualstudio.xunit/security-advisories",
+        "FetchedAtUtc": "2026-10-22T01:29:42.8446304Z",
+        "count": 0,
+        "advisory_ids": [],
+        "limitation": "Repository advisory list only; does not prove no vulnerability or include all transitive package advisories."
+      }
+    ],
+    "documentation_excerpts": [
+      {
+        "Url": "https://www.nuget.org/packages/xunit/2.9.3",
+        "FetchedAtUtc": "2026-10-22T01:29:46.112689Z",
+        "excerpts": [
+          "This package has been deprecated as it is legacy and is no longer maintained.\r\n\r\n                    \r\n                \r\n\r\n                <div class=\""
+        ]
+      },
+      {
+        "Url": "https://raw.githubusercontent.com/coverlet-coverage/coverlet/v10.1.0/Documentation/VSTestIntegration.md",
+        "FetchedAtUtc": "2026-10-22T01:30:07.5918578Z",
+        "excerpts": [
+          "coverlet.collector` is not compatible with the Microsoft Testing Platform (MTP v2).**\n>\n> This is particularly important if you're using the native `dotnet test` integrat",
+          "Minimum version 18.4.0 -->"
+        ]
+      },
+      {
+        "Url": "https://raw.githubusercontent.com/actions/setup-dotnet/v6.0.0/README.md",
+        "FetchedAtUtc": "2026-10-22T01:30:37.958585Z",
+        "excerpts": [
+          "Unless a concrete version is specified in the [`global.json`](https://learn.microsoft.com/en-us/dotnet/core/tools/global-json) file, **_the latest .NET version installed",
+          "latest .NET version installed on the runner (including preinstalled versions) will be used [by default](https://learn.microsoft.com/en-us/dotnet/core/versions/selection#t"
+        ]
+      }
+    ],
+    "fetch_failures": [
+      {
+        "Url": "https://api.github.com/repos/microsoft/vstest/security-advisories",
+        "error": "Response status code does not indicate success: 403 (rate limit exceeded)."
+      },
+      {
+        "Url": "https://api.github.com/repos/dotnet/BenchmarkDotNet/security-advisories",
+        "error": "Response status code does not indicate success: 403 (rate limit exceeded)."
+      },
+      {
+        "Url": "https://api.github.com/repos/Shane32/QRCoder/security-advisories",
+        "error": "Response status code does not indicate success: 403 (rate limit exceeded)."
+      },
+      {
+        "Url": "https://raw.githubusercontent.com/actions/checkout/v7.0.1/README.md",
+        "error": "The request was canceled due to the configured HttpClient.Timeout of 30 seconds elapsing."
+      },
+      {
+        "Url": "https://xunit.net/docs/getting-started/v3/migration",
+        "error": "The request was canceled due to the configured HttpClient.Timeout of 30 seconds elapsing."
+      }
+    ],
+    "earlier_successful_documentation_observations": [
+      {
+        "Url": "https://raw.githubusercontent.com/actions/checkout/v7.0.1/README.md",
+        "Provenance": "Read successfully in earlier terminal call during this audit; later refetch timed out and is retained among Sources.",
+        "Excerpt": "Updated to the node24 runtime",
+        "Summary": "README states minimum Actions Runner v2.327.1. Checkout v6 moves persisted credentials into RUNNER_TEMP; v7 adds unsafe fork checkout guards."
+      },
+      {
+        "Url": "https://xunit.net/docs/getting-started/v3/migration",
+        "Provenance": "Read successfully in earlier terminal call during this audit; later refetch timed out and is retained among Sources.",
+        "Excerpt": "Test projects in v3 are stand-alone executables now, capable of running themselves.",
+        "Summary": "Migration guide sets minimum .NET Framework 4.7.2 and .NET 8. It requires migration to xunit.v3 package names and executable test projects."
+      }
+    ],
+    "qrcoder_package_cross_check": [
+      {
+        "version": "1.6.0",
+        "url": "https://api.nuget.org/v3-flatcontainer/qrcoder/1.6.0/qrcoder.1.6.0.nupkg",
+        "fetched_at_utc": "2026-10-22T01:31:08.7386707Z",
+        "sha256": "D84BFFE9DECF1FA2B8755610407959F998209029C3B6B95A1B282CEB9983A36F",
+        "lib_entries": [
+          "lib/net35/QRCoder.dll",
+          "lib/net40/QRCoder.dll",
+          "lib/net5.0/QRCoder.dll",
+          "lib/net5.0-windows7.0/QRCoder.dll",
+          "lib/net6.0/QRCoder.dll",
+          "lib/net6.0-windows7.0/QRCoder.dll",
+          "lib/netstandard1.3/QRCoder.dll",
+          "lib/netstandard2.0/QRCoder.dll"
+        ],
+        "embedded_nuspec": {
+          "id": "QRCoder",
+          "version": "1.6.0",
+          "description": "QRCoder is a simple library, written in C#.NET, which enables you to create QR codes.",
+          "dependency_groups": [
+            {
+              "target_framework": ".NETFramework3.5",
+              "dependencies": []
+            },
+            {
+              "target_framework": ".NETFramework4.0",
+              "dependencies": []
+            },
+            {
+              "target_framework": ".NETStandard1.3",
+              "dependencies": [
+                {
+                  "id": "NETStandard.Library",
+                  "version": "1.6.1",
+                  "exclude": "Build,Analyzers"
+                },
+                {
+                  "id": "System.Text.Encoding.CodePages",
+                  "version": "5.0.0",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            },
+            {
+              "target_framework": "net5.0",
+              "dependencies": [
+                {
+                  "id": "System.Drawing.Common",
+                  "version": "5.0.3",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            },
+            {
+              "target_framework": "net5.0-windows7.0",
+              "dependencies": [
+                {
+                  "id": "System.Drawing.Common",
+                  "version": "5.0.3",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            },
+            {
+              "target_framework": "net6.0",
+              "dependencies": []
+            },
+            {
+              "target_framework": "net6.0-windows7.0",
+              "dependencies": [
+                {
+                  "id": "System.Drawing.Common",
+                  "version": "6.0.0",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            },
+            {
+              "target_framework": ".NETStandard2.0",
+              "dependencies": [
+                {
+                  "id": "System.Drawing.Common",
+                  "version": "5.0.3",
+                  "exclude": "Build,Analyzers"
+                },
+                {
+                  "id": "System.Text.Encoding.CodePages",
+                  "version": "5.0.0",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            }
+          ],
+          "framework_assemblies": [
+            {
+              "assemblyName": "PresentationCore",
+              "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+            },
+            {
+              "assemblyName": "PresentationFramework",
+              "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+            },
+            {
+              "assemblyName": "WindowsBase",
+              "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+            }
+          ]
+        }
+      },
+      {
+        "version": "1.8.1",
+        "url": "https://api.nuget.org/v3-flatcontainer/qrcoder/1.8.1/qrcoder.1.8.1.nupkg",
+        "fetched_at_utc": "2026-10-22T01:31:08.9733542Z",
+        "sha256": "D3FE5C80C742B6A2EF8A31734C06600E2D674806A97F36F4AF97B0D2871DE309",
+        "lib_entries": [
+          "lib/net35/QRCoder.dll",
+          "lib/net40/QRCoder.dll",
+          "lib/net5.0/QRCoder.dll",
+          "lib/net6.0/QRCoder.dll",
+          "lib/netstandard1.3/QRCoder.dll",
+          "lib/netstandard2.0/QRCoder.dll",
+          "lib/netstandard2.1/QRCoder.dll"
+        ],
+        "embedded_nuspec": {
+          "id": "QRCoder",
+          "version": "1.8.1",
+          "description": "QRCoder is a simple library, written in C#.NET, which enables you to create QR codes.",
+          "dependency_groups": [
+            {
+              "target_framework": ".NETFramework3.5",
+              "dependencies": []
+            },
+            {
+              "target_framework": ".NETFramework4.0",
+              "dependencies": []
+            },
+            {
+              "target_framework": ".NETStandard1.3",
+              "dependencies": [
+                {
+                  "id": "NETStandard.Library",
+                  "version": "1.6.1",
+                  "exclude": "Build,Analyzers"
+                },
+                {
+                  "id": "System.Text.Encoding.CodePages",
+                  "version": "5.0.0",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            },
+            {
+              "target_framework": "net5.0",
+              "dependencies": [
+                {
+                  "id": "System.Drawing.Common",
+                  "version": "5.0.3",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            },
+            {
+              "target_framework": "net6.0",
+              "dependencies": [
+                {
+                  "id": "System.Drawing.Common",
+                  "version": "6.0.0",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            },
+            {
+              "target_framework": ".NETStandard2.0",
+              "dependencies": [
+                {
+                  "id": "System.Drawing.Common",
+                  "version": "5.0.3",
+                  "exclude": "Build,Analyzers"
+                },
+                {
+                  "id": "System.Text.Encoding.CodePages",
+                  "version": "5.0.0",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            },
+            {
+              "target_framework": ".NETStandard2.1",
+              "dependencies": [
+                {
+                  "id": "System.Drawing.Common",
+                  "version": "5.0.3",
+                  "exclude": "Build,Analyzers"
+                },
+                {
+                  "id": "System.Text.Encoding.CodePages",
+                  "version": "5.0.0",
+                  "exclude": "Build,Analyzers"
+                }
+              ]
+            }
+          ],
+          "framework_assemblies": [
+            {
+              "assemblyName": "PresentationCore",
+              "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+            },
+            {
+              "assemblyName": "PresentationFramework",
+              "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+            },
+            {
+              "assemblyName": "WindowsBase",
+              "targetFramework": ".NETFramework3.5, .NETFramework4.0"
+            }
+          ]
+        }
+      }
+    ],
+    "qrcoder_local_resolution": {
+      "Path": "C:\\work\\OpenCode\\TemplateFrame\\samples\\TemplateFrame.Demo.Word\\obj\\project.assets.json",
+      "Target": "net8.0",
+      "ResolvedPackage": {
+        "type": "package",
+        "compile": {
+          "lib/net6.0/QRCoder.dll": {}
+        },
+        "runtime": {
+          "lib/net6.0/QRCoder.dll": {}
+        }
+      },
+      "DrawingPackages": []
+    },
+    "qrcoder_conclusion": "Correction: QRCoder 1.6.0 selected net6.0 has no dependencies, confirmed in current assets. QRCoder 1.8.1 selected net6.0 declares System.Drawing.Common >=6.0.0, confirmed in BOTH official flatcontainer nuspec and downloaded nupkg embedded nuspec. Thus upgrade can INTRODUCE a legacy drawing dependency; there is no current QRCoder-driven System.Drawing dependency. Evaluate a safe explicit resolved Drawing version or defer this optional demo-only upgrade; do not describe it as a current production vulnerability.",
+    "limitations": [
+      "No restore, build or test was performed by this agent. Repository files were not modified.",
+      "Three GitHub advisory endpoints returned 403 rate-limit responses during evidence collection; earlier successful requests for all nine repositories returned empty arrays. Failed refetches are retained explicitly.",
+      "Two documentation refetches timed out. Earlier successful reads are separately summarized with provenance; full copyrighted documentation pages are not stored.",
+      "QRCoder 1.8.1 dependency consequence is inferred from target framework selection and verified package nuspec metadata; it was not installed/restored into the repository."
+    ],
+    "original_artifact": {
+      "path": "dev-ci-evidence.json",
+      "sha256": "80874e28117079d39850cd6adbf482954b813e24ee1098abe669363a3a7a9925",
+      "bytes": 82911
+    }
+  },
+  "tests": {
+    "baseline": {
+      "group": "baseline-tests",
+      "trx_count": 8,
+      "totals": {
+        "total": 844,
+        "executed": 844,
+        "passed": 844,
+        "failed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "notExecuted": 0
+      },
+      "coverage_attachment_count": 0,
+      "all_resolved_coverage_attachments_nonzero": null,
+      "coverage_note": "Only attachments explicitly referenced by these TRX files are counted. Coverage across test assemblies/frameworks is not summed because source coverage overlaps.",
+      "runs": [
+        {
+          "artifact": {
+            "path": "baseline-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_25_28_net8.0.trx",
+            "sha256": "b1374a1f999227ba2a758fcdcd7d78cc7d9213d3b770063a20c3ef272d668444",
+            "bytes": 141372
+          },
+          "assembly": "TemplateFrame.Tests.dll",
+          "target_framework": "net8.0",
+          "times": {
+            "creation": "2026-10-22T09:25:28.788238+08:00",
+            "queuing": "2026-10-22T09:25:28.7882384+08:00",
+            "start": "2026-10-22T09:25:24.6428206+08:00",
+            "finish": "2026-10-22T09:25:29.1563851+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 102,
+            "executed": 102,
+            "passed": 102,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 8.0.31)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "baseline-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_25_32_net8.0.trx",
+            "sha256": "de041270bf24d76fcb313b36931dd69241983576f37fbd233b2008562e74ed80",
+            "bytes": 181077
+          },
+          "assembly": "TemplateFrame.Word.Tests.dll",
+          "target_framework": "net8.0",
+          "times": {
+            "creation": "2026-10-22T09:25:32.8170228+08:00",
+            "queuing": "2026-10-22T09:25:32.8170237+08:00",
+            "start": "2026-10-22T09:25:29.7736109+08:00",
+            "finish": "2026-10-22T09:25:33.8791045+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 126,
+            "executed": 126,
+            "passed": 126,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 8.0.31)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "baseline-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_25_33_net8.0.trx",
+            "sha256": "fb90d391bc4c72cdb83d9eeb02c53c3ec06b331adb4d05cbf5546f968bf31ea4",
+            "bytes": 94726
+          },
+          "assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+          "target_framework": "net8.0",
+          "times": {
+            "creation": "2026-10-22T09:25:33.6005305+08:00",
+            "queuing": "2026-10-22T09:25:33.6005314+08:00",
+            "start": "2026-10-22T09:25:31.3704759+08:00",
+            "finish": "2026-10-22T09:25:34.1637858+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 64,
+            "executed": 64,
+            "passed": 64,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 8.0.31)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "baseline-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_25_34_net472.trx",
+            "sha256": "8aed77673de858b0d8dfe66a2717261c495570e5987b2c8ad45312dfea1a1183",
+            "bytes": 141182
+          },
+          "assembly": "TemplateFrame.Tests.dll",
+          "target_framework": "net472",
+          "times": {
+            "creation": "2026-10-22T09:25:34.318395+08:00",
+            "queuing": "2026-10-22T09:25:34.3183955+08:00",
+            "start": "2026-10-22T09:25:24.6161656+08:00",
+            "finish": "2026-10-22T09:25:35.2020337+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 102,
+            "executed": 102,
+            "passed": 102,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.01] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET Framework 4.8.9310.0)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "baseline-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_25_36_net472.trx",
+            "sha256": "7f7a68b4135e8ad3aec06b88f7689e849381b212ed23cbd0dfc99a36c37b892d",
+            "bytes": 94612
+          },
+          "assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+          "target_framework": "net472",
+          "times": {
+            "creation": "2026-10-22T09:25:36.7934367+08:00",
+            "queuing": "2026-10-22T09:25:36.7934373+08:00",
+            "start": "2026-10-22T09:25:31.5089305+08:00",
+            "finish": "2026-10-22T09:25:37.5883094+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 64,
+            "executed": 64,
+            "passed": 64,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET Framework 4.8.9310.0)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "baseline-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_25_36_net472[1].trx",
+            "sha256": "a0777a52e3c5ffc5aac5c5469cdd2bdd5644f826a3d7708e88c752028efbb53d",
+            "bytes": 180839
+          },
+          "assembly": "TemplateFrame.Word.Tests.dll",
+          "target_framework": "net472",
+          "times": {
+            "creation": "2026-10-22T09:25:36.4451747+08:00",
+            "queuing": "2026-10-22T09:25:36.4451751+08:00",
+            "start": "2026-10-22T09:25:29.9506526+08:00",
+            "finish": "2026-10-22T09:25:39.4821038+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 126,
+            "executed": 126,
+            "passed": 126,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET Framework 4.8.9310.0)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "baseline-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_25_40_net8.0.trx",
+            "sha256": "deb48acbcdd392c4a163570f915c79c8a1ee0ea5d2ebd11a5919a1c972ae7745",
+            "bytes": 188672
+          },
+          "assembly": "TemplateFrame.Excel.Tests.dll",
+          "target_framework": "net8.0",
+          "times": {
+            "creation": "2026-10-22T09:25:40.3133821+08:00",
+            "queuing": "2026-10-22T09:25:40.3133835+08:00",
+            "start": "2026-10-22T09:25:38.5138371+08:00",
+            "finish": "2026-10-22T09:25:41.4790584+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 130,
+            "executed": 130,
+            "passed": 130,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.01] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET 8.0.31)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "baseline-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_25_42_net472.trx",
+            "sha256": "cf90d06e5d5cf1ba9b87b5615e5c81821d480b763f85f4cbcee9999c881ff953",
+            "bytes": 188426
+          },
+          "assembly": "TemplateFrame.Excel.Tests.dll",
+          "target_framework": "net472",
+          "times": {
+            "creation": "2026-10-22T09:25:42.4263409+08:00",
+            "queuing": "2026-10-22T09:25:42.4263415+08:00",
+            "start": "2026-10-22T09:25:38.5881983+08:00",
+            "finish": "2026-10-22T09:25:44.7266543+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 130,
+            "executed": 130,
+            "passed": 130,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.01] xUnit.net VSTest Adapter v3.1.4+50e68bbb8b (64-bit .NET Framework 4.8.9310.0)"
+          ],
+          "attachments": []
+        }
+      ]
+    },
+    "candidate_final": {
+      "group": "candidate-final-tests",
+      "trx_count": 8,
+      "totals": {
+        "total": 844,
+        "executed": 844,
+        "passed": 844,
+        "failed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "notExecuted": 0
+      },
+      "coverage_attachment_count": 8,
+      "all_resolved_coverage_attachments_nonzero": true,
+      "coverage_note": "Only attachments explicitly referenced by these TRX files are counted. Coverage across test assemblies/frameworks is not summed because source coverage overlaps.",
+      "runs": [
+        {
+          "artifact": {
+            "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_11_net8.0.trx",
+            "sha256": "40a06343717e989171be5595a7f0de5af0511c0cfc58411b683323895ff05f3c",
+            "bytes": 194328
+          },
+          "assembly": "TemplateFrame.Word.Tests.dll",
+          "target_framework": "net8.0",
+          "times": {
+            "creation": "2026-10-22T09:35:11.168767+08:00",
+            "queuing": "2026-10-22T09:35:11.1687685+08:00",
+            "start": "2026-10-22T09:35:07.5019385+08:00",
+            "finish": "2026-10-22T09:35:13.0563676+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 126,
+            "executed": 126,
+            "passed": 126,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 8.0.31)"
+          ],
+          "attachments": [
+            {
+              "trx_href": "DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+              "resolution_method": "TRX runDeploymentRoot/In/href; no directory-wide coverage glob",
+              "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_11/In/DESKTOP-IR7RCO3/coverage.cobertura.xml",
+              "sha256": "5f590e46ef5be949e73f794c629f7f37d3d1c3b6b4c3f7774be645ca5efd67ed",
+              "bytes": 390584,
+              "exists": true,
+              "coverage": {
+                "lines_covered": 1234,
+                "lines_valid": 1461,
+                "line_rate": 0.8445999999999999,
+                "branches_covered": 709,
+                "branches_valid": 980,
+                "branch_rate": 0.7234
+              },
+              "nonzero_coverage": true
+            }
+          ]
+        },
+        {
+          "artifact": {
+            "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_12_net8.0.trx",
+            "sha256": "6e976a0368c1aab2fc6323a1e13edf88afef43a6e4131acd8e959ca3976eac29",
+            "bytes": 152175
+          },
+          "assembly": "TemplateFrame.Tests.dll",
+          "target_framework": "net8.0",
+          "times": {
+            "creation": "2026-10-22T09:35:12.341555+08:00",
+            "queuing": "2026-10-22T09:35:12.3415558+08:00",
+            "start": "2026-10-22T09:35:08.3961649+08:00",
+            "finish": "2026-10-22T09:35:13.0030169+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 102,
+            "executed": 102,
+            "passed": 102,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 8.0.31)"
+          ],
+          "attachments": [
+            {
+              "trx_href": "DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+              "resolution_method": "TRX runDeploymentRoot/In/href; no directory-wide coverage glob",
+              "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_12/In/DESKTOP-IR7RCO3/coverage.cobertura.xml",
+              "sha256": "740224187a5d2d1688fc9890bcf765a636b42cc156d3c877f8c47162cd7101b8",
+              "bytes": 167966,
+              "exists": true,
+              "coverage": {
+                "lines_covered": 455,
+                "lines_valid": 582,
+                "line_rate": 0.7817000000000001,
+                "branches_covered": 352,
+                "branches_valid": 468,
+                "branch_rate": 0.7521
+              },
+              "nonzero_coverage": true
+            }
+          ]
+        },
+        {
+          "artifact": {
+            "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_12_net8.0[1].trx",
+            "sha256": "840cf555cbab2616cd091f3692c0d66bdcff28503dea252989ba8abae587dc94",
+            "bytes": 101656
+          },
+          "assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+          "target_framework": "net8.0",
+          "times": {
+            "creation": "2026-10-22T09:35:12.2098024+08:00",
+            "queuing": "2026-10-22T09:35:12.2098038+08:00",
+            "start": "2026-10-22T09:35:08.2933072+08:00",
+            "finish": "2026-10-22T09:35:13.3699128+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 64,
+            "executed": 64,
+            "passed": 64,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 8.0.31)"
+          ],
+          "attachments": [
+            {
+              "trx_href": "DESKTOP-IR7RCO3\\coverage.cobertura[1].xml",
+              "resolution_method": "TRX runDeploymentRoot/In/href; no directory-wide coverage glob",
+              "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_12/In/DESKTOP-IR7RCO3/coverage.cobertura[1].xml",
+              "sha256": "dcdbbcaaf33bd6e9de6fa34731aa19b35b80d21fcaf0dfeaca21f71e47b053a2",
+              "bytes": 361592,
+              "exists": true,
+              "coverage": {
+                "lines_covered": 837,
+                "lines_valid": 1283,
+                "line_rate": 0.6523,
+                "branches_covered": 562,
+                "branches_valid": 1062,
+                "branch_rate": 0.5291
+              },
+              "nonzero_coverage": true
+            }
+          ]
+        },
+        {
+          "artifact": {
+            "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_12_net8.0[2].trx",
+            "sha256": "5c8eae36081f38f3dca6054e99aef165a0c7433f45fac054816849ecbd06c939",
+            "bytes": 202334
+          },
+          "assembly": "TemplateFrame.Excel.Tests.dll",
+          "target_framework": "net8.0",
+          "times": {
+            "creation": "2026-10-22T09:35:12.3841565+08:00",
+            "queuing": "2026-10-22T09:35:12.384157+08:00",
+            "start": "2026-10-22T09:35:08.3159738+08:00",
+            "finish": "2026-10-22T09:35:13.7111485+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 130,
+            "executed": 130,
+            "passed": 130,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 8.0.31)"
+          ],
+          "attachments": [
+            {
+              "trx_href": "DESKTOP-IR7RCO3\\coverage.cobertura[2].xml",
+              "resolution_method": "TRX runDeploymentRoot/In/href; no directory-wide coverage glob",
+              "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_12/In/DESKTOP-IR7RCO3/coverage.cobertura[2].xml",
+              "sha256": "ead2cd502e96ea43e13e853a3f3eb3d177871744a30899338513592888738b91",
+              "bytes": 442759,
+              "exists": true,
+              "coverage": {
+                "lines_covered": 1342,
+                "lines_valid": 1669,
+                "line_rate": 0.804,
+                "branches_covered": 783,
+                "branches_valid": 1234,
+                "branch_rate": 0.6345000000000001
+              },
+              "nonzero_coverage": true
+            }
+          ]
+        },
+        {
+          "artifact": {
+            "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_15_net472.trx",
+            "sha256": "332426e750f96ded693b4cfb90e844b70e92c94fa600040ef8a0ae4f4867f53f",
+            "bytes": 151985
+          },
+          "assembly": "TemplateFrame.Tests.dll",
+          "target_framework": "net472",
+          "times": {
+            "creation": "2026-10-22T09:35:15.3955054+08:00",
+            "queuing": "2026-10-22T09:35:15.3955061+08:00",
+            "start": "2026-10-22T09:35:08.3194499+08:00",
+            "finish": "2026-10-22T09:35:17.2064461+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 102,
+            "executed": 102,
+            "passed": 102,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET Framework 4.8.9310.0)"
+          ],
+          "attachments": [
+            {
+              "trx_href": "DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+              "resolution_method": "TRX runDeploymentRoot/In/href; no directory-wide coverage glob",
+              "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_15/In/DESKTOP-IR7RCO3/coverage.cobertura.xml",
+              "sha256": "e82bf0fa60d86660b9f277f6231a0c4e1c6093c7c125a4fa4f58f5dc39e0a8f9",
+              "bytes": 169185,
+              "exists": true,
+              "coverage": {
+                "lines_covered": 455,
+                "lines_valid": 584,
+                "line_rate": 0.7791,
+                "branches_covered": 352,
+                "branches_valid": 468,
+                "branch_rate": 0.7521
+              },
+              "nonzero_coverage": true
+            }
+          ]
+        },
+        {
+          "artifact": {
+            "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_15_net472[1].trx",
+            "sha256": "51d398b3750bca69129fcb33ede2253f715599f32a22eb193472a8ad34986f78",
+            "bytes": 202088
+          },
+          "assembly": "TemplateFrame.Excel.Tests.dll",
+          "target_framework": "net472",
+          "times": {
+            "creation": "2026-10-22T09:35:15.775329+08:00",
+            "queuing": "2026-10-22T09:35:15.7753296+08:00",
+            "start": "2026-10-22T09:35:08.3863053+08:00",
+            "finish": "2026-10-22T09:35:19.0540177+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 130,
+            "executed": 130,
+            "passed": 130,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET Framework 4.8.9310.0)"
+          ],
+          "attachments": [
+            {
+              "trx_href": "DESKTOP-IR7RCO3\\coverage.cobertura[1].xml",
+              "resolution_method": "TRX runDeploymentRoot/In/href; no directory-wide coverage glob",
+              "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_15/In/DESKTOP-IR7RCO3/coverage.cobertura[1].xml",
+              "sha256": "18a247144a4da2ebfed4292dbf14316443cbe48c1d11a65b8e5d34fda6025105",
+              "bytes": 444475,
+              "exists": true,
+              "coverage": {
+                "lines_covered": 1342,
+                "lines_valid": 1673,
+                "line_rate": 0.8020999999999999,
+                "branches_covered": 783,
+                "branches_valid": 1234,
+                "branch_rate": 0.6345000000000001
+              },
+              "nonzero_coverage": true
+            }
+          ]
+        },
+        {
+          "artifact": {
+            "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_16_net472.trx",
+            "sha256": "9c2d7cf078e85e8ce9e0b6cbb3915e06ae3eb9fa7ed19e205df82a563c700d20",
+            "bytes": 101539
+          },
+          "assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+          "target_framework": "net472",
+          "times": {
+            "creation": "2026-10-22T09:35:16.160325+08:00",
+            "queuing": "2026-10-22T09:35:16.1603258+08:00",
+            "start": "2026-10-22T09:35:08.4397136+08:00",
+            "finish": "2026-10-22T09:35:18.0938174+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 64,
+            "executed": 64,
+            "passed": 64,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET Framework 4.8.9310.0)"
+          ],
+          "attachments": [
+            {
+              "trx_href": "DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+              "resolution_method": "TRX runDeploymentRoot/In/href; no directory-wide coverage glob",
+              "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_16/In/DESKTOP-IR7RCO3/coverage.cobertura.xml",
+              "sha256": "3c9b217109aa865defc67b1cd8f734801164d6565e360b4952cd6850dd186ca6",
+              "bytes": 363306,
+              "exists": true,
+              "coverage": {
+                "lines_covered": 840,
+                "lines_valid": 1287,
+                "line_rate": 0.6526000000000001,
+                "branches_covered": 562,
+                "branches_valid": 1062,
+                "branch_rate": 0.5291
+              },
+              "nonzero_coverage": true
+            }
+          ]
+        },
+        {
+          "artifact": {
+            "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_16_net472[1].trx",
+            "sha256": "0d8918b75c11938590eafa6a47988abc789cb4bc410cb4377f268f0b5c452a78",
+            "bytes": 194093
+          },
+          "assembly": "TemplateFrame.Word.Tests.dll",
+          "target_framework": "net472",
+          "times": {
+            "creation": "2026-10-22T09:35:16.7455633+08:00",
+            "queuing": "2026-10-22T09:35:16.7455639+08:00",
+            "start": "2026-10-22T09:35:08.5024788+08:00",
+            "finish": "2026-10-22T09:35:19.0227088+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 126,
+            "executed": 126,
+            "passed": 126,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET Framework 4.8.9310.0)"
+          ],
+          "attachments": [
+            {
+              "trx_href": "DESKTOP-IR7RCO3\\coverage.cobertura[1].xml",
+              "resolution_method": "TRX runDeploymentRoot/In/href; no directory-wide coverage glob",
+              "path": "candidate-final-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_35_16/In/DESKTOP-IR7RCO3/coverage.cobertura[1].xml",
+              "sha256": "6dabc44c437d44c684b69cb397ad3408f07fbb4353f0ca7b88cfc82fe6bc600b",
+              "bytes": 392298,
+              "exists": true,
+              "coverage": {
+                "lines_covered": 1234,
+                "lines_valid": 1465,
+                "line_rate": 0.8423,
+                "branches_covered": 709,
+                "branches_valid": 980,
+                "branch_rate": 0.7234
+              },
+              "nonzero_coverage": true
+            }
+          ]
+        }
+      ]
+    },
+    "candidate_net10": {
+      "group": "candidate-net10-tests",
+      "trx_count": 4,
+      "totals": {
+        "total": 422,
+        "executed": 422,
+        "passed": 422,
+        "failed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "notExecuted": 0
+      },
+      "coverage_attachment_count": 0,
+      "all_resolved_coverage_attachments_nonzero": null,
+      "coverage_note": "Only attachments explicitly referenced by these TRX files are counted. Coverage across test assemblies/frameworks is not summed because source coverage overlaps.",
+      "runs": [
+        {
+          "artifact": {
+            "path": "candidate-net10-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_36_26_net10.0.trx",
+            "sha256": "c0c4cb479ced6279fd355244e54f121794136d6fdce908fc2209f8ee772b0d33",
+            "bytes": 151981
+          },
+          "assembly": "TemplateFrame.Tests.dll",
+          "target_framework": "net10.0",
+          "times": {
+            "creation": "2026-10-22T09:36:26.7400718+08:00",
+            "queuing": "2026-10-22T09:36:26.7400723+08:00",
+            "start": "2026-10-22T09:36:25.2236395+08:00",
+            "finish": "2026-10-22T09:36:26.9292078+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 102,
+            "executed": 102,
+            "passed": 102,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 10.0.12)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "candidate-net10-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_36_26_net10.0[1].trx",
+            "sha256": "7bd0458bfb767ffb73f0f89bd2ce3bbdf9bfcd78cd943cab4c7045ea6cd1f696",
+            "bytes": 194182
+          },
+          "assembly": "TemplateFrame.Word.Tests.dll",
+          "target_framework": "net10.0",
+          "times": {
+            "creation": "2026-10-22T09:36:26.8405496+08:00",
+            "queuing": "2026-10-22T09:36:26.8405503+08:00",
+            "start": "2026-10-22T09:36:25.2059171+08:00",
+            "finish": "2026-10-22T09:36:27.8353711+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 126,
+            "executed": 126,
+            "passed": 126,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 10.0.12)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "candidate-net10-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_36_27_net10.0.trx",
+            "sha256": "0c3d6a46a47f80666c56e4538efb94c7150719fc17b63928e533e05e40b0c23d",
+            "bytes": 101383
+          },
+          "assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+          "target_framework": "net10.0",
+          "times": {
+            "creation": "2026-10-22T09:36:27.550884+08:00",
+            "queuing": "2026-10-22T09:36:27.5508855+08:00",
+            "start": "2026-10-22T09:36:25.5336137+08:00",
+            "finish": "2026-10-22T09:36:28.0149548+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 64,
+            "executed": 64,
+            "passed": 64,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 10.0.12)"
+          ],
+          "attachments": []
+        },
+        {
+          "artifact": {
+            "path": "candidate-net10-tests/Marci_DESKTOP-IR7RCO3_2026-10-22_09_36_27_net10.0[1].trx",
+            "sha256": "9f8cea136e2f00b42ae27ca689365c47f0180f072a01a52fbd50af4b012f8628",
+            "bytes": 202193
+          },
+          "assembly": "TemplateFrame.Excel.Tests.dll",
+          "target_framework": "net10.0",
+          "times": {
+            "creation": "2026-10-22T09:36:27.2750776+08:00",
+            "queuing": "2026-10-22T09:36:27.2750782+08:00",
+            "start": "2026-10-22T09:36:25.4912571+08:00",
+            "finish": "2026-10-22T09:36:28.2572463+08:00"
+          },
+          "outcome": "Completed",
+          "counters": {
+            "total": 130,
+            "executed": 130,
+            "passed": 130,
+            "failed": 0,
+            "error": 0,
+            "timeout": 0,
+            "aborted": 0,
+            "inconclusive": 0,
+            "passedButRunAborted": 0,
+            "notRunnable": 0,
+            "notExecuted": 0,
+            "disconnected": 0,
+            "warning": 0,
+            "completed": 0,
+            "inProgress": 0,
+            "pending": 0
+          },
+          "test_host_reported": [
+            "[xUnit.net 00:00:00.00] xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 10.0.12)"
+          ],
+          "attachments": []
+        }
+      ]
+    }
+  },
+  "candidate": {
+    "upgrades": {
+      "Microsoft.NET.Test.Sdk": "18.11.0",
+      "DocumentFormat.OpenXml": "3.5.1",
+      "xunit.runner.visualstudio": "4.0.1",
+      "System.ValueTuple": "4.6.2",
+      "coverlet.collector": "10.1.0",
+      "BenchmarkDotNet": "0.15.8",
+      "System.Text.Json": "8.0.6"
+    },
+    "inventory": [
+      {
+        "id": "BenchmarkDotNet.Annotations",
+        "version": "0.15.8"
+      },
+      {
+        "id": "BenchmarkDotNet",
+        "version": "0.15.8"
+      },
+      {
+        "id": "CommandLineParser",
+        "version": "2.9.1"
+      },
+      {
+        "id": "coverlet.collector",
+        "version": "10.1.0"
+      },
+      {
+        "id": "DocumentFormat.OpenXml.Framework",
+        "version": "3.5.1"
+      },
+      {
+        "id": "DocumentFormat.OpenXml",
+        "version": "3.5.1"
+      },
+      {
+        "id": "Gee.External.Capstone",
+        "version": "2.3.0"
+      },
+      {
+        "id": "Iced",
+        "version": "1.21.0"
+      },
+      {
+        "id": "Microsoft.Bcl.AsyncInterfaces",
+        "version": "8.0.0"
+      },
+      {
+        "id": "Microsoft.CodeAnalysis.Analyzers",
+        "version": "3.11.0"
+      },
+      {
+        "id": "Microsoft.CodeAnalysis.Common",
+        "version": "4.14.0"
+      },
+      {
+        "id": "Microsoft.CodeAnalysis.CSharp",
+        "version": "4.14.0"
+      },
+      {
+        "id": "Microsoft.CodeCoverage",
+        "version": "18.11.0"
+      },
+      {
+        "id": "Microsoft.Diagnostics.NETCore.Client",
+        "version": "0.2.510501"
+      },
+      {
+        "id": "Microsoft.Diagnostics.Runtime",
+        "version": "3.1.512801"
+      },
+      {
+        "id": "Microsoft.Diagnostics.Tracing.TraceEvent",
+        "version": "3.1.21"
+      },
+      {
+        "id": "Microsoft.DotNet.PlatformAbstractions",
+        "version": "3.1.6"
+      },
+      {
+        "id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.DependencyInjection",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.Logging.Abstractions",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.Logging",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.Options",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.Primitives",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.NET.Test.Sdk",
+        "version": "18.11.0"
+      },
+      {
+        "id": "Microsoft.NETCore.Platforms",
+        "version": "1.1.0"
+      },
+      {
+        "id": "Microsoft.NETCore.Platforms",
+        "version": "5.0.0"
+      },
+      {
+        "id": "Microsoft.NETFramework.ReferenceAssemblies.net462",
+        "version": "1.0.3"
+      },
+      {
+        "id": "Microsoft.NETFramework.ReferenceAssemblies",
+        "version": "1.0.3"
+      },
+      {
+        "id": "Microsoft.TestPlatform.ObjectModel",
+        "version": "17.13.0"
+      },
+      {
+        "id": "Microsoft.TestPlatform.ObjectModel",
+        "version": "18.11.0"
+      },
+      {
+        "id": "Microsoft.TestPlatform.TestHost",
+        "version": "18.11.0"
+      },
+      {
+        "id": "Microsoft.Win32.Registry",
+        "version": "5.0.0"
+      },
+      {
+        "id": "NETStandard.Library",
+        "version": "2.0.3"
+      },
+      {
+        "id": "Perfolizer",
+        "version": "0.6.1"
+      },
+      {
+        "id": "Pragmastat",
+        "version": "3.2.4"
+      },
+      {
+        "id": "QRCoder",
+        "version": "1.6.0"
+      },
+      {
+        "id": "System.Buffers",
+        "version": "4.5.1"
+      },
+      {
+        "id": "System.CodeDom",
+        "version": "9.0.5"
+      },
+      {
+        "id": "System.Collections.Immutable",
+        "version": "1.5.0"
+      },
+      {
+        "id": "System.Collections.Immutable",
+        "version": "9.0.0"
+      },
+      {
+        "id": "System.Diagnostics.DiagnosticSource",
+        "version": "6.0.0"
+      },
+      {
+        "id": "System.IO.Packaging",
+        "version": "8.0.1"
+      },
+      {
+        "id": "System.Management",
+        "version": "9.0.5"
+      },
+      {
+        "id": "System.Memory",
+        "version": "4.5.5"
+      },
+      {
+        "id": "System.Numerics.Vectors",
+        "version": "4.4.0"
+      },
+      {
+        "id": "System.Numerics.Vectors",
+        "version": "4.5.0"
+      },
+      {
+        "id": "System.Reflection.Metadata",
+        "version": "1.6.0"
+      },
+      {
+        "id": "System.Reflection.Metadata",
+        "version": "9.0.0"
+      },
+      {
+        "id": "System.Reflection.TypeExtensions",
+        "version": "4.7.0"
+      },
+      {
+        "id": "System.Runtime.CompilerServices.Unsafe",
+        "version": "4.5.3"
+      },
+      {
+        "id": "System.Runtime.CompilerServices.Unsafe",
+        "version": "6.0.0"
+      },
+      {
+        "id": "System.Security.AccessControl",
+        "version": "5.0.0"
+      },
+      {
+        "id": "System.Security.Principal.Windows",
+        "version": "5.0.0"
+      },
+      {
+        "id": "System.Text.Encodings.Web",
+        "version": "8.0.0"
+      },
+      {
+        "id": "System.Text.Json",
+        "version": "8.0.5"
+      },
+      {
+        "id": "System.Text.Json",
+        "version": "8.0.6"
+      },
+      {
+        "id": "System.Threading.Tasks.Extensions",
+        "version": "4.5.4"
+      },
+      {
+        "id": "System.ValueTuple",
+        "version": "4.6.2"
+      },
+      {
+        "id": "xunit.abstractions",
+        "version": "2.0.3"
+      },
+      {
+        "id": "xunit.analyzers",
+        "version": "1.18.0"
+      },
+      {
+        "id": "xunit.assert",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.core",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.extensibility.core",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.extensibility.execution",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.runner.visualstudio",
+        "version": "4.0.1"
+      },
+      {
+        "id": "xunit",
+        "version": "2.9.3"
+      }
+    ],
+    "package_version_pair_count": 66,
+    "inventory_artifact": {
+      "path": "candidate-resolved-packages.txt",
+      "sha256": "70655d476cb1c96ed34fd55f6eacdeb7ff8869fd9bfd177772300501ff26611a",
+      "bytes": 2234
+    },
+    "osv": {
+      "source": "https://api.osv.dev/v1/querybatch",
+      "ecosystem": "NuGet",
+      "inventory_count": 66,
+      "response_count": 66,
+      "matched_result_count": 0,
+      "vulnerability_match_count": 0,
+      "raw_response": {
+        "results": [
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {},
+          {}
+        ]
+      },
+      "artifact": {
+        "path": "candidate-osv-audit.json",
+        "sha256": "853e4307e651173247f4857c74591c2fccec73bfc376e48b827df0899ee3bc4e",
+        "bytes": 620
+      },
+      "scope_note": "Results apply to queried package/version pairs, not bundled runtimes, SDKs, or unknown vulnerabilities."
+    },
+    "status": "Validated only in an isolated temporary source copy; dependency changes are not applied to the repository."
+  },
+  "build_warning_comparison": {
+    "baseline_clean": {
+      "SourceSnapshot": "source-snapshot.zip (provided by parent for HEAD a4163fd)",
+      "Sdk": "10.0.401",
+      "RestoreSource": "https://api.nuget.org/v3/index.json",
+      "RestoreExitCode": 0,
+      "BuildCommand": "dotnet build TemplateFrame.slnx -c Release --no-restore --verbosity minimal",
+      "BuildExitCode": 0,
+      "WarningCodes": [],
+      "BuildWarningLineCount": 0,
+      "BuildSummary": [
+        "已成功生成。",
+        "    0 个警告",
+        "    0 个错误",
+        "",
+        "已用时间 00:00:11.09"
+      ],
+      "RestoreWarningLines": [],
+      "DependencyReferences": [
+        "src\\TemplateFrame.Word\\TemplateFrame.Word.csproj:20:    <PackageReference Include=\"DocumentFormat.OpenXml\" Version=\"3.3.0\" />",
+        "src\\Directory.Build.props:30:    <PackageReference Include=\"System.ValueTuple\" Version=\"4.5.0\" />",
+        "test\\TemplateFrame.Word.Tests\\TemplateFrame.Word.Tests.csproj:12:    <PackageReference Include=\"Microsoft.NET.Test.Sdk\" Version=\"17.14.1\" />",
+        "test\\TemplateFrame.Word.Tests\\TemplateFrame.Word.Tests.csproj:13:    <PackageReference Include=\"xunit\" Version=\"2.9.3\" />",
+        "test\\TemplateFrame.Word.Tests\\TemplateFrame.Word.Tests.csproj:14:    <PackageReference Include=\"coverlet.collector\" Version=\"6.0.4\" />",
+        "test\\TemplateFrame.Word.Tests\\TemplateFrame.Word.Tests.csproj:15:    <PackageReference Include=\"xunit.runner.visualstudio\" Version=\"3.1.4\">",
+        "test\\TemplateFrame.Word.Tests\\TemplateFrame.Word.Tests.csproj:18:    </PackageReference>",
+        "test\\TemplateFrame.Word.Tests\\TemplateFrame.Word.Tests.csproj:28:    <PackageReference Include=\"System.Text.Json\" Version=\"8.0.5\" />",
+        "samples\\TemplateFrame.Demo.Word.I18n\\obj\\TemplateFrame.Demo.Word.I18n.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "src\\TemplateFrame.Word\\obj\\TemplateFrame.Word.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "samples\\TemplateFrame.Demo.Excel.Simple.I18n\\obj\\TemplateFrame.Demo.Excel.Simple.I18n.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "test\\TemplateFrame.Word.Tests\\obj\\TemplateFrame.Word.Tests.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "test\\TemplateFrame.Excel.Simple.Tests\\TemplateFrame.Excel.Simple.Tests.csproj:12:    <PackageReference Include=\"Microsoft.NET.Test.Sdk\" Version=\"17.14.1\" />",
+        "test\\TemplateFrame.Excel.Simple.Tests\\TemplateFrame.Excel.Simple.Tests.csproj:13:    <PackageReference Include=\"xunit\" Version=\"2.9.3\" />",
+        "test\\TemplateFrame.Excel.Simple.Tests\\TemplateFrame.Excel.Simple.Tests.csproj:14:    <PackageReference Include=\"coverlet.collector\" Version=\"6.0.4\" />",
+        "test\\TemplateFrame.Excel.Simple.Tests\\TemplateFrame.Excel.Simple.Tests.csproj:15:    <PackageReference Include=\"xunit.runner.visualstudio\" Version=\"3.1.4\">",
+        "test\\TemplateFrame.Excel.Simple.Tests\\TemplateFrame.Excel.Simple.Tests.csproj:18:    </PackageReference>",
+        "test\\TemplateFrame.Excel.Simple.Tests\\TemplateFrame.Excel.Simple.Tests.csproj:19:    <PackageReference Include=\"DocumentFormat.OpenXml\" Version=\"3.3.0\" />",
+        "test\\TemplateFrame.Excel.Simple.Tests\\obj\\TemplateFrame.Excel.Simple.Tests.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "src\\TemplateFrame\\obj\\TemplateFrame.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "test\\TemplateFrame.Benchmarks\\TemplateFrame.Benchmarks.csproj:15:    <PackageReference Include=\"BenchmarkDotNet\" Version=\"0.14.0\" />",
+        "samples\\TemplateFrame.Demo.Excel\\TemplateFrame.Demo.Excel.csproj:15:    <PackageReference Include=\"QRCoder\" Version=\"1.6.0\" />",
+        "test\\TemplateFrame.Benchmarks\\obj\\TemplateFrame.Benchmarks.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "samples\\TemplateFrame.Demo.Excel.I18n\\obj\\TemplateFrame.Demo.Excel.I18n.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "samples\\TemplateFrame.Demo.Excel\\obj\\TemplateFrame.Demo.Excel.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "samples\\TemplateFrame.Demo.Word.AutoMapping\\TemplateFrame.Demo.Word.AutoMapping.csproj:15:    <PackageReference Include=\"QRCoder\" Version=\"1.6.0\" />",
+        "samples\\TemplateFrame.Demo.Word.AutoMapping\\obj\\TemplateFrame.Demo.Word.AutoMapping.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "samples\\TemplateFrame.Demo.Excel.Simple\\obj\\TemplateFrame.Demo.Excel.Simple.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "samples\\TemplateFrame.Demo.Excel.AutoMapping\\TemplateFrame.Demo.Excel.AutoMapping.csproj:15:    <PackageReference Include=\"QRCoder\" Version=\"1.6.0\" />",
+        "src\\TemplateFrame.Excel.Simple\\TemplateFrame.Excel.Simple.csproj:20:    <PackageReference Include=\"DocumentFormat.OpenXml\" Version=\"3.3.0\" />",
+        "samples\\TemplateFrame.Demo.Word\\TemplateFrame.Demo.Word.csproj:15:    <PackageReference Include=\"QRCoder\" Version=\"1.6.0\" />",
+        "src\\TemplateFrame.Excel.Simple\\obj\\TemplateFrame.Excel.Simple.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "samples\\TemplateFrame.Demo.Excel.AutoMapping\\obj\\TemplateFrame.Demo.Excel.AutoMapping.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "samples\\TemplateFrame.Demo.Word\\obj\\TemplateFrame.Demo.Word.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "src\\TemplateFrame.Excel\\TemplateFrame.Excel.csproj:20:    <PackageReference Include=\"DocumentFormat.OpenXml\" Version=\"3.3.0\" />",
+        "src\\TemplateFrame.Excel\\obj\\TemplateFrame.Excel.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "test\\TemplateFrame.Tests\\TemplateFrame.Tests.csproj:12:    <PackageReference Include=\"Microsoft.NET.Test.Sdk\" Version=\"17.14.1\" />",
+        "test\\TemplateFrame.Tests\\TemplateFrame.Tests.csproj:13:    <PackageReference Include=\"xunit\" Version=\"2.9.3\" />",
+        "test\\TemplateFrame.Tests\\TemplateFrame.Tests.csproj:14:    <PackageReference Include=\"coverlet.collector\" Version=\"6.0.4\" />",
+        "test\\TemplateFrame.Tests\\TemplateFrame.Tests.csproj:15:    <PackageReference Include=\"xunit.runner.visualstudio\" Version=\"3.1.4\">",
+        "test\\TemplateFrame.Tests\\TemplateFrame.Tests.csproj:18:    </PackageReference>",
+        "test\\TemplateFrame.Excel.Tests\\TemplateFrame.Excel.Tests.csproj:12:    <PackageReference Include=\"Microsoft.NET.Test.Sdk\" Version=\"17.14.1\" />",
+        "test\\TemplateFrame.Excel.Tests\\TemplateFrame.Excel.Tests.csproj:13:    <PackageReference Include=\"xunit\" Version=\"2.9.3\" />",
+        "test\\TemplateFrame.Excel.Tests\\TemplateFrame.Excel.Tests.csproj:14:    <PackageReference Include=\"coverlet.collector\" Version=\"6.0.4\" />",
+        "test\\TemplateFrame.Excel.Tests\\TemplateFrame.Excel.Tests.csproj:15:    <PackageReference Include=\"xunit.runner.visualstudio\" Version=\"3.1.4\">",
+        "test\\TemplateFrame.Excel.Tests\\TemplateFrame.Excel.Tests.csproj:18:    </PackageReference>",
+        "test\\TemplateFrame.Excel.Tests\\TemplateFrame.Excel.Tests.csproj:28:    <PackageReference Include=\"System.Text.Json\" Version=\"8.0.5\" />",
+        "test\\TemplateFrame.Tests\\obj\\TemplateFrame.Tests.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>",
+        "test\\TemplateFrame.Excel.Tests\\obj\\TemplateFrame.Excel.Tests.csproj.nuget.g.props:9:    <NuGetProjectStyle Condition=\" '$(NuGetProjectStyle)' == '' \">PackageReference</NuGetProjectStyle>"
+      ],
+      "Conclusion": "Clean original baseline has zero compiler warnings. Candidate 64 CS8602 warnings are newly exposed relative to this baseline; dependency/API nullability changes are a plausible cause, requiring candidate source locations to confirm."
+    },
+    "baseline_clean_log": {
+      "path": "baseline-clean/baseline-clean-build.txt",
+      "sha256": "0fa4b4ba5a03ce69198ed1c0f508135190bbe7946551036f465f65fdf594d40f",
+      "bytes": 5806
+    },
+    "candidate_final": {
+      "artifact": {
+        "path": "candidate-final-build.txt",
+        "sha256": "4217b3c39fac5c9d76faa6bf4cf132ad6b864b60801c4d222122f29afbd48449",
+        "bytes": 53628
+      },
+      "warning_occurrences": 64,
+      "counts_by_code": {
+        "CS8602": 64
+      },
+      "counting_method": "Count compiler warning lines before the build summary, avoiding the repeated summary listing.",
+      "warnings": [
+        {
+          "file": "test/TemplateFrame.Excel.Tests/ExcelServiceConcurrencyTests.cs",
+          "line": 15,
+          "column": 16,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/ExcelTemplateBuilderTests.cs",
+          "line": 66,
+          "column": 29,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/DocumentContentLocalizationTests.cs",
+          "line": 144,
+          "column": 20,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/DocumentContentLocalizationTests.cs",
+          "line": 150,
+          "column": 55,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/DocumentContentLocalizationTests.cs",
+          "line": 179,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/RealScenarioTests.cs",
+          "line": 104,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/ParseDetailedTests.cs",
+          "line": 54,
+          "column": 29,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/ExcelServiceConcurrencyTests.cs",
+          "line": 15,
+          "column": 16,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/DocumentContentLocalizationTests.cs",
+          "line": 144,
+          "column": 20,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/DocumentContentLocalizationTests.cs",
+          "line": 150,
+          "column": 55,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/DocumentContentLocalizationTests.cs",
+          "line": 179,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/RealScenarioTests.cs",
+          "line": 104,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/ExcelTemplateBuilderTests.cs",
+          "line": 66,
+          "column": 29,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Tests/ParseDetailedTests.cs",
+          "line": 54,
+          "column": 29,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Tests/TemplateFrame.Excel.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/ParseDetailedTests.cs",
+          "line": 52,
+          "column": 23,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/RealScenarioTests.cs",
+          "line": 71,
+          "column": 24,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/SchemaValidationTests.cs",
+          "line": 41,
+          "column": 42,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/RealScenarioTests.cs",
+          "line": 120,
+          "column": 20,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/RealScenarioTests.cs",
+          "line": 141,
+          "column": 19,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/DocumentContentLocalizationTests.cs",
+          "line": 243,
+          "column": 20,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/DocumentContentLocalizationTests.cs",
+          "line": 258,
+          "column": 20,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordRobustnessTests.cs",
+          "line": 101,
+          "column": 22,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordServiceConcurrencyTests.cs",
+          "line": 15,
+          "column": 16,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordRobustnessTests.cs",
+          "line": 149,
+          "column": 22,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 23,
+          "column": 23,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordRobustnessTests.cs",
+          "line": 192,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateFillerTests.cs",
+          "line": 146,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 87,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 117,
+          "column": 19,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 134,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateFillerTests.cs",
+          "line": 305,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateFillerTests.cs",
+          "line": 319,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 186,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 262,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 281,
+          "column": 19,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 302,
+          "column": 26,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Simple.Tests/DefinedNameColumnTests.cs",
+          "line": 75,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Simple.Tests/HeaderFallbackTests.cs",
+          "line": 122,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Simple.Tests/SimpleExcelTests.cs",
+          "line": 230,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/ParseDetailedTests.cs",
+          "line": 52,
+          "column": 23,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/RealScenarioTests.cs",
+          "line": 71,
+          "column": 24,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/RealScenarioTests.cs",
+          "line": 120,
+          "column": 20,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/SchemaValidationTests.cs",
+          "line": 41,
+          "column": 42,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/RealScenarioTests.cs",
+          "line": 141,
+          "column": 19,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordServiceConcurrencyTests.cs",
+          "line": 15,
+          "column": 16,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 23,
+          "column": 23,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordRobustnessTests.cs",
+          "line": 101,
+          "column": 22,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/DocumentContentLocalizationTests.cs",
+          "line": 243,
+          "column": 20,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/DocumentContentLocalizationTests.cs",
+          "line": 258,
+          "column": 20,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordRobustnessTests.cs",
+          "line": 149,
+          "column": 22,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 87,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordRobustnessTests.cs",
+          "line": 192,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 117,
+          "column": 19,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateFillerTests.cs",
+          "line": 146,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 134,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 186,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateFillerTests.cs",
+          "line": 305,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateFillerTests.cs",
+          "line": 319,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 262,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 281,
+          "column": 19,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Word.Tests/WordTemplateBuilderCapabilitiesTests.cs",
+          "line": 302,
+          "column": 26,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Word.Tests/TemplateFrame.Word.Tests.csproj::TargetFramework=net8.0"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Simple.Tests/DefinedNameColumnTests.cs",
+          "line": 75,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Simple.Tests/HeaderFallbackTests.cs",
+          "line": 122,
+          "column": 25,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj::TargetFramework=net472"
+        },
+        {
+          "file": "test/TemplateFrame.Excel.Simple.Tests/SimpleExcelTests.cs",
+          "line": 230,
+          "column": 21,
+          "code": "CS8602",
+          "message": "解引用可能出现空引用。",
+          "project_and_target": "test/TemplateFrame.Excel.Simple.Tests/TemplateFrame.Excel.Simple.Tests.csproj::TargetFramework=net472"
+        }
+      ],
+      "build_tail": [
+        "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-security-audit-20261022\\candidate\\test\\TemplateFrame.Excel.Simple.Tests\\SimpleExcelTests.cs(230,21): warning CS8602: 解引用可能出现空引用。 [C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-security-audit-20261022\\candidate\\test\\TemplateFrame.Excel.Simple.Tests\\TemplateFrame.Excel.Simple.Tests.csproj::TargetFramework=net472]",
+        "    64 个警告",
+        "    0 个错误",
+        "",
+        "已用时间 00:00:03.89"
+      ]
+    },
+    "interpretation": "Clean baseline has no compiler warnings. Candidate has new CS8602 warnings relative to that baseline. Passing tests do not establish that these warnings are harmless; the isolated comparison changes multiple dependencies, so it does not by itself attribute every warning to one package."
+  },
+  "input_probes": {
+    "result": {
+      "auditDate": "2026-10-22",
+      "executedAtUtc": "2026-10-22T01:31:51.4822144Z",
+      "repositoryRoot": "C:\\work\\OpenCode\\TemplateFrame",
+      "configuration": "Release",
+      "targetFrameworkOfLoadedArtifacts": "net8.0",
+      "actualExecutionRuntime": ".NET 10.0.11",
+      "powerShellVersion": "7.6.5",
+      "assemblyManifest": [
+        {
+          "path": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\System.IO.Packaging.dll",
+          "assemblyVersion": "10.0.0.0",
+          "sha256": "12DDC8BFF279FAD856551A74894DC52B80FA437D5D2B32722E70AE6899217B7C",
+          "lastWriteTimeUtc": "2024-09-16T23:09:52Z"
+        },
+        {
+          "path": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\DocumentFormat.OpenXml.Framework.dll",
+          "assemblyVersion": "3.3.0.0",
+          "sha256": "5B8C2B9CA1AA70539AF0B8054D649BD09FDCE4DEC812B263AB511B13789C8589",
+          "lastWriteTimeUtc": "2025-03-05T21:55:00Z"
+        },
+        {
+          "path": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\DocumentFormat.OpenXml.dll",
+          "assemblyVersion": "3.3.0.0",
+          "sha256": "72E8F6E3E3527D7E6EE29F2F9182EF1B39A4DE6DA355A33013C0940EFB24D87E",
+          "lastWriteTimeUtc": "2025-03-05T21:55:02Z"
+        },
+        {
+          "path": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\TemplateFrame.dll",
+          "assemblyVersion": "2.4.1.0",
+          "sha256": "4A53DE1AF649CF4A571AF10E314321B168EC2C6D0CF3121EB86108A163762091",
+          "lastWriteTimeUtc": "2026-10-22T01:25:17.0941993Z"
+        },
+        {
+          "path": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\TemplateFrame.Excel.dll",
+          "assemblyVersion": "2.4.1.0",
+          "sha256": "584FA1263F038777434CA5F3443CC41B17C8F3542570388D63FE42A24605C2F9",
+          "lastWriteTimeUtc": "2026-10-22T01:25:23.096729Z"
+        },
+        {
+          "path": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Simple.Tests\\bin\\Release\\net8.0\\TemplateFrame.Excel.Simple.dll",
+          "assemblyVersion": "2.4.1.0",
+          "sha256": "924C788614929DFDBBB51CA08C60E157736550B9C2682AD1F764B45C98B566C6",
+          "lastWriteTimeUtc": "2026-10-22T01:25:19.668596Z"
+        }
+      ],
+      "memoryMetric": "Cumulative current-thread managed allocation; NOT peak memory, working set, retained heap, or native memory.",
+      "caveats": [
+        "Reads prebuilt DLLs; does not build the repository. Compare assembly manifest hashes/timestamps with intended build.",
+        "Synthetic bounded probes only, not a stress test or complete security test.",
+        "No int.MaxValue, archive bomb, executable macro, external network request, or disk extraction probe.",
+        "Elapsed time and cumulative allocations are host-dependent observations, not performance guarantees.",
+        "This does not validate net462 or a .NET 8 host merely because net8.0 target artifacts were loaded."
+      ],
+      "simpleSparseRows": {
+        "lastRowIndex": 100000,
+        "physicalDataRows": 1,
+        "inputBytes": 1448,
+        "rowsReturned": 1,
+        "elapsedMilliseconds": 33,
+        "cumulativeThreadAllocatedBytes": 11465624
+      },
+      "excelNamedRange": {
+        "namedRangeEndRow": 10000,
+        "physicalDataRows": 1,
+        "inputBytes": 1453,
+        "rowsReturned": 9999,
+        "elapsedMilliseconds": 15,
+        "cumulativeThreadAllocatedBytes": 2631936
+      },
+      "dtd": {
+        "rejected": true,
+        "prohibitedDtdMessageObserved": true,
+        "error": [
+          "Exception calling \"Read\" with \"2\" argument(s): \"工作表 XML 已损坏，无法解析：For security reasons DTD is prohibited in this XML document. To enable DTD processing set the DtdProcessing property on XmlReaderSettings to Parse and pass the settings into XmlReader.Create method.\"",
+          "工作表 XML 已损坏，无法解析：For security reasons DTD is prohibited in this XML document. To enable DTD processing set the DtdProcessing property on XmlReaderSettings to Parse and pass the settings into XmlReader.Create method.",
+          "For security reasons DTD is prohibited in this XML document. To enable DTD processing set the DtdProcessing property on XmlReaderSettings to Parse and pass the settings into XmlReader.Create method."
+        ]
+      },
+      "defaultMaxCharactersInPart": 0,
+      "activeContentPreservation": {
+        "validationIssues": 0,
+        "inertVbaMarkerPartPreserved": true,
+        "externalHyperlinkPreserved": true,
+        "executedCodeOrAccessedLink": false,
+        "interpretation": "Content preservation only; this does not demonstrate macro execution or SSRF."
+      }
+    },
+    "artifact": {
+      "path": "input-probes-results.json",
+      "sha256": "4f20e7a3b396942ea725f949555d6b731e32bb5b60b150944d05424727ddd06d",
+      "bytes": 4644
+    },
+    "provenance_note": "Recorded execution time, bounds, loaded DLL manifest, and actual host runtime are preserved verbatim. net8.0 compiled targets were loaded into PowerShell running .NET 10.0.11; this is not a test on a .NET 8 host. AssemblyVersion is not a NuGet package version.",
+    "assembly_binding_limitation": "The historical manifest used Assembly.LoadFrom(...).GetName(), which can report an already-loaded PowerShell dependency rather than the file at the requested path. Its assemblyVersion must not be interpreted as the version read from that file. The original results remain unchanged. The archived script now records loadedAssemblyLocation/loadedAssemblyVersion separately from diskAssemblyVersion read by AssemblyName.GetAssemblyName.",
+    "archived_probe_script": {
+      "path": "docs/reviews/security-2026-10-22/input-probes.ps1",
+      "sha256": "f113feb90db91f1ff01638d55ea022118808b02ab79bc8faabb340d93cc3c55f",
+      "changes_from_original": [
+        "Default RepositoryRoot resolves ../../.. from PSScriptRoot.",
+        "Record loaded assembly actual Location and loaded version separately from disk metadata version.",
+        "Add an assembly-binding caveat; preserve compatibility field assemblyVersion as loaded version."
+      ],
+      "execution_status": "Edited and archived only; not executed by the evidence-archiving agent."
+    }
+  },
+  "limitations": [
+    "Package advisory queries cover public indexed advisories at query time, not unknown vulnerabilities or every exploitable application path.",
+    "Runtime and SDK CVE version matches do not alone prove reachable exploitation in this library; application hosting and deployment conditions matter.",
+    "NuGet vulnerability feed metadata was stale, so native NuGet zero results were not trusted alone.",
+    "TRX summaries are Windows-local results. They do not validate Linux GitHub runners, actual release publishing, every supported OS, or the minimum net462 installed runtime.",
+    "Baseline/candidate builds used SDK 10.0.401; actual test-host versions are retained from TRX output. Tests were not rerun after an SDK/host patch installation.",
+    "Candidate upgrades remain temporary. xunit v3 migration, QRCoder 1.8.1 upgrade, and GitHub Action upgrades were assessed but not executed in this candidate.",
+    "Candidate net10 tests do not mean the published library was retargeted to net10 or that all net10-specific dependency selections were audited.",
+    "Coverage is recorded once per TRX-referenced attachment and is nonzero; overlapping test coverage is not summed into a misleading repository-wide percentage.",
+    "Bounded synthetic input probes are not a stress test. Allocation is cumulative current-thread managed allocation, not peak memory; inert content preservation does not demonstrate macro execution or SSRF.",
+    "Source artifacts are referenced by relative path and SHA-256 in the original temporary audit directory; this compact evidence file does not embed all raw TRX, logs, package archives, or full web pages.",
+    "Some GitHub API refetches were rate-limited and two documentation refetches timed out. Source-specific failures and provenance limitations are retained.",
+    "Historical PowerShell probe assemblyVersion can describe a unified already-loaded assembly, not the requested file; inspect the actual binding or independent .NET host probes before associating behavior with an exact package graph.",
+    "The authoritative input resource probes are input_probes_net8: independently hosted on .NET 8.0.31 with System.IO.Packaging 8.0.1 exact binary verification. Earlier PowerShell observations used a unified System.IO.Packaging 10 assembly and are historical cross-checks only."
+  ],
+  "input_probes_net8": {
+    "auditDate": "2026-10-22",
+    "executedAtUtc": "2026-10-22T01:43:11.458684Z",
+    "repositoryRoot": "C:\\work\\OpenCode\\TemplateFrame",
+    "probeSource": "Independent net8.0 console using direct references to rebuilt workspace Release DLLs; no PowerShell runtime assembly binding.",
+    "actualExecutionRuntime": ".NET 8.0.31",
+    "runtimeVersion": "8.0.31",
+    "processPath": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-security-audit-20261022\\net8-input-probe\\bin\\Release\\net8.0\\InputProbes.exe",
+    "assemblyManifest": [
+      {
+        "name": "System.IO.Packaging",
+        "assemblyVersion": "8.0.0.0",
+        "fileVersion": "8.0.1024.46610",
+        "loadedLocation": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-security-audit-20261022\\net8-input-probe\\bin\\Release\\net8.0\\System.IO.Packaging.dll",
+        "sha256": "12DDC8BFF279FAD856551A74894DC52B80FA437D5D2B32722E70AE6899217B7C",
+        "sourceArtifact": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\System.IO.Packaging.dll",
+        "sourceSha256": "12DDC8BFF279FAD856551A74894DC52B80FA437D5D2B32722E70AE6899217B7C",
+        "sourceLastWriteTimeUtc": "2024-09-16T23:09:52Z",
+        "loadedHashMatchesSource": true
+      },
+      {
+        "name": "DocumentFormat.OpenXml.Framework",
+        "assemblyVersion": "3.3.0.0",
+        "fileVersion": "3.3.0",
+        "loadedLocation": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-security-audit-20261022\\net8-input-probe\\bin\\Release\\net8.0\\DocumentFormat.OpenXml.Framework.dll",
+        "sha256": "5B8C2B9CA1AA70539AF0B8054D649BD09FDCE4DEC812B263AB511B13789C8589",
+        "sourceArtifact": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\DocumentFormat.OpenXml.Framework.dll",
+        "sourceSha256": "5B8C2B9CA1AA70539AF0B8054D649BD09FDCE4DEC812B263AB511B13789C8589",
+        "sourceLastWriteTimeUtc": "2025-03-05T21:55:00Z",
+        "loadedHashMatchesSource": true
+      },
+      {
+        "name": "DocumentFormat.OpenXml",
+        "assemblyVersion": "3.3.0.0",
+        "fileVersion": "3.3.0",
+        "loadedLocation": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-security-audit-20261022\\net8-input-probe\\bin\\Release\\net8.0\\DocumentFormat.OpenXml.dll",
+        "sha256": "72E8F6E3E3527D7E6EE29F2F9182EF1B39A4DE6DA355A33013C0940EFB24D87E",
+        "sourceArtifact": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\DocumentFormat.OpenXml.dll",
+        "sourceSha256": "72E8F6E3E3527D7E6EE29F2F9182EF1B39A4DE6DA355A33013C0940EFB24D87E",
+        "sourceLastWriteTimeUtc": "2025-03-05T21:55:02Z",
+        "loadedHashMatchesSource": true
+      },
+      {
+        "name": "TemplateFrame",
+        "assemblyVersion": "2.4.1.0",
+        "fileVersion": "2.4.1.0",
+        "loadedLocation": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-security-audit-20261022\\net8-input-probe\\bin\\Release\\net8.0\\TemplateFrame.dll",
+        "sha256": "4A53DE1AF649CF4A571AF10E314321B168EC2C6D0CF3121EB86108A163762091",
+        "sourceArtifact": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\TemplateFrame.dll",
+        "sourceSha256": "4A53DE1AF649CF4A571AF10E314321B168EC2C6D0CF3121EB86108A163762091",
+        "sourceLastWriteTimeUtc": "2026-10-22T01:25:17.0941993Z",
+        "loadedHashMatchesSource": true
+      },
+      {
+        "name": "TemplateFrame.Excel",
+        "assemblyVersion": "2.4.1.0",
+        "fileVersion": "2.4.1.0",
+        "loadedLocation": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-security-audit-20261022\\net8-input-probe\\bin\\Release\\net8.0\\TemplateFrame.Excel.dll",
+        "sha256": "584FA1263F038777434CA5F3443CC41B17C8F3542570388D63FE42A24605C2F9",
+        "sourceArtifact": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Tests\\bin\\Release\\net8.0\\TemplateFrame.Excel.dll",
+        "sourceSha256": "584FA1263F038777434CA5F3443CC41B17C8F3542570388D63FE42A24605C2F9",
+        "sourceLastWriteTimeUtc": "2026-10-22T01:25:23.096729Z",
+        "loadedHashMatchesSource": true
+      },
+      {
+        "name": "TemplateFrame.Excel.Simple",
+        "assemblyVersion": "2.4.1.0",
+        "fileVersion": "2.4.1.0",
+        "loadedLocation": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-security-audit-20261022\\net8-input-probe\\bin\\Release\\net8.0\\TemplateFrame.Excel.Simple.dll",
+        "sha256": "924C788614929DFDBBB51CA08C60E157736550B9C2682AD1F764B45C98B566C6",
+        "sourceArtifact": "C:\\work\\OpenCode\\TemplateFrame\\test\\TemplateFrame.Excel.Simple.Tests\\bin\\Release\\net8.0\\TemplateFrame.Excel.Simple.dll",
+        "sourceSha256": "924C788614929DFDBBB51CA08C60E157736550B9C2682AD1F764B45C98B566C6",
+        "sourceLastWriteTimeUtc": "2026-10-22T01:25:19.668596Z",
+        "loadedHashMatchesSource": true
+      }
+    ],
+    "packagingPackageVerification": {
+      "expectedNuGetPackage": "System.IO.Packaging/8.0.1",
+      "expectedPackagePath": "C:\\Users\\Marci\\.nuget\\packages\\system.io.packaging\\8.0.1\\lib\\net8.0\\System.IO.Packaging.dll",
+      "actualPackagingHash": "12DDC8BFF279FAD856551A74894DC52B80FA437D5D2B32722E70AE6899217B7C",
+      "expectedPackagingHash": "12DDC8BFF279FAD856551A74894DC52B80FA437D5D2B32722E70AE6899217B7C",
+      "exactBinaryMatch": true
+    },
+    "memoryMetric": "Cumulative current-thread managed allocation; NOT peak memory, working set, retained heap, or native memory.",
+    "simpleSparseRows": {
+      "lastRowIndex": 100000,
+      "physicalDataRows": 1,
+      "inputBytes": 1442,
+      "rowsReturned": 1,
+      "elapsedMilliseconds": 27,
+      "cumulativeThreadAllocatedBytes": 15392664
+    },
+    "excelNamedRange": {
+      "namedRangeEndRow": 10000,
+      "physicalDataRows": 1,
+      "inputBytes": 1444,
+      "rowsReturned": 9999,
+      "elapsedMilliseconds": 11,
+      "cumulativeThreadAllocatedBytes": 2618912
+    },
+    "dtd": {
+      "rejected": true,
+      "prohibitedDtdMessageObserved": true,
+      "errors": [
+        "工作表 XML 已损坏，无法解析：For security reasons DTD is prohibited in this XML document. To enable DTD processing set the DtdProcessing property on XmlReaderSettings to Parse and pass the settings into XmlReader.Create method.",
+        "For security reasons DTD is prohibited in this XML document. To enable DTD processing set the DtdProcessing property on XmlReaderSettings to Parse and pass the settings into XmlReader.Create method."
+      ]
+    },
+    "defaultMaxCharactersInPart": 0,
+    "activeContentPreservation": {
+      "validationIssues": 0,
+      "inertVbaMarkerPartPreserved": true,
+      "externalHyperlinkPreserved": true,
+      "executedCodeOrAccessedLink": false
+    },
+    "limitations": [
+      "Bounded synthetic probes only; no stress test.",
+      "No executable macro, external request, filesystem extraction, or archive bomb.",
+      "Times and allocations are host-dependent observations, not performance guarantees.",
+      "No product source changes; project and build outputs are under TEMP.",
+      "Does not test net462 host behavior."
+    ]
+  },
+  "candidate_net10_packaging_audit": {
+    "request": {
+      "queries": [
+        {
+          "version": "10.0.2",
+          "package": {
+            "ecosystem": "NuGet",
+            "name": "System.IO.Packaging"
+          }
+        }
+      ]
+    },
+    "response": {
+      "results": [
+        {}
+      ]
+    }
+  }
+}

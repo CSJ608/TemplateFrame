@@ -119,8 +119,8 @@ public sealed class HeaderFallbackTests
         stream.Position = 0;
         using (var document = DocumentFormat.OpenXml.Packaging.SpreadsheetDocument.Open(stream, true))
         {
-            var cells = document.WorkbookPart!.WorksheetParts.Single().Worksheet
-                .Descendants<DocumentFormat.OpenXml.Spreadsheet.Row>().First()
+            var worksheet = Assert.IsType<DocumentFormat.OpenXml.Spreadsheet.Worksheet>(document.WorkbookPart?.WorksheetParts.Single().Worksheet);
+            var cells = worksheet.Descendants<DocumentFormat.OpenXml.Spreadsheet.Row>().First()
                 .Elements<DocumentFormat.OpenXml.Spreadsheet.Cell>().ToArray();
             cells[0].DataType = DocumentFormat.OpenXml.Spreadsheet.CellValues.InlineString;
             cells[0].InlineString = new(new DocumentFormat.OpenXml.Spreadsheet.Text("名称"));

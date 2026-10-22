@@ -4,6 +4,8 @@ using DocumentFormat.OpenXml.Wordprocessing;
 using System.IO.Compression;
 using System.Xml;
 using TemplateFrame.Contract;
+using TemplateFrame.Engine;
+using TemplateFrame.Internal;
 using TemplateFrame.Validation;
 using TemplateFrame.Word.Localization;
 using A = DocumentFormat.OpenXml.Drawing;
@@ -50,19 +52,48 @@ public sealed record WordTemplateValidationResult : TemplateValidationResult
 /// <remarks>Extra 只告警放行。</remarks>
 public sealed class WordTemplateValidator
 {
+    private readonly TemplateResourceLimits _limits;
+
+    /// <summary>Creates a validator with the default resource limits.</summary>
+    public WordTemplateValidator()
+        : this(TemplateResourceLimits.Default)
+    {
+    }
+
+    /// <summary>Creates a validator with explicit resource limits.</summary>
+    public WordTemplateValidator(TemplateResourceLimits limits)
+    {
+        Guard.ThrowIfNull(limits, nameof(limits));
+        limits.Validate();
+        _limits = limits;
+    }
+
     /// <summary>Validates whether a .docx template matches the contract.</summary>
     public WordTemplateValidationResult Validate(Stream template, TemplateContract contract)
+        => Validate(template, contract, packageChecked: false);
+
+    /// <summary>Validates document structure after the caller has checked the package with the same resource limits.</summary>
+    internal WordTemplateValidationResult ValidateCheckedPackage(Stream template, TemplateContract contract)
+        => Validate(template, contract, packageChecked: true);
+
+    private WordTemplateValidationResult Validate(Stream template, TemplateContract contract, bool packageChecked)
     {
         Guard.ThrowIfNull(template, nameof(template));
         Guard.ThrowIfNull(contract, nameof(contract));
-        if (template.CanSeek)
-        {
-            template.Position = 0;
-        }
-
         try
         {
-            using var document = WordprocessingDocument.Open(template, false);
+            using var buffered = template.CanSeek
+                ? null
+                : new MemoryStream(StreamUtil.ReadAllBytes(template, _limits), writable: false);
+            var package = buffered ?? template;
+            if (buffered is null && !packageChecked)
+            {
+                StreamUtil.ValidatePackage(package, _limits);
+            }
+
+            package.Position = 0;
+            using var document = WordprocessingDocument.Open(package, false,
+                new OpenSettings { MaxCharactersInPart = _limits.MaxXmlCharactersPerPart });
             if (document.MainDocumentPart is null)
             {
                 return Invalid("Word.Validation.MissingMainPart");

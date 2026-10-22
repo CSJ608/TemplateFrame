@@ -4,9 +4,11 @@ using System.Globalization;
 using System.Xml;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
-using TemplateFrame.Excel.Simple.Localization;
+using TemplateFrame.Engine;
+using TemplateFrame.Internal;
 using TemplateFrame.Localization;
 using TemplateFrame.Validation;
+using Sr = TemplateFrame.Excel.Simple.Localization.Sr;
 
 namespace TemplateFrame.Excel.Simple;
 
@@ -58,6 +60,12 @@ public static class SimpleExcelContract
         Guard.ThrowIfNull(target, nameof(target));
         Guard.ThrowIfNull(data, nameof(data));
         var table = RequireSingleTable(contract);
+        options ??= new SimpleExcelOptions();
+        Guard.ThrowIfNull(options.ResourceLimits, nameof(options.ResourceLimits));
+        var budget = new TemplateResourceBudget(options.ResourceLimits);
+        budget.AddCells(table.Columns.Count);
+        var rowCount = data.Tables.TryGetValue(table.Key, out var suppliedRows) ? suppliedRows.Count : 0;
+        budget.AddRows(rowCount, table.Columns.Count);
         var headers = table.Columns
             .Select(c => ResolveHeaderText(c, culture, localizer))
             .ToList();
@@ -85,20 +93,23 @@ public static class SimpleExcelContract
         Guard.ThrowIfNull(source, nameof(source));
         Guard.ThrowIfNull(contract, nameof(contract));
         options ??= new SimpleExcelOptions();
+        Guard.ThrowIfNull(options.ResourceLimits, nameof(options.ResourceLimits));
+        options.ResourceLimits.Validate();
         var table = RequireSingleTable(contract);
 
         try
         {
-            return ReadCore(source, table, options);
+            using var buffered = source.CanSeek ? null : new MemoryStream(StreamUtil.ReadAllBytes(source, options.ResourceLimits), writable: false);
+            return ReadCore(buffered ?? source, table, options, packageChecked: buffered is not null);
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or FileFormatException
-                                   or XmlException) // zip 有效但 XML 损坏：惰性 DOM 在树访问时才抛
+                                   or XmlException or FormatException or OverflowException) // zip 有效但 XML 损坏：惰性 DOM 在树访问时才抛
         {
             throw new InvalidOperationException(Sr.Get("SimpleExcel.Contract.CannotOpen", ex.Message), ex);
         }
     }
 
-    private static FillData ReadCore(Stream source, TableElement table, SimpleExcelOptions options)
+    private static FillData ReadCore(Stream source, TableElement table, SimpleExcelOptions options, bool packageChecked)
     {
         // ① 每列定义名定位（开一次文档）
         if (source.CanSeek)
@@ -106,7 +117,12 @@ public static class SimpleExcelContract
             source.Position = 0;
         }
 
-        using (var document = SpreadsheetDocument.Open(source, false))
+        if (!packageChecked)
+        {
+            StreamUtil.ValidatePackage(source, options.ResourceLimits);
+        }
+        using (var document = SpreadsheetDocument.Open(source, false,
+                   new OpenSettings { MaxCharactersInPart = options.ResourceLimits.MaxXmlCharactersPerPart }))
         {
             var layout = ResolveColumnLayout(document, options, table);
             if (layout is not null)
@@ -121,7 +137,7 @@ public static class SimpleExcelContract
             source.Position = 0;
         }
 
-        var loaded = SimpleExcel.Read(source, options.TableName);
+        var loaded = SimpleExcelReader.Read(source, options.TableName, options.ResourceLimits, packageChecked: true);
         var columnByHeader = BuildColumnLookup(table, loaded.Headers);
 
         var rows = new List<IReadOnlyDictionary<string, object?>>();
@@ -152,20 +168,36 @@ public static class SimpleExcelContract
     /// <summary>Validates whether .xlsx headers match the contract columns (Missing / Extra / Ambiguous).</summary>
     /// <remarks>列定位与 <see cref="Read"/> 相同的分级回退；缺必填列报 Missing，可选列缺失与多余列告警，重复列定义名报 Ambiguous。</remarks>
     public static TemplateValidationResult Validate(Stream template, TemplateContract contract, SimpleExcelOptions? options = null)
+        => ValidatePackage(template, contract, options ?? new SimpleExcelOptions(), packageChecked: false);
+
+    private static TemplateValidationResult ValidatePackage(Stream template, TemplateContract contract, SimpleExcelOptions options, bool packageChecked)
     {
         Guard.ThrowIfNull(template, nameof(template));
         Guard.ThrowIfNull(contract, nameof(contract));
         var table = RequireSingleTable(contract);
         options ??= new SimpleExcelOptions();
+        Guard.ThrowIfNull(options.ResourceLimits, nameof(options.ResourceLimits));
+        options.ResourceLimits.Validate();
 
         try
         {
+            if (!template.CanSeek)
+            {
+                using var buffered = new MemoryStream(StreamUtil.ReadAllBytes(template, options.ResourceLimits), writable: false);
+                return ValidatePackage(buffered, contract, options, packageChecked: true);
+            }
+
             if (template.CanSeek)
             {
                 template.Position = 0;
             }
 
-            using (var document = SpreadsheetDocument.Open(template, false))
+            if (!packageChecked)
+            {
+                StreamUtil.ValidatePackage(template, options.ResourceLimits);
+            }
+            using (var document = SpreadsheetDocument.Open(template, false,
+                       new OpenSettings { MaxCharactersInPart = options.ResourceLimits.MaxXmlCharactersPerPart }))
             {
                 var layout = ResolveColumnLayout(document, options, table);
                 if (layout is not null)
@@ -175,7 +207,7 @@ public static class SimpleExcelContract
             }
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException
-                                       or FileFormatException or IOException or XmlException) // XmlException：zip 有效但 XML 损坏（惰性 DOM）
+                                       or FileFormatException or IOException or XmlException or FormatException or OverflowException) // XmlException：zip 有效但 XML 损坏（惰性 DOM）
         {
             return Invalid(ex);
         }
@@ -189,10 +221,10 @@ public static class SimpleExcelContract
                 template.Position = 0;
             }
 
-            loaded = SimpleExcel.Read(template, options.TableName);
+            loaded = SimpleExcelReader.Read(template, options.TableName, options.ResourceLimits, packageChecked: true);
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException
-                                       or FileFormatException or IOException or XmlException)
+                                       or FileFormatException or IOException or XmlException or FormatException or OverflowException)
         {
             return Invalid(ex);
         }
@@ -316,6 +348,10 @@ public static class SimpleExcelContract
             return null; // 没有可用列定义名 → 回退文本匹配
         }
 
+        // Bound header work before visiting even absent cells in a wide named range.
+        new TemplateResourceBudget(options.ResourceLimits).AddCells(
+            checked((long)tableRange.Value.EndCol - tableRange.Value.StartCol + 1));
+
         // 表头行文本（按区域列序，用于 Extra 检测 / 展示）
         var headers = new List<string>();
         for (var c = tableRange.Value.StartCol; c <= tableRange.Value.EndCol; c++)
@@ -346,12 +382,13 @@ public static class SimpleExcelContract
         var sharedStrings = SimpleExcelReader.MaterializeSharedStrings(workbookPart);
         var rowLookup = SimpleExcelReader.BuildRowLookup(rows);
 
-        // 数据区顺延到工作表最后一行（与 SimpleExcel.Read 一致；全空行跳过）。
-        var endRow = rows.Count > 0 ? Math.Max(layout.Range.EndRow, rowLookup.Keys.Max()) : layout.Range.EndRow;
-
+        var budget = new TemplateResourceBudget(options.ResourceLimits);
+        budget.AddCells(layout.Headers.Count);
         var dataRows = new List<IReadOnlyDictionary<string, object?>>();
-        for (var r = layout.Range.StartRow + 1; r <= endRow; r++)
+        // Preserve row-number order and skip absent rows without allocating a dictionary for every gap.
+        foreach (var r in rowLookup.Keys.Where(r => r > layout.Range.StartRow).OrderBy(r => r))
         {
+            budget.AddRows(1, table.Columns.Count);
             var rowValues = new Dictionary<string, object?>();
             var any = false;
             foreach (var column in table.Columns)
@@ -391,6 +428,14 @@ public static class SimpleExcelContract
         TableElement table,
         DefinedNameLayout layout)
     {
+        var workbookPart = document.WorkbookPart!;
+        var worksheetPart = SimpleExcelReader.ResolveWorksheetPart(workbookPart, layout.Range.Sheet);
+        var rows = worksheetPart?.Worksheet?.GetFirstChild<SheetData>()?.Elements<Row>().ToList() ?? [];
+        var rowLookup = SimpleExcelReader.BuildRowLookup(rows);
+        var budget = new TemplateResourceBudget(options.ResourceLimits);
+        budget.AddCells(layout.Headers.Count);
+        budget.AddRows(rowLookup.Keys.Count(r => r > layout.Range.StartRow), table.Columns.Count);
+
         var tableName = string.IsNullOrWhiteSpace(options.TableName) ? SimpleExcel.DefaultTableName : options.TableName.Trim();
         var issues = new List<TemplateValidationIssue>();
 

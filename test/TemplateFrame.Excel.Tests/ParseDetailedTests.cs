@@ -51,7 +51,8 @@ public sealed class ParseDetailedTests
         buffer.Position = 0;
         using (var document = SpreadsheetDocument.Open(buffer, true))
         {
-            var sheetData = document.WorkbookPart!.WorksheetParts.First().Worksheet.GetFirstChild<SheetData>()!;
+            var worksheet = Assert.IsType<Worksheet>(document.WorkbookPart?.WorksheetParts.First().Worksheet);
+            var sheetData = Assert.IsType<SheetData>(worksheet.GetFirstChild<SheetData>());
             var cell = sheetData.Descendants<Cell>().First(c => c.CellReference?.Value == cellAddress);
             cell.DataType = CellValues.InlineString;
             cell.RemoveAllChildren<CellValue>();

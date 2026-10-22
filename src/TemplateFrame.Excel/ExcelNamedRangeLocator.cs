@@ -85,6 +85,11 @@ public static class ExcelNamedRangeLocator
 
         var startCell = ExcelAddressHelper.ParseCell(cells.Substring(0, colon));
         var endCell = ExcelAddressHelper.ParseCell(cells.Substring(colon + 1));
+        if (endCell.Row < startCell.Row || endCell.Col < startCell.Col)
+        {
+            throw new FormatException(Localization.Sr.Get("Excel.Address.CannotParse", reference));
+        }
+
         return (sheet, startCell, endCell);
     }
 

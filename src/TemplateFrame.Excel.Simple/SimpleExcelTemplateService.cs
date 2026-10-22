@@ -1,10 +1,10 @@
 using System.Globalization;
 using TemplateFrame.Contract;
 using TemplateFrame.Data;
-using TemplateFrame.Excel.Simple.Localization;
 using TemplateFrame.Localization;
 using TemplateFrame.Mapping;
 using TemplateFrame.Validation;
+using Sr = TemplateFrame.Excel.Simple.Localization.Sr;
 
 namespace TemplateFrame.Excel.Simple;
 

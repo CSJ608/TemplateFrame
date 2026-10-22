@@ -1,5 +1,7 @@
 # TemplateFrame.Excel.Simple
 
+> **3.0 迁移提示**：默认资源预算会改变超大输入的接受行为，请先阅读[迁移指南](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/MIGRATION-3.0.md)。
+
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Excel.Simple.svg)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Excel.Simple)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
 
@@ -110,7 +112,7 @@ var parsed = service.Parse(filled);                    // xlsx → 强类型 Mat
 
 - 历史性能快照（2026-08-24，仅描述当时样本，不保证线性伸缩或当前版本耗时）：写 / 读 1000 行 ~30ms，1 万行 ~0.3–0.5s；契约路径读 1 万行 ~0.6–0.9s。
 - 快照见仓库 [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md)，基准项目 [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md)（复现命令见该页）。
-- 目标框架 `netstandard2.0 / net462 / net8.0`（NuGet 按运行时自动选择），依赖 `DocumentFormat.OpenXml`（3.3.x）。
+- 目标框架 `netstandard2.0 / net462 / net8.0`（NuGet 按运行时自动选择），依赖 `DocumentFormat.OpenXml`（3.5.1）。
 
 ## Demo
 
@@ -124,3 +126,5 @@ dotnet run --project samples/TemplateFrame.Demo.Excel.Simple
 - `Excel-Simple-Materials-template.xlsx`：**模板**（仅表头，定义列结构）
 - `Excel-Simple-Materials-filled.xlsx`：**填充后**（表头 + 物料数据行）
 - 控制台输出**反解析**结果（读回填充后文件 → `SimpleExcel.Read` → 打印表头与每行数据）
+
+输入包、XML、图片和表数据默认启用可配置资源预算；超限会拒绝输入。Validate 不进行宏或外部关系净化。配置方式与适用边界见[安全说明](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md)。

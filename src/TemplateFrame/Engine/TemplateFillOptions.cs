@@ -13,6 +13,9 @@ public enum MissingElementPolicy
 /// <summary>Fill options shared by the Word / Excel plugins.</summary>
 public sealed record TemplateFillOptions
 {
+    /// <summary>Resource limits used by the engine for validation, filling and parsing.</summary>
+    public TemplateResourceLimits ResourceLimits { get; init; } = TemplateResourceLimits.Default;
+
     /// <summary>Policy for missing required elements; defaults to <see cref="MissingElementPolicy.Throw"/>.</summary>
     public MissingElementPolicy MissingElementPolicy { get; init; } = MissingElementPolicy.Throw;
 }

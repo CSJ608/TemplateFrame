@@ -3,7 +3,9 @@ using DocumentFormat.OpenXml.Packaging;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Xml;
 using TemplateFrame.Contract;
+using TemplateFrame.Engine;
 using TemplateFrame.Excel.Localization;
+using TemplateFrame.Internal;
 using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel;
@@ -12,8 +14,29 @@ namespace TemplateFrame.Excel;
 /// <remarks>Extra 只告警放行。</remarks>
 public sealed class ExcelTemplateValidator
 {
+    private readonly TemplateResourceLimits _limits;
+
+    /// <summary>Creates a validator with default input budgets.</summary>
+    public ExcelTemplateValidator() : this(TemplateResourceLimits.Default)
+    {
+    }
+
+    /// <summary>Creates a validator with the supplied input budgets.</summary>
+    public ExcelTemplateValidator(TemplateResourceLimits resourceLimits)
+    {
+        _limits = resourceLimits ?? throw new ArgumentNullException(nameof(resourceLimits));
+        _limits.Validate();
+    }
+
     /// <summary>Validates whether an .xlsx template matches the contract.</summary>
     public TemplateValidationResult Validate(Stream template, TemplateContract contract)
+        => ValidatePackage(template, contract, packageChecked: false);
+
+    // Only callers that already ran StreamUtil's complete package preflight may use this path.
+    internal TemplateValidationResult ValidateCheckedPackage(Stream template, TemplateContract contract)
+        => ValidatePackage(template, contract, packageChecked: true);
+
+    private TemplateValidationResult ValidatePackage(Stream template, TemplateContract contract, bool packageChecked)
     {
         Guard.ThrowIfNull(template, nameof(template));
         Guard.ThrowIfNull(contract, nameof(contract));
@@ -24,7 +47,14 @@ public sealed class ExcelTemplateValidator
 
         try
         {
-            using var document = SpreadsheetDocument.Open(template, false);
+            using var buffered = template.CanSeek ? null : new MemoryStream(StreamUtil.ReadAllBytes(template, _limits), writable: false);
+            var input = buffered ?? template;
+            if (!packageChecked && buffered is null)
+            {
+                StreamUtil.ValidatePackage(input, _limits);
+            }
+            using var document = SpreadsheetDocument.Open(input, false,
+                new OpenSettings { MaxCharactersInPart = _limits.MaxXmlCharactersPerPart });
             if (document.WorkbookPart is null)
             {
                 return Invalid("Excel.Validation.MissingWorkbookPart");
@@ -33,15 +63,16 @@ public sealed class ExcelTemplateValidator
             return ValidateCore(document.WorkbookPart, contract);
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException or FileFormatException
-                                   or XmlException) // zip 有效但 XML 损坏：惰性 DOM 在树访问时才抛
+                                   or XmlException or FormatException or OverflowException) // zip 有效但 XML 损坏：惰性 DOM 在树访问时才抛
         {
             return Invalid("Excel.Validation.CannotOpen", ex.Message);
         }
     }
 
-    private static TemplateValidationResult ValidateCore(WorkbookPart workbookPart, TemplateContract contract)
+    private TemplateValidationResult ValidateCore(WorkbookPart workbookPart, TemplateContract contract)
     {
         var issues = new List<TemplateValidationIssue>();
+        var budget = new TemplateResourceBudget(_limits);
         var names = ExcelNamedRangeLocator.FindAll(workbookPart);
         var knownNames = new HashSet<string>(StringComparer.Ordinal);
 
@@ -94,7 +125,7 @@ public sealed class ExcelTemplateValidator
                         knownNames.Add(ExcelNamedRangeLocator.TableColumnName(table.Key, column.Key));
                     }
 
-                    CheckTableElement(table, workbookPart, names, issues);
+                    CheckTableElement(table, workbookPart, names, issues, budget);
                     break;
             }
         }
@@ -125,7 +156,8 @@ public sealed class ExcelTemplateValidator
         List<TemplateValidationIssue> issues)
     {
         var name = ExcelNamedRangeLocator.ElementName(element.Key);
-        if (names.All(n => n.Name != name))
+        var match = names.FirstOrDefault(n => n.Name == name);
+        if (match is null)
         {
             // 可选元素缺失只告警（模板仍有效），必填缺失才失败
             issues.Add(Missing(
@@ -133,6 +165,10 @@ public sealed class ExcelTemplateValidator
                 "Excel.Validation.MissingTextElement",
                 [element.Key, element.DisplayName],
                 element.Required ? TemplateValidationSeverity.Error : TemplateValidationSeverity.Warning));
+        }
+        else
+        {
+            _ = ExcelNamedRangeLocator.ParseReference(match.Reference);
         }
     }
 
@@ -173,10 +209,12 @@ public sealed class ExcelTemplateValidator
         TableElement element,
         WorkbookPart workbookPart,
         IReadOnlyList<NamedRangeMatch> names,
-        List<TemplateValidationIssue> issues)
+        List<TemplateValidationIssue> issues,
+        TemplateResourceBudget budget)
     {
         var missingColumns = new List<string>();
         var rows = new List<int>();
+        var rowCount = 0;
         foreach (var column in element.Columns)
         {
             var name = ExcelNamedRangeLocator.TableColumnName(element.Key, column.Key);
@@ -187,10 +225,17 @@ public sealed class ExcelTemplateValidator
             }
             else
             {
-                var (_, start, _) = ExcelNamedRangeLocator.ParseReference(match.Reference);
+                var (_, start, end) = ExcelNamedRangeLocator.ParseReference(match.Reference);
                 rows.Add(start.Row);
+                rowCount = Math.Max(rowCount, checked(end.Row - start.Row + 1));
             }
         }
+
+        if (rows.Any(start => (long)start + rowCount - 1 > ExcelAddressHelper.MaxRow))
+        {
+            throw new FormatException(Sr.Get("Excel.Address.CannotParse", element.Key));
+        }
+        budget.AddRows(rowCount, rows.Count);
 
         var requiredKeys = new HashSet<string>(element.Columns.Where(c => c.Required).Select(c => c.Key), StringComparer.Ordinal);
         var missingRequired = missingColumns.Where(requiredKeys.Contains).ToList();

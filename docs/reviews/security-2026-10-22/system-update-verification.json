@@ -1,0 +1,720 @@
+{
+  "SchemaVersion": 1,
+  "Date": "2026-10-22",
+  "TimeZone": "Asia/Shanghai",
+  "Status": "system-installation-and-project-validation-complete",
+  "SourceLogDirectory": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022",
+  "CodeCommit": "1b46cbd4633c52295ae5dffd37918a84d52ed61a",
+  "IndependentSystemVerification": {
+    "CheckedAt": "2026-10-22T12:24:32.441263+08:00",
+    "WorkingDirectory": "C:\\Users\\Marci\\AppData\\Local\\Temp",
+    "SystemDotnet": "C:\\Program Files\\dotnet\\dotnet.exe",
+    "DotnetOnPath": "C:\\Program Files\\dotnet\\dotnet.exe",
+    "InstallerSteps": [
+      {
+        "Name": "Visual Studio stable channel update",
+        "ExitCode": 0,
+        "StartedAt": "2026-10-22T11:48:19.3818719+08:00",
+        "FinishedAt": "2026-10-22T12:15:14.7350775+08:00"
+      },
+      {
+        "Name": "dotnet-sdk-9-x64",
+        "ExitCode": 0,
+        "StartedAt": "2026-10-22T12:15:17.1163164+08:00",
+        "FinishedAt": "2026-10-22T12:19:42.810174+08:00"
+      },
+      {
+        "Name": "dotnet-desktop-10-x64",
+        "ExitCode": 0,
+        "StartedAt": "2026-10-22T12:19:43.6614874+08:00",
+        "FinishedAt": "2026-10-22T12:19:59.4669294+08:00"
+      },
+      {
+        "Name": "dotnet-hosting-9",
+        "ExitCode": 0,
+        "StartedAt": "2026-10-22T12:20:00.7093718+08:00",
+        "FinishedAt": "2026-10-22T12:21:26.0798377+08:00"
+      },
+      {
+        "Name": "dotnet-hosting-10",
+        "ExitCode": 0,
+        "StartedAt": "2026-10-22T12:21:27.2627627+08:00",
+        "FinishedAt": "2026-10-22T12:22:32.8116936+08:00"
+      }
+    ],
+    "InstallerRestartRequired": false,
+    "VisualStudio": {
+      "installationPath": "C:\\Program Files\\Microsoft Visual Studio\\18\\Community",
+      "installationVersion": "18.11.12315.225",
+      "installationName": "VisualStudio/18.11.1+12315.225",
+      "catalog_productDisplayVersion": "18.11.1",
+      "isComplete": "1",
+      "isLaunchable": "1",
+      "isRebootRequired": "0",
+      "state": "4294967295"
+    },
+    "SystemSdks": [
+      "9.0.319 [C:\\Program Files\\dotnet\\sdk]",
+      "10.0.402 [C:\\Program Files\\dotnet\\sdk]"
+    ],
+    "SystemSdkDirectories": [
+      {
+        "Name": "10.0.402",
+        "FullName": "C:\\Program Files\\dotnet\\sdk\\10.0.402"
+      },
+      {
+        "Name": "9.0.319",
+        "FullName": "C:\\Program Files\\dotnet\\sdk\\9.0.319"
+      }
+    ],
+    "RuntimesX64": [
+      "Microsoft.AspNetCore.App 8.0.30 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.AspNetCore.App 8.0.32 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.AspNetCore.App 9.0.21 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.AspNetCore.App 10.0.11 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.AspNetCore.App 10.0.13 [C:\\Program Files\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.NETCore.App 8.0.30 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 8.0.32 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 9.0.21 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 10.0.11 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 10.0.13 [C:\\Program Files\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.WindowsDesktop.App 8.0.30 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]",
+      "Microsoft.WindowsDesktop.App 8.0.32 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]",
+      "Microsoft.WindowsDesktop.App 9.0.21 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]",
+      "Microsoft.WindowsDesktop.App 10.0.11 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]",
+      "Microsoft.WindowsDesktop.App 10.0.13 [C:\\Program Files\\dotnet\\shared\\Microsoft.WindowsDesktop.App]"
+    ],
+    "RuntimesX86": [
+      "Microsoft.AspNetCore.App 8.0.30 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.AspNetCore.App 8.0.32 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.AspNetCore.App 9.0.21 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.AspNetCore.App 10.0.11 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.AspNetCore.App 10.0.13 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.AspNetCore.App]",
+      "Microsoft.NETCore.App 8.0.30 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 8.0.32 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 9.0.21 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 10.0.11 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.NETCore.App 10.0.13 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.NETCore.App]",
+      "Microsoft.WindowsDesktop.App 8.0.30 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.WindowsDesktop.App]",
+      "Microsoft.WindowsDesktop.App 8.0.32 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.WindowsDesktop.App]",
+      "Microsoft.WindowsDesktop.App 10.0.11 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.WindowsDesktop.App]",
+      "Microsoft.WindowsDesktop.App 10.0.13 [C:\\Program Files (x86)\\dotnet\\shared\\Microsoft.WindowsDesktop.App]"
+    ],
+    "MissingSystemTargets": [],
+    "HostingRegistrations": [
+      {
+        "DisplayName": "Microsoft .NET 10.0.13 - Windows Server Hosting",
+        "DisplayVersion": "10.0.13.26504",
+        "InstallLocation": null,
+        "PSPath": "Microsoft.PowerShell.Core\\Registry::HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{235AA5E0-ECDD-424F-A5F9-39E696F70832}"
+      },
+      {
+        "DisplayName": "Microsoft ASP.NET Core 9.0.21 Hosting Bundle Options",
+        "DisplayVersion": "9.0.21.26505",
+        "InstallLocation": "",
+        "PSPath": "Microsoft.PowerShell.Core\\Registry::HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{7E332C82-C444-3911-B185-B2B041B0ABD0}"
+      },
+      {
+        "DisplayName": "Microsoft ASP.NET Core 10.0.13 Hosting Bundle Options",
+        "DisplayVersion": "10.0.13.26504",
+        "InstallLocation": "",
+        "PSPath": "Microsoft.PowerShell.Core\\Registry::HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{89FDA7CF-B56C-3022-9087-8E5E040CBD5F}"
+      },
+      {
+        "DisplayName": "Microsoft .NET 9.0.21 - Windows Server Hosting",
+        "DisplayVersion": "9.0.21.26505",
+        "InstallLocation": null,
+        "PSPath": "Microsoft.PowerShell.Core\\Registry::HKEY_LOCAL_MACHINE\\SOFTWARE\\WOW6432Node\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\{b7dee4cb-ba8e-4643-abee-5d767e7e88da}"
+      }
+    ],
+    "AncmModules": [
+      {
+        "FullName": "C:\\Program Files\\IIS\\Asp.Net Core Module\\V2\\aspnetcorev2.dll",
+        "FileVersion": "20.0.26278.13",
+        "ProductVersion": "20.0.26278.13",
+        "LastWriteTime": "2026-10-05T00:40:50+08:00"
+      },
+      {
+        "FullName": "C:\\Program Files (x86)\\IIS\\Asp.Net Core Module\\V2\\aspnetcorev2.dll",
+        "FileVersion": "20.0.26278.13",
+        "ProductVersion": "20.0.26278.13",
+        "LastWriteTime": "2026-10-05T00:41:10+08:00"
+      }
+    ],
+    "Services": [
+      {
+        "Name": "W3SVC",
+        "State": "Running",
+        "ProcessId": 5744
+      },
+      {
+        "Name": "WAS",
+        "State": "Running",
+        "ProcessId": 5744
+      }
+    ],
+    "WebWorkers": [],
+    "RebootChecks": {
+      "PendingCBS": false,
+      "PendingWindowsUpdate": false,
+      "PendingFileRenameCount": 2524,
+      "RuntimeOrIisPendingRenameEntries": [],
+      "VsInstallerCleanupCount": 1057
+    },
+    "Baseline": {
+      "AncmVersionX64": "20.0.26177.10",
+      "AncmVersionX86": "20.0.26177.10",
+      "WasW3svcProcessId": 5744,
+      "WebWorkerCount": 0,
+      "PendingFileRenameCount": 2200,
+      "RuntimeOrIisPendingRenameCount": 0,
+      "VsInstallerCleanupCount": 1057
+    }
+  },
+  "InstallerVerification": [
+    {
+      "Name": "dotnet-sdk-9-x64",
+      "Version": "9.0.319",
+      "Path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-sdk-9.0.319-win-x64.exe",
+      "Sha512": "38967B1F36C9D58A008EF3F494EB2BA8B330CADA8374715476506100AB137CC306D2B2E9AD687404290C6DDF93EAD2EBB1B966D816942BCDFC36F872E9420CFE",
+      "SignatureStatus": "Valid",
+      "Signer": "CN=.NET, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "Bytes": 226235224
+    },
+    {
+      "Name": "dotnet-hosting-10",
+      "Version": "10.0.13",
+      "Path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-hosting-10.0.13-win.exe",
+      "Sha512": "4D87F5AA460A53D5EB5B5D04F2BA4EAFBCB1A3A0F847F0314033C8A0E47F63931D1A627B8773DA6D02B426868D3761BD79366B818738C22254FC6074FA8C3FBE",
+      "SignatureStatus": "Valid",
+      "Signer": "CN=.NET, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "Bytes": 117600864
+    },
+    {
+      "Name": "dotnet-desktop-10-x64",
+      "Version": "10.0.13",
+      "Path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\windowsdesktop-runtime-10.0.13-win-x64.exe",
+      "Sha512": "ADAF5E06B66B145848F3A994B51EA1590D19A5C02F6E7C5899ED896BBDB020AF6386D2EAEF613034D697388ADAF48AA8C3291343F0BBB5F8E62E37AFF9564A00",
+      "SignatureStatus": "Valid",
+      "Signer": "CN=.NET, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "Bytes": 60056984
+    },
+    {
+      "Name": "dotnet-hosting-9",
+      "Version": "9.0.21",
+      "Path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-hosting-9.0.21-win.exe",
+      "Sha512": "297E86F675984611FB3BFB757B96991FE0F835569707A23783E5C4264417F8C1C561289BC12C33A1FBDF0E6E418336090E3526C91C4EFB1C1FBA2199B8716656",
+      "SignatureStatus": "Valid",
+      "Signer": "CN=Microsoft Corporation, O=Microsoft Corporation, L=Redmond, S=Washington, C=US",
+      "Bytes": 115991320
+    }
+  ],
+  "InstallerSteps": [
+    {
+      "Name": "Visual Studio stable channel update",
+      "StartedAt": "2026-10-22T11:48:19.3818719+08:00",
+      "Path": "C:\\Program Files (x86)\\Microsoft Visual Studio\\Installer\\setup.exe",
+      "Arguments": [
+        "update",
+        "--installPath",
+        "\"C:\\Program Files\\Microsoft Visual Studio\\18\\Community\"",
+        "--quiet",
+        "--norestart"
+      ],
+      "ExitCode": 0,
+      "FinishedAt": "2026-10-22T12:15:14.7350775+08:00"
+    },
+    {
+      "Name": "dotnet-sdk-9-x64",
+      "StartedAt": "2026-10-22T12:15:17.1163164+08:00",
+      "Path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-sdk-9.0.319-win-x64.exe",
+      "Arguments": [
+        "/install",
+        "/quiet",
+        "/norestart",
+        "/log",
+        "\"C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-sdk-9-x64-install.log\""
+      ],
+      "ExitCode": 0,
+      "FinishedAt": "2026-10-22T12:19:42.810174+08:00"
+    },
+    {
+      "Name": "dotnet-desktop-10-x64",
+      "StartedAt": "2026-10-22T12:19:43.6614874+08:00",
+      "Path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\windowsdesktop-runtime-10.0.13-win-x64.exe",
+      "Arguments": [
+        "/install",
+        "/quiet",
+        "/norestart",
+        "/log",
+        "\"C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-desktop-10-x64-install.log\""
+      ],
+      "ExitCode": 0,
+      "FinishedAt": "2026-10-22T12:19:59.4669294+08:00"
+    },
+    {
+      "Name": "dotnet-hosting-9",
+      "StartedAt": "2026-10-22T12:20:00.7093718+08:00",
+      "Path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-hosting-9.0.21-win.exe",
+      "Arguments": [
+        "/install",
+        "/quiet",
+        "/norestart",
+        "/log",
+        "\"C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-hosting-9-install.log\""
+      ],
+      "ExitCode": 0,
+      "FinishedAt": "2026-10-22T12:21:26.0798377+08:00"
+    },
+    {
+      "Name": "dotnet-hosting-10",
+      "StartedAt": "2026-10-22T12:21:27.2627627+08:00",
+      "Path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-hosting-10.0.13-win.exe",
+      "Arguments": [
+        "/install",
+        "/quiet",
+        "/norestart",
+        "/log",
+        "\"C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-system-update-20261022\\dotnet-hosting-10-install.log\""
+      ],
+      "ExitCode": 0,
+      "FinishedAt": "2026-10-22T12:22:32.8116936+08:00"
+    }
+  ],
+  "OriginalReadbackError": "Conversion from JSON failed with error: After parsing a value an unexpected character was encountered: c. Path '[0].description', line 17, position 5.",
+  "ReadbackResolution": "Re-read Visual Studio properties individually and independently verified versions and system paths; no installer was rerun.",
+  "Validation": {
+    "Skipped": 0.0,
+    "Packages": [
+      {
+        "Name": "TemplateFrame.2.4.1.nupkg",
+        "Bytes": 148339,
+        "Sha256": "51E15D5CBC22889501445A4832A992592C2BDC7B1E74667051F27AD9B6B6FB8F"
+      },
+      {
+        "Name": "TemplateFrame.2.4.1.snupkg",
+        "Bytes": 40771,
+        "Sha256": "1B27A7C4ACD3821074CF4DB116F270CC9D167399A75FFFA7CCC05BA5D94CA4B3"
+      },
+      {
+        "Name": "TemplateFrame.Excel.2.4.1.nupkg",
+        "Bytes": 135154,
+        "Sha256": "F4F43A61738137B444028D6A2ADAF59B8CD8482DEBEE19D4ACF4FD1824A982D1"
+      },
+      {
+        "Name": "TemplateFrame.Excel.2.4.1.snupkg",
+        "Bytes": 44677,
+        "Sha256": "6A5EEB987F0235720FAF3174D7381D6242E828598D2EED7AE9DC4E38AC4D0890"
+      },
+      {
+        "Name": "TemplateFrame.Excel.Simple.2.4.1.nupkg",
+        "Bytes": 108009,
+        "Sha256": "D8651AF15923E05DFFD5576230B0BDD62AE354AA72D41E8EB5AC6009840D90AD"
+      },
+      {
+        "Name": "TemplateFrame.Excel.Simple.2.4.1.snupkg",
+        "Bytes": 37758,
+        "Sha256": "B64481224B987AA0AEAE65ACA365DF8A3C7023A24B3207543EEF92C23A00141E"
+      },
+      {
+        "Name": "TemplateFrame.Word.2.4.1.nupkg",
+        "Bytes": 131198,
+        "Sha256": "D92A9F1B1786BD516151E027AC6C00F477E04A2EE44EEEA9CA78B34CCCCEF987"
+      },
+      {
+        "Name": "TemplateFrame.Word.2.4.1.snupkg",
+        "Bytes": 39558,
+        "Sha256": "70D5DEDA85024005B0BFCB0E8A47887A49D6013C59F515709500259F328C452A"
+      }
+    ],
+    "TestRuns": [
+      {
+        "RunId": "4437f427-b243-4afd-ac1f-9e6e3618ed79",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_40_net8.0.trx",
+        "Assembly": "TemplateFrame.Tests.dll",
+        "Total": 109,
+        "Passed": 109,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "2cc3db1e-ce7c-4acc-9651-b0a373f480cf",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_41_net10.0.trx",
+        "Assembly": "TemplateFrame.Tests.dll",
+        "Total": 109,
+        "Passed": 109,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "efe3595c-d9d7-495d-99d6-d91e1224367f",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_41_net10.0[1].trx",
+        "Assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+        "Total": 86,
+        "Passed": 86,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "6336a315-ab02-4468-aaf5-7d3908bb8e0c",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_41_net10.0[2].trx",
+        "Assembly": "TemplateFrame.Excel.Tests.dll",
+        "Total": 148,
+        "Passed": 148,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "d605ec88-6233-45e0-aa70-dd249fea1e44",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_41_net8.0.trx",
+        "Assembly": "TemplateFrame.Word.Tests.dll",
+        "Total": 143,
+        "Passed": 143,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "ca6bb7c4-d381-4cf2-bce6-06262f931710",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_41_net8.0[1].trx",
+        "Assembly": "TemplateFrame.Excel.Tests.dll",
+        "Total": 148,
+        "Passed": 148,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "ee21d63b-d1a7-435c-be5b-c314989f5cfe",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_42_net10.0.trx",
+        "Assembly": "TemplateFrame.Word.Tests.dll",
+        "Total": 143,
+        "Passed": 143,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "60ebe022-2107-481a-b9b1-820ccb775587",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_42_net8.0.trx",
+        "Assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+        "Total": 86,
+        "Passed": 86,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "5b23a54a-dc14-4239-b207-0d5066f9c9fa",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_47_net472.trx",
+        "Assembly": "TemplateFrame.Tests.dll",
+        "Total": 109,
+        "Passed": 109,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "74ec37cf-310a-4e4e-9304-dde7b8400590",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_47_net472[1].trx",
+        "Assembly": "TemplateFrame.Excel.Tests.dll",
+        "Total": 148,
+        "Passed": 148,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "1f0c8ce1-6b1b-4934-a201-5777e7a8b519",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_48_net472.trx",
+        "Assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+        "Total": 85,
+        "Passed": 85,
+        "Failed": 0,
+        "Skipped": 0
+      },
+      {
+        "RunId": "e361092e-a3be-4598-882e-7fe655548021",
+        "Artifact": "Marci_DESKTOP-IR7RCO3_2026-10-22_12_26_49_net472.trx",
+        "Assembly": "TemplateFrame.Word.Tests.dll",
+        "Total": 143,
+        "Passed": 143,
+        "Failed": 0,
+        "Skipped": 0
+      }
+    ],
+    "RebuildExitCode": 0,
+    "SdkBasePath": "C:\\Program Files\\dotnet\\sdk\\10.0.402\\",
+    "DependencyAudit": {
+      "checked_at_utc": "2026-10-22T12:26:52.9590692+08:00",
+      "solution": "TemplateFrame.slnx",
+      "project_count": 17,
+      "package_count": 59,
+      "packages": [
+        {
+          "id": "BenchmarkDotNet",
+          "version": "0.15.8"
+        },
+        {
+          "id": "BenchmarkDotNet.Annotations",
+          "version": "0.15.8"
+        },
+        {
+          "id": "CommandLineParser",
+          "version": "2.9.1"
+        },
+        {
+          "id": "coverlet.collector",
+          "version": "10.1.0"
+        },
+        {
+          "id": "DocumentFormat.OpenXml",
+          "version": "3.5.1"
+        },
+        {
+          "id": "DocumentFormat.OpenXml.Framework",
+          "version": "3.5.1"
+        },
+        {
+          "id": "Gee.External.Capstone",
+          "version": "2.3.0"
+        },
+        {
+          "id": "Iced",
+          "version": "1.21.0"
+        },
+        {
+          "id": "Microsoft.Bcl.AsyncInterfaces",
+          "version": "8.0.0"
+        },
+        {
+          "id": "Microsoft.CodeAnalysis.Analyzers",
+          "version": "3.11.0"
+        },
+        {
+          "id": "Microsoft.CodeAnalysis.Common",
+          "version": "4.14.0"
+        },
+        {
+          "id": "Microsoft.CodeAnalysis.CSharp",
+          "version": "4.14.0"
+        },
+        {
+          "id": "Microsoft.CodeCoverage",
+          "version": "18.11.0"
+        },
+        {
+          "id": "Microsoft.Diagnostics.NETCore.Client",
+          "version": "0.2.510501"
+        },
+        {
+          "id": "Microsoft.Diagnostics.Runtime",
+          "version": "3.1.512801"
+        },
+        {
+          "id": "Microsoft.Diagnostics.Tracing.TraceEvent",
+          "version": "3.1.21"
+        },
+        {
+          "id": "Microsoft.DotNet.PlatformAbstractions",
+          "version": "3.1.6"
+        },
+        {
+          "id": "Microsoft.Extensions.DependencyInjection",
+          "version": "6.0.0"
+        },
+        {
+          "id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+          "version": "6.0.0"
+        },
+        {
+          "id": "Microsoft.Extensions.Logging",
+          "version": "6.0.0"
+        },
+        {
+          "id": "Microsoft.Extensions.Logging.Abstractions",
+          "version": "6.0.0"
+        },
+        {
+          "id": "Microsoft.Extensions.Options",
+          "version": "6.0.0"
+        },
+        {
+          "id": "Microsoft.Extensions.Primitives",
+          "version": "6.0.0"
+        },
+        {
+          "id": "Microsoft.NET.Test.Sdk",
+          "version": "18.11.0"
+        },
+        {
+          "id": "Microsoft.NETCore.Platforms",
+          "version": "1.1.0"
+        },
+        {
+          "id": "Microsoft.NETFramework.ReferenceAssemblies",
+          "version": "1.0.3"
+        },
+        {
+          "id": "Microsoft.NETFramework.ReferenceAssemblies.net462",
+          "version": "1.0.3"
+        },
+        {
+          "id": "Microsoft.TestPlatform.ObjectModel",
+          "version": "17.13.0"
+        },
+        {
+          "id": "Microsoft.TestPlatform.ObjectModel",
+          "version": "18.11.0"
+        },
+        {
+          "id": "Microsoft.TestPlatform.TestHost",
+          "version": "18.11.0"
+        },
+        {
+          "id": "NETStandard.Library",
+          "version": "2.0.3"
+        },
+        {
+          "id": "Perfolizer",
+          "version": "0.6.1"
+        },
+        {
+          "id": "Pragmastat",
+          "version": "3.2.4"
+        },
+        {
+          "id": "QRCoder",
+          "version": "1.6.0"
+        },
+        {
+          "id": "System.Buffers",
+          "version": "4.5.1"
+        },
+        {
+          "id": "System.CodeDom",
+          "version": "9.0.5"
+        },
+        {
+          "id": "System.Collections.Immutable",
+          "version": "1.5.0"
+        },
+        {
+          "id": "System.IO.Packaging",
+          "version": "10.0.2"
+        },
+        {
+          "id": "System.IO.Packaging",
+          "version": "8.0.1"
+        },
+        {
+          "id": "System.Management",
+          "version": "9.0.5"
+        },
+        {
+          "id": "System.Memory",
+          "version": "4.5.5"
+        },
+        {
+          "id": "System.Numerics.Vectors",
+          "version": "4.4.0"
+        },
+        {
+          "id": "System.Numerics.Vectors",
+          "version": "4.5.0"
+        },
+        {
+          "id": "System.Reflection.Metadata",
+          "version": "1.6.0"
+        },
+        {
+          "id": "System.Reflection.TypeExtensions",
+          "version": "4.7.0"
+        },
+        {
+          "id": "System.Runtime.CompilerServices.Unsafe",
+          "version": "4.5.3"
+        },
+        {
+          "id": "System.Runtime.CompilerServices.Unsafe",
+          "version": "6.0.0"
+        },
+        {
+          "id": "System.Text.Encodings.Web",
+          "version": "8.0.0"
+        },
+        {
+          "id": "System.Text.Json",
+          "version": "8.0.6"
+        },
+        {
+          "id": "System.Threading.Tasks.Extensions",
+          "version": "4.5.4"
+        },
+        {
+          "id": "System.ValueTuple",
+          "version": "4.6.2"
+        },
+        {
+          "id": "xunit",
+          "version": "2.9.3"
+        },
+        {
+          "id": "xunit.abstractions",
+          "version": "2.0.3"
+        },
+        {
+          "id": "xunit.analyzers",
+          "version": "1.18.0"
+        },
+        {
+          "id": "xunit.assert",
+          "version": "2.9.3"
+        },
+        {
+          "id": "xunit.core",
+          "version": "2.9.3"
+        },
+        {
+          "id": "xunit.extensibility.core",
+          "version": "2.9.3"
+        },
+        {
+          "id": "xunit.extensibility.execution",
+          "version": "2.9.3"
+        },
+        {
+          "id": "xunit.runner.visualstudio",
+          "version": "4.0.1"
+        }
+      ],
+      "nuget": {
+        "stale": true,
+        "source": "https://api.nuget.org/v3/vulnerabilities/index.json",
+        "max_age_days": 7,
+        "newest_update_utc": "2023-12-13T08:48:47.5745986+08:00"
+      },
+      "osv": {
+        "positive_control_passed": true,
+        "findings": [],
+        "source": "https://api.osv.dev/v1/querybatch"
+      }
+    },
+    "RestoreExitCode": 0,
+    "Passed": 1457.0,
+    "Failed": 0.0,
+    "FormatExitCode": 0,
+    "RebuildWarnings": 0,
+    "RebuildErrors": 0,
+    "TestExitCode": 0,
+    "DotnetExecutable": "C:\\Program Files\\dotnet\\dotnet.exe"
+  },
+  "RepositoryCleanup": {
+    "WrapperRemoved": "eng/dotnet.ps1",
+    "LocalSdkDirectoryRemovedFromRepository": true,
+    "GlobalJsonLocalSdkPathsRemoved": true,
+    "LocalSdkArchive": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\retired-project-dotnet"
+  },
+  "Limitations": [
+    "Older 8.0.30 and 10.0.11 shared runtimes remain installed side by side; no manual uninstall was performed.",
+    "No Windows reboot was requested by these installers; unrelated pending file rename entries are not treated as a .NET reboot requirement.",
+    "IIS module files were updated, but WAS/W3SVC were not manually restarted; no w3wp workers were running during verification.",
+    "Windows/.NET Framework OS updates, PowerShell embedded runtime, other machines, self-contained application deployments and containers were outside this operation.",
+    "Remote PR/CI and package publication were not performed.",
+    "The supervisor had a JSON readback error after all five installers succeeded; the original error record was preserved and independent version/path verification resolved acceptance."
+  ]
+}

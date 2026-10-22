@@ -1,5 +1,7 @@
 # TemplateFrame.Excel.Simple
 
+> **3.0 migration:** finite default budgets change which large inputs are accepted. See the [migration guide](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/MIGRATION-3.0.md).
+
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Excel.Simple.svg)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Excel.Simple)](https://www.nuget.org/packages/TemplateFrame.Excel.Simple)
 
@@ -110,7 +112,7 @@ For list-only data, inherit `SimpleExcelTemplateService<List<MaterialLine>>`. Ke
 
 - Historical snapshot (2026-08-24; sample-specific, with no guarantee of linear scaling or current-version timings): write / read of 1,000 rows ~30ms, 10,000 rows ~0.3–0.5s; contract-path read of 10,000 rows ~0.6–0.9s.
 - Snapshots in [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md); benchmark project [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md) (see that page for reproduction commands).
-- Target frameworks `netstandard2.0 / net462 / net8.0` (NuGet picks per runtime automatically); depends on `DocumentFormat.OpenXml` (3.3.x).
+- Target frameworks `netstandard2.0 / net462 / net8.0` (NuGet picks per runtime automatically); depends on `DocumentFormat.OpenXml` (3.5.1).
 
 ## Demo
 
@@ -124,3 +126,5 @@ Outputs go to the system temp directory `%TEMP%\TemplateFrame.Demo.Excel.Simple`
 - `Excel-Simple-Materials-template.xlsx`: the **template** (header-only, defines the column structure)
 - `Excel-Simple-Materials-filled.xlsx`: the **filled** file (header + material data rows)
 - The console prints the **re-parse** result (read the filled file → `SimpleExcel.Read` → print headers and each row)
+
+Input packages, XML, images and table data use configurable finite resource budgets. Validate does not sanitize macros or external relationships. See the [security guidance](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md) for configuration and boundaries.

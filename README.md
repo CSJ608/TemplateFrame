@@ -1,5 +1,7 @@
 # TemplateFrame
 
+> **升级到 3.0**：默认资源限额会拒绝部分此前可处理的超大输入；公开入口和库目标框架保留。升级前请阅读 [迁移指南](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/MIGRATION-3.0.md)。
+
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.svg)](https://www.nuget.org/packages/TemplateFrame)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame)](https://www.nuget.org/packages/TemplateFrame)
 [![CI](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml/badge.svg)](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml)
@@ -163,6 +165,8 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 | 插件 README | [Word](src/TemplateFrame.Word/README.md) · [Excel](src/TemplateFrame.Excel/README.md) · [Excel.Simple](src/TemplateFrame.Excel.Simple/README.md) |
 
 ## 构建与测试
+
+开发使用 `global.json` 固定的 .NET 10 SDK；测试覆盖 net8.0 / net472 / net10.0，样例运行于 .NET 10。输入文档默认启用可配置资源限额，部署补丁、调用示例和审计命令见 [安全与开发环境说明](docs/SECURITY.md)。直接使用系统级 `dotnet` 命令。
 
 ```bash
 dotnet build TemplateFrame.slnx

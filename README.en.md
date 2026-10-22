@@ -1,5 +1,7 @@
 # TemplateFrame
 
+> **Upgrading to 3.0:** finite default resource limits can reject large inputs that worked in 2.x. Existing entry points and library target frameworks remain available. Read the [migration guide](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/MIGRATION-3.0.md) before upgrading.
+
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.svg)](https://www.nuget.org/packages/TemplateFrame)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame)](https://www.nuget.org/packages/TemplateFrame)
 [![CI](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml/badge.svg)](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml)
@@ -165,6 +167,8 @@ dotnet run --project samples/TemplateFrame.Demo.Word
 | Plugin READMEs | [Word](src/TemplateFrame.Word/README.en.md) · [Excel](src/TemplateFrame.Excel/README.en.md) · [Excel.Simple](src/TemplateFrame.Excel.Simple/README.en.md) |
 
 ## Build & test
+
+Use the .NET 10 SDK selected by `global.json`. Tests target net8.0 / net472 / net10.0; demos run on .NET 10. Office inputs have configurable resource limits. See [security and development guidance](docs/SECURITY.md) for budgets, deployment boundaries and audit commands. Use the system-wide `dotnet` command.
 
 ```bash
 dotnet build TemplateFrame.slnx

@@ -18,6 +18,7 @@ public sealed class ExcelTemplateEngine : ITemplateEngine
     private readonly ExcelTemplateFiller _filler;
     private readonly ExcelTemplateParser _parser;
     private readonly ITemplateLocalizer _localizer;
+    private readonly TemplateResourceLimits _limits;
 
     /// <summary>Creates the default engine (missing required elements throw on fill; default localizer).</summary>
     public ExcelTemplateEngine()
@@ -29,9 +30,11 @@ public sealed class ExcelTemplateEngine : ITemplateEngine
     /// <remarks><paramref name="localizer"/>：文档内容本地化器（null = <see cref="DefaultTemplateLocalizer.Instance"/>）。</remarks>
     public ExcelTemplateEngine(TemplateFillOptions? options = null, ITemplateLocalizer? localizer = null)
     {
-        _filler = new ExcelTemplateFiller(options ?? new TemplateFillOptions());
+        options ??= new TemplateFillOptions();
+        _filler = new ExcelTemplateFiller(options);
+        _limits = options.ResourceLimits;
         _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
-        _parser = new ExcelTemplateParser(_localizer);
+        _parser = new ExcelTemplateParser(_limits, _localizer);
     }
 
     /// <inheritdoc />
@@ -44,7 +47,7 @@ public sealed class ExcelTemplateEngine : ITemplateEngine
 
     /// <inheritdoc />
     public TemplateValidationResult Validate(Stream template, TemplateContract contract)
-        => new ExcelTemplateValidator().Validate(template, contract);
+        => new ExcelTemplateValidator(_limits).Validate(template, contract);
 
     /// <inheritdoc />
     public Stream Fill(Stream template, TemplateContract contract, FillData data)

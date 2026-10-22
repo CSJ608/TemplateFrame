@@ -7,6 +7,9 @@ namespace TemplateFrame.Excel;
 /// <summary>单元格地址（1 基行/列）与 A1 引用互转、命名区域引用解析的辅助。</summary>
 internal static class ExcelAddressHelper
 {
+    internal const int MaxRow = 1_048_576;
+    internal const int MaxColumn = 16_384;
+
     /// <summary>列号 → 列字母（1 → A，27 → AA）。</summary>
     public static string ColumnLetter(int col1Based)
     {
@@ -28,7 +31,22 @@ internal static class ExcelAddressHelper
         var result = 0;
         foreach (var ch in letters)
         {
-            result = result * 26 + (char.ToUpperInvariant(ch) - 'A' + 1);
+            var upper = char.ToUpperInvariant(ch);
+            if (upper < 'A' || upper > 'Z')
+            {
+                throw new FormatException(Sr.Get("Excel.Address.CannotParse", letters));
+            }
+
+            result = checked(result * 26 + (upper - 'A' + 1));
+            if (result > MaxColumn)
+            {
+                throw new FormatException(Sr.Get("Excel.Address.CannotParse", letters));
+            }
+        }
+
+        if (result == 0)
+        {
+            throw new FormatException(Sr.Get("Excel.Address.CannotParse", letters));
         }
 
         return result;
@@ -56,7 +74,12 @@ internal static class ExcelAddressHelper
         }
 
         var col = ColumnIndex(cleaned.Substring(0, i));
-        var row = int.Parse(cleaned.Substring(i), CultureInfo.InvariantCulture);
+        if (!int.TryParse(cleaned.Substring(i), NumberStyles.None, CultureInfo.InvariantCulture, out var row)
+            || row < 1 || row > MaxRow)
+        {
+            throw new FormatException(Sr.Get("Excel.Address.CannotParse", reference));
+        }
+
         return (row, col);
     }
 }

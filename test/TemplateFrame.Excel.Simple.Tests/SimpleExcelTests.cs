@@ -227,8 +227,9 @@ public sealed class SimpleExcelTests
 
         stream.Position = 0;
         using var document = SpreadsheetDocument.Open(stream, false);
-        var cells = document.WorkbookPart!.WorksheetParts.First().Worksheet
-            .GetFirstChild<SheetData>()!.Descendants<Cell>()
+        var worksheet = Assert.IsType<Worksheet>(document.WorkbookPart?.WorksheetParts.First().Worksheet);
+        var sheetData = Assert.IsType<SheetData>(worksheet.GetFirstChild<SheetData>());
+        var cells = sheetData.Descendants<Cell>()
             .Where(c => c.DataType?.Value == CellValues.Number)
             .ToList();
 

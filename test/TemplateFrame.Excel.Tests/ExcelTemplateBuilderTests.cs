@@ -63,7 +63,8 @@ public sealed class ExcelTemplateBuilderTests
 
         Assert.NotNull(orderNo);
         Assert.Equal("'送货单'!$B$2", orderNo!.Reference);
-        Assert.Equal("送货单", document.WorkbookPart!.Workbook.Sheets!.Elements<Sheet>().First().Name!.Value);
+        var sheets = Assert.IsType<Sheets>(document.WorkbookPart?.Workbook?.Sheets);
+        Assert.Equal("送货单", sheets.Elements<Sheet>().First().Name!.Value);
     }
 
     [Fact]

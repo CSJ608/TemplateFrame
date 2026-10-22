@@ -17,6 +17,7 @@ public sealed class WordTemplateEngine : ITemplateEngine
 {
     private readonly WordTemplateFiller _filler;
     private readonly WordTemplateParser _parser;
+    private readonly WordTemplateValidator _validator;
     private readonly ITemplateLocalizer _localizer;
 
     /// <summary>Creates the default engine (missing required elements throw on fill; default localizer).</summary>
@@ -29,9 +30,11 @@ public sealed class WordTemplateEngine : ITemplateEngine
     /// <remarks><paramref name="localizer"/>：文档内容本地化器（null = <see cref="DefaultTemplateLocalizer.Instance"/>）。</remarks>
     public WordTemplateEngine(TemplateFillOptions? options = null, ITemplateLocalizer? localizer = null)
     {
-        _filler = new WordTemplateFiller(options ?? new TemplateFillOptions());
+        var fillOptions = options ?? new TemplateFillOptions();
+        _filler = new WordTemplateFiller(fillOptions);
         _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
-        _parser = new WordTemplateParser(_localizer);
+        _parser = new WordTemplateParser(fillOptions.ResourceLimits, _localizer);
+        _validator = new WordTemplateValidator(fillOptions.ResourceLimits);
     }
 
     /// <inheritdoc />
@@ -44,7 +47,7 @@ public sealed class WordTemplateEngine : ITemplateEngine
 
     /// <inheritdoc />
     public TemplateValidationResult Validate(Stream template, TemplateContract contract)
-        => new WordTemplateValidator().Validate(template, contract);
+        => _validator.Validate(template, contract);
 
     /// <inheritdoc />
     public Stream Fill(Stream template, TemplateContract contract, FillData data)

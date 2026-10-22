@@ -240,7 +240,7 @@ public sealed class DocumentContentLocalizationTests
     private static IReadOnlyList<string> HeaderTexts(WordprocessingDocument document, string columnTag)
     {
         // 表格首行为表头（静态文本，无列 SDT）；按任一列 SDT 的 tag 定位表格
-        var body = document.MainDocumentPart!.Document.Body!;
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
         var table = body.Descendants<Table>().First(t =>
             t.Descendants<SdtElement>().Any(s => SdtLocator.GetTag(s) == columnTag));
         var headerRow = table.Elements<TableRow>().First();
@@ -255,7 +255,7 @@ public sealed class DocumentContentLocalizationTests
 
     private static IReadOnlyList<string> BodyTexts(WordprocessingDocument document)
     {
-        var body = document.MainDocumentPart!.Document.Body!;
+        var body = Assert.IsType<Body>(document.MainDocumentPart?.Document?.Body);
         return body.Descendants<Text>().Select(t => t.Text ?? string.Empty).ToArray();
     }
 

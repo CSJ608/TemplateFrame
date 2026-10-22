@@ -1,0 +1,1125 @@
+{
+  "schema_version": 1,
+  "verification_date": "2026-10-22",
+  "timezone": "Asia/Shanghai",
+  "assembled_at_utc": "2026-10-22T02:50:03.2537275Z",
+  "sources": {
+    "changes_committed": false,
+    "workspace": "C:\\work\\OpenCode\\TemplateFrame",
+    "git_base_commit": "a4163fdeb78a8824fb0eec29ca3cb7e0239ddc30",
+    "source_directories": [
+      "src",
+      "test",
+      "samples",
+      ".github",
+      "eng"
+    ],
+    "raw_log_directory": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022"
+  },
+  "local_toolchain": {
+    "runtimes": [
+      "8.0.32",
+      "10.0.13"
+    ],
+    "visual_studio_managed_sdk_updated": false,
+    "sdk_directory_exists": true,
+    "sdk": "10.0.402",
+    "download_manifest": {
+      "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\dotnet-install-files.json",
+      "bytes": 879,
+      "sha256": "833c016429f39ad895b11f7de839a316188062c36d6c7468fe6df1207073cbc6"
+    },
+    "installation_directory": "C:\\work\\OpenCode\\TemplateFrame\\.dotnet",
+    "system_wide_sdk_updated": false,
+    "runtime8_directory_exists": true,
+    "download_verification": [
+      {
+        "kind": "sdk",
+        "version": "10.0.402",
+        "official_url": "https://builds.dotnet.microsoft.com/dotnet/Sdk/10.0.402/dotnet-sdk-10.0.402-win-x64.zip",
+        "archive_path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\dotnet-sdk-10.0.402-win-x64.zip",
+        "archive_bytes": 300755826,
+        "expected_sha512": "ae4fd528cb7e9f6af6aaf7de36715a69f761f183744f1bb3025d19f5a92447090ec561410e46266c1d10a63781ed6f3de771760bc76c876d87daabc367b898cd",
+        "actual_sha512": "ae4fd528cb7e9f6af6aaf7de36715a69f761f183744f1bb3025d19f5a92447090ec561410e46266c1d10a63781ed6f3de771760bc76c876d87daabc367b898cd",
+        "sha512_matches": true
+      },
+      {
+        "kind": "runtime",
+        "version": "8.0.32",
+        "official_url": "https://builds.dotnet.microsoft.com/dotnet/Runtime/8.0.32/dotnet-runtime-8.0.32-win-x64.zip",
+        "archive_path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\dotnet-runtime-8.0.32-win-x64.zip",
+        "archive_bytes": 33337383,
+        "expected_sha512": "f0349e793d8081c682c01d736db695c9c1ec268c6173648913543db219e44cbf2e952c7ef94fc37946b0f2bb95ca1898d972a43591b8e44d5a1659f4911904c0",
+        "actual_sha512": "f0349e793d8081c682c01d736db695c9c1ec268c6173648913543db219e44cbf2e952c7ef94fc37946b0f2bb95ca1898d972a43591b8e44d5a1659f4911904c0",
+        "sha512_matches": true
+      }
+    ],
+    "installation_scope": "repository-local",
+    "runtime10_directory_exists": true
+  },
+  "build": {
+    "configuration": "Release",
+    "source": {
+      "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\build-final.txt",
+      "bytes": 4767,
+      "sha256": "dba89ba77e260505a6b731cbf0114e128c84a40f31e2122d75d8c0d629e9f66a"
+    },
+    "summary_excerpt": "\n已成功生成。\n    0 个警告\n    0 个错误\n\n已用时间 00:00:09.93\n",
+    "status": "passed",
+    "errors": 0,
+    "warnings": 0,
+    "exit_code": 0,
+    "exit_code_evidence": "Primary agent confirmed final build/test exec session 86218 completed with exit code 0; final build log independently reports success."
+  },
+  "tests": {
+    "coverage_files": [
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\016069a8-b38c-4efd-bf1b-47bacc36b496\\coverage.cobertura.xml",
+        "bytes": 191191,
+        "sha256": "482eca080bf406f907de60da4aa9c902dbd3e02650c15b3aef7702318a5672cd"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\22e7da5e-0732-41b4-ad90-b420635d9f71\\coverage.cobertura.xml",
+        "bytes": 486464,
+        "sha256": "52ee43203b12a901aa8189c0b66bf3ec0d96aa40db327b8a79018d4fdefc602b"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\30f4b857-5f8b-455a-8bd2-8dc896442d68\\coverage.cobertura.xml",
+        "bytes": 404158,
+        "sha256": "a93ef9a4a238e8557ba059c10fba69c93d999f4f3ac28cda63cc8c35724656f1"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\31dba574-dc76-4e08-99dd-4f5a4374f829\\coverage.cobertura.xml",
+        "bytes": 192486,
+        "sha256": "2677b5dfe652391589a528a9503744c605ed1a5dab407e49d06a9c3e8ec1f00f"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\42778463-25ec-4975-bcb0-c8f52cebcd25\\coverage.cobertura.xml",
+        "bytes": 191191,
+        "sha256": "71fcac61b0800b83dff2a812f7cda32b4755edad929d41b00c753ccf2dbcaaca"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\72c69f3d-ac79-45db-9db8-cbc9f87aa1a0\\coverage.cobertura.xml",
+        "bytes": 484752,
+        "sha256": "d06e953d518c8772f39fa7b0c534242f376fa12b2085611665d804af9abad124"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\78c059a7-d64b-4f03-ab8b-d4a0f1d36e4b\\coverage.cobertura.xml",
+        "bytes": 422254,
+        "sha256": "b7585458610ae4a88a7a927fcafe2af4ad745c67082d79d31589447dba9aeddf"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\80b25027-460c-4798-a199-a3965546f279\\coverage.cobertura.xml",
+        "bytes": 405862,
+        "sha256": "f7785c9ee3d1da35153d359272bb3ec95ef1b2e9d694cbb5b403f5c02787bdc0"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\8d8015e0-edc2-4788-91ef-916045e66e7e\\coverage.cobertura.xml",
+        "bytes": 420552,
+        "sha256": "86739d668b2fcfbacc9ff7ca628937dda0fc25e04d1abc4beb0c1e7c03a066d8"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\a659cb21-977d-4522-ad54-052b6cb8d428\\coverage.cobertura.xml",
+        "bytes": 404158,
+        "sha256": "a93ef9a4a238e8557ba059c10fba69c93d999f4f3ac28cda63cc8c35724656f1"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\bfc84894-31ca-453f-a348-499afb8ec2dc\\coverage.cobertura.xml",
+        "bytes": 484764,
+        "sha256": "5f0c6251c6fe8c70313204825f0c19cc2d659ce2a2559cea74f72b4d89aeb14b"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\c34fac9a-2ff5-4dab-804c-127fee7eeced\\coverage.cobertura.xml",
+        "bytes": 420552,
+        "sha256": "86739d668b2fcfbacc9ff7ca628937dda0fc25e04d1abc4beb0c1e7c03a066d8"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_42_59\\In\\DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+        "bytes": 420552,
+        "sha256": "86739d668b2fcfbacc9ff7ca628937dda0fc25e04d1abc4beb0c1e7c03a066d8"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_00\\In\\DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+        "bytes": 191191,
+        "sha256": "71fcac61b0800b83dff2a812f7cda32b4755edad929d41b00c753ccf2dbcaaca"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_01\\In\\DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+        "bytes": 191191,
+        "sha256": "482eca080bf406f907de60da4aa9c902dbd3e02650c15b3aef7702318a5672cd"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_02\\In\\DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+        "bytes": 404158,
+        "sha256": "a93ef9a4a238e8557ba059c10fba69c93d999f4f3ac28cda63cc8c35724656f1"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_07\\In\\DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+        "bytes": 192486,
+        "sha256": "2677b5dfe652391589a528a9503744c605ed1a5dab407e49d06a9c3e8ec1f00f"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_08\\In\\DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+        "bytes": 405862,
+        "sha256": "f7785c9ee3d1da35153d359272bb3ec95ef1b2e9d694cbb5b403f5c02787bdc0"
+      },
+      {
+        "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_09\\In\\DESKTOP-IR7RCO3\\coverage.cobertura.xml",
+        "bytes": 422254,
+        "sha256": "b7585458610ae4a88a7a927fcafe2af4ad745c67082d79d31589447dba9aeddf"
+      }
+    ],
+    "passed": 1457.0,
+    "runs": [
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_42_59_net8.0.trx",
+          "bytes": 205893,
+          "sha256": "a7307b47818cf22f34c7e8570b939ef9199f98bbc6043e75f9938db1fa287c57"
+        },
+        "run_id": "78d15d27-e5f1-4930-b3b8-83ab125d2206",
+        "assembly": "TemplateFrame.Word.Tests.dll",
+        "framework": "net8.0",
+        "outcome": "Completed",
+        "total": 143,
+        "executed": 143,
+        "passed": 143,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 8.0.32)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_00_net10.0.trx",
+          "bytes": 151425,
+          "sha256": "dd43e50a31fb50f7aa20889ed61ac4df0a5a06842a239c13d2d9d9de34c18311"
+        },
+        "run_id": "c0b8fb1a-2ca2-4ded-ba5c-378415771d72",
+        "assembly": "TemplateFrame.Tests.dll",
+        "framework": "net10.0",
+        "outcome": "Completed",
+        "total": 109,
+        "executed": 109,
+        "passed": 109,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 10.0.13)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_01_net10.0.trx",
+          "bytes": 215236,
+          "sha256": "5aa23815a002dace2d8cfd22ba8aa211b0af97bf81c9270843efcdb6cb660739"
+        },
+        "run_id": "4a8964be-d12e-4c7d-ac47-e54660d29184",
+        "assembly": "TemplateFrame.Excel.Tests.dll",
+        "framework": "net10.0",
+        "outcome": "Completed",
+        "total": 148,
+        "executed": 148,
+        "passed": 148,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 10.0.13)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_01_net8.0.trx",
+          "bytes": 151206,
+          "sha256": "2b3a7218e52e837fd1f861f794234eeea7265b9903abb59fe5c2d4f93760bffd"
+        },
+        "run_id": "51e12409-8970-4dac-81c4-3878474793a3",
+        "assembly": "TemplateFrame.Tests.dll",
+        "framework": "net8.0",
+        "outcome": "Completed",
+        "total": 109,
+        "executed": 109,
+        "passed": 109,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 8.0.32)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_01_net8.0[1].trx",
+          "bytes": 127771,
+          "sha256": "e0248367285acc3e63e21b1d9b42d5f9ed88b0b52a77fe86154690038dffb714"
+        },
+        "run_id": "def8a5bc-55e1-448f-bf01-96b565b6c69b",
+        "assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+        "framework": "net8.0",
+        "outcome": "Completed",
+        "total": 86,
+        "executed": 86,
+        "passed": 86,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 8.0.32)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_02_net10.0.trx",
+          "bytes": 127941,
+          "sha256": "97c7a54f71a0dd00358b90760fcefd073ae1db44ddbf3a2b950ece24718ae8ca"
+        },
+        "run_id": "43ab78d5-6e5c-493f-a26d-57fe6f6527b7",
+        "assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+        "framework": "net10.0",
+        "outcome": "Completed",
+        "total": 86,
+        "executed": 86,
+        "passed": 86,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 10.0.13)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_02_net10.0[1].trx",
+          "bytes": 206183,
+          "sha256": "3899ab3309da66823a253af0b3e7cc181efaafdefecdb305df63f93c9b273ec8"
+        },
+        "run_id": "d8e637b3-6dc7-454c-863a-32d8ebc396ae",
+        "assembly": "TemplateFrame.Word.Tests.dll",
+        "framework": "net10.0",
+        "outcome": "Completed",
+        "total": 143,
+        "executed": 143,
+        "passed": 143,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 10.0.13)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_02_net8.0.trx",
+          "bytes": 214939,
+          "sha256": "11dfce33e84db12659bee5c1bdb77cc274cf42d6d26e0080a20cdbf7abb8116e"
+        },
+        "run_id": "cea6f3d3-3e69-4a2c-9f9b-801e3337ba6a",
+        "assembly": "TemplateFrame.Excel.Tests.dll",
+        "framework": "net8.0",
+        "outcome": "Completed",
+        "total": 148,
+        "executed": 148,
+        "passed": 148,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET 8.0.32)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_07_net472.trx",
+          "bytes": 151002,
+          "sha256": "9e9ab7adb2458fd9d0d09530595634742ebf6af77fd520ed80f236ddeaaa664d"
+        },
+        "run_id": "517b91c8-01f7-4606-aba6-b94819f912f7",
+        "assembly": "TemplateFrame.Tests.dll",
+        "framework": "net472",
+        "outcome": "Completed",
+        "total": 109,
+        "executed": 109,
+        "passed": 109,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET Framework 4.8.9310.0)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_07_net472[1].trx",
+          "bytes": 214657,
+          "sha256": "930d650c4a6b7c2a2955b4cdfb22283287b8ca33560da39ade74789943f4723d"
+        },
+        "run_id": "c6d89b04-8c8c-4a92-845c-232c77882a9b",
+        "assembly": "TemplateFrame.Excel.Tests.dll",
+        "framework": "net472",
+        "outcome": "Completed",
+        "total": 148,
+        "executed": 148,
+        "passed": 148,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET Framework 4.8.9310.0)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_08_net472.trx",
+          "bytes": 126189,
+          "sha256": "db94ead052e684c5d79b7472be866b2bbb263afde0537e7e73631fe36d863892"
+        },
+        "run_id": "ab866728-e376-409b-a0af-8823f78aa950",
+        "assembly": "TemplateFrame.Excel.Simple.Tests.dll",
+        "framework": "net472",
+        "outcome": "Completed",
+        "total": 85,
+        "executed": 85,
+        "passed": 85,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET Framework 4.8.9310.0)"
+      },
+      {
+        "source": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\tests\\Marci_DESKTOP-IR7RCO3_2026-10-22_10_43_09_net472.trx",
+          "bytes": 205621,
+          "sha256": "e5d992db879ec7bd2b2eec23888c998b62904d9192fe688fb007c51fcedc2d98"
+        },
+        "run_id": "1d2784de-4563-4cb3-b0c3-a590734bc55e",
+        "assembly": "TemplateFrame.Word.Tests.dll",
+        "framework": "net472",
+        "outcome": "Completed",
+        "total": 143,
+        "executed": 143,
+        "passed": 143,
+        "failed": 0,
+        "not_executed": 0,
+        "error": 0,
+        "timeout": 0,
+        "aborted": 0,
+        "runtime_banner": "xUnit.net VSTest Adapter v4.0.1+0f7d528729 (64-bit .NET Framework 4.8.9310.0)"
+      }
+    ],
+    "by_framework": [
+      {
+        "framework": "net10.0",
+        "assemblies": 4,
+        "total": 486.0,
+        "passed": 486.0,
+        "failed": 0.0,
+        "not_executed": 0.0
+      },
+      {
+        "framework": "net472",
+        "assemblies": 4,
+        "total": 485.0,
+        "passed": 485.0,
+        "failed": 0.0,
+        "not_executed": 0.0
+      },
+      {
+        "framework": "net8.0",
+        "assemblies": 4,
+        "total": 486.0,
+        "passed": 486.0,
+        "failed": 0.0,
+        "not_executed": 0.0
+      }
+    ],
+    "coverage_files_nonempty": true,
+    "trx_files": 12,
+    "total": 1457.0,
+    "coverage_file_count": 19,
+    "not_executed": 0.0,
+    "failed": 0.0,
+    "aggregation": "TRX ResultSummary Counters, one count per unique TestRun id; UnitTestResult counts cross-checked. Coverage XML and console attachments are not counted as additional test executions.",
+    "unique_assembly_framework_pairs": 12,
+    "exit_code": 0
+  },
+  "dependency_audit": {
+    "packages": [
+      {
+        "id": "BenchmarkDotNet",
+        "version": "0.15.8"
+      },
+      {
+        "id": "BenchmarkDotNet.Annotations",
+        "version": "0.15.8"
+      },
+      {
+        "id": "CommandLineParser",
+        "version": "2.9.1"
+      },
+      {
+        "id": "coverlet.collector",
+        "version": "10.1.0"
+      },
+      {
+        "id": "DocumentFormat.OpenXml",
+        "version": "3.5.1"
+      },
+      {
+        "id": "DocumentFormat.OpenXml.Framework",
+        "version": "3.5.1"
+      },
+      {
+        "id": "Gee.External.Capstone",
+        "version": "2.3.0"
+      },
+      {
+        "id": "Iced",
+        "version": "1.21.0"
+      },
+      {
+        "id": "Microsoft.Bcl.AsyncInterfaces",
+        "version": "8.0.0"
+      },
+      {
+        "id": "Microsoft.CodeAnalysis.Analyzers",
+        "version": "3.11.0"
+      },
+      {
+        "id": "Microsoft.CodeAnalysis.Common",
+        "version": "4.14.0"
+      },
+      {
+        "id": "Microsoft.CodeAnalysis.CSharp",
+        "version": "4.14.0"
+      },
+      {
+        "id": "Microsoft.CodeCoverage",
+        "version": "18.11.0"
+      },
+      {
+        "id": "Microsoft.Diagnostics.NETCore.Client",
+        "version": "0.2.510501"
+      },
+      {
+        "id": "Microsoft.Diagnostics.Runtime",
+        "version": "3.1.512801"
+      },
+      {
+        "id": "Microsoft.Diagnostics.Tracing.TraceEvent",
+        "version": "3.1.21"
+      },
+      {
+        "id": "Microsoft.DotNet.PlatformAbstractions",
+        "version": "3.1.6"
+      },
+      {
+        "id": "Microsoft.Extensions.DependencyInjection",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.DependencyInjection.Abstractions",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.Logging",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.Logging.Abstractions",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.Options",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.Extensions.Primitives",
+        "version": "6.0.0"
+      },
+      {
+        "id": "Microsoft.NET.Test.Sdk",
+        "version": "18.11.0"
+      },
+      {
+        "id": "Microsoft.NETCore.Platforms",
+        "version": "1.1.0"
+      },
+      {
+        "id": "Microsoft.NETFramework.ReferenceAssemblies",
+        "version": "1.0.3"
+      },
+      {
+        "id": "Microsoft.NETFramework.ReferenceAssemblies.net462",
+        "version": "1.0.3"
+      },
+      {
+        "id": "Microsoft.TestPlatform.ObjectModel",
+        "version": "17.13.0"
+      },
+      {
+        "id": "Microsoft.TestPlatform.ObjectModel",
+        "version": "18.11.0"
+      },
+      {
+        "id": "Microsoft.TestPlatform.TestHost",
+        "version": "18.11.0"
+      },
+      {
+        "id": "NETStandard.Library",
+        "version": "2.0.3"
+      },
+      {
+        "id": "Perfolizer",
+        "version": "0.6.1"
+      },
+      {
+        "id": "Pragmastat",
+        "version": "3.2.4"
+      },
+      {
+        "id": "QRCoder",
+        "version": "1.6.0"
+      },
+      {
+        "id": "System.Buffers",
+        "version": "4.5.1"
+      },
+      {
+        "id": "System.CodeDom",
+        "version": "9.0.5"
+      },
+      {
+        "id": "System.Collections.Immutable",
+        "version": "1.5.0"
+      },
+      {
+        "id": "System.IO.Packaging",
+        "version": "10.0.2"
+      },
+      {
+        "id": "System.IO.Packaging",
+        "version": "8.0.1"
+      },
+      {
+        "id": "System.Management",
+        "version": "9.0.5"
+      },
+      {
+        "id": "System.Memory",
+        "version": "4.5.5"
+      },
+      {
+        "id": "System.Numerics.Vectors",
+        "version": "4.4.0"
+      },
+      {
+        "id": "System.Numerics.Vectors",
+        "version": "4.5.0"
+      },
+      {
+        "id": "System.Reflection.Metadata",
+        "version": "1.6.0"
+      },
+      {
+        "id": "System.Reflection.TypeExtensions",
+        "version": "4.7.0"
+      },
+      {
+        "id": "System.Runtime.CompilerServices.Unsafe",
+        "version": "4.5.3"
+      },
+      {
+        "id": "System.Runtime.CompilerServices.Unsafe",
+        "version": "6.0.0"
+      },
+      {
+        "id": "System.Text.Encodings.Web",
+        "version": "8.0.0"
+      },
+      {
+        "id": "System.Text.Json",
+        "version": "8.0.6"
+      },
+      {
+        "id": "System.Threading.Tasks.Extensions",
+        "version": "4.5.4"
+      },
+      {
+        "id": "System.ValueTuple",
+        "version": "4.6.2"
+      },
+      {
+        "id": "xunit",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.abstractions",
+        "version": "2.0.3"
+      },
+      {
+        "id": "xunit.analyzers",
+        "version": "1.18.0"
+      },
+      {
+        "id": "xunit.assert",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.core",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.extensibility.core",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.extensibility.execution",
+        "version": "2.9.3"
+      },
+      {
+        "id": "xunit.runner.visualstudio",
+        "version": "4.0.1"
+      }
+    ],
+    "source": {
+      "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\dependency-audit.json",
+      "bytes": 5424,
+      "sha256": "3f6d769a93ea2dbf50a1dbbbb2cbe8803bb58a6f753d6b9b1896adbdade354c4"
+    },
+    "project_count": 17,
+    "checked_at_utc": "2026-10-22T10:43:24.7976813+08:00",
+    "resolved_package_versions": 59,
+    "nuget": {
+      "stale": true,
+      "newest_update_utc": "2023-12-13T08:48:47.5745986+08:00",
+      "source": "https://api.nuget.org/v3/vulnerabilities/index.json",
+      "max_age_days": 7
+    },
+    "osv": {
+      "findings": [],
+      "source": "https://api.osv.dev/v1/querybatch",
+      "positive_control_passed": true
+    }
+  },
+  "demos": {
+    "project_count": 8,
+    "results": [
+      {
+        "Project": "TemplateFrame.Demo.Excel.AutoMapping",
+        "ExitCode": 0
+      },
+      {
+        "Project": "TemplateFrame.Demo.Excel.I18n",
+        "ExitCode": 0
+      },
+      {
+        "Project": "TemplateFrame.Demo.Excel.Simple.I18n",
+        "ExitCode": 0
+      },
+      {
+        "Project": "TemplateFrame.Demo.Excel.Simple",
+        "ExitCode": 0
+      },
+      {
+        "Project": "TemplateFrame.Demo.Excel",
+        "ExitCode": 0
+      },
+      {
+        "Project": "TemplateFrame.Demo.Word.AutoMapping",
+        "ExitCode": 0
+      },
+      {
+        "Project": "TemplateFrame.Demo.Word.I18n",
+        "ExitCode": 0
+      },
+      {
+        "Project": "TemplateFrame.Demo.Word",
+        "ExitCode": 0
+      }
+    ],
+    "source": {
+      "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\demo-results.json",
+      "bytes": 647,
+      "sha256": "047cb02c2f74e331b6a13308aeae3031cc45e7e9447f593efe2dc8004d7ebf17"
+    },
+    "all_exit_codes_zero": true
+  },
+  "benchmark_smoke": {
+    "status": "completed",
+    "host_runtime": "10.0.13",
+    "warmup_count": 0,
+    "iteration_count": 1,
+    "sdk": "10.0.402",
+    "warning": "MinIterationTime; confidence interval/error unavailable for N=1.",
+    "invocation_count": 1,
+    "interpretation": "Tool execution smoke check only. One short iteration is not a stable performance baseline or regression result.",
+    "job": "InProcess-Short",
+    "method": "DataPathMapperBenchmarks.ToFillData_10000Rows",
+    "source": {
+      "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\benchmark-smoke.txt",
+      "bytes": 6035,
+      "sha256": "e4b45200cf91e455b79ee7c187ac757f41486a4733409794eed58756429fd98e"
+    }
+  },
+  "packages": {
+    "published": false,
+    "note": "Local pack artifacts only; inspecting contents does not execute restore, build, tests, or publish.",
+    "no_test_tools_in_package_contents_or_nuspec": true,
+    "nupkg_count": 4,
+    "snupkg_count": 4,
+    "all_expected_library_frameworks": true,
+    "directory": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\packages",
+    "version": "2.4.1",
+    "version_bumped": false,
+    "snupkg": [
+      {
+        "file": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\packages\\TemplateFrame.2.4.1.snupkg",
+          "bytes": 40761,
+          "sha256": "e98bf3a1df6ded3cc0c07a2121b1f6df2283d64a8bc5cc11af17e810b11c4ca0"
+        },
+        "pdb_files": [
+          "lib/net462/TemplateFrame.pdb",
+          "lib/net8.0/TemplateFrame.pdb",
+          "lib/netstandard2.0/TemplateFrame.pdb"
+        ]
+      },
+      {
+        "file": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\packages\\TemplateFrame.Excel.2.4.1.snupkg",
+          "bytes": 44668,
+          "sha256": "02bdb8ac936f748b82a8a1f4b63b9946c124116456b1d7330f022e14392ee6f8"
+        },
+        "pdb_files": [
+          "lib/net462/TemplateFrame.Excel.pdb",
+          "lib/net8.0/TemplateFrame.Excel.pdb",
+          "lib/netstandard2.0/TemplateFrame.Excel.pdb"
+        ]
+      },
+      {
+        "file": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\packages\\TemplateFrame.Excel.Simple.2.4.1.snupkg",
+          "bytes": 37739,
+          "sha256": "b2a8fe06cac3259502dd76d1cfb8a272f397e8a8a93b6a03fd100b114d811a4f"
+        },
+        "pdb_files": [
+          "lib/net462/TemplateFrame.Excel.Simple.pdb",
+          "lib/net8.0/TemplateFrame.Excel.Simple.pdb",
+          "lib/netstandard2.0/TemplateFrame.Excel.Simple.pdb"
+        ]
+      },
+      {
+        "file": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\packages\\TemplateFrame.Word.2.4.1.snupkg",
+          "bytes": 39546,
+          "sha256": "92a3f8900ce000804d197d8339e01efc9104ad9e900ffff60a33715f47082f54"
+        },
+        "pdb_files": [
+          "lib/net462/TemplateFrame.Word.pdb",
+          "lib/net8.0/TemplateFrame.Word.pdb",
+          "lib/netstandard2.0/TemplateFrame.Word.pdb"
+        ]
+      }
+    ],
+    "nupkg": [
+      {
+        "file": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\packages\\TemplateFrame.2.4.1.nupkg",
+          "bytes": 148343,
+          "sha256": "4a197a48ebda14fafbf4bdc83b945f7b3642e41acea4ca205c427f8cbb28848b"
+        },
+        "package_id": "TemplateFrame",
+        "version": "2.4.1",
+        "library_frameworks": [
+          "net462",
+          "net8.0",
+          "netstandard2.0"
+        ],
+        "expected_three_frameworks": true,
+        "library_files": [
+          "lib/net462/TemplateFrame.dll",
+          "lib/net8.0/TemplateFrame.dll",
+          "lib/netstandard2.0/TemplateFrame.dll"
+        ],
+        "dependency_groups": [
+          {
+            "target_framework": ".NETFramework4.6.2",
+            "dependencies": [
+              {
+                "id": "System.ValueTuple",
+                "version": "4.6.2",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net8.0",
+            "dependencies": []
+          },
+          {
+            "target_framework": ".NETStandard2.0",
+            "dependencies": []
+          }
+        ],
+        "unexpected_dependencies": [],
+        "test_tool_file_matches": [],
+        "production_only_dependencies": true
+      },
+      {
+        "file": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\packages\\TemplateFrame.Excel.2.4.1.nupkg",
+          "bytes": 135144,
+          "sha256": "d4a4c4d101ef5a9313842306a1d3c0ff56029e13d050266eab20c98ebc741efd"
+        },
+        "package_id": "TemplateFrame.Excel",
+        "version": "2.4.1",
+        "library_frameworks": [
+          "net462",
+          "net8.0",
+          "netstandard2.0"
+        ],
+        "expected_three_frameworks": true,
+        "library_files": [
+          "lib/net462/TemplateFrame.Excel.dll",
+          "lib/net8.0/TemplateFrame.Excel.dll",
+          "lib/netstandard2.0/TemplateFrame.Excel.dll"
+        ],
+        "dependency_groups": [
+          {
+            "target_framework": ".NETFramework4.6.2",
+            "dependencies": [
+              {
+                "id": "TemplateFrame",
+                "version": "2.4.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "DocumentFormat.OpenXml",
+                "version": "3.5.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.ValueTuple",
+                "version": "4.6.2",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net8.0",
+            "dependencies": [
+              {
+                "id": "TemplateFrame",
+                "version": "2.4.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "DocumentFormat.OpenXml",
+                "version": "3.5.1",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": ".NETStandard2.0",
+            "dependencies": [
+              {
+                "id": "TemplateFrame",
+                "version": "2.4.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "DocumentFormat.OpenXml",
+                "version": "3.5.1",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          }
+        ],
+        "unexpected_dependencies": [],
+        "test_tool_file_matches": [],
+        "production_only_dependencies": true
+      },
+      {
+        "file": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\packages\\TemplateFrame.Excel.Simple.2.4.1.nupkg",
+          "bytes": 107987,
+          "sha256": "ed5af78babdb9525f247fd0719d7141e05f9364b064385bbf13d60963e18a7d4"
+        },
+        "package_id": "TemplateFrame.Excel.Simple",
+        "version": "2.4.1",
+        "library_frameworks": [
+          "net462",
+          "net8.0",
+          "netstandard2.0"
+        ],
+        "expected_three_frameworks": true,
+        "library_files": [
+          "lib/net462/TemplateFrame.Excel.Simple.dll",
+          "lib/net8.0/TemplateFrame.Excel.Simple.dll",
+          "lib/netstandard2.0/TemplateFrame.Excel.Simple.dll"
+        ],
+        "dependency_groups": [
+          {
+            "target_framework": ".NETFramework4.6.2",
+            "dependencies": [
+              {
+                "id": "TemplateFrame",
+                "version": "2.4.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "DocumentFormat.OpenXml",
+                "version": "3.5.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.ValueTuple",
+                "version": "4.6.2",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net8.0",
+            "dependencies": [
+              {
+                "id": "TemplateFrame",
+                "version": "2.4.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "DocumentFormat.OpenXml",
+                "version": "3.5.1",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": ".NETStandard2.0",
+            "dependencies": [
+              {
+                "id": "TemplateFrame",
+                "version": "2.4.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "DocumentFormat.OpenXml",
+                "version": "3.5.1",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          }
+        ],
+        "unexpected_dependencies": [],
+        "test_tool_file_matches": [],
+        "production_only_dependencies": true
+      },
+      {
+        "file": {
+          "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\packages\\TemplateFrame.Word.2.4.1.nupkg",
+          "bytes": 131189,
+          "sha256": "89422739f9bf41bb0d11e9d0f75f631531f7d728adcd8e84c530e04c05fcecaa"
+        },
+        "package_id": "TemplateFrame.Word",
+        "version": "2.4.1",
+        "library_frameworks": [
+          "net462",
+          "net8.0",
+          "netstandard2.0"
+        ],
+        "expected_three_frameworks": true,
+        "library_files": [
+          "lib/net462/TemplateFrame.Word.dll",
+          "lib/net8.0/TemplateFrame.Word.dll",
+          "lib/netstandard2.0/TemplateFrame.Word.dll"
+        ],
+        "dependency_groups": [
+          {
+            "target_framework": ".NETFramework4.6.2",
+            "dependencies": [
+              {
+                "id": "TemplateFrame",
+                "version": "2.4.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "DocumentFormat.OpenXml",
+                "version": "3.5.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "System.ValueTuple",
+                "version": "4.6.2",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": "net8.0",
+            "dependencies": [
+              {
+                "id": "TemplateFrame",
+                "version": "2.4.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "DocumentFormat.OpenXml",
+                "version": "3.5.1",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          },
+          {
+            "target_framework": ".NETStandard2.0",
+            "dependencies": [
+              {
+                "id": "TemplateFrame",
+                "version": "2.4.1",
+                "exclude": "Build,Analyzers"
+              },
+              {
+                "id": "DocumentFormat.OpenXml",
+                "version": "3.5.1",
+                "exclude": "Build,Analyzers"
+              }
+            ]
+          }
+        ],
+        "unexpected_dependencies": [],
+        "test_tool_file_matches": [],
+        "production_only_dependencies": true
+      }
+    ],
+    "packaging_note": "These are the successful final pack artifacts after correcting the local dotnet wrapper argument forwarding; earlier failed invocation is not counted as a successful pack."
+  },
+  "format_verification": {
+    "reason": "Final dotnet format --verify-no-changes --no-restore exited 0; empty log is consistent with success.",
+    "source": {
+      "path": "C:\\Users\\Marci\\AppData\\Local\\Temp\\TemplateFrame-upgrade-20261022\\format-verify.txt",
+      "bytes": 0,
+      "sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+    },
+    "status": "passed",
+    "log_empty": true,
+    "exit_code": 0,
+    "exit_code_evidence": "Primary agent observed exec session 79970 exit code 0 and confirmed it in task coordination."
+  },
+  "limits": {
+    "version_published": false,
+    "production_environment_updated": false,
+    "linux_tests_executed": false,
+    "remote_github_actions_executed": false,
+    "system_wide_sdk_updated": false,
+    "customer_deployments_validated": false,
+    "net462_actual_runtime_tested": false,
+    "net472_test_note": "Tests execute against the installed .NET Framework 4.x runtime; this is not proof of a separate 4.6.2 runtime installation."
+  },
+  "pending": []
+}
