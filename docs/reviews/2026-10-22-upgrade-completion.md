@@ -1,6 +1,6 @@
 **TemplateFrame 升级实施记录 · 2026-10-22**
 
-提交收尾在 `codex/security-upgrade-20261022` 分支进行，使用 Conventional Commits；ROADMAP 当前入口与 DESIGN 已同步。系统级更新按用户后续要求单独推进，项目本地 SDK 不作为系统升级完成证据。
+产品实现已在 `codex/security-upgrade-20261022` 分支提交为 `1b46cbd`（`fix(security): bound Office processing and update dependencies`），使用 Conventional Commits；ROADMAP 当前入口与 DESIGN 已同步。该提交经过未参与实施者的独立静态审阅，未发现确定的 P1/P2 缺陷；发现的当前文档提交状态过时问题已在收尾中更正。静态审阅不替代远端 CI 或独立运行验收。系统级更新按用户后续要求单独推进，项目本地 SDK 不作为系统升级完成证据。
 
 本轮已将安全评估中的优先修复与已验证依赖组合落到工作区。正式版本号仍为 2.4.1，变更记录在 CHANGELOG 的 Unreleased；未创建 tag、推送提交或发布 NuGet/GitHub Release。前置评估保留为提交 a4163fd 的历史快照。
 

@@ -421,7 +421,7 @@ TemplateFrame/
 
 ## 7. 迭代计划
 
-迭代归档与后续规划见 [ROADMAP](ROADMAP.md)，已发布版本及兼容性变更统一见 [CHANGELOG](../CHANGELOG.md)。2026-10-22 安全维护的本地验证、待提交状态及剩余边界见[升级实施记录](reviews/2026-10-22-upgrade-completion.md)；历史整改与验收证据仍见[评审台账](reviews/2026-09-07-review.md)。本轮本地测试通过不等于最终提交独立验收、远端 CI 或发布完成；此处不另行维护版本或迭代列表。
+迭代归档与后续规划见 [ROADMAP](ROADMAP.md)，已发布版本及兼容性变更统一见 [CHANGELOG](../CHANGELOG.md)。2026-10-22 安全维护的本地验证、提交状态及剩余边界见[升级实施记录](reviews/2026-10-22-upgrade-completion.md)；历史整改与验收证据仍见[评审台账](reviews/2026-09-07-review.md)。本轮本地测试通过不等于最终提交独立验收、远端 CI 或发布完成；此处不另行维护版本或迭代列表。
 
 ---
 
