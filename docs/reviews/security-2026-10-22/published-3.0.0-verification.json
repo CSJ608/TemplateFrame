@@ -1,0 +1,2755 @@
+{
+  "checked_at_utc": "2026-10-22T07:47:53.3843880+00:00",
+  "repository": "CSJ608/TemplateFrame",
+  "expected_version": "3.0.0",
+  "expected_tag": "v3.0.0",
+  "expected_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+  "status": "passed",
+  "checks": [
+    {
+      "name": "Tag resolves to expected release commit",
+      "passed": true
+    },
+    {
+      "name": "Release workflow succeeded at expected tag/commit",
+      "passed": true
+    },
+    {
+      "name": "GitHub Release is published, non-draft, non-prerelease",
+      "passed": true
+    },
+    {
+      "name": "GitHub Release has exactly four nupkg and four snupkg assets",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.3.0.0.nupkg matches GitHub asset size",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.3.0.0.nupkg matches GitHub asset SHA256 digest",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.3.0.0.snupkg matches GitHub asset size",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.3.0.0.snupkg matches GitHub asset SHA256 digest",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.3.0.0.nupkg matches GitHub asset size",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.3.0.0.nupkg matches GitHub asset SHA256 digest",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.3.0.0.snupkg matches GitHub asset size",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.3.0.0.snupkg matches GitHub asset SHA256 digest",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple.3.0.0.nupkg matches GitHub asset size",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple.3.0.0.nupkg matches GitHub asset SHA256 digest",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple.3.0.0.snupkg matches GitHub asset size",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple.3.0.0.snupkg matches GitHub asset SHA256 digest",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word.3.0.0.nupkg matches GitHub asset size",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word.3.0.0.nupkg matches GitHub asset SHA256 digest",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word.3.0.0.snupkg matches GitHub asset size",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word.3.0.0.snupkg matches GitHub asset SHA256 digest",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame NuGet version index contains 3.0.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame exact NuGet package URL returns HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame GitHub nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame GitHub nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame GitHub RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame GitHub repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame GitHub dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame GitHub complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame NuGet nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame NuGet nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame NuGet RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame NuGet repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame NuGet dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame NuGet complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame Symbols nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame Symbols nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame Symbols RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame Symbols repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame Symbols dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame Symbols complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame all non-signature ZIP payload entries match SHA256",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains lib/net462/TemplateFrame.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains lib/net462/TemplateFrame.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains lib/net462/en/TemplateFrame.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame symbols contain Portable PDB for net462",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains lib/net8.0/TemplateFrame.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains lib/net8.0/TemplateFrame.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains lib/net8.0/en/TemplateFrame.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame symbols contain Portable PDB for net8.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains lib/netstandard2.0/TemplateFrame.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains lib/netstandard2.0/TemplateFrame.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains lib/netstandard2.0/en/TemplateFrame.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame symbols contain Portable PDB for netstandard2.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains README.md",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame contains icon.png",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame symbols have exactly three PDB files",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word NuGet version index contains 3.0.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word exact NuGet package URL returns HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word GitHub nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word GitHub nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word GitHub RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word GitHub repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word GitHub dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word GitHub complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word NuGet nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word NuGet nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word NuGet RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word NuGet repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word NuGet dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word NuGet complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word Symbols nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word Symbols nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word Symbols RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word Symbols repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word Symbols dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word Symbols complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word all non-signature ZIP payload entries match SHA256",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains lib/net462/TemplateFrame.Word.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains lib/net462/TemplateFrame.Word.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains lib/net462/en/TemplateFrame.Word.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word symbols contain Portable PDB for net462",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains lib/net8.0/TemplateFrame.Word.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains lib/net8.0/TemplateFrame.Word.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains lib/net8.0/en/TemplateFrame.Word.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word symbols contain Portable PDB for net8.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains lib/netstandard2.0/TemplateFrame.Word.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains lib/netstandard2.0/TemplateFrame.Word.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains lib/netstandard2.0/en/TemplateFrame.Word.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word symbols contain Portable PDB for netstandard2.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains README.md",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word contains icon.png",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Word symbols have exactly three PDB files",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel NuGet version index contains 3.0.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel exact NuGet package URL returns HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel GitHub nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel GitHub nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel GitHub RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel GitHub repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel GitHub dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel GitHub complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel NuGet nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel NuGet nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel NuGet RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel NuGet repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel NuGet dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel NuGet complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel Symbols nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel Symbols nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel Symbols RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel Symbols repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel Symbols dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel Symbols complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel all non-signature ZIP payload entries match SHA256",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains lib/net462/TemplateFrame.Excel.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains lib/net462/TemplateFrame.Excel.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains lib/net462/en/TemplateFrame.Excel.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel symbols contain Portable PDB for net462",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains lib/net8.0/TemplateFrame.Excel.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains lib/net8.0/TemplateFrame.Excel.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains lib/net8.0/en/TemplateFrame.Excel.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel symbols contain Portable PDB for net8.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains lib/netstandard2.0/TemplateFrame.Excel.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains lib/netstandard2.0/TemplateFrame.Excel.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains lib/netstandard2.0/en/TemplateFrame.Excel.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel symbols contain Portable PDB for netstandard2.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains README.md",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel contains icon.png",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel symbols have exactly three PDB files",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple NuGet version index contains 3.0.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple exact NuGet package URL returns HTTP 200",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple GitHub nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple GitHub nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple GitHub RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple GitHub repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple GitHub dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple GitHub complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple NuGet nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple NuGet nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple NuGet RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple NuGet repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple NuGet dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple NuGet complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple Symbols nuspec ID",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple Symbols nuspec version",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple Symbols RepositoryCommit",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple Symbols repository type/url",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple Symbols dependency target frameworks",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple Symbols complete dependency list",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple all non-signature ZIP payload entries match SHA256",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains lib/net462/TemplateFrame.Excel.Simple.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains lib/net462/TemplateFrame.Excel.Simple.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains lib/net462/en/TemplateFrame.Excel.Simple.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple symbols contain Portable PDB for net462",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains lib/net8.0/TemplateFrame.Excel.Simple.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains lib/net8.0/TemplateFrame.Excel.Simple.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains lib/net8.0/en/TemplateFrame.Excel.Simple.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple symbols contain Portable PDB for net8.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains lib/netstandard2.0/TemplateFrame.Excel.Simple.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains lib/netstandard2.0/TemplateFrame.Excel.Simple.xml",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains lib/netstandard2.0/en/TemplateFrame.Excel.Simple.resources.dll",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple symbols contain Portable PDB for netstandard2.0",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains README.md",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple contains icon.png",
+      "passed": true
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple symbols have exactly three PDB files",
+      "passed": true
+    }
+  ],
+  "failures": [],
+  "packages": [
+    {
+      "id": "TemplateFrame",
+      "version": "3.0.0",
+      "index_url": "https://api.nuget.org/v3-flatcontainer/templateframe/index.json",
+      "index_contains_version": true,
+      "package_url": "https://api.nuget.org/v3-flatcontainer/templateframe/3.0.0/templateframe.3.0.0.nupkg",
+      "exact_package_http_status": 200,
+      "nuget_signed": true,
+      "all_payload_entries_match": true,
+      "payload_comparison": [
+        {
+          "path": "_rels/.rels",
+          "github_sha256": "90dbf94803fe05e50711c7447afd43f8d4f307a51cad3d9107fbe9a68f886075",
+          "nuget_sha256": "90dbf94803fe05e50711c7447afd43f8d4f307a51cad3d9107fbe9a68f886075",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": ".signature.p7s",
+          "github_sha256": null,
+          "nuget_sha256": "4b8aba738a190f0e723b659a672d96829a462988437937b236ed2d884dc468de",
+          "sha256_matches": false,
+          "signature_entry_excluded": true
+        },
+        {
+          "path": "[Content_Types].xml",
+          "github_sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+          "nuget_sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "icon.png",
+          "github_sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+          "nuget_sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/en/TemplateFrame.resources.dll",
+          "github_sha256": "73e0ad64226fc2dc676e69b9f5ad65aa63f34623ad099c1d9d90d61d186405b4",
+          "nuget_sha256": "73e0ad64226fc2dc676e69b9f5ad65aa63f34623ad099c1d9d90d61d186405b4",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/TemplateFrame.dll",
+          "github_sha256": "f70bbe25703d51802d6f24f163adea4bc0e1a1db0a711832a3c9407b87472fb7",
+          "nuget_sha256": "f70bbe25703d51802d6f24f163adea4bc0e1a1db0a711832a3c9407b87472fb7",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/TemplateFrame.xml",
+          "github_sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+          "nuget_sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/en/TemplateFrame.resources.dll",
+          "github_sha256": "7a495072f0d0e04efd7f226112ec07ff5f001206fdc611c5ec1e1af3f4abdf9d",
+          "nuget_sha256": "7a495072f0d0e04efd7f226112ec07ff5f001206fdc611c5ec1e1af3f4abdf9d",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/TemplateFrame.dll",
+          "github_sha256": "77dc71a4bc4969203c470d2ebd9e21aec1da07f4b2e62a33cc0b97cabec62de2",
+          "nuget_sha256": "77dc71a4bc4969203c470d2ebd9e21aec1da07f4b2e62a33cc0b97cabec62de2",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/TemplateFrame.xml",
+          "github_sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+          "nuget_sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/en/TemplateFrame.resources.dll",
+          "github_sha256": "a1e89c01fcef18548b7264fa0f0e64b664ca5177ef75c4c8192a8c65c16c7092",
+          "nuget_sha256": "a1e89c01fcef18548b7264fa0f0e64b664ca5177ef75c4c8192a8c65c16c7092",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/TemplateFrame.dll",
+          "github_sha256": "06d499e8ad5f3c1ee3d571a0c8ee0d033e9702d6e64fbc39c700a32d8b483cd3",
+          "nuget_sha256": "06d499e8ad5f3c1ee3d571a0c8ee0d033e9702d6e64fbc39c700a32d8b483cd3",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/TemplateFrame.xml",
+          "github_sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+          "nuget_sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "package/services/metadata/core-properties/nuget.psmdcp",
+          "github_sha256": "1c96d27bef7b72440ce61b166eae36ac6ff0bdd5bac492cbc4fca4f2daec8a9c",
+          "nuget_sha256": "1c96d27bef7b72440ce61b166eae36ac6ff0bdd5bac492cbc4fca4f2daec8a9c",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "README.md",
+          "github_sha256": "7e2b073e4dbd9c31e9eb395f4a12fbf6c45db901602b08d4080d4d65c82d0e8f",
+          "nuget_sha256": "7e2b073e4dbd9c31e9eb395f4a12fbf6c45db901602b08d4080d4d65c82d0e8f",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "TemplateFrame.nuspec",
+          "github_sha256": "58ce292ef4a61e46a02d93035160e4ce9dd30054c1fad2c1cd00855b26af0787",
+          "nuget_sha256": "58ce292ef4a61e46a02d93035160e4ce9dd30054c1fad2c1cd00855b26af0787",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        }
+      ],
+      "github_package": {
+        "file": "TemplateFrame.3.0.0.nupkg",
+        "sha256": "98ed7ea5e69125bde37135ec19f981b554899b90db567c705575817517b5ad7f",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 476,
+            "sha256": "90dbf94803fe05e50711c7447afd43f8d4f307a51cad3d9107fbe9a68f886075",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.nuspec",
+            "bytes": 1161,
+            "sha256": "58ce292ef4a61e46a02d93035160e4ce9dd30054c1fad2c1cd00855b26af0787",
+            "portable_pdb": null
+          },
+          {
+            "path": "README.md",
+            "bytes": 9751,
+            "sha256": "7e2b073e4dbd9c31e9eb395f4a12fbf6c45db901602b08d4080d4d65c82d0e8f",
+            "portable_pdb": null
+          },
+          {
+            "path": "icon.png",
+            "bytes": 877,
+            "sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.dll",
+            "bytes": 76800,
+            "sha256": "f70bbe25703d51802d6f24f163adea4bc0e1a1db0a711832a3c9407b87472fb7",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.xml",
+            "bytes": 52560,
+            "sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/en/TemplateFrame.resources.dll",
+            "bytes": 8704,
+            "sha256": "73e0ad64226fc2dc676e69b9f5ad65aa63f34623ad099c1d9d90d61d186405b4",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.dll",
+            "bytes": 76288,
+            "sha256": "77dc71a4bc4969203c470d2ebd9e21aec1da07f4b2e62a33cc0b97cabec62de2",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.xml",
+            "bytes": 52560,
+            "sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/en/TemplateFrame.resources.dll",
+            "bytes": 8704,
+            "sha256": "7a495072f0d0e04efd7f226112ec07ff5f001206fdc611c5ec1e1af3f4abdf9d",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.dll",
+            "bytes": 76800,
+            "sha256": "06d499e8ad5f3c1ee3d571a0c8ee0d033e9702d6e64fbc39c700a32d8b483cd3",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.xml",
+            "bytes": 52560,
+            "sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/en/TemplateFrame.resources.dll",
+            "bytes": 8704,
+            "sha256": "a1e89c01fcef18548b7264fa0f0e64b664ca5177ef75c4c8192a8c65c16c7092",
+            "portable_pdb": null
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 644,
+            "sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 731,
+            "sha256": "1c96d27bef7b72440ce61b166eae36ac6ff0bdd5bac492cbc4fca4f2daec8a9c",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            }
+          ]
+        }
+      },
+      "nuget_package": {
+        "file": "TemplateFrame.3.0.0.nupkg",
+        "sha256": "3c52535f89ffa22bfd42406fac9dab3c832ce86dac81223bf31bec036b040eef",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 476,
+            "sha256": "90dbf94803fe05e50711c7447afd43f8d4f307a51cad3d9107fbe9a68f886075",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.nuspec",
+            "bytes": 1161,
+            "sha256": "58ce292ef4a61e46a02d93035160e4ce9dd30054c1fad2c1cd00855b26af0787",
+            "portable_pdb": null
+          },
+          {
+            "path": "README.md",
+            "bytes": 9751,
+            "sha256": "7e2b073e4dbd9c31e9eb395f4a12fbf6c45db901602b08d4080d4d65c82d0e8f",
+            "portable_pdb": null
+          },
+          {
+            "path": "icon.png",
+            "bytes": 877,
+            "sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.dll",
+            "bytes": 76800,
+            "sha256": "f70bbe25703d51802d6f24f163adea4bc0e1a1db0a711832a3c9407b87472fb7",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.xml",
+            "bytes": 52560,
+            "sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/en/TemplateFrame.resources.dll",
+            "bytes": 8704,
+            "sha256": "73e0ad64226fc2dc676e69b9f5ad65aa63f34623ad099c1d9d90d61d186405b4",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.dll",
+            "bytes": 76288,
+            "sha256": "77dc71a4bc4969203c470d2ebd9e21aec1da07f4b2e62a33cc0b97cabec62de2",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.xml",
+            "bytes": 52560,
+            "sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/en/TemplateFrame.resources.dll",
+            "bytes": 8704,
+            "sha256": "7a495072f0d0e04efd7f226112ec07ff5f001206fdc611c5ec1e1af3f4abdf9d",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.dll",
+            "bytes": 76800,
+            "sha256": "06d499e8ad5f3c1ee3d571a0c8ee0d033e9702d6e64fbc39c700a32d8b483cd3",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.xml",
+            "bytes": 52560,
+            "sha256": "4b7483e3ca0639eb825943a1adc9e2b46b5161355c6f5c6055ea30b8cca31c25",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/en/TemplateFrame.resources.dll",
+            "bytes": 8704,
+            "sha256": "a1e89c01fcef18548b7264fa0f0e64b664ca5177ef75c4c8192a8c65c16c7092",
+            "portable_pdb": null
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 644,
+            "sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 731,
+            "sha256": "1c96d27bef7b72440ce61b166eae36ac6ff0bdd5bac492cbc4fca4f2daec8a9c",
+            "portable_pdb": null
+          },
+          {
+            "path": ".signature.p7s",
+            "bytes": 12979,
+            "sha256": "4b8aba738a190f0e723b659a672d96829a462988437937b236ed2d884dc468de",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            }
+          ]
+        }
+      },
+      "github_symbols": {
+        "file": "TemplateFrame.3.0.0.snupkg",
+        "sha256": "12dff2055135008d790b199e7c467056550886a85d6291c1838c77bada502354",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 476,
+            "sha256": "90dbf94803fe05e50711c7447afd43f8d4f307a51cad3d9107fbe9a68f886075",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.nuspec",
+            "bytes": 1052,
+            "sha256": "1612cd57fa3f203a37d0cf1544ba1453f7ccbf932d060ead1a8233edb1f5f032",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.pdb",
+            "bytes": 18044,
+            "sha256": "9267047857cc7f9ad416ab8dc7e4f306f37e48d34dcd6f11e853470469b1cb89",
+            "portable_pdb": true
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.pdb",
+            "bytes": 27508,
+            "sha256": "ccedbbda4344171eda766101f89c634fc189b582076ba22e66042979d122703d",
+            "portable_pdb": true
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.pdb",
+            "bytes": 24716,
+            "sha256": "a72090b15a872ee7d4703699304a7eefdbc5a5ba40f0fddb792a8db4ef4cee1f",
+            "portable_pdb": true
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 459,
+            "sha256": "7832da3521034796a780be0ceaef1a2381a4344ad0b3a890aef11e02e034b9f0",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 731,
+            "sha256": "1c96d27bef7b72440ce61b166eae36ac6ff0bdd5bac492cbc4fca4f2daec8a9c",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "TemplateFrame.Word",
+      "version": "3.0.0",
+      "index_url": "https://api.nuget.org/v3-flatcontainer/templateframe.word/index.json",
+      "index_contains_version": true,
+      "package_url": "https://api.nuget.org/v3-flatcontainer/templateframe.word/3.0.0/templateframe.word.3.0.0.nupkg",
+      "exact_package_http_status": 200,
+      "nuget_signed": true,
+      "all_payload_entries_match": true,
+      "payload_comparison": [
+        {
+          "path": "_rels/.rels",
+          "github_sha256": "ed18c993dd6d09c6d2851c1fbc1f06a1637b7d67b39636f8ae3cc22403dcd10c",
+          "nuget_sha256": "ed18c993dd6d09c6d2851c1fbc1f06a1637b7d67b39636f8ae3cc22403dcd10c",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": ".signature.p7s",
+          "github_sha256": null,
+          "nuget_sha256": "dacc9ef70db17ab5f9872163dce65064a1449b53e81c9253e02ae8b818e0bab8",
+          "sha256_matches": false,
+          "signature_entry_excluded": true
+        },
+        {
+          "path": "[Content_Types].xml",
+          "github_sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+          "nuget_sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "icon.png",
+          "github_sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+          "nuget_sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/en/TemplateFrame.Word.resources.dll",
+          "github_sha256": "fe33efaec01182f3070dcaed51b58efc9fd97d0d5f2cbc057f00ea1119a69a86",
+          "nuget_sha256": "fe33efaec01182f3070dcaed51b58efc9fd97d0d5f2cbc057f00ea1119a69a86",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/TemplateFrame.Word.dll",
+          "github_sha256": "201a8b93f0184449a46dcbac387e70a15fb006460b13e9446c5624aa1c8bc4ba",
+          "nuget_sha256": "201a8b93f0184449a46dcbac387e70a15fb006460b13e9446c5624aa1c8bc4ba",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/TemplateFrame.Word.xml",
+          "github_sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+          "nuget_sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/en/TemplateFrame.Word.resources.dll",
+          "github_sha256": "e7a00f47e97f7668103af8b7422d94c6a3c761b0d40b368153983843312aae07",
+          "nuget_sha256": "e7a00f47e97f7668103af8b7422d94c6a3c761b0d40b368153983843312aae07",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/TemplateFrame.Word.dll",
+          "github_sha256": "d08be73c53bf9d3ab491726c7e5ada079a255825f12d1f31e30561312dd7e966",
+          "nuget_sha256": "d08be73c53bf9d3ab491726c7e5ada079a255825f12d1f31e30561312dd7e966",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/TemplateFrame.Word.xml",
+          "github_sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+          "nuget_sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/en/TemplateFrame.Word.resources.dll",
+          "github_sha256": "c95e8bdbaec372bdee5df769c766b6015ba7070ea1ea88568dd02889ffcd97b2",
+          "nuget_sha256": "c95e8bdbaec372bdee5df769c766b6015ba7070ea1ea88568dd02889ffcd97b2",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/TemplateFrame.Word.dll",
+          "github_sha256": "c13120560b2bb15d375933650a64551d348107db84f64fbc5a0d8b30ca66612e",
+          "nuget_sha256": "c13120560b2bb15d375933650a64551d348107db84f64fbc5a0d8b30ca66612e",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/TemplateFrame.Word.xml",
+          "github_sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+          "nuget_sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "package/services/metadata/core-properties/nuget.psmdcp",
+          "github_sha256": "b7b5a5228b8480b045297bb999a33c844367eeca59519deca56e5ddc6f70ef26",
+          "nuget_sha256": "b7b5a5228b8480b045297bb999a33c844367eeca59519deca56e5ddc6f70ef26",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "README.md",
+          "github_sha256": "d2e6dc7ffe6387b3074d90857946000466f0f055113e4755ce62a9e1bd56bde2",
+          "nuget_sha256": "d2e6dc7ffe6387b3074d90857946000466f0f055113e4755ce62a9e1bd56bde2",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "TemplateFrame.Word.nuspec",
+          "github_sha256": "99808c44bc9590c2c96d6f0246ee8399e276ae3d3d1d4dbe948b855c99defe30",
+          "nuget_sha256": "99808c44bc9590c2c96d6f0246ee8399e276ae3d3d1d4dbe948b855c99defe30",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        }
+      ],
+      "github_package": {
+        "file": "TemplateFrame.Word.3.0.0.nupkg",
+        "sha256": "cf6537292460e8132e09fda11e8153656d1b0b8b9fa8905356176d7795f8cbe7",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 481,
+            "sha256": "ed18c993dd6d09c6d2851c1fbc1f06a1637b7d67b39636f8ae3cc22403dcd10c",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.Word.nuspec",
+            "bytes": 1552,
+            "sha256": "99808c44bc9590c2c96d6f0246ee8399e276ae3d3d1d4dbe948b855c99defe30",
+            "portable_pdb": null
+          },
+          {
+            "path": "README.md",
+            "bytes": 6882,
+            "sha256": "d2e6dc7ffe6387b3074d90857946000466f0f055113e4755ce62a9e1bd56bde2",
+            "portable_pdb": null
+          },
+          {
+            "path": "icon.png",
+            "bytes": 877,
+            "sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Word.dll",
+            "bytes": 72704,
+            "sha256": "201a8b93f0184449a46dcbac387e70a15fb006460b13e9446c5624aa1c8bc4ba",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Word.xml",
+            "bytes": 25497,
+            "sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/en/TemplateFrame.Word.resources.dll",
+            "bytes": 8192,
+            "sha256": "fe33efaec01182f3070dcaed51b58efc9fd97d0d5f2cbc057f00ea1119a69a86",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Word.dll",
+            "bytes": 71680,
+            "sha256": "d08be73c53bf9d3ab491726c7e5ada079a255825f12d1f31e30561312dd7e966",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Word.xml",
+            "bytes": 25497,
+            "sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/en/TemplateFrame.Word.resources.dll",
+            "bytes": 8192,
+            "sha256": "e7a00f47e97f7668103af8b7422d94c6a3c761b0d40b368153983843312aae07",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Word.dll",
+            "bytes": 72192,
+            "sha256": "c13120560b2bb15d375933650a64551d348107db84f64fbc5a0d8b30ca66612e",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Word.xml",
+            "bytes": 25497,
+            "sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/en/TemplateFrame.Word.resources.dll",
+            "bytes": 8192,
+            "sha256": "c95e8bdbaec372bdee5df769c766b6015ba7070ea1ea88568dd02889ffcd97b2",
+            "portable_pdb": null
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 644,
+            "sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 720,
+            "sha256": "b7b5a5228b8480b045297bb999a33c844367eeca59519deca56e5ddc6f70ef26",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame.Word",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            },
+            {
+              "framework": "net8.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": "net8.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            }
+          ]
+        }
+      },
+      "nuget_package": {
+        "file": "TemplateFrame.Word.3.0.0.nupkg",
+        "sha256": "10809386825d5ce5cd8a8d55adb9c151703faac468f788ba4fc7245472d438b0",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 481,
+            "sha256": "ed18c993dd6d09c6d2851c1fbc1f06a1637b7d67b39636f8ae3cc22403dcd10c",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.Word.nuspec",
+            "bytes": 1552,
+            "sha256": "99808c44bc9590c2c96d6f0246ee8399e276ae3d3d1d4dbe948b855c99defe30",
+            "portable_pdb": null
+          },
+          {
+            "path": "README.md",
+            "bytes": 6882,
+            "sha256": "d2e6dc7ffe6387b3074d90857946000466f0f055113e4755ce62a9e1bd56bde2",
+            "portable_pdb": null
+          },
+          {
+            "path": "icon.png",
+            "bytes": 877,
+            "sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Word.dll",
+            "bytes": 72704,
+            "sha256": "201a8b93f0184449a46dcbac387e70a15fb006460b13e9446c5624aa1c8bc4ba",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Word.xml",
+            "bytes": 25497,
+            "sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/en/TemplateFrame.Word.resources.dll",
+            "bytes": 8192,
+            "sha256": "fe33efaec01182f3070dcaed51b58efc9fd97d0d5f2cbc057f00ea1119a69a86",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Word.dll",
+            "bytes": 71680,
+            "sha256": "d08be73c53bf9d3ab491726c7e5ada079a255825f12d1f31e30561312dd7e966",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Word.xml",
+            "bytes": 25497,
+            "sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/en/TemplateFrame.Word.resources.dll",
+            "bytes": 8192,
+            "sha256": "e7a00f47e97f7668103af8b7422d94c6a3c761b0d40b368153983843312aae07",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Word.dll",
+            "bytes": 72192,
+            "sha256": "c13120560b2bb15d375933650a64551d348107db84f64fbc5a0d8b30ca66612e",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Word.xml",
+            "bytes": 25497,
+            "sha256": "da23c3a81f2355e0d023294d20511b661e1acdbb28aff82c531602d35942ec69",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/en/TemplateFrame.Word.resources.dll",
+            "bytes": 8192,
+            "sha256": "c95e8bdbaec372bdee5df769c766b6015ba7070ea1ea88568dd02889ffcd97b2",
+            "portable_pdb": null
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 644,
+            "sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 720,
+            "sha256": "b7b5a5228b8480b045297bb999a33c844367eeca59519deca56e5ddc6f70ef26",
+            "portable_pdb": null
+          },
+          {
+            "path": ".signature.p7s",
+            "bytes": 12979,
+            "sha256": "dacc9ef70db17ab5f9872163dce65064a1449b53e81c9253e02ae8b818e0bab8",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame.Word",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            },
+            {
+              "framework": "net8.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": "net8.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            }
+          ]
+        }
+      },
+      "github_symbols": {
+        "file": "TemplateFrame.Word.3.0.0.snupkg",
+        "sha256": "9248e6a25a0dd8606e1cc6e1071e148103fc6940770d3e7777fd28e2b53616c8",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 481,
+            "sha256": "ed18c993dd6d09c6d2851c1fbc1f06a1637b7d67b39636f8ae3cc22403dcd10c",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.Word.nuspec",
+            "bytes": 1443,
+            "sha256": "e0664111e356107a53e3da08d8a700e5a31245797f9d49a9f6d28db2f5b3ae0f",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Word.pdb",
+            "bytes": 16896,
+            "sha256": "d06f72e2ed3aec990815b77930f10da7304f981d0a55131c762efdd516f8d3a9",
+            "portable_pdb": true
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Word.pdb",
+            "bytes": 26352,
+            "sha256": "ea1fd3b0dab671a3c59cefcc2d89fe7708622438bccda159650bca7f5bfa6ce2",
+            "portable_pdb": true
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Word.pdb",
+            "bytes": 23796,
+            "sha256": "e1b80547bb3ea5c1025acdab33ea7823c09cdc12d846fb1652d926f8c5b20da9",
+            "portable_pdb": true
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 459,
+            "sha256": "7832da3521034796a780be0ceaef1a2381a4344ad0b3a890aef11e02e034b9f0",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 720,
+            "sha256": "b7b5a5228b8480b045297bb999a33c844367eeca59519deca56e5ddc6f70ef26",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame.Word",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            },
+            {
+              "framework": "net8.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": "net8.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "TemplateFrame.Excel",
+      "version": "3.0.0",
+      "index_url": "https://api.nuget.org/v3-flatcontainer/templateframe.excel/index.json",
+      "index_contains_version": true,
+      "package_url": "https://api.nuget.org/v3-flatcontainer/templateframe.excel/3.0.0/templateframe.excel.3.0.0.nupkg",
+      "exact_package_http_status": 200,
+      "nuget_signed": true,
+      "all_payload_entries_match": true,
+      "payload_comparison": [
+        {
+          "path": "_rels/.rels",
+          "github_sha256": "b627f263b1b9cb3afa8ae7a4ffeeab4ac8b616b9ef6b21a0075e19a6562fe483",
+          "nuget_sha256": "b627f263b1b9cb3afa8ae7a4ffeeab4ac8b616b9ef6b21a0075e19a6562fe483",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": ".signature.p7s",
+          "github_sha256": null,
+          "nuget_sha256": "511e5c238f42c0381e352faa95d1985a827decda9a3637e91329f68805410552",
+          "sha256_matches": false,
+          "signature_entry_excluded": true
+        },
+        {
+          "path": "[Content_Types].xml",
+          "github_sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+          "nuget_sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "icon.png",
+          "github_sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+          "nuget_sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/en/TemplateFrame.Excel.resources.dll",
+          "github_sha256": "fea2ed48b24a9a6cf6eab44c2ae8ed4dcb9ec34c242df2a2767c1ec11a69b939",
+          "nuget_sha256": "fea2ed48b24a9a6cf6eab44c2ae8ed4dcb9ec34c242df2a2767c1ec11a69b939",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/TemplateFrame.Excel.dll",
+          "github_sha256": "375b6f7b34edf6f5388c9cff551b2acb5a746ededc22765558cf04bdee6f2276",
+          "nuget_sha256": "375b6f7b34edf6f5388c9cff551b2acb5a746ededc22765558cf04bdee6f2276",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/TemplateFrame.Excel.xml",
+          "github_sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+          "nuget_sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/en/TemplateFrame.Excel.resources.dll",
+          "github_sha256": "52c92138dc2021a8640b45e6e6ae383ff5f274b59572f5a78f1c134aa470b283",
+          "nuget_sha256": "52c92138dc2021a8640b45e6e6ae383ff5f274b59572f5a78f1c134aa470b283",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/TemplateFrame.Excel.dll",
+          "github_sha256": "82accb52c13ded8a59e1ee375559f840b2becedd78c6dc68a2d9a9c8e38e8b75",
+          "nuget_sha256": "82accb52c13ded8a59e1ee375559f840b2becedd78c6dc68a2d9a9c8e38e8b75",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/TemplateFrame.Excel.xml",
+          "github_sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+          "nuget_sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/en/TemplateFrame.Excel.resources.dll",
+          "github_sha256": "267fda7fc9bc98d5073f2df691afdc94da765878703bbfd186728ed3e5b3eb37",
+          "nuget_sha256": "267fda7fc9bc98d5073f2df691afdc94da765878703bbfd186728ed3e5b3eb37",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/TemplateFrame.Excel.dll",
+          "github_sha256": "04b64a184edfa76649d38f249ffdedab2bb64974ceba3602f542d4e67e46b5b7",
+          "nuget_sha256": "04b64a184edfa76649d38f249ffdedab2bb64974ceba3602f542d4e67e46b5b7",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/TemplateFrame.Excel.xml",
+          "github_sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+          "nuget_sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "package/services/metadata/core-properties/nuget.psmdcp",
+          "github_sha256": "844839d1a851e1fc92e54e28d5b8a2fe7a9bc6715e8e29a541a3c25808c6c3b2",
+          "nuget_sha256": "844839d1a851e1fc92e54e28d5b8a2fe7a9bc6715e8e29a541a3c25808c6c3b2",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "README.md",
+          "github_sha256": "a6fbff2e9aecbd3198f5676b134c848b2b729b7c601cb2690dfec2f3263eeb16",
+          "nuget_sha256": "a6fbff2e9aecbd3198f5676b134c848b2b729b7c601cb2690dfec2f3263eeb16",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "TemplateFrame.Excel.nuspec",
+          "github_sha256": "6a84cddb62c21768d7930506cb4600d64c79f818daf241d153ebff849b7d2acc",
+          "nuget_sha256": "6a84cddb62c21768d7930506cb4600d64c79f818daf241d153ebff849b7d2acc",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        }
+      ],
+      "github_package": {
+        "file": "TemplateFrame.Excel.3.0.0.nupkg",
+        "sha256": "ab9f03609e7284c0644edd833d0c4c79ab04599842410047e63f5398ca8e2084",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 482,
+            "sha256": "b627f263b1b9cb3afa8ae7a4ffeeab4ac8b616b9ef6b21a0075e19a6562fe483",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.Excel.nuspec",
+            "bytes": 1575,
+            "sha256": "6a84cddb62c21768d7930506cb4600d64c79f818daf241d153ebff849b7d2acc",
+            "portable_pdb": null
+          },
+          {
+            "path": "icon.png",
+            "bytes": 877,
+            "sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+            "portable_pdb": null
+          },
+          {
+            "path": "README.md",
+            "bytes": 7158,
+            "sha256": "a6fbff2e9aecbd3198f5676b134c848b2b729b7c601cb2690dfec2f3263eeb16",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.dll",
+            "bytes": 71168,
+            "sha256": "375b6f7b34edf6f5388c9cff551b2acb5a746ededc22765558cf04bdee6f2276",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.xml",
+            "bytes": 28054,
+            "sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/en/TemplateFrame.Excel.resources.dll",
+            "bytes": 7680,
+            "sha256": "fea2ed48b24a9a6cf6eab44c2ae8ed4dcb9ec34c242df2a2767c1ec11a69b939",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.dll",
+            "bytes": 71168,
+            "sha256": "82accb52c13ded8a59e1ee375559f840b2becedd78c6dc68a2d9a9c8e38e8b75",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.xml",
+            "bytes": 28054,
+            "sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/en/TemplateFrame.Excel.resources.dll",
+            "bytes": 7680,
+            "sha256": "52c92138dc2021a8640b45e6e6ae383ff5f274b59572f5a78f1c134aa470b283",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.dll",
+            "bytes": 71168,
+            "sha256": "04b64a184edfa76649d38f249ffdedab2bb64974ceba3602f542d4e67e46b5b7",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.xml",
+            "bytes": 28054,
+            "sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/en/TemplateFrame.Excel.resources.dll",
+            "bytes": 7680,
+            "sha256": "267fda7fc9bc98d5073f2df691afdc94da765878703bbfd186728ed3e5b3eb37",
+            "portable_pdb": null
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 644,
+            "sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 743,
+            "sha256": "844839d1a851e1fc92e54e28d5b8a2fe7a9bc6715e8e29a541a3c25808c6c3b2",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame.Excel",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            },
+            {
+              "framework": "net8.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": "net8.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            }
+          ]
+        }
+      },
+      "nuget_package": {
+        "file": "TemplateFrame.Excel.3.0.0.nupkg",
+        "sha256": "85cfb2c9c6afe266fb49e347e22317d7a12d875eb6396145c9ea34f5eeab0531",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 482,
+            "sha256": "b627f263b1b9cb3afa8ae7a4ffeeab4ac8b616b9ef6b21a0075e19a6562fe483",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.Excel.nuspec",
+            "bytes": 1575,
+            "sha256": "6a84cddb62c21768d7930506cb4600d64c79f818daf241d153ebff849b7d2acc",
+            "portable_pdb": null
+          },
+          {
+            "path": "icon.png",
+            "bytes": 877,
+            "sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+            "portable_pdb": null
+          },
+          {
+            "path": "README.md",
+            "bytes": 7158,
+            "sha256": "a6fbff2e9aecbd3198f5676b134c848b2b729b7c601cb2690dfec2f3263eeb16",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.dll",
+            "bytes": 71168,
+            "sha256": "375b6f7b34edf6f5388c9cff551b2acb5a746ededc22765558cf04bdee6f2276",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.xml",
+            "bytes": 28054,
+            "sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/en/TemplateFrame.Excel.resources.dll",
+            "bytes": 7680,
+            "sha256": "fea2ed48b24a9a6cf6eab44c2ae8ed4dcb9ec34c242df2a2767c1ec11a69b939",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.dll",
+            "bytes": 71168,
+            "sha256": "82accb52c13ded8a59e1ee375559f840b2becedd78c6dc68a2d9a9c8e38e8b75",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.xml",
+            "bytes": 28054,
+            "sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/en/TemplateFrame.Excel.resources.dll",
+            "bytes": 7680,
+            "sha256": "52c92138dc2021a8640b45e6e6ae383ff5f274b59572f5a78f1c134aa470b283",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.dll",
+            "bytes": 71168,
+            "sha256": "04b64a184edfa76649d38f249ffdedab2bb64974ceba3602f542d4e67e46b5b7",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.xml",
+            "bytes": 28054,
+            "sha256": "7a3f20497ca9f8c2591b41ef98a09e0ec330df11e1b5b95bf1f9a1bfafc5a717",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/en/TemplateFrame.Excel.resources.dll",
+            "bytes": 7680,
+            "sha256": "267fda7fc9bc98d5073f2df691afdc94da765878703bbfd186728ed3e5b3eb37",
+            "portable_pdb": null
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 644,
+            "sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 743,
+            "sha256": "844839d1a851e1fc92e54e28d5b8a2fe7a9bc6715e8e29a541a3c25808c6c3b2",
+            "portable_pdb": null
+          },
+          {
+            "path": ".signature.p7s",
+            "bytes": 12979,
+            "sha256": "511e5c238f42c0381e352faa95d1985a827decda9a3637e91329f68805410552",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame.Excel",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            },
+            {
+              "framework": "net8.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": "net8.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            }
+          ]
+        }
+      },
+      "github_symbols": {
+        "file": "TemplateFrame.Excel.3.0.0.snupkg",
+        "sha256": "f98d0fd309466ae853a1803c36979ba3e82fb24bc13aa623e328a4b14494d136",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 482,
+            "sha256": "b627f263b1b9cb3afa8ae7a4ffeeab4ac8b616b9ef6b21a0075e19a6562fe483",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.Excel.nuspec",
+            "bytes": 1466,
+            "sha256": "dddbe33fa5c38e47a0c33723e714cfb2a80fce36ac74fbde57b3d4f0cf99f0ee",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.pdb",
+            "bytes": 19948,
+            "sha256": "5a71607a47586d30e5e554b2c9c5521898a8c8a8569fb52a29caf5559138526d",
+            "portable_pdb": true
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.pdb",
+            "bytes": 29404,
+            "sha256": "504945ae9b3cb545312cdf371293599868466d6905ef098294fbf2f17440e8e5",
+            "portable_pdb": true
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.pdb",
+            "bytes": 26868,
+            "sha256": "8ad9439930e8a0f6863e4e9314cae57598b4632fc884813bb9b1341423e47279",
+            "portable_pdb": true
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 459,
+            "sha256": "7832da3521034796a780be0ceaef1a2381a4344ad0b3a890aef11e02e034b9f0",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 743,
+            "sha256": "844839d1a851e1fc92e54e28d5b8a2fe7a9bc6715e8e29a541a3c25808c6c3b2",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame.Excel",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            },
+            {
+              "framework": "net8.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": "net8.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            }
+          ]
+        }
+      }
+    },
+    {
+      "id": "TemplateFrame.Excel.Simple",
+      "version": "3.0.0",
+      "index_url": "https://api.nuget.org/v3-flatcontainer/templateframe.excel.simple/index.json",
+      "index_contains_version": true,
+      "package_url": "https://api.nuget.org/v3-flatcontainer/templateframe.excel.simple/3.0.0/templateframe.excel.simple.3.0.0.nupkg",
+      "exact_package_http_status": 200,
+      "nuget_signed": true,
+      "all_payload_entries_match": true,
+      "payload_comparison": [
+        {
+          "path": "_rels/.rels",
+          "github_sha256": "f37dfeaca5f8c3e7e48e0fb6fcc056295f9b1dea0b5e880d7ecf063b16d3b667",
+          "nuget_sha256": "f37dfeaca5f8c3e7e48e0fb6fcc056295f9b1dea0b5e880d7ecf063b16d3b667",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": ".signature.p7s",
+          "github_sha256": null,
+          "nuget_sha256": "908d1283bdf0bffbb1e67ced67cfd2d5b482695f5bf40d3e6c472e88f0052fc6",
+          "sha256_matches": false,
+          "signature_entry_excluded": true
+        },
+        {
+          "path": "[Content_Types].xml",
+          "github_sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+          "nuget_sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "icon.png",
+          "github_sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+          "nuget_sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/en/TemplateFrame.Excel.Simple.resources.dll",
+          "github_sha256": "1ec4584c375bb7155ae22c326c3eb0cf547882c1726fb61dcf2d70efba909535",
+          "nuget_sha256": "1ec4584c375bb7155ae22c326c3eb0cf547882c1726fb61dcf2d70efba909535",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/TemplateFrame.Excel.Simple.dll",
+          "github_sha256": "8291e885b1fa2d10c4ac39a9df4b30c6656f48f91798c58f73d87ddb7a6badd2",
+          "nuget_sha256": "8291e885b1fa2d10c4ac39a9df4b30c6656f48f91798c58f73d87ddb7a6badd2",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net462/TemplateFrame.Excel.Simple.xml",
+          "github_sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+          "nuget_sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/en/TemplateFrame.Excel.Simple.resources.dll",
+          "github_sha256": "4dbefaf2e213e5ddc7d984a2e4549640943fe1dc9ff73edf82cf320316f93c5b",
+          "nuget_sha256": "4dbefaf2e213e5ddc7d984a2e4549640943fe1dc9ff73edf82cf320316f93c5b",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/TemplateFrame.Excel.Simple.dll",
+          "github_sha256": "a1fd7714be7d8c5d595fcaf87f884144fb2abb37c163371734c5c08cf05b1040",
+          "nuget_sha256": "a1fd7714be7d8c5d595fcaf87f884144fb2abb37c163371734c5c08cf05b1040",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/net8.0/TemplateFrame.Excel.Simple.xml",
+          "github_sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+          "nuget_sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/en/TemplateFrame.Excel.Simple.resources.dll",
+          "github_sha256": "5b74ad77bd2f9815f731e01dcfb10d7aed9632f23bc9ebbd291308b3942def45",
+          "nuget_sha256": "5b74ad77bd2f9815f731e01dcfb10d7aed9632f23bc9ebbd291308b3942def45",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/TemplateFrame.Excel.Simple.dll",
+          "github_sha256": "db5cbb8343bde93126809bbad363249f46b5e223035beae0356f6371a5f7133a",
+          "nuget_sha256": "db5cbb8343bde93126809bbad363249f46b5e223035beae0356f6371a5f7133a",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "lib/netstandard2.0/TemplateFrame.Excel.Simple.xml",
+          "github_sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+          "nuget_sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "package/services/metadata/core-properties/nuget.psmdcp",
+          "github_sha256": "d17c4310448bcf869a12b46ddf0dbc2d28f7a72981b7ae559a99af4f7a0cfb2a",
+          "nuget_sha256": "d17c4310448bcf869a12b46ddf0dbc2d28f7a72981b7ae559a99af4f7a0cfb2a",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "README.md",
+          "github_sha256": "46b73d600deaa2b17dadc6e69d29b17d896f22f2a2ae2bb333e14a9ea627640f",
+          "nuget_sha256": "46b73d600deaa2b17dadc6e69d29b17d896f22f2a2ae2bb333e14a9ea627640f",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        },
+        {
+          "path": "TemplateFrame.Excel.Simple.nuspec",
+          "github_sha256": "22e32a99bcec6b9ce4c71b396e5b7687436c01e39ef3c5e1d3cba0511ff9e132",
+          "nuget_sha256": "22e32a99bcec6b9ce4c71b396e5b7687436c01e39ef3c5e1d3cba0511ff9e132",
+          "sha256_matches": true,
+          "signature_entry_excluded": false
+        }
+      ],
+      "github_package": {
+        "file": "TemplateFrame.Excel.Simple.3.0.0.nupkg",
+        "sha256": "d58c731f3c9f426e559c8697f70dd852bdcb7b2d010f5fba85c6dad0b1fb41b5",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 489,
+            "sha256": "f37dfeaca5f8c3e7e48e0fb6fcc056295f9b1dea0b5e880d7ecf063b16d3b667",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.Excel.Simple.nuspec",
+            "bytes": 1653,
+            "sha256": "22e32a99bcec6b9ce4c71b396e5b7687436c01e39ef3c5e1d3cba0511ff9e132",
+            "portable_pdb": null
+          },
+          {
+            "path": "icon.png",
+            "bytes": 877,
+            "sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+            "portable_pdb": null
+          },
+          {
+            "path": "README.md",
+            "bytes": 8148,
+            "sha256": "46b73d600deaa2b17dadc6e69d29b17d896f22f2a2ae2bb333e14a9ea627640f",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.Simple.dll",
+            "bytes": 57856,
+            "sha256": "8291e885b1fa2d10c4ac39a9df4b30c6656f48f91798c58f73d87ddb7a6badd2",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.Simple.xml",
+            "bytes": 19103,
+            "sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/en/TemplateFrame.Excel.Simple.resources.dll",
+            "bytes": 6656,
+            "sha256": "1ec4584c375bb7155ae22c326c3eb0cf547882c1726fb61dcf2d70efba909535",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.Simple.dll",
+            "bytes": 57344,
+            "sha256": "a1fd7714be7d8c5d595fcaf87f884144fb2abb37c163371734c5c08cf05b1040",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.Simple.xml",
+            "bytes": 19103,
+            "sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/en/TemplateFrame.Excel.Simple.resources.dll",
+            "bytes": 6656,
+            "sha256": "4dbefaf2e213e5ddc7d984a2e4549640943fe1dc9ff73edf82cf320316f93c5b",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.Simple.dll",
+            "bytes": 57856,
+            "sha256": "db5cbb8343bde93126809bbad363249f46b5e223035beae0356f6371a5f7133a",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.Simple.xml",
+            "bytes": 19103,
+            "sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/en/TemplateFrame.Excel.Simple.resources.dll",
+            "bytes": 6656,
+            "sha256": "5b74ad77bd2f9815f731e01dcfb10d7aed9632f23bc9ebbd291308b3942def45",
+            "portable_pdb": null
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 644,
+            "sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 821,
+            "sha256": "d17c4310448bcf869a12b46ddf0dbc2d28f7a72981b7ae559a99af4f7a0cfb2a",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame.Excel.Simple",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            },
+            {
+              "framework": "net8.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": "net8.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            }
+          ]
+        }
+      },
+      "nuget_package": {
+        "file": "TemplateFrame.Excel.Simple.3.0.0.nupkg",
+        "sha256": "841da9c47b8fe3be3af290a2b689e0627f7af14cc604c4b7aefec15116d8d46f",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 489,
+            "sha256": "f37dfeaca5f8c3e7e48e0fb6fcc056295f9b1dea0b5e880d7ecf063b16d3b667",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.Excel.Simple.nuspec",
+            "bytes": 1653,
+            "sha256": "22e32a99bcec6b9ce4c71b396e5b7687436c01e39ef3c5e1d3cba0511ff9e132",
+            "portable_pdb": null
+          },
+          {
+            "path": "icon.png",
+            "bytes": 877,
+            "sha256": "e5d323731b5ec179ce50547fbf869221cfdfcf2cdded9f8ab8e17718298e3920",
+            "portable_pdb": null
+          },
+          {
+            "path": "README.md",
+            "bytes": 8148,
+            "sha256": "46b73d600deaa2b17dadc6e69d29b17d896f22f2a2ae2bb333e14a9ea627640f",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.Simple.dll",
+            "bytes": 57856,
+            "sha256": "8291e885b1fa2d10c4ac39a9df4b30c6656f48f91798c58f73d87ddb7a6badd2",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.Simple.xml",
+            "bytes": 19103,
+            "sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/en/TemplateFrame.Excel.Simple.resources.dll",
+            "bytes": 6656,
+            "sha256": "1ec4584c375bb7155ae22c326c3eb0cf547882c1726fb61dcf2d70efba909535",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.Simple.dll",
+            "bytes": 57344,
+            "sha256": "a1fd7714be7d8c5d595fcaf87f884144fb2abb37c163371734c5c08cf05b1040",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.Simple.xml",
+            "bytes": 19103,
+            "sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net8.0/en/TemplateFrame.Excel.Simple.resources.dll",
+            "bytes": 6656,
+            "sha256": "4dbefaf2e213e5ddc7d984a2e4549640943fe1dc9ff73edf82cf320316f93c5b",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.Simple.dll",
+            "bytes": 57856,
+            "sha256": "db5cbb8343bde93126809bbad363249f46b5e223035beae0356f6371a5f7133a",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.Simple.xml",
+            "bytes": 19103,
+            "sha256": "3ea13229c3577f780b24625b3e8254877cd61e3c8a5ec499dbd3b0178bfd3b09",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/netstandard2.0/en/TemplateFrame.Excel.Simple.resources.dll",
+            "bytes": 6656,
+            "sha256": "5b74ad77bd2f9815f731e01dcfb10d7aed9632f23bc9ebbd291308b3942def45",
+            "portable_pdb": null
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 644,
+            "sha256": "b858fadd5794c5a53fcbaa7a45db7aa5f6ab1fd173ba71cc2625214ee1509c6a",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 821,
+            "sha256": "d17c4310448bcf869a12b46ddf0dbc2d28f7a72981b7ae559a99af4f7a0cfb2a",
+            "portable_pdb": null
+          },
+          {
+            "path": ".signature.p7s",
+            "bytes": 12980,
+            "sha256": "908d1283bdf0bffbb1e67ced67cfd2d5b482695f5bf40d3e6c472e88f0052fc6",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame.Excel.Simple",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            },
+            {
+              "framework": "net8.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": "net8.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            }
+          ]
+        }
+      },
+      "github_symbols": {
+        "file": "TemplateFrame.Excel.Simple.3.0.0.snupkg",
+        "sha256": "3084a558730da9646f7035e8c726aff28ef0b55c45f0047b4df416b97e92fd20",
+        "entries": [
+          {
+            "path": "_rels/.rels",
+            "bytes": 489,
+            "sha256": "f37dfeaca5f8c3e7e48e0fb6fcc056295f9b1dea0b5e880d7ecf063b16d3b667",
+            "portable_pdb": null
+          },
+          {
+            "path": "TemplateFrame.Excel.Simple.nuspec",
+            "bytes": 1544,
+            "sha256": "8fed249c0748500fc8f2e2855ab941603927547f2ce3a22aa3f8f203865f30da",
+            "portable_pdb": null
+          },
+          {
+            "path": "lib/net462/TemplateFrame.Excel.Simple.pdb",
+            "bytes": 15384,
+            "sha256": "309cc3d9f1d2e0629af32d00d541475fd89bea7145eaca94962435439a33d519",
+            "portable_pdb": true
+          },
+          {
+            "path": "lib/net8.0/TemplateFrame.Excel.Simple.pdb",
+            "bytes": 24940,
+            "sha256": "697db7d020dbaed3e8ab01c691f3df2fb6997e2d0f6b21a1f155a2e63397210e",
+            "portable_pdb": true
+          },
+          {
+            "path": "lib/netstandard2.0/TemplateFrame.Excel.Simple.pdb",
+            "bytes": 22376,
+            "sha256": "20978d0f986e7ea64b48fd16db1143ce10127dc5b054e3364eb5f12c92c44d63",
+            "portable_pdb": true
+          },
+          {
+            "path": "[Content_Types].xml",
+            "bytes": 459,
+            "sha256": "7832da3521034796a780be0ceaef1a2381a4344ad0b3a890aef11e02e034b9f0",
+            "portable_pdb": null
+          },
+          {
+            "path": "package/services/metadata/core-properties/nuget.psmdcp",
+            "bytes": 821,
+            "sha256": "d17c4310448bcf869a12b46ddf0dbc2d28f7a72981b7ae559a99af4f7a0cfb2a",
+            "portable_pdb": null
+          }
+        ],
+        "nuspec": {
+          "id": "TemplateFrame.Excel.Simple",
+          "version": "3.0.0",
+          "repository_url": "https://github.com/CSJ608/TemplateFrame",
+          "repository_type": "git",
+          "repository_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+          "dependency_groups": [
+            ".NETFramework4.6.2",
+            "net8.0",
+            ".NETStandard2.0"
+          ],
+          "dependencies": [
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETFramework4.6.2",
+              "id": "System.ValueTuple",
+              "version": "4.6.2"
+            },
+            {
+              "framework": "net8.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": "net8.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "TemplateFrame",
+              "version": "3.0.0"
+            },
+            {
+              "framework": ".NETStandard2.0",
+              "id": "DocumentFormat.OpenXml",
+              "version": "3.5.1"
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "scope": "Read-only GitHub/NuGet API and official published archive verification. Downloaded files are inspected as ZIP data only; package payload SHA256 comparisons ignore only repository signature entries.",
+  "tag": {
+    "api_url": "https://api.github.com/repos/CSJ608/TemplateFrame/git/ref/tags/v3.0.0",
+    "reference": "refs/tags/v3.0.0",
+    "dereference_chain": [
+      {
+        "sha": "36ce4b942a13028f7367fb952731fe9c64899552",
+        "type": "tag",
+        "url": "https://api.github.com/repos/CSJ608/TemplateFrame/git/tags/36ce4b942a13028f7367fb952731fe9c64899552"
+      },
+      {
+        "sha": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+        "type": "commit",
+        "url": "https://api.github.com/repos/CSJ608/TemplateFrame/git/commits/68093169b2d9ad30c03c1e4e945477c37d1c673a"
+      }
+    ],
+    "resolved_commit": "68093169b2d9ad30c03c1e4e945477c37d1c673a"
+  },
+  "workflow": {
+    "id": 39741668795,
+    "url": "https://github.com/CSJ608/TemplateFrame/actions/runs/39741668795",
+    "event": "push",
+    "status": "completed",
+    "conclusion": "success",
+    "head_branch": "v3.0.0",
+    "head_sha": "68093169b2d9ad30c03c1e4e945477c37d1c673a",
+    "created_at": "2026-10-22T07:36:30Z",
+    "updated_at": "2026-10-22T07:39:30Z"
+  },
+  "github_release": {
+    "id": 420428093,
+    "url": "https://github.com/CSJ608/TemplateFrame/releases/tag/v3.0.0",
+    "api_url": "https://api.github.com/repos/CSJ608/TemplateFrame/releases/420428093",
+    "tag_name": "v3.0.0",
+    "target_commitish": "main",
+    "draft": false,
+    "prerelease": false,
+    "created_at": "2026-10-22T07:36:24Z",
+    "published_at": "2026-10-22T07:39:26Z",
+    "immutable": false,
+    "assets": [
+      {
+        "name": "TemplateFrame.3.0.0.nupkg",
+        "size": 148331,
+        "digest": "sha256:98ed7ea5e69125bde37135ec19f981b554899b90db567c705575817517b5ad7f",
+        "browser_download_url": "https://github.com/CSJ608/TemplateFrame/releases/download/v3.0.0/TemplateFrame.3.0.0.nupkg",
+        "content_type": "application/octet-stream",
+        "state": "uploaded"
+      },
+      {
+        "name": "TemplateFrame.3.0.0.snupkg",
+        "size": 40722,
+        "digest": "sha256:12dff2055135008d790b199e7c467056550886a85d6291c1838c77bada502354",
+        "browser_download_url": "https://github.com/CSJ608/TemplateFrame/releases/download/v3.0.0/TemplateFrame.3.0.0.snupkg",
+        "content_type": "application/octet-stream",
+        "state": "uploaded"
+      },
+      {
+        "name": "TemplateFrame.Excel.3.0.0.nupkg",
+        "size": 135187,
+        "digest": "sha256:ab9f03609e7284c0644edd833d0c4c79ab04599842410047e63f5398ca8e2084",
+        "browser_download_url": "https://github.com/CSJ608/TemplateFrame/releases/download/v3.0.0/TemplateFrame.Excel.3.0.0.nupkg",
+        "content_type": "application/octet-stream",
+        "state": "uploaded"
+      },
+      {
+        "name": "TemplateFrame.Excel.3.0.0.snupkg",
+        "size": 44638,
+        "digest": "sha256:f98d0fd309466ae853a1803c36979ba3e82fb24bc13aa623e328a4b14494d136",
+        "browser_download_url": "https://github.com/CSJ608/TemplateFrame/releases/download/v3.0.0/TemplateFrame.Excel.3.0.0.snupkg",
+        "content_type": "application/octet-stream",
+        "state": "uploaded"
+      },
+      {
+        "name": "TemplateFrame.Excel.Simple.3.0.0.nupkg",
+        "size": 108028,
+        "digest": "sha256:d58c731f3c9f426e559c8697f70dd852bdcb7b2d010f5fba85c6dad0b1fb41b5",
+        "browser_download_url": "https://github.com/CSJ608/TemplateFrame/releases/download/v3.0.0/TemplateFrame.Excel.Simple.3.0.0.nupkg",
+        "content_type": "application/octet-stream",
+        "state": "uploaded"
+      },
+      {
+        "name": "TemplateFrame.Excel.Simple.3.0.0.snupkg",
+        "size": 37727,
+        "digest": "sha256:3084a558730da9646f7035e8c726aff28ef0b55c45f0047b4df416b97e92fd20",
+        "browser_download_url": "https://github.com/CSJ608/TemplateFrame/releases/download/v3.0.0/TemplateFrame.Excel.Simple.3.0.0.snupkg",
+        "content_type": "application/octet-stream",
+        "state": "uploaded"
+      },
+      {
+        "name": "TemplateFrame.Word.3.0.0.nupkg",
+        "size": 131223,
+        "digest": "sha256:cf6537292460e8132e09fda11e8153656d1b0b8b9fa8905356176d7795f8cbe7",
+        "browser_download_url": "https://github.com/CSJ608/TemplateFrame/releases/download/v3.0.0/TemplateFrame.Word.3.0.0.nupkg",
+        "content_type": "application/octet-stream",
+        "state": "uploaded"
+      },
+      {
+        "name": "TemplateFrame.Word.3.0.0.snupkg",
+        "size": 39514,
+        "digest": "sha256:9248e6a25a0dd8606e1cc6e1071e148103fc6940770d3e7777fd28e2b53616c8",
+        "browser_download_url": "https://github.com/CSJ608/TemplateFrame/releases/download/v3.0.0/TemplateFrame.Word.3.0.0.snupkg",
+        "content_type": "application/octet-stream",
+        "state": "uploaded"
+      }
+    ]
+  },
+  "completed_at_utc": "2026-10-22T07:48:10.9452745+00:00"
+}
