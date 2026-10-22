@@ -1,5 +1,7 @@
 # TemplateFrame
 
+> **Upgrading to 3.0:** finite default resource limits can reject large inputs that worked in 2.x. Existing entry points and library target frameworks remain available. Read the [migration guide](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/MIGRATION-3.0.md) before upgrading.
+
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.svg)](https://www.nuget.org/packages/TemplateFrame)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame)](https://www.nuget.org/packages/TemplateFrame)
 [![CI](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml/badge.svg)](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml)

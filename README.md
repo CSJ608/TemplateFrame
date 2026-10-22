@@ -1,5 +1,7 @@
 # TemplateFrame
 
+> **升级到 3.0**：默认资源限额会拒绝部分此前可处理的超大输入；公开入口和库目标框架保留。升级前请阅读 [迁移指南](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/MIGRATION-3.0.md)。
+
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.svg)](https://www.nuget.org/packages/TemplateFrame)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame)](https://www.nuget.org/packages/TemplateFrame)
 [![CI](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml/badge.svg)](https://github.com/CSJ608/TemplateFrame/actions/workflows/ci.yml)

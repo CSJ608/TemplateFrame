@@ -1,5 +1,7 @@
 # TemplateFrame.Excel
 
+> **3.0 migration:** finite default budgets change which large inputs are accepted. See the [migration guide](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/MIGRATION-3.0.md).
+
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Excel.svg)](https://www.nuget.org/packages/TemplateFrame.Excel)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Excel)](https://www.nuget.org/packages/TemplateFrame.Excel)
 

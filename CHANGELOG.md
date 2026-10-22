@@ -4,17 +4,27 @@
 
 ## [Unreleased]
 
-### 安全与依赖
-- Open XML SDK 升至 3.5.1；更新测试 SDK、xUnit runner、coverlet、BenchmarkDotNet、ValueTuple 及 net472 测试 JSON 补丁。保留 xUnit v2 与 QRCoder 1.6.0；不将无已知漏洞命中误报为安全修复。
-- 固定 .NET SDK 10.0.402；测试新增 net10.0，样例和基准迁至 net10.0；库继续提供 netstandard2.0 / net462 / net8.0 资产。
-- 开发环境改用已更新的系统级 SDK/runtime，移除临时项目 SDK 搜索路径及 dotnet 包装脚本；系统安装和回归证据见 [系统更新记录](docs/reviews/2026-10-22-system-update.md)。
-- 新增可配置 `TemplateResourceLimits`，限制输入包、实际展开量、XML、图片、累计表数据与克隆 XML。默认有限额会拒绝超大输入；原入口签名保留，业务可显式调大，配置与边界见 [安全说明](docs/SECURITY.md)。
-- Excel.Simple 按实际行遍历，避免稀疏行号导致大量空扫描；标准 Excel 保留空行语义并在物化前检查累计范围预算。拒绝越界坐标，缓存共享字符串索引，并限制模板整行复制放大。
-- CI/发布固定 Actions SHA、按 job 最小授权、保留 OIDC；全传递 NuGet 审计与独立 OSV 检查设置失败门禁，过期漏洞源显式告警；增加定期依赖更新检查。
+## [3.0.0] - 2026-10-22
+
+### 破坏性行为变更与迁移
+- **默认启用有限资源预算。** 新增 `TemplateResourceLimits`，限制输入包大小、包条目数及实际展开量、XML 字符、图片字节、累计表行/单元格和模板行克隆量。此前可处理的超大合法输入可能被拒绝，因此按主版本升级；例如 Simple 写入 100,001 行现在超过默认 100,000 数据行预算。
+- 原有公开入口签名及 `netstandard2.0 / net462 / net8.0` 库资产保留。可信大文档业务应通过 `TemplateFillOptions.ResourceLimits`、`SimpleExcelOptions.ResourceLimits` 或新增 Parser/Validator/Read 重载显式配置预算。超限抛 `InvalidOperationException`，Validate 返回 `Invalid`，不会静默截断数据。迁移步骤见 [3.0 迁移指南](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/MIGRATION-3.0.md)，默认值与适用边界见 [安全说明](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/SECURITY.md)。
+- options record 新增 `ResourceLimits` 字段会参与 record 相等比较及相应序列化；保存配置、快照比较或自定义序列化的消费方需核对该变化。
+
+### 安全与可靠性
+- ZIP 预检同时检查声明长度与逐块读取的实际展开量；Word、Excel、Simple 的文档入口统一接入有界输入与 XML 限额，图片读写和表格物化采用每次调用独立预算。
+- Word/Excel 在深度克隆样板行前累计实际额外单元格与克隆 XML 字符量，避免只按契约列数计量而放大无关静态内容；已预检包复用内部校验路径，减少重复完整展开。
+- Excel.Simple 按实际存在的行遍历，避免稀疏行号造成大量空扫描；标准 Excel 保留命名范围内空行语义，在物化前检查累计范围预算。校验越界和倒序坐标，保留不可用定义名的表头回退。
+- 标准 Excel 在单次解析中建立共享字符串索引，避免每格反复遍历共享字符串表。
+- 资源预算不等于峰值内存/执行时间硬保证；Validate 不净化宏、OLE、外部关系或旧图片，宿主应用仍需管理并发、活动内容策略及运行时补丁。
 
 ### 修复
 - Excel.Simple：无可用列定义名时，Read 与 Validate 统一先匹配 DisplayName、未命中才回退 Key（Trim / Ordinal）；两者同时存在时 DisplayName 优先且与列序无关，修复仅有 Key 表头时校验通过但回读缺字段的问题。保留有效定义名优先、契约列首次占用及重复物理表头后值覆盖规则，不新增文本冲突诊断。
 
+### 依赖与工程
+- Open XML SDK 升至 3.5.1，net462 的 System.ValueTuple 升至 4.6.2；测试与基准工具同步更新。保留 xUnit v2 与 QRCoder 1.6.0，不将维护升级描述为已命中 CVE 的修复。
+- 构建使用 .NET SDK 10.0.402；测试新增 net10.0，样例和基准迁至 net10.0。NuGet 包保留原兼容目标，安装包本身不会更新消费应用的宿主运行时。
+- CI/发布固定 Actions SHA、按 job 最小授权并保留 OIDC；启用全传递 NuGet 审计和独立 OSV 检查，过期漏洞源明确告警；增加定期依赖更新检查。
 ## [2.4.1] - 2026-09-08
 
 ### 文档

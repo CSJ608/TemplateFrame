@@ -1,5 +1,7 @@
 # TemplateFrame.Word
 
+> **3.0 迁移提示**：默认资源预算会改变超大输入的接受行为，请先阅读[迁移指南](https://github.com/CSJ608/TemplateFrame/blob/v3.0.0/docs/MIGRATION-3.0.md)。
+
 [![NuGet](https://img.shields.io/nuget/v/TemplateFrame.Word.svg)](https://www.nuget.org/packages/TemplateFrame.Word)
 [![NuGet Downloads](https://img.shields.io/nuget/dt/TemplateFrame.Word)](https://www.nuget.org/packages/TemplateFrame.Word)
 
