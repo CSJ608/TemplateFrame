@@ -1,0 +1,18 @@
+{
+  "repository": "dotnet/symstore",
+  "commit": "d66992e7c2f32288fbf1acf08cdea43098025c7c",
+  "retrieved_at_utc": "2026-10-22T15:59:45.5061245+08:00",
+  "key_algorithm": "filename.ToLowerInvariant()/guid.ToString(\"N\")+FFFFFFFF/filename.ToLowerInvariant()",
+  "checksum_header": "SymbolChecksum: AlgorithmName:lowercaseHex(PE PdbChecksum bytes)",
+  "sources": [
+    "https://github.com/dotnet/symstore/blob/d66992e7c2f32288fbf1acf08cdea43098025c7c/src/Microsoft.SymbolStore/KeyGenerators/PortablePDBFileKeyGenerator.cs",
+    "https://github.com/dotnet/symstore/blob/d66992e7c2f32288fbf1acf08cdea43098025c7c/src/Microsoft.SymbolStore/KeyGenerators/KeyGenerator.cs",
+    "https://github.com/dotnet/symstore/blob/d66992e7c2f32288fbf1acf08cdea43098025c7c/src/Microsoft.SymbolStore/KeyGenerators/PEFileKeyGenerator.cs",
+    "https://github.com/dotnet/symstore/blob/d66992e7c2f32288fbf1acf08cdea43098025c7c/src/Microsoft.SymbolStore/SymbolStores/HttpSymbolStore.cs",
+    "https://github.com/dotnet/symstore/blob/d66992e7c2f32288fbf1acf08cdea43098025c7c/src/Microsoft.FileFormats/PE/PEStructures.cs",
+    "https://github.com/dotnet/symstore/blob/d66992e7c2f32288fbf1acf08cdea43098025c7c/src/Microsoft.FileFormats/PE/PEFile.cs",
+    "https://github.com/dotnet/symstore/blob/d66992e7c2f32288fbf1acf08cdea43098025c7c/src/Microsoft.SymbolStore/ChecksumValidator.cs"
+  ],
+  "nuget_documentation": "https://learn.microsoft.com/en-us/nuget/create-packages/symbol-packages-snupkg",
+  "checksum_validation": "SHA256 over Portable PDB bytes with the 20-byte #Pdb stream content ID zeroed, per dotnet/symstore ChecksumValidator; whole-file SHA256 is separately used for release/download payload equivalence."
+}

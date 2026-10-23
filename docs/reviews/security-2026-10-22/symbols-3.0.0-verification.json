@@ -1,0 +1,431 @@
+{
+  "checked_at_utc": "2026-10-23T00:50:14.4510993+00:00",
+  "status": "passed",
+  "sample": false,
+  "protocol_reference": "symbol-protocol-reference.json",
+  "symbols": [
+    {
+      "package_id": "TemplateFrame",
+      "version": "3.0.0",
+      "target_framework": "net8.0",
+      "github_symbol_entry": "lib/net8.0/TemplateFrame.pdb",
+      "pdb_guid": "a87bb66e-510f-47f5-92fc-b550b6ed7348",
+      "pdb_id_hex": "6eb67ba80f51f54792fcb550b6ed734825c2afd6",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "a87bb66e-510f-47f5-92fc-b550b6ed7348",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame/obj/Release/net8.0/TemplateFrame.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "6eb67ba80f51f5c7d2fcb550b6ed734825c2afd6745f0cf05f031245edb832ac"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:6eb67ba80f51f5c7d2fcb550b6ed734825c2afd6745f0cf05f031245edb832ac",
+      "symbol_key": "templateframe.pdb/a87bb66e510f47f592fcb550b6ed7348FFFFFFFF/templateframe.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.pdb/a87bb66e510f47f592fcb550b6ed7348FFFFFFFF/templateframe.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:21 GMT",
+        "ETag": "\"0x8DF3016665A6D8A\"",
+        "Content-Length": "27508",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "ccedbbda4344171eda766101f89c634fc189b582076ba22e66042979d122703d",
+      "downloaded_pdb_sha256": "ccedbbda4344171eda766101f89c634fc189b582076ba22e66042979d122703d",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 27508,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.net8.0.pdb"
+    },
+    {
+      "package_id": "TemplateFrame",
+      "version": "3.0.0",
+      "target_framework": "net462",
+      "github_symbol_entry": "lib/net462/TemplateFrame.pdb",
+      "pdb_guid": "e146773e-e90f-4946-89f0-288b460ea06f",
+      "pdb_id_hex": "3e7746e10fe9464989f0288b460ea06ff1ac43a7",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "e146773e-e90f-4946-89f0-288b460ea06f",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame/obj/Release/net462/TemplateFrame.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "3e7746e10fe9460909f0288b460ea06ff1ac43a784dcdd3998ea62ad2ecf2bd0"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:3e7746e10fe9460909f0288b460ea06ff1ac43a784dcdd3998ea62ad2ecf2bd0",
+      "symbol_key": "templateframe.pdb/e146773ee90f494689f0288b460ea06fFFFFFFFF/templateframe.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.pdb/e146773ee90f494689f0288b460ea06fFFFFFFFF/templateframe.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:26 GMT",
+        "ETag": "\"0x8DF30166657AE70\"",
+        "Content-Length": "18044",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "9267047857cc7f9ad416ab8dc7e4f306f37e48d34dcd6f11e853470469b1cb89",
+      "downloaded_pdb_sha256": "9267047857cc7f9ad416ab8dc7e4f306f37e48d34dcd6f11e853470469b1cb89",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 18044,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.net462.pdb"
+    },
+    {
+      "package_id": "TemplateFrame",
+      "version": "3.0.0",
+      "target_framework": "netstandard2.0",
+      "github_symbol_entry": "lib/netstandard2.0/TemplateFrame.pdb",
+      "pdb_guid": "72cb03ca-3ade-4da2-9f31-256c7b9807f5",
+      "pdb_id_hex": "ca03cb72de3aa24d9f31256c7b9807f51a3d07a7",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "72cb03ca-3ade-4da2-9f31-256c7b9807f5",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame/obj/Release/netstandard2.0/TemplateFrame.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "ca03cb72de3aa2dddf31256c7b9807f51a3d072751d022f7e01b847dbec1b521"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:ca03cb72de3aa2dddf31256c7b9807f51a3d072751d022f7e01b847dbec1b521",
+      "symbol_key": "templateframe.pdb/72cb03ca3ade4da29f31256c7b9807f5FFFFFFFF/templateframe.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.pdb/72cb03ca3ade4da29f31256c7b9807f5FFFFFFFF/templateframe.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:31 GMT",
+        "ETag": "\"0x8DF3016665715A6\"",
+        "Content-Length": "24716",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "a72090b15a872ee7d4703699304a7eefdbc5a5ba40f0fddb792a8db4ef4cee1f",
+      "downloaded_pdb_sha256": "a72090b15a872ee7d4703699304a7eefdbc5a5ba40f0fddb792a8db4ef4cee1f",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 24716,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.netstandard2.0.pdb"
+    },
+    {
+      "package_id": "TemplateFrame.Word",
+      "version": "3.0.0",
+      "target_framework": "net8.0",
+      "github_symbol_entry": "lib/net8.0/TemplateFrame.Word.pdb",
+      "pdb_guid": "4d1a3b83-50c3-4455-971f-ad8047297ca0",
+      "pdb_id_hex": "833b1a4dc3505544971fad8047297ca083efe1aa",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "4d1a3b83-50c3-4455-971f-ad8047297ca0",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame.Word/obj/Release/net8.0/TemplateFrame.Word.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "833b1a4dc35055c4971fad8047297ca083efe1aa248d7f7404d076a9dca95c4a"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:833b1a4dc35055c4971fad8047297ca083efe1aa248d7f7404d076a9dca95c4a",
+      "symbol_key": "templateframe.word.pdb/4d1a3b8350c34455971fad8047297ca0FFFFFFFF/templateframe.word.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.word.pdb/4d1a3b8350c34455971fad8047297ca0FFFFFFFF/templateframe.word.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:35 GMT",
+        "ETag": "\"0x8DF30168D660BEA\"",
+        "Content-Length": "26352",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "ea1fd3b0dab671a3c59cefcc2d89fe7708622438bccda159650bca7f5bfa6ce2",
+      "downloaded_pdb_sha256": "ea1fd3b0dab671a3c59cefcc2d89fe7708622438bccda159650bca7f5bfa6ce2",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 26352,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.Word.net8.0.pdb"
+    },
+    {
+      "package_id": "TemplateFrame.Word",
+      "version": "3.0.0",
+      "target_framework": "net462",
+      "github_symbol_entry": "lib/net462/TemplateFrame.Word.pdb",
+      "pdb_guid": "edd7beaf-2988-4a04-a8de-16310be00a2b",
+      "pdb_id_hex": "afbed7ed8829044aa8de16310be00a2b572f52e9",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "edd7beaf-2988-4a04-a8de-16310be00a2b",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame.Word/obj/Release/net462/TemplateFrame.Word.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "afbed7ed8829040ae8de16310be00a2b572f526913a6216570b3e67de814fe6c"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:afbed7ed8829040ae8de16310be00a2b572f526913a6216570b3e67de814fe6c",
+      "symbol_key": "templateframe.word.pdb/edd7beaf29884a04a8de16310be00a2bFFFFFFFF/templateframe.word.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.word.pdb/edd7beaf29884a04a8de16310be00a2bFFFFFFFF/templateframe.word.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:40 GMT",
+        "ETag": "\"0x8DF30168D64D587\"",
+        "Content-Length": "16896",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "d06f72e2ed3aec990815b77930f10da7304f981d0a55131c762efdd516f8d3a9",
+      "downloaded_pdb_sha256": "d06f72e2ed3aec990815b77930f10da7304f981d0a55131c762efdd516f8d3a9",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 16896,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.Word.net462.pdb"
+    },
+    {
+      "package_id": "TemplateFrame.Word",
+      "version": "3.0.0",
+      "target_framework": "netstandard2.0",
+      "github_symbol_entry": "lib/netstandard2.0/TemplateFrame.Word.pdb",
+      "pdb_guid": "86fdae7c-001e-445c-8f79-263fdd16dfd6",
+      "pdb_id_hex": "7caefd861e005c448f79263fdd16dfd6df39318c",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "86fdae7c-001e-445c-8f79-263fdd16dfd6",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame.Word/obj/Release/netstandard2.0/TemplateFrame.Word.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "7caefd861e005c640f79263fdd16dfd6df39310c356f631177baa66cae6ead43"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:7caefd861e005c640f79263fdd16dfd6df39310c356f631177baa66cae6ead43",
+      "symbol_key": "templateframe.word.pdb/86fdae7c001e445c8f79263fdd16dfd6FFFFFFFF/templateframe.word.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.word.pdb/86fdae7c001e445c8f79263fdd16dfd6FFFFFFFF/templateframe.word.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:44 GMT",
+        "ETag": "\"0x8DF30168D65E925\"",
+        "Content-Length": "23796",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "e1b80547bb3ea5c1025acdab33ea7823c09cdc12d846fb1652d926f8c5b20da9",
+      "downloaded_pdb_sha256": "e1b80547bb3ea5c1025acdab33ea7823c09cdc12d846fb1652d926f8c5b20da9",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 23796,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.Word.netstandard2.0.pdb"
+    },
+    {
+      "package_id": "TemplateFrame.Excel",
+      "version": "3.0.0",
+      "target_framework": "net8.0",
+      "github_symbol_entry": "lib/net8.0/TemplateFrame.Excel.pdb",
+      "pdb_guid": "45527a11-df75-4864-9b8d-20e65568eab1",
+      "pdb_id_hex": "117a524575df64489b8d20e65568eab1640c0ce2",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "45527a11-df75-4864-9b8d-20e65568eab1",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame.Excel/obj/Release/net8.0/TemplateFrame.Excel.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "117a524575df64289b8d20e65568eab1640c0c62c40b4e27d8fec100536be337"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:117a524575df64289b8d20e65568eab1640c0c62c40b4e27d8fec100536be337",
+      "symbol_key": "templateframe.excel.pdb/45527a11df7548649b8d20e65568eab1FFFFFFFF/templateframe.excel.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.excel.pdb/45527a11df7548649b8d20e65568eab1FFFFFFFF/templateframe.excel.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:48 GMT",
+        "ETag": "\"0x8DF3015FED67970\"",
+        "Content-Length": "29404",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "504945ae9b3cb545312cdf371293599868466d6905ef098294fbf2f17440e8e5",
+      "downloaded_pdb_sha256": "504945ae9b3cb545312cdf371293599868466d6905ef098294fbf2f17440e8e5",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 29404,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.Excel.net8.0.pdb"
+    },
+    {
+      "package_id": "TemplateFrame.Excel",
+      "version": "3.0.0",
+      "target_framework": "net462",
+      "github_symbol_entry": "lib/net462/TemplateFrame.Excel.pdb",
+      "pdb_guid": "17a52e88-8a4b-4911-8c87-169b7545cac9",
+      "pdb_id_hex": "882ea5174b8a11498c87169b7545cac9b911c3af",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "17a52e88-8a4b-4911-8c87-169b7545cac9",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame.Excel/obj/Release/net462/TemplateFrame.Excel.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "882ea5174b8a11590c87169b7545cac9b911c32f35c120de09e7f54c9f0cc3a5"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:882ea5174b8a11590c87169b7545cac9b911c32f35c120de09e7f54c9f0cc3a5",
+      "symbol_key": "templateframe.excel.pdb/17a52e888a4b49118c87169b7545cac9FFFFFFFF/templateframe.excel.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.excel.pdb/17a52e888a4b49118c87169b7545cac9FFFFFFFF/templateframe.excel.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:51 GMT",
+        "ETag": "\"0x8DF3015FED5C1A8\"",
+        "Content-Length": "19948",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "5a71607a47586d30e5e554b2c9c5521898a8c8a8569fb52a29caf5559138526d",
+      "downloaded_pdb_sha256": "5a71607a47586d30e5e554b2c9c5521898a8c8a8569fb52a29caf5559138526d",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 19948,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.Excel.net462.pdb"
+    },
+    {
+      "package_id": "TemplateFrame.Excel",
+      "version": "3.0.0",
+      "target_framework": "netstandard2.0",
+      "github_symbol_entry": "lib/netstandard2.0/TemplateFrame.Excel.pdb",
+      "pdb_guid": "4e83c838-df00-487a-8bab-c255cbd420ff",
+      "pdb_id_hex": "38c8834e00df7a488babc255cbd420ffd92da7d4",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "4e83c838-df00-487a-8bab-c255cbd420ff",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame.Excel/obj/Release/netstandard2.0/TemplateFrame.Excel.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "38c8834e00df7a388babc255cbd420ffd92da7d42907e1a09d7acb94a0ea217d"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:38c8834e00df7a388babc255cbd420ffd92da7d42907e1a09d7acb94a0ea217d",
+      "symbol_key": "templateframe.excel.pdb/4e83c838df00487a8babc255cbd420ffFFFFFFFF/templateframe.excel.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.excel.pdb/4e83c838df00487a8babc255cbd420ffFFFFFFFF/templateframe.excel.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:54 GMT",
+        "ETag": "\"0x8DF3015FED75BD1\"",
+        "Content-Length": "26868",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "8ad9439930e8a0f6863e4e9314cae57598b4632fc884813bb9b1341423e47279",
+      "downloaded_pdb_sha256": "8ad9439930e8a0f6863e4e9314cae57598b4632fc884813bb9b1341423e47279",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 26868,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.Excel.netstandard2.0.pdb"
+    },
+    {
+      "package_id": "TemplateFrame.Excel.Simple",
+      "version": "3.0.0",
+      "target_framework": "net8.0",
+      "github_symbol_entry": "lib/net8.0/TemplateFrame.Excel.Simple.pdb",
+      "pdb_guid": "7fd4280f-4085-4e7c-aeb5-274dd1188faa",
+      "pdb_id_hex": "0f28d47f85407c4eaeb5274dd1188faa9c6b97dd",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "7fd4280f-4085-4e7c-aeb5-274dd1188faa",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame.Excel.Simple/obj/Release/net8.0/TemplateFrame.Excel.Simple.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "0f28d47f85407c7eeeb5274dd1188faa9c6b97dd82fc242d8764e08287fa7a61"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:0f28d47f85407c7eeeb5274dd1188faa9c6b97dd82fc242d8764e08287fa7a61",
+      "symbol_key": "templateframe.excel.simple.pdb/7fd4280f40854e7caeb5274dd1188faaFFFFFFFF/templateframe.excel.simple.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.excel.simple.pdb/7fd4280f40854e7caeb5274dd1188faaFFFFFFFF/templateframe.excel.simple.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:50:59 GMT",
+        "ETag": "\"0x8DF301624832BED\"",
+        "Content-Length": "24940",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "697db7d020dbaed3e8ab01c691f3df2fb6997e2d0f6b21a1f155a2e63397210e",
+      "downloaded_pdb_sha256": "697db7d020dbaed3e8ab01c691f3df2fb6997e2d0f6b21a1f155a2e63397210e",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 24940,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.Excel.Simple.net8.0.pdb"
+    },
+    {
+      "package_id": "TemplateFrame.Excel.Simple",
+      "version": "3.0.0",
+      "target_framework": "net462",
+      "github_symbol_entry": "lib/net462/TemplateFrame.Excel.Simple.pdb",
+      "pdb_guid": "cbe0f588-35a3-4687-86f9-d6647994af01",
+      "pdb_id_hex": "88f5e0cba335874686f9d6647994af018d6ffafe",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "cbe0f588-35a3-4687-86f9-d6647994af01",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame.Excel.Simple/obj/Release/net462/TemplateFrame.Excel.Simple.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "88f5e0cba335874686f9d6647994af018d6ffa7e2457eedee193b26a20dfafbc"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:88f5e0cba335874686f9d6647994af018d6ffa7e2457eedee193b26a20dfafbc",
+      "symbol_key": "templateframe.excel.simple.pdb/cbe0f58835a3468786f9d6647994af01FFFFFFFF/templateframe.excel.simple.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.excel.simple.pdb/cbe0f58835a3468786f9d6647994af01FFFFFFFF/templateframe.excel.simple.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:51:02 GMT",
+        "ETag": "\"0x8DF30162486C229\"",
+        "Content-Length": "15384",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "309cc3d9f1d2e0629af32d00d541475fd89bea7145eaca94962435439a33d519",
+      "downloaded_pdb_sha256": "309cc3d9f1d2e0629af32d00d541475fd89bea7145eaca94962435439a33d519",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 15384,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.Excel.Simple.net462.pdb"
+    },
+    {
+      "package_id": "TemplateFrame.Excel.Simple",
+      "version": "3.0.0",
+      "target_framework": "netstandard2.0",
+      "github_symbol_entry": "lib/netstandard2.0/TemplateFrame.Excel.Simple.pdb",
+      "pdb_guid": "b65184a8-d236-4ed8-8d75-901fc2bc8a7e",
+      "pdb_id_hex": "a88451b636d2d84e8d75901fc2bc8a7e63f1d0ff",
+      "pdb_id_start_offset": 124,
+      "codeview_guid": "b65184a8-d236-4ed8-8d75-901fc2bc8a7e",
+      "codeview_age": 1,
+      "codeview_path": "/home/runner/work/TemplateFrame/TemplateFrame/src/TemplateFrame.Excel.Simple/obj/Release/netstandard2.0/TemplateFrame.Excel.Simple.pdb",
+      "pdb_guid_matches_dll": true,
+      "pe_pdb_checksums": [
+        {
+          "algorithm": "SHA256",
+          "hex": "a88451b636d2d8decd75901fc2bc8a7e63f1d07ffc70d26439c9bf40ea7cacbf"
+        }
+      ],
+      "zeroed_pdb_sha256_matches_pe_checksum": true,
+      "symbol_checksum_header": "SHA256:a88451b636d2d8decd75901fc2bc8a7e63f1d07ffc70d26439c9bf40ea7cacbf",
+      "symbol_key": "templateframe.excel.simple.pdb/b65184a8d2364ed88d75901fc2bc8a7eFFFFFFFF/templateframe.excel.simple.pdb",
+      "symbol_url": "https://symbols.nuget.org/download/symbols/templateframe.excel.simple.pdb/b65184a8d2364ed88d75901fc2bc8a7eFFFFFFFF/templateframe.excel.simple.pdb",
+      "http_status": 200,
+      "response_headers": {
+        "Date": "Fri, 23 Oct 2026 00:51:06 GMT",
+        "ETag": "\"0x8DF3016248309F2\"",
+        "Content-Length": "22376",
+        "Content-Type": "application/octet-stream"
+      },
+      "expected_full_pdb_sha256": "20978d0f986e7ea64b48fd16db1143ce10127dc5b054e3364eb5f12c92c44d63",
+      "downloaded_pdb_sha256": "20978d0f986e7ea64b48fd16db1143ce10127dc5b054e3364eb5f12c92c44d63",
+      "downloaded_payload_matches": true,
+      "expected_bytes": 22376,
+      "downloaded_file": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\release-check-3.0.0\\published-symbols\\TemplateFrame.Excel.Simple.netstandard2.0.pdb"
+    }
+  ],
+  "failures": [],
+  "interpretation": "A non-200 response means not available at this check, not proof the symbols were never submitted. Requests use the documented key and DLL PdbChecksum header, with cache-control no-cache.",
+  "completed_at_utc": "2026-10-23T00:51:06.8303577+00:00"
+}
