@@ -89,13 +89,15 @@ internal static class ExcelNumberFormat
             return;
         }
 
+        var target = (CellFormat)baseXf.CloneNode(true);
+        target.NumberFormatId = numFmtId;
+        target.ApplyNumberFormat = true;
+
         var existingTarget = cellFormats.Elements<CellFormat>()
             .Select((xf, i) => (Xf: xf, Index: i))
             .FirstOrDefault(t =>
                 t.Xf.NumberFormatId?.Value == numFmtId
-                && t.Xf.FontId?.Value == baseXf.FontId?.Value
-                && t.Xf.FillId?.Value == baseXf.FillId?.Value
-                && t.Xf.BorderId?.Value == baseXf.BorderId?.Value);
+                && HasSameStyle(t.Xf, target));
 
         uint newIndex;
         if (existingTarget.Xf is not null)
@@ -105,13 +107,31 @@ internal static class ExcelNumberFormat
         else
         {
             newIndex = (uint)cellFormats.Elements<CellFormat>().Count();
-            var clone = (CellFormat)baseXf.CloneNode(true);
-            clone.NumberFormatId = numFmtId;
-            clone.ApplyNumberFormat = true;
-            cellFormats.Append(clone);
+            cellFormats.Append(target);
             cellFormats.Count = newIndex + 1;
         }
 
         cell.StyleIndex = newIndex;
+    }
+
+    private static bool HasSameStyle(OpenXmlElement left, OpenXmlElement right)
+    {
+        if (left.LocalName != right.LocalName || left.NamespaceUri != right.NamespaceUri
+            || left.ChildElements.Count != right.ChildElements.Count || left.InnerText != right.InnerText)
+        {
+            return false;
+        }
+
+        var leftAttributes = left.GetAttributes();
+        var rightAttributes = right.GetAttributes();
+        if (leftAttributes.Count != rightAttributes.Count
+            || leftAttributes.Any(attribute => !rightAttributes.Any(other =>
+                attribute.LocalName == other.LocalName && attribute.NamespaceUri == other.NamespaceUri
+                && attribute.Value == other.Value)))
+        {
+            return false;
+        }
+
+        return left.ChildElements.Zip(right.ChildElements, HasSameStyle).All(equal => equal);
     }
 }
