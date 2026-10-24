@@ -46,23 +46,27 @@ internal static class SimpleExcelWriter
         var headerStyle = options.BoldHeader ? styles.BoldStyleIndex : styles.DefaultStyleIndex;
         var dateStyle = styles.DateStyleIndex;
 
-        var rowIndex = WriteHeader(sheetData, headers, (uint)startRow, startCol, headerStyle);
-        rowIndex = WriteRows(sheetData, rows, headers.Count, rowIndex, startCol, dateStyle);
+        var rowIndex = WriteHeader(sheetData, headers, (Row: (uint)startRow, Col: startCol), headerStyle);
+        rowIndex = WriteRows(sheetData, rows, headers.Count, (Row: rowIndex, Col: startCol), dateStyle);
         WriteColumnWidths(worksheetPart.Worksheet, sheetData, ComputeWidths(headers, rows), startCol);
-        WriteDefinedNames(workbookPart, options.TableName, sheetName, startRow, startCol, rowIndex - 1, headers.Count, columnKeys);
+        var writtenRange = new SimpleExcelAddress.TableRange(
+            Sheet: sheetName, StartRow: startRow, StartCol: startCol,
+            EndRow: (int)(rowIndex - 1), EndCol: startCol + headers.Count - 1);
+        WriteDefinedNames(workbookPart, options.TableName, writtenRange, columnKeys);
 
         styles.WriteTo(workbookPart);
         document.Save();
     }
 
-    private static uint WriteHeader(SheetData sheetData, IReadOnlyList<string> headers, uint rowIndex, int startCol, uint headerStyle)
+    private static uint WriteHeader(SheetData sheetData, IReadOnlyList<string> headers, (uint Row, int Col) startCell, uint headerStyle)
     {
+        var rowIndex = startCell.Row;
         var headerRow = new Row { RowIndex = rowIndex };
         for (var c = 0; c < headers.Count; c++)
         {
             headerRow.Append(new Cell
             {
-                CellReference = SimpleExcelAddress.CellReference(rowIndex, startCol + c),
+                CellReference = SimpleExcelAddress.CellReference(rowIndex, startCell.Col + c),
                 StyleIndex = headerStyle,
                 DataType = CellValues.InlineString,
                 InlineString = new InlineString(new Text(headers[c] ?? string.Empty)
@@ -85,17 +89,17 @@ internal static class SimpleExcelWriter
         SheetData sheetData,
         IReadOnlyList<IReadOnlyList<object?>> rows,
         int columnCount,
-        uint rowIndex,
-        int startCol,
+        (uint Row, int Col) startCell,
         uint dateStyle)
     {
+        var rowIndex = startCell.Row;
         foreach (var row in rows)
         {
             var dataRow = new Row { RowIndex = rowIndex };
             for (var c = 0; c < columnCount; c++)
             {
                 var value = c < row.Count ? row[c] : null;
-                var cell = new Cell { CellReference = SimpleExcelAddress.CellReference(rowIndex, startCol + c) };
+                var cell = new Cell { CellReference = SimpleExcelAddress.CellReference(rowIndex, startCell.Col + c) };
                 WriteValue(cell, value, dateStyle);
                 if (cell.HasChildren || cell.StyleIndex is not null)
                 {
@@ -131,20 +135,16 @@ internal static class SimpleExcelWriter
     private static void WriteDefinedNames(
         WorkbookPart workbookPart,
         string? requestedTableName,
-        string sheetName,
-        int startRow,
-        int startCol,
-        uint endRow,
-        int columnCount,
+        SimpleExcelAddress.TableRange range,
         IReadOnlyList<string>? columnKeys)
     {
+        var columnCount = range.EndCol - range.StartCol + 1;
         if (!string.IsNullOrWhiteSpace(requestedTableName) && columnCount > 0)
         {
             var tableName = requestedTableName!.Trim();
-            var endCol = startCol + columnCount - 1;
-            var regionReference = SimpleExcelAddress.QuoteSheet(sheetName)
-                                  + "!$" + SimpleExcelAddress.ColumnLetter(startCol) + "$" + startRow
-                                  + ":$" + SimpleExcelAddress.ColumnLetter(endCol) + "$" + endRow;
+            var regionReference = SimpleExcelAddress.QuoteSheet(range.Sheet)
+                                  + "!$" + SimpleExcelAddress.ColumnLetter(range.StartCol) + "$" + range.StartRow
+                                  + ":$" + SimpleExcelAddress.ColumnLetter(range.EndCol) + "$" + range.EndRow;
             var definedNames = new List<DefinedName>
             {
                 new() { Name = tableName, Text = regionReference },
@@ -163,7 +163,7 @@ internal static class SimpleExcelWriter
                     definedNames.Add(new DefinedName
                     {
                         Name = SimpleExcel.ColumnDefinedName(tableName, columnKey!),
-                        Text = SimpleExcelAddress.QuoteSheet(sheetName) + "!$" + SimpleExcelAddress.ColumnLetter(startCol + i) + "$" + startRow,
+                        Text = SimpleExcelAddress.QuoteSheet(range.Sheet) + "!$" + SimpleExcelAddress.ColumnLetter(range.StartCol + i) + "$" + range.StartRow,
                     });
                 }
             }
