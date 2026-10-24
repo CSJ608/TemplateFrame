@@ -27,11 +27,11 @@ public sealed class TemplateDataValidator
             switch (element)
             {
                 case TextElement text:
-                    CheckScalarValue(text.Key, text.DisplayName, text.Required, text.ValueType, data, issues);
+                    CheckScalarValue(text, text.ValueType, data, issues);
                     break;
 
                 case ImageElement image:
-                    CheckScalarValue(image.Key, image.DisplayName, image.Required, typeof(byte[]), data, issues);
+                    CheckScalarValue(image, typeof(byte[]), data, issues);
                     break;
 
                 case TableElement table:
@@ -58,22 +58,20 @@ public sealed class TemplateDataValidator
     }
 
     private static void CheckScalarValue(
-        string key,
-        string displayName,
-        bool required,
+        TemplateElement element,
         Type valueType,
         FillData data,
         List<TemplateValidationIssue> issues)
     {
-        if (!data.Values.TryGetValue(key, out var value))
+        if (!data.Values.TryGetValue(element.Key, out var value))
         {
-            if (required)
+            if (element.Required)
             {
                 issues.Add(Issue(
                     TemplateValidationIssueCode.Missing,
-                    key,
+                    element.Key,
                     "Validation.DataMissingRequiredField",
-                    [key, displayName]));
+                    [element.Key, element.DisplayName]));
             }
 
             return;
@@ -83,9 +81,9 @@ public sealed class TemplateDataValidator
         {
             issues.Add(Issue(
                 TemplateValidationIssueCode.WrongType,
-                key,
+                element.Key,
                 "Validation.DataFieldTypeMismatch",
-                [key, valueType.Name, value.GetType().Name],
+                [element.Key, valueType.Name, value.GetType().Name],
                 TemplateValidationSeverity.Warning));
         }
     }
