@@ -134,6 +134,7 @@ internal static class SimpleExcelReader
     {
         var result = new List<IReadOnlyList<object?>>();
         var cells = new SimpleExcelRowCells();
+        var dateStyles = new SimpleExcelDateStyles(workbookPart);
         foreach (var r in rowLookup.Keys.Where(r => r > header.Row).OrderBy(r => r))
         {
             budget.AddRows(1, header.ColumnCount);
@@ -142,7 +143,7 @@ internal static class SimpleExcelReader
             for (var c = 0; c < header.ColumnCount; c++)
             {
                 var cell = cells.Find(r, header.StartColumn + c);
-                values.Add(cell is null ? null : ReadCellValue(workbookPart, sharedStrings, cell));
+                values.Add(cell is null ? null : ReadCellValue(dateStyles, sharedStrings, cell));
             }
 
             if (values.All(v => v is null))
@@ -156,7 +157,7 @@ internal static class SimpleExcelReader
         return result;
     }
 
-    internal static object? ReadCellValue(WorkbookPart workbookPart, IReadOnlyList<string> sharedStrings, Cell cell)
+    internal static object? ReadCellValue(SimpleExcelDateStyles dateStyles, IReadOnlyList<string> sharedStrings, Cell cell)
     {
         if (cell.DataType?.Value == CellValues.Boolean)
         {
@@ -182,7 +183,7 @@ internal static class SimpleExcelReader
                 return null;
             }
 
-            return IsDateCell(workbookPart, cell) ? DateTime.FromOADate(number) : number;
+            return dateStyles.IsDateCell(cell) ? DateTime.FromOADate(number) : number;
         }
 
         return GetCellText(sharedStrings, cell);
@@ -199,37 +200,6 @@ internal static class SimpleExcelReader
     internal static int CountDefinedName(WorkbookPart workbookPart, string name)
         => workbookPart.Workbook?.DefinedNames
             ?.Elements<DefinedName>().Count(d => d.Name?.Value == name) ?? 0;
-
-    private static bool IsDateCell(WorkbookPart workbookPart, Cell cell)
-    {
-        if (cell.StyleIndex is not { } styleIndex
-            || workbookPart.WorkbookStylesPart?.Stylesheet?.GetFirstChild<CellFormats>() is not { } cellFormats)
-        {
-            return false;
-        }
-
-        var cellFormat = cellFormats.Elements<CellFormat>().ElementAtOrDefault((int)styleIndex.Value);
-        var numberFormatId = cellFormat?.NumberFormatId?.Value;
-        if (numberFormatId is null)
-        {
-            return false;
-        }
-
-        if (numberFormatId >= 14 && numberFormatId <= 22
-            || numberFormatId >= 27 && numberFormatId <= 36
-            || numberFormatId >= 45 && numberFormatId <= 47
-            || numberFormatId >= 50 && numberFormatId <= 58)
-        {
-            return true;
-        }
-
-        var formatCode = workbookPart.WorkbookStylesPart?.Stylesheet?.GetFirstChild<NumberingFormats>()
-            ?.Elements<NumberingFormat>().FirstOrDefault(n => n.NumberFormatId?.Value == numberFormatId)?.FormatCode?.Value;
-        return formatCode is not null
-               && (formatCode.IndexOf("yy", StringComparison.OrdinalIgnoreCase) >= 0
-                   || formatCode.IndexOf("hh", StringComparison.OrdinalIgnoreCase) >= 0
-                   || formatCode.IndexOf("dd", StringComparison.OrdinalIgnoreCase) >= 0);
-    }
 
     internal static string? GetCellText(IReadOnlyList<string> sharedStrings, Cell? cell)
     {

@@ -58,7 +58,7 @@ public sealed class ReaderWriterSemanticsTests
         var cell = new Cell { DataType = CellValues.SharedString, CellValue = new CellValue(index), InlineString = new InlineString(new Text("ignored")) };
         string[] strings = ["first", ""];
         Assert.Equal(expected, SimpleExcelReader.GetCellText(strings, cell));
-        Assert.Equal(expected, SimpleExcelReader.ReadCellValue(workbook, strings, cell));
+        Assert.Equal(expected, SimpleExcelReader.ReadCellValue(new SimpleExcelDateStyles(workbook), strings, cell));
     }
 
     private sealed class TextOnlyFormattable : IFormattable

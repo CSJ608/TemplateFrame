@@ -106,6 +106,7 @@ internal static class SimpleExcelContractReader
         budget.AddCells(layout.Headers.Count);
         var dataRows = new List<IReadOnlyDictionary<string, object?>>();
         var cells = new SimpleExcelRowCells();
+        var dateStyles = new SimpleExcelDateStyles(workbookPart);
         foreach (var r in rowLookup.Keys.Where(r => r > layout.Range.StartRow).OrderBy(r => r))
         {
             budget.AddRows(1, table.Columns.Count);
@@ -117,7 +118,7 @@ internal static class SimpleExcelContractReader
                 if (layout.ColumnIndex.TryGetValue(column.Key, out var col))
                 {
                     var cell = cells.Find(r, col);
-                    var value = cell is null ? null : SimpleExcelReader.ReadCellValue(workbookPart, sharedStrings, cell);
+                    var value = cell is null ? null : SimpleExcelReader.ReadCellValue(dateStyles, sharedStrings, cell);
                     rowValues[column.Key] = value;
                     any |= value is not null;
                 }
