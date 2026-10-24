@@ -7,7 +7,7 @@
 - [x] `ExcelDrawingHelper.CreateAnchor`：复用 SDK FromMarker（零基单元格、相对左上角 EMU 偏移）和 Extent（EMU 尺寸），八参数降为四个独立职责；形状尺寸从锚尺寸获取。没有新增参数模型/构造函数或额外节点分配。公开 AddImage 保留原签名、默认值与英寸单位，不需要公开 API 决策。
 - [x] `SimpleExcelWriter.WriteDefinedNames`：复用已有值类型 TableRange，以实际写入末行定义区域，从区域推导列数，八参数降为四个。WriteHeader/WriteRows 使用与地址解析一致的 Row/Col 坐标对；保留四/五参数，数据行可能缺列/多列，不能推导表头列数；样式与目标 XML 各有独立语义。TableRange 五字段描述工作表及两个边界，使用具名构造参数，不新增包装类型。空表头不写定义名、空数据行压缩、列宽异常顺序不变。
 - [x] `TemplateDataValidator.CheckScalarValue`：传递已有元素，避免拆散 Key/DisplayName/Required。保留四参数：元素、期望类型、输入数据、诊断输出；ImageElement 没有 ValueType，显式类型避免新增标量模型或隐含类型分派。
-- [ ] `ExcelTemplateParser`：单次解析的工作簿、缓存、诊断和预算归属。
+- [x] `ExcelTemplateParser`：私有 ParseOperation 持有单次工作簿、缓存、诊断、预算；从解析器复制只读配置，三参数构造，不保存解析器引用。ReadText/ReadImage/ReadTableRows 各一个参数，ReadCellValue 三个参数。实例只在 ParseCore 局部使用，原有 using 和 catch 边界不变，不扩展资源生命周期或共享可变状态。
 - [ ] Word/Excel Builder：本地化行为开关及调用时机。
 - [ ] 全仓库长参数审查：包含构造函数、record、参数对象和调用点；逐项记录合理保留理由。
 - [ ] 最终全量验证及交接复核。
@@ -17,6 +17,8 @@
 - 标量校验：Release 全量构建零警告零错误；三框架 1,631 次测试通过；全仓库格式检查及 `git diff --check` 通过。复用已有混合诊断、缺键/null、类型检查回归；不增加热路径分配。
 - `4c5acf5` 为标量校验提交。绘图小步：新增非对称坐标/尺寸、正负偏移及形状尺寸一致性测试，Excel 三框架 504 次测试通过，相关文件格式与差异检查通过；现有默认图片、填充与行移动测试不变。
 - `0cdb5b8` 为绘图提交。SimpleExcel 小步：三框架 284 次测试通过，包含空表头、空行压缩、偏移起点/命名区域、列键与日期/宽度测试；相关格式及差异检查通过。仅值类型组合，不增加逐行/逐单元格分配。
+- `e71d49d` 为 SimpleExcel 提交。解析小步新增同一解析器并发/连续 Parse 与 ParseDetailed 隔离测试：不同工作簿共享字符串索引、各自告警、累计行预算及输入流所有权。Release 全量构建零警告零错误，全量 1,637 次测试通过，格式和差异检查通过。
+- 解析性能验证：运行现有 ExcelParseBenchmarks（100/1,000/5,000 行）改前/改后短基准；分配显示均为 1.58/9.88/47.05 MB。新增固定单次操作对象，无逐行/逐格对象新增。耗时均值改前 20.79/26.76/188.78 ms、改后 7.91/60.47/255.74 ms，改后波动很大、置信区间重叠，不能据此声称提速或无时间回归；后续再复测。原始报告位于系统临时目录 `TemplateFrame-parameters-parser-before` 与 `TemplateFrame-parameters-parser-after`。
 
 交接约定：后续会话显式使用 `gpt-6-astra` / `medium`；用户授权在实际可获取的剩余上下文接近或低于 70% 时创建同项目、本地工作目录接续会话。不得以计费 token 推算占用。当前工具未提供当前上下文容量/剩余比例，不能声称已达到阈值。每个安全小步验证并本地提交，只提交本轮改动，不推送/发布/创建 PR；交接确认启动后旧会话停止修改。需要公开 API 或行为变化时先请用户决定。
 

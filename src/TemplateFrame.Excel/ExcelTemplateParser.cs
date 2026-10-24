@@ -54,8 +54,7 @@ public sealed class ExcelTemplateParser
 
         var values = new Dictionary<string, object?>();
         var tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>();
-        var lookup = new CellLookup();
-        var budget = new TemplateResourceBudget(_limits);
+        var operation = new ParseOperation(this, workbookPart, issues);
 
         try
         {
@@ -64,7 +63,7 @@ public sealed class ExcelTemplateParser
                 switch (element)
                 {
                     case TextElement text:
-                        var (found, textValue) = ReadText(workbookPart, text, issues, lookup);
+                        var (found, textValue) = operation.ReadText(text);
                         if (found)
                         {
                             values[text.Key] = textValue;
@@ -73,7 +72,7 @@ public sealed class ExcelTemplateParser
                         break;
 
                     case ImageElement image:
-                        var imageBytes = ReadImage(workbookPart, image.Key);
+                        var imageBytes = operation.ReadImage(image.Key);
                         if (imageBytes is not null)
                         {
                             values[image.Key] = imageBytes;
@@ -82,7 +81,7 @@ public sealed class ExcelTemplateParser
                         break;
 
                     case TableElement table:
-                        var rows = ReadTableRows(workbookPart, table, issues, lookup, budget);
+                        var rows = operation.ReadTableRows(table);
                         if (rows is not null)
                         {
                             tables[table.Key] = rows;
@@ -121,102 +120,177 @@ public sealed class ExcelTemplateParser
         }
     }
 
-    private (bool Found, object? Value) ReadText(
-        WorkbookPart workbookPart,
-        TextElement element,
-        List<TemplateValidationIssue>? issues,
-        CellLookup lookup)
+    private sealed class ParseOperation
     {
-        var match = ExcelNamedRangeLocator.FindByName(workbookPart, ExcelNamedRangeLocator.ElementName(element.Key));
-        if (match is null)
+        private readonly WorkbookPart _workbookPart;
+        private readonly List<TemplateValidationIssue>? _issues;
+        private readonly CellLookup _lookup = new();
+        private readonly TemplateResourceBudget _budget;
+        private readonly TemplateResourceLimits _limits;
+        private readonly ITemplateLocalizer _localizer;
+        private readonly ContractTextParser _textParser;
+
+        public ParseOperation(ExcelTemplateParser parser, WorkbookPart workbookPart, List<TemplateValidationIssue>? issues)
         {
-            return (false, null);
+            _workbookPart = workbookPart;
+            _issues = issues;
+            _limits = parser._limits;
+            _localizer = parser._localizer;
+            _textParser = parser._textParser;
+            _budget = new TemplateResourceBudget(_limits);
         }
 
-        var (sheet, start, _) = ExcelNamedRangeLocator.ParseReference(match.Reference);
-        var worksheetPart = ExcelTemplateValidator.ResolveWorksheetPart(workbookPart, sheet);
-        var cell = lookup.FindCell(worksheetPart, start.Row, start.Col);
-        return cell is null
-            ? (false, null)
-            : (true, ReadCellValue(workbookPart, cell, element, lookup, issues, new ParseLocation(element.Key)));
-    }
-
-    private byte[]? ReadImage(WorkbookPart workbookPart, string key)
-    {
-        var match = ExcelNamedRangeLocator.FindByName(workbookPart, ExcelNamedRangeLocator.ElementName(key));
-        if (match is null)
+        public (bool Found, object? Value) ReadText(TextElement element)
         {
-            return null;
-        }
-
-        var (sheet, start, _) = ExcelNamedRangeLocator.ParseReference(match.Reference);
-        var worksheetPart = ExcelTemplateValidator.ResolveWorksheetPart(workbookPart, sheet);
-        if (worksheetPart is null)
-        {
-            return null;
-        }
-
-        return ExcelDrawingHelper.ReadImageBytes(worksheetPart, start.Col - 1, start.Row - 1, _limits);
-    }
-
-    private IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(
-        WorkbookPart workbookPart,
-        TableElement table,
-        List<TemplateValidationIssue>? issues,
-        CellLookup lookup,
-        TemplateResourceBudget budget)
-    {
-        var columnRanges = new List<(TextElement Column, (int Row, int Col) Start, (int Row, int Col) End)>();
-        string sheet = string.Empty;
-        foreach (var column in table.Columns)
-        {
-            var match = ExcelNamedRangeLocator.FindByName(
-                workbookPart,
-                ExcelNamedRangeLocator.TableColumnName(table.Key, column.Key));
+            var match = ExcelNamedRangeLocator.FindByName(_workbookPart, ExcelNamedRangeLocator.ElementName(element.Key));
             if (match is null)
             {
-                continue;
+                return (false, null);
             }
 
-            var (matchSheet, start, end) = ExcelNamedRangeLocator.ParseReference(match.Reference);
-            sheet = matchSheet;
-            columnRanges.Add((column, start, end));
+            var (sheet, start, _) = ExcelNamedRangeLocator.ParseReference(match.Reference);
+            var worksheetPart = ExcelTemplateValidator.ResolveWorksheetPart(_workbookPart, sheet);
+            var cell = _lookup.FindCell(worksheetPart, start.Row, start.Col);
+            return cell is null
+                ? (false, null)
+                : (true, ReadCellValue(cell, element, new ParseLocation(element.Key)));
         }
 
-        if (columnRanges.Count == 0)
+        public byte[]? ReadImage(string key)
         {
-            return null;
-        }
-
-        var worksheetPart = ExcelTemplateValidator.ResolveWorksheetPart(workbookPart, sheet);
-        if (worksheetPart is null)
-        {
-            return null;
-        }
-
-        var rowCount = columnRanges.Max(c => checked(c.End.Row - c.Start.Row + 1));
-        if (columnRanges.Any(c => (long)c.Start.Row + rowCount - 1 > ExcelAddressHelper.MaxRow))
-        {
-            throw new FormatException(Sr.Get("Excel.Address.CannotParse", table.Key));
-        }
-
-        budget.AddRows(rowCount, columnRanges.Count);
-        var rows = new List<IReadOnlyDictionary<string, object?>>();
-        for (var r = 0; r < rowCount; r++)
-        {
-            var rowValues = new Dictionary<string, object?>();
-            foreach (var (column, start, _) in columnRanges)
+            var match = ExcelNamedRangeLocator.FindByName(_workbookPart, ExcelNamedRangeLocator.ElementName(key));
+            if (match is null)
             {
-                var cell = lookup.FindCell(worksheetPart, start.Row + r, start.Col);
-                rowValues[column.Key] = cell is null
-                    ? null
-                    : ReadCellValue(workbookPart, cell, column, lookup, issues, new ParseLocation(column.Key, table.Key, start.Row + r, r + 1));
+                return null;
             }
 
-            rows.Add(rowValues);
+            var (sheet, start, _) = ExcelNamedRangeLocator.ParseReference(match.Reference);
+            var worksheetPart = ExcelTemplateValidator.ResolveWorksheetPart(_workbookPart, sheet);
+            if (worksheetPart is null)
+            {
+                return null;
+            }
+
+            return ExcelDrawingHelper.ReadImageBytes(worksheetPart, start.Col - 1, start.Row - 1, _limits);
         }
 
-        return rows;
+        public IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(TableElement table)
+        {
+            var columnRanges = new List<(TextElement Column, (int Row, int Col) Start, (int Row, int Col) End)>();
+            string sheet = string.Empty;
+            foreach (var column in table.Columns)
+            {
+                var match = ExcelNamedRangeLocator.FindByName(
+                    _workbookPart,
+                    ExcelNamedRangeLocator.TableColumnName(table.Key, column.Key));
+                if (match is null)
+                {
+                    continue;
+                }
+
+                var (matchSheet, start, end) = ExcelNamedRangeLocator.ParseReference(match.Reference);
+                sheet = matchSheet;
+                columnRanges.Add((column, start, end));
+            }
+
+            if (columnRanges.Count == 0)
+            {
+                return null;
+            }
+
+            var worksheetPart = ExcelTemplateValidator.ResolveWorksheetPart(_workbookPart, sheet);
+            if (worksheetPart is null)
+            {
+                return null;
+            }
+
+            var rowCount = columnRanges.Max(c => checked(c.End.Row - c.Start.Row + 1));
+            if (columnRanges.Any(c => (long)c.Start.Row + rowCount - 1 > ExcelAddressHelper.MaxRow))
+            {
+                throw new FormatException(Sr.Get("Excel.Address.CannotParse", table.Key));
+            }
+
+            _budget.AddRows(rowCount, columnRanges.Count);
+            var rows = new List<IReadOnlyDictionary<string, object?>>();
+            for (var r = 0; r < rowCount; r++)
+            {
+                var rowValues = new Dictionary<string, object?>();
+                foreach (var (column, start, _) in columnRanges)
+                {
+                    var cell = _lookup.FindCell(worksheetPart, start.Row + r, start.Col);
+                    rowValues[column.Key] = cell is null
+                        ? null
+                        : ReadCellValue(cell, column, new ParseLocation(column.Key, table.Key, start.Row + r, r + 1));
+                }
+
+                rows.Add(rowValues);
+            }
+
+            return rows;
+        }
+
+        private object? ReadCellValue(Cell cell, TextElement element, ParseLocation location)
+        {
+            var dataType = cell.DataType?.Value;
+            if (dataType == CellValues.Boolean)
+            {
+                if (cell.CellValue?.Text is { } boolText)
+                {
+                    if (boolText is "1" or "0")
+                    {
+                        return boolText == "1";
+                    }
+
+                    if (bool.TryParse(boolText, out var boolValue))
+                    {
+                        return boolValue;
+                    }
+                }
+
+                return null;
+            }
+
+            if (dataType == CellValues.Number)
+            {
+                if (cell.CellValue?.Text is not { } numberText)
+                {
+                    return null;
+                }
+
+                if (element.ValueType == typeof(DateTime)
+                    && double.TryParse(numberText, NumberStyles.Float, CultureInfo.InvariantCulture, out var serial))
+                {
+                    return DateTime.FromOADate(serial);
+                }
+
+                return _textParser.Parse(numberText, element, location, _issues);
+            }
+
+            if (dataType == CellValues.SharedString)
+            {
+                if (cell.CellValue?.Text is not { } sharedIndexText)
+                {
+                    return null;
+                }
+
+                var sharedText = _lookup.ReadSharedString(_workbookPart, sharedIndexText);
+                if (sharedText is null)
+                {
+                    return null;
+                }
+
+                return _localizer.IsPlaceholderText(sharedText)
+                    ? null
+                    : _textParser.Parse(sharedText, element, location, _issues);
+            }
+
+            var text = cell.InlineString?.Text?.Text
+                       ?? cell.CellValue?.Text
+                       ?? string.Empty;
+            return _localizer.IsPlaceholderText(text)
+                ? null
+                : _textParser.Parse(text, element, location, _issues);
+        }
     }
 
     private sealed class CellLookup
@@ -279,74 +353,4 @@ public sealed class ExcelTemplateParser
                 ? cell : null;
         }
     }
-
-    private object? ReadCellValue(
-        WorkbookPart workbookPart,
-        Cell cell,
-        TextElement element,
-        CellLookup lookup,
-        List<TemplateValidationIssue>? issues,
-        ParseLocation location)
-    {
-        var dataType = cell.DataType?.Value;
-        if (dataType == CellValues.Boolean)
-        {
-            if (cell.CellValue?.Text is { } boolText)
-            {
-                if (boolText is "1" or "0")
-                {
-                    return boolText == "1";
-                }
-
-                if (bool.TryParse(boolText, out var boolValue))
-                {
-                    return boolValue;
-                }
-            }
-
-            return null;
-        }
-
-        if (dataType == CellValues.Number)
-        {
-            if (cell.CellValue?.Text is not { } numberText)
-            {
-                return null;
-            }
-
-            if (element.ValueType == typeof(DateTime)
-                && double.TryParse(numberText, NumberStyles.Float, CultureInfo.InvariantCulture, out var serial))
-            {
-                return DateTime.FromOADate(serial);
-            }
-
-            return _textParser.Parse(numberText, element, location, issues);
-        }
-
-        if (dataType == CellValues.SharedString)
-        {
-            if (cell.CellValue?.Text is not { } sharedIndexText)
-            {
-                return null;
-            }
-
-            var sharedText = lookup.ReadSharedString(workbookPart, sharedIndexText);
-            if (sharedText is null)
-            {
-                return null;
-            }
-
-            return _localizer.IsPlaceholderText(sharedText)
-                ? null
-                : _textParser.Parse(sharedText, element, location, issues);
-        }
-
-        var text = cell.InlineString?.Text?.Text
-                   ?? cell.CellValue?.Text
-                   ?? string.Empty;
-        return _localizer.IsPlaceholderText(text)
-            ? null
-            : _textParser.Parse(text, element, location, issues);
-    }
-
 }

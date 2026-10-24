@@ -8,6 +8,46 @@ namespace TemplateFrame.Excel.Tests;
 
 public sealed class ExcelParserLookupTests
 {
+    [Fact]
+    public async Task SharedParser_ConcurrentOperations_IsolateSharedStringsWarningsAndBudgets()
+    {
+        var parser = new ExcelTemplateParser(new Engine.TemplateResourceLimits { MaxTableRows = 4 }, null);
+        var contract = Contract() with
+        {
+            Elements = Contract().Elements.Select(element => element is TextElement { Key: "Before" } text
+                ? text with { ValueType = typeof(int) }
+                : element).ToArray(),
+        };
+
+        await Task.WhenAll(Enumerable.Range(0, 12).Select(index => Task.Run(() =>
+        {
+            var rawValue = "invalid-" + index;
+            using var input = Build(rawValue);
+            using (var document = SpreadsheetDocument.Open(input, true))
+            {
+                var workbook = document.WorkbookPart!;
+                workbook.AddNewPart<SharedStringTablePart>().SharedStringTable =
+                    new SharedStringTable(new SharedStringItem(new Text(rawValue)));
+                var cell = workbook.WorksheetParts.First().Worksheet!.Descendants<Cell>().First();
+                cell.RemoveAllChildren();
+                cell.DataType = CellValues.SharedString;
+                cell.CellValue = new CellValue("0");
+                document.Save();
+            }
+
+            input.Position = 0;
+            var result = parser.ParseDetailed(input, contract);
+            Assert.Equal(rawValue, result.Data.Values["Before"]);
+            Assert.Equal(rawValue, Assert.Single(result.Warnings).RawValue);
+            Assert.Equal(3, result.Data.Tables["Lines"].Count);
+            Assert.Single(result.Data.Tables["Again"]);
+            Assert.True(input.CanRead);
+
+            input.Position = 0;
+            Assert.Equal(rawValue, parser.Parse(input, contract).Values["Before"]);
+        })));
+    }
+
     [Theory]
     [InlineData(false)]
     [InlineData(true)]
