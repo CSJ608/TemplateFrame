@@ -3,7 +3,6 @@ using TemplateFrame.Excel.Simple.Localization;
 
 namespace TemplateFrame.Excel.Simple;
 
-/// <summary>单元格地址与命名区域引用的解析/构造（SimpleExcel 内部共用）。</summary>
 internal static class SimpleExcelAddress
 {
     internal const int MaxRow = 1_048_576;
@@ -47,7 +46,6 @@ internal static class SimpleExcelAddress
         return true;
     }
 
-    // Unsupported formulas/#REF! can use the documented header fallback; invalid A1 coordinates cannot.
     internal static bool LooksLikeCellReference(string reference)
     {
         var cellPart = reference.Substring(reference.LastIndexOf('!') + 1).Trim().TrimStart('=');

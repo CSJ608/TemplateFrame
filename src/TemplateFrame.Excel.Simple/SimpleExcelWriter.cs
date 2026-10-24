@@ -6,7 +6,6 @@ using TemplateFrame.Internal;
 
 namespace TemplateFrame.Excel.Simple;
 
-/// <summary>SimpleExcel 导出实现（公共入口见 <see cref="SimpleExcel.Write"/>）：表头 + 数据行 + 列宽 + 命名区域。</summary>
 internal static class SimpleExcelWriter
 {
     internal static void Write(Stream target, SimpleExcelTable table, SimpleExcelOptions? options = null, IReadOnlyList<string>? columnKeys = null)
@@ -47,7 +46,17 @@ internal static class SimpleExcelWriter
         var headerStyle = options.BoldHeader ? styles.BoldStyleIndex : styles.DefaultStyleIndex;
         var dateStyle = styles.DateStyleIndex;
 
-        var rowIndex = (uint)startRow;
+        var rowIndex = WriteHeader(sheetData, headers, (uint)startRow, startCol, headerStyle);
+        rowIndex = WriteRows(sheetData, rows, headers.Count, rowIndex, startCol, dateStyle);
+        WriteColumnWidths(worksheetPart.Worksheet, sheetData, ComputeWidths(headers, rows), startCol);
+        WriteDefinedNames(workbookPart, options.TableName, sheetName, startRow, startCol, rowIndex - 1, headers.Count, columnKeys);
+
+        styles.WriteTo(workbookPart);
+        document.Save();
+    }
+
+    private static uint WriteHeader(SheetData sheetData, IReadOnlyList<string> headers, uint rowIndex, int startCol, uint headerStyle)
+    {
         var headerRow = new Row { RowIndex = rowIndex };
         for (var c = 0; c < headers.Count; c++)
         {
@@ -69,10 +78,21 @@ internal static class SimpleExcelWriter
             rowIndex++;
         }
 
+        return rowIndex;
+    }
+
+    private static uint WriteRows(
+        SheetData sheetData,
+        IReadOnlyList<IReadOnlyList<object?>> rows,
+        int columnCount,
+        uint rowIndex,
+        int startCol,
+        uint dateStyle)
+    {
         foreach (var row in rows)
         {
             var dataRow = new Row { RowIndex = rowIndex };
-            for (var c = 0; c < headers.Count; c++)
+            for (var c = 0; c < columnCount; c++)
             {
                 var value = c < row.Count ? row[c] : null;
                 var cell = new Cell { CellReference = SimpleExcelAddress.CellReference(rowIndex, startCol + c) };
@@ -90,7 +110,11 @@ internal static class SimpleExcelWriter
             }
         }
 
-        var widths = ComputeWidths(headers, rows);
+        return rowIndex;
+    }
+
+    private static void WriteColumnWidths(Worksheet worksheet, SheetData sheetData, IReadOnlyList<double> widths, int startCol)
+    {
         if (widths.Count > 0)
         {
             var cols = new Columns();
@@ -100,14 +124,24 @@ internal static class SimpleExcelWriter
                 cols.Append(new Column { Min = (uint)colIndex, Max = (uint)colIndex, Width = widths[i], CustomWidth = true });
             }
 
-            worksheetPart.Worksheet.InsertBefore(cols, sheetData);
+            worksheet.InsertBefore(cols, sheetData);
         }
+    }
 
-        if (!string.IsNullOrWhiteSpace(options.TableName) && headers.Count > 0)
+    private static void WriteDefinedNames(
+        WorkbookPart workbookPart,
+        string? requestedTableName,
+        string sheetName,
+        int startRow,
+        int startCol,
+        uint endRow,
+        int columnCount,
+        IReadOnlyList<string>? columnKeys)
+    {
+        if (!string.IsNullOrWhiteSpace(requestedTableName) && columnCount > 0)
         {
-            var tableName = options.TableName.Trim();
-            var endRow = rowIndex - 1;
-            var endCol = startCol + headers.Count - 1;
+            var tableName = requestedTableName!.Trim();
+            var endCol = startCol + columnCount - 1;
             var regionReference = SimpleExcelAddress.QuoteSheet(sheetName)
                                   + "!$" + SimpleExcelAddress.ColumnLetter(startCol) + "$" + startRow
                                   + ":$" + SimpleExcelAddress.ColumnLetter(endCol) + "$" + endRow;
@@ -118,7 +152,7 @@ internal static class SimpleExcelWriter
 
             if (columnKeys is { Count: > 0 })
             {
-                for (var i = 0; i < headers.Count && i < columnKeys.Count; i++)
+                for (var i = 0; i < columnCount && i < columnKeys.Count; i++)
                 {
                     var columnKey = columnKeys[i]?.Trim();
                     if (string.IsNullOrEmpty(columnKey))
@@ -134,11 +168,8 @@ internal static class SimpleExcelWriter
                 }
             }
 
-            workbookPart.Workbook.AppendChild(new DefinedNames(definedNames.ToArray()));
+            workbookPart.Workbook!.AppendChild(new DefinedNames(definedNames.ToArray()));
         }
-
-        styles.WriteTo(workbookPart);
-        document.Save();
     }
 
     private static void WriteValue(Cell cell, object? value, uint dateStyle)
@@ -165,19 +196,16 @@ internal static class SimpleExcelWriter
                 break;
 
             case decimal decimalValue:
-                // decimal 直写 invariant 文本：28-29 位精度不经 double 中转（double 中转会静默截到 15 位）
                 cell.DataType = CellValues.Number;
                 cell.CellValue = new CellValue(decimalValue.ToString(CultureInfo.InvariantCulture));
                 break;
 
             case long longValue:
-                // long 直写：> 2^53 的整数经 double 中转会失真
                 cell.DataType = CellValues.Number;
                 cell.CellValue = new CellValue(longValue.ToString(CultureInfo.InvariantCulture));
                 break;
 
             case double doubleValue:
-                // "R" 全 TFM 保证往返（netfx 默认 G15 不可往返）
                 cell.DataType = CellValues.Number;
                 cell.CellValue = new CellValue(doubleValue.ToString("R", CultureInfo.InvariantCulture));
                 break;
@@ -218,7 +246,6 @@ internal static class SimpleExcelWriter
                 }
             }
 
-            // 宽度收敛到 [8, 60]（Math.Clamp 是 netcore API）
             var width = max + 2;
             widths.Add(width < 8 ? 8 : width > 60 ? 60 : width);
         }
@@ -230,7 +257,7 @@ internal static class SimpleExcelWriter
         => value switch
         {
             null => 0,
-            DateTime dateTime => 10, // yyyy-mm-dd
+            DateTime => 10,
             bool boolValue => boolValue ? 4 : 5,
             IFormattable number => Convert.ToDouble(number, CultureInfo.InvariantCulture)
                 .ToString(CultureInfo.InvariantCulture).Length,

@@ -4,7 +4,6 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace TemplateFrame.Excel.Simple;
 
-/// <summary>简单表格的最小样式池：默认 / 标题加粗 / 日期数字格式。</summary>
 internal sealed class SimpleExcelStyles
 {
     private const string DateFormatCode = "yyyy-mm-dd";
@@ -15,7 +14,6 @@ internal sealed class SimpleExcelStyles
 
     public uint DateStyleIndex { get; } = 2;
 
-    /// <summary>写入 styles.xml（WorkbookStylesPart）。</summary>
     public void WriteTo(WorkbookPart workbookPart)
     {
         var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
