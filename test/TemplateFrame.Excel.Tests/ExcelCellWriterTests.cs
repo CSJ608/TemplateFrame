@@ -45,6 +45,89 @@ public sealed class ExcelCellWriterTests
     }
 
     [Fact]
+    public void Write_NumberFormatDistinguishesBaseStylesAndFormatCodes()
+    {
+        using var template = TestDocuments.BuildDemoTemplate();
+        using var document = SpreadsheetDocument.Open(template, true);
+        var workbook = document.WorkbookPart!;
+        var formats = new CellFormats(
+            new CellFormat(new Alignment { Horizontal = HorizontalAlignmentValues.Left }),
+            new CellFormat(new Alignment { Horizontal = HorizontalAlignmentValues.Right }));
+        workbook.WorkbookStylesPart!.Stylesheet!.CellFormats = formats;
+        var combinations = new (uint BaseStyle, string Format)[]
+        {
+            (0, "N2"), (0, "N0"), (1, "N2"), (0, "N2"), (1, "N0"), (1, "N2"),
+        };
+        var resolved = new Dictionary<(uint, string), uint>();
+
+        foreach (var (baseStyle, format) in combinations)
+        {
+            var cell = new Cell { StyleIndex = baseStyle };
+            ExcelCellWriter.Write(workbook, cell, new TextElement { Format = format }, 12.5m);
+
+            var targetIndex = cell.StyleIndex!.Value;
+            var target = (CellFormat)formats.ChildElements[(int)targetIndex];
+            var original = (CellFormat)formats.ChildElements[(int)baseStyle];
+            Assert.Equal(original.Alignment!.Horizontal!.Value, target.Alignment!.Horizontal!.Value);
+            var numberFormat = workbook.WorkbookStylesPart.Stylesheet.NumberingFormats!
+                .Elements<NumberingFormat>().Single(item => item.NumberFormatId!.Value == target.NumberFormatId!.Value);
+            Assert.Equal(format == "N2" ? "#,##0.00" : "#,##0", numberFormat.FormatCode!.Value);
+            if (resolved.TryGetValue((baseStyle, format), out var previousIndex))
+            {
+                Assert.Equal(previousIndex, targetIndex);
+            }
+
+            resolved[(baseStyle, format)] = targetIndex;
+        }
+
+        Assert.Equal(6, formats.ChildElements.Count);
+    }
+
+    [Fact]
+    public void Write_NumberFormatRetriesAfterMissingBaseStyleIsAdded()
+    {
+        using var template = TestDocuments.BuildDemoTemplate();
+        using var document = SpreadsheetDocument.Open(template, true);
+        var workbook = document.WorkbookPart!;
+        var formats = new CellFormats(new CellFormat());
+        workbook.WorkbookStylesPart!.Stylesheet!.CellFormats = formats;
+        var cell = new Cell { StyleIndex = 1U };
+        var element = new TextElement { Format = "N2" };
+
+        ExcelCellWriter.Write(workbook, cell, element, 12.5m);
+        Assert.Equal(1U, cell.StyleIndex!.Value);
+        Assert.Single(formats.ChildElements);
+
+        formats.Append(new CellFormat(new Protection { Locked = false }));
+        ExcelCellWriter.Write(workbook, cell, element, 25m);
+
+        Assert.Equal(2U, cell.StyleIndex!.Value);
+        Assert.False(((CellFormat)formats.ChildElements[2]).Protection!.Locked!.Value);
+        Assert.Equal(3, formats.ChildElements.Count);
+    }
+
+    [Fact]
+    public void Write_NumberFormatSelectsFirstEquivalentStyleEvenForFormattedCells()
+    {
+        using var template = TestDocuments.BuildDemoTemplate();
+        using var document = SpreadsheetDocument.Open(template, true);
+        var workbook = document.WorkbookPart!;
+        var stylesheet = workbook.WorkbookStylesPart!.Stylesheet!;
+        stylesheet.NumberingFormats = new NumberingFormats(new NumberingFormat { NumberFormatId = 164U, FormatCode = "#,##0.00" });
+        var target = new CellFormat { NumberFormatId = 164U, ApplyNumberFormat = true };
+        stylesheet.CellFormats = new CellFormats(new CellFormat(), target, target.CloneNode(true));
+
+        foreach (var baseStyle in new uint[] { 0, 2, 1, 2, 0 })
+        {
+            var cell = new Cell { StyleIndex = baseStyle };
+            ExcelCellWriter.Write(workbook, cell, new TextElement { Format = "N2" }, 12.5m);
+            Assert.Equal(1U, cell.StyleIndex!.Value);
+        }
+
+        Assert.Equal(3, stylesheet.CellFormats.ChildElements.Count);
+    }
+
+    [Fact]
     public void Write_NumberFormatPreservesExistingFontAndBorder()
     {
         using var template = TestDocuments.BuildDemoTemplate();
