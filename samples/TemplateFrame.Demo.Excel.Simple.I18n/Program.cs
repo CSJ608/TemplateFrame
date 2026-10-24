@@ -94,8 +94,15 @@ internal static class Program
         Console.WriteLine("    → 回读走每列定义名定位（语言无关），不依赖表头文本匹配");
 
         Console.WriteLine("\n[7] 回读（语言无关）：");
-        PrintReadback("zh 文件", full.Parse(File.OpenRead(zhFilledPath), options));
-        PrintReadback("en 文件", full.Parse(File.OpenRead(enFilledPath), options));
+        using (var input = File.OpenRead(zhFilledPath))
+        {
+            PrintReadback("zh 文件", full.Parse(input, options));
+        }
+
+        using (var input = File.OpenRead(enFilledPath))
+        {
+            PrintReadback("en 文件", full.Parse(input, options));
+        }
 
         Console.WriteLine("\n[8] 结论（Excel.Simple i18n）：");
         Console.WriteLine("  - 表头按语言（en 表头经本地化器），每列定义名承载列身份 → 框架产物回读语言无关（无需知道文件语言）；");
@@ -124,8 +131,15 @@ internal static class Program
         Console.WriteLine($"  - en 填充：{enRootListPath}");
 
         Console.WriteLine("\n[10] 根集合回读（语言无关，直接 List<MaterialLine>）：");
-        PrintListReadback("zh 文件", listService.Parse(File.OpenRead(zhRootListPath), options));
-        PrintListReadback("en 文件", listService.Parse(File.OpenRead(enRootListPath), options));
+        using (var input = File.OpenRead(zhRootListPath))
+        {
+            PrintListReadback("zh 文件", listService.Parse(input, options));
+        }
+
+        using (var input = File.OpenRead(enRootListPath))
+        {
+            PrintListReadback("en 文件", listService.Parse(input, options));
+        }
 
         Console.WriteLine("\n[11] 结论（根集合 + i18n）：");
         Console.WriteLine("  - TData 直接是 List<MaterialLine>（表格 DataPath 留空），无需再包一层容器对象；");

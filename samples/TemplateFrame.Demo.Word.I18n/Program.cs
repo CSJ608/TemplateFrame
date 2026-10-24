@@ -93,12 +93,14 @@ var content = new DeliveryOrderContentData
 var zhFilledPath = Path.Combine(dir, "Word-I18n-DeliveryOrder-zh-filled.docx");
 var enFilledPath = Path.Combine(dir, "Word-I18n-DeliveryOrder-en-filled.docx");
 Console.WriteLine("\n[8] 填充（同一份数据 → 中英模板各一份填充文件）：");
-using (var filled = contentService.Fill(File.OpenRead(zhTemplatePath), content))
+using (var input = File.OpenRead(zhTemplatePath))
+using (var filled = contentService.Fill(input, content))
 {
     File.WriteAllBytes(zhFilledPath, ReadAllBytes(filled));
 }
 
-using (var filled = contentService.Fill(File.OpenRead(enTemplatePath), content))
+using (var input = File.OpenRead(enTemplatePath))
+using (var filled = contentService.Fill(input, content))
 {
     File.WriteAllBytes(enFilledPath, ReadAllBytes(filled));
 }
@@ -107,12 +109,18 @@ Console.WriteLine($"  - {zhFilledPath}");
 Console.WriteLine($"  - {enFilledPath}");
 
 Console.WriteLine("\n[9] 回读未填充模板（Parse 规范化：已知占位符 → null，null=未填充）：");
-var unfilled = contentService.Parse(File.OpenRead(zhTemplatePath));
-PrintContentReadback("zh 未填充", unfilled);
+using (var input = File.OpenRead(zhTemplatePath))
+{
+    var unfilled = contentService.Parse(input);
+    PrintContentReadback("zh 未填充", unfilled);
+}
 
 Console.WriteLine("\n[10] 回读已填充模板（数据值原样、不翻译，值格式化 InvariantCulture）：");
-var readback = contentService.Parse(File.OpenRead(zhFilledPath));
-PrintContentReadback("zh 已填充", readback);
+using (var input = File.OpenRead(zhFilledPath))
+{
+    var readback = contentService.Parse(input);
+    PrintContentReadback("zh 已填充", readback);
+}
 
 Console.WriteLine("\n[11] 结论（文档内容 i18n）：");
 Console.WriteLine("  - 同一版式代码输出 zh/en 两份模板：占位符/页码/版式文本/表头按语言解析，样式名/字体不本地化；");

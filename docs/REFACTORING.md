@@ -6,7 +6,10 @@
 
 - [x] 数字格式：先新增回归，旧实现下 15 个场景错误复用均失败；克隆原样式后仅设置 NumberFormatId/ApplyNumberFormat，按完整属性（命名空间、名称、值）和有序子节点匹配，不再仅比较四个 ID。保留对齐、换行、保护、继承样式 ID、apply 标记、扩展内容等；忽略属性顺序和元素前缀差异，重复应用及等价目标继续复用。保守保留显式属性与缺省属性、不同词法值的区别，不推断 Excel 的默认/继承语义。
 - 样式验证：新增 16 个场景，Excel net472/net8.0/net10.0 各 189 项，共 567 次通过。公共 API、原样式和调用方流所有权未改；不运行基准，完整比较及目标克隆的性能影响留待后续专项验证。
-- [ ] 样例调用方输入流释放。
+- 样式修复提交：`aabdb77`；相关格式检查和 `git diff --check` 通过。
+- [x] 样例调用方输入流释放：Word.I18n、Excel.I18n、Excel.Simple.I18n 共 14 处 File.OpenRead 直接参数改为局部 using；输入流先于 Fill 输出流取得，正常/异常路径均由调用方释放，不新增包装抽象，不改变库契约。复核 samples 其余文件/内存流创建点，未发现同类遗漏。
+- 最终验证：Release 全量测试 net472/net8.0/net10.0 共 1,709 次通过（核心 399、Word 459、Excel 567、SimpleExcel 284）。三个国际化示例均实际构建/运行成功，产物位于 `C:\Users\Marci\AppData\Local\Temp\TemplateFrame-stream-fix-aad33a24698d4d60acfaabab8bc2da20`；未写入仓库。未执行性能测试、推送、发布或其他行为修复。
+- Release 全量构建零警告零错误；全仓库 `dotnet format --verify-no-changes --no-restore` 及 `git diff --check` 通过。两个授权事项已完成，无待决策项；历史章节的待调查记录保留当时语境，以本节为最新状态。
 
 ## 参数设计与调用清晰度专项（2026-10-24）
 
