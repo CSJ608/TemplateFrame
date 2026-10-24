@@ -81,10 +81,13 @@ internal static class SimpleExcelReader
         SimpleExcelAddress.TableRange? tableRange,
         IReadOnlyList<string> sharedStrings)
     {
-        if (tableRange is { } range
-            && HasNonEmptyCellInSpan(rowLookup, range.StartRow, range.StartCol, range.EndCol - range.StartCol + 1, sharedStrings))
+        if (tableRange is { } range)
         {
-            return new HeaderLayout(range.StartRow, range.StartCol, range.EndCol - range.StartCol + 1);
+            var requestedHeader = new HeaderLayout(range.StartRow, range.StartCol, range.EndCol - range.StartCol + 1);
+            if (HasNonEmptyHeaderCell(rowLookup, requestedHeader, sharedStrings))
+            {
+                return requestedHeader;
+            }
         }
 
         var headerIndex = FindHeaderRowIndex(rows, sharedStrings);
@@ -369,16 +372,14 @@ internal static class SimpleExcelReader
         return firstNonEmpty;
     }
 
-    private static bool HasNonEmptyCellInSpan(
+    private static bool HasNonEmptyHeaderCell(
         IReadOnlyDictionary<int, Row> rowLookup,
-        int headerRow,
-        int colStart,
-        int colCount,
+        HeaderLayout header,
         IReadOnlyList<string> sharedStrings)
     {
-        for (var c = 0; c < colCount; c++)
+        for (var c = 0; c < header.ColumnCount; c++)
         {
-            var cell = FindCell(rowLookup, headerRow, colStart + c);
+            var cell = FindCell(rowLookup, header.Row, header.StartColumn + c);
             if (!string.IsNullOrEmpty(GetCellText(sharedStrings, cell)))
             {
                 return true;
