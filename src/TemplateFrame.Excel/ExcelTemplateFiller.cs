@@ -90,8 +90,6 @@ public sealed class ExcelTemplateFiller
         return new TemplateFillResult { Output = output, Warnings = warnings };
     }
 
-    /// <summary>按设计文档 §5.3 处理软校验问题：Drifted/Extra 告警继续；Missing 按策略；其余硬错误抛错。</summary>
-    /// <summary>按设计文档 §5.3 处理软校验问题（共用逻辑见 <see cref="ValidationApplier"/>）：Drifted/Extra 告警继续；Missing 按策略；其余硬错误抛错。</summary>
     private IReadOnlyList<TemplateValidationIssue> ApplyValidation(
         TemplateValidationResult validation,
         TemplateContract contract)
