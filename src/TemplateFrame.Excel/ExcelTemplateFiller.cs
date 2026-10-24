@@ -135,7 +135,7 @@ public sealed class ExcelTemplateFiller
             return;
         }
 
-        var cell = GetOrCreateCell(worksheetPart.Worksheet!, start.Row, start.Col);
+        var cell = ExcelWorksheetCells.GetOrCreateCell(worksheetPart.Worksheet!.GetFirstChild<SheetData>()!, start.Row, start.Col);
         ExcelCellWriter.Write(workbookPart, cell, element, value);
     }
 
@@ -278,62 +278,6 @@ public sealed class ExcelTemplateFiller
             values.TryGetValue(column.Key, out var value);
             ExcelCellWriter.Write(workbookPart, cell, column, value);
         }
-    }
-
-    private static Cell GetOrCreateCell(Worksheet worksheet, int rowIndex, int colIndex)
-    {
-        var sheetData = worksheet.GetFirstChild<SheetData>()!;
-        var row = sheetData.Elements<Row>().FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
-        if (row is null)
-        {
-            row = new Row { RowIndex = (uint)rowIndex };
-            Row? next = null;
-            foreach (var existing in sheetData.Elements<Row>())
-            {
-                if (existing.RowIndex?.Value > rowIndex)
-                {
-                    next = existing;
-                    break;
-                }
-            }
-
-            if (next is null)
-            {
-                sheetData.Append(row);
-            }
-            else
-            {
-                sheetData.InsertBefore(row, next);
-            }
-        }
-
-        var reference = ExcelAddressHelper.CellReference(rowIndex, colIndex);
-        var cell = row.Elements<Cell>().FirstOrDefault(c => c.CellReference?.Value == reference);
-        if (cell is null)
-        {
-            cell = new Cell { CellReference = reference };
-            Cell? nextCell = null;
-            foreach (var existing in row.Elements<Cell>())
-            {
-                if (existing.CellReference?.Value is { } existingRef
-                    && ExcelAddressHelper.ParseCell(existingRef).Col > colIndex)
-                {
-                    nextCell = existing;
-                    break;
-                }
-            }
-
-            if (nextCell is null)
-            {
-                row.Append(cell);
-            }
-            else
-            {
-                row.InsertBefore(cell, nextCell);
-            }
-        }
-
-        return cell;
     }
 
 }

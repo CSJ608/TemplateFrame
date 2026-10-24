@@ -11,13 +11,6 @@ using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
 
 namespace TemplateFrame.Excel;
 
-/// <summary>Excel layout builder — column widths, cell text, named-range elements, tables, cell-anchored images, merges.</summary>
-/// <remarks>
-/// 业务服务声明 <c>TemplateService&lt;TData, ExcelTemplateBuilder&gt;</c> 后，在无参数 <c>BuildInitialTemplate()</c> 里直接调用本类的全部能力。
-/// 命名区域统一前缀 <c>TF_</c>，全表唯一；框架只认 <see cref="ITemplateBuilder.Save"/>。
-/// 与 Word 不同，Excel 是"网格规整"型版式，本插件不提供页面设置（纸张/方向/边距）——
-/// 由 Demo/业务侧按内容列数评估宽度、用合并单元格排版。
-/// </remarks>
 public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
 {
     private readonly MemoryStream _stream = new();
@@ -39,14 +32,11 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
     private bool _saved;
     private bool _finalized;
 
-    /// <summary>Creates an empty workbook builder (single sheet, default name Sheet1); default localizer + Chinese culture.</summary>
     public ExcelTemplateBuilder()
         : this(null, null)
     {
     }
 
-    /// <summary>Creates the builder with a localizer and target culture (document content i18n).</summary>
-    /// <remarks><paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；<paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。</remarks>
     public ExcelTemplateBuilder(ITemplateLocalizer? localizer, CultureInfo? culture)
     {
         _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
@@ -58,7 +48,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         EnsureWorksheet();
     }
 
-    /// <summary>Sets the worksheet name (default Sheet1; named-range references quote it as needed).</summary>
     public ExcelTemplateBuilder SetSheetName(string name)
     {
         _sheetName = string.IsNullOrWhiteSpace(name) ? "Sheet1" : name.Trim();
@@ -70,14 +59,12 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Sets a column width in characters (approximate; 1cm ≈ 5 chars, see <see cref="AddTable"/>).</summary>
     public ExcelTemplateBuilder SetColumnWidth(string column, double widthChars)
     {
         _columnWidths[column.Trim().ToUpperInvariant()] = widthChars;
         return this;
     }
 
-    /// <summary>Sets a row height (points); writes customHeight so overflow text no longer auto-grows the row.</summary>
     public ExcelTemplateBuilder SetRowHeight(int row, double heightPoints)
     {
         if (row < 1)
@@ -89,7 +76,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Writes static text to a cell (optionally formatted).</summary>
     public ExcelTemplateBuilder AddText(string cellAddress, string text, TextFormat? format = null)
     {
         var cell = GetOrCreateCell(cellAddress);
@@ -98,11 +84,9 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Writes text resolved from an i18n key to a cell (see <see cref="TemplateFrame.Localization.ITemplateLocalizer"/>).</summary>
     public ExcelTemplateBuilder AddTextKey(string cellAddress, string key, TextFormat? format = null)
         => AddText(cellAddress, _localizer.GetString(key, _culture), format);
 
-    /// <summary>Places a text element: localized placeholder + named range TF_&lt;Key&gt; pointing at the cell.</summary>
     public ExcelTemplateBuilder AddElement(string key, string cellAddress, TextFormat? format = null)
     {
         Guard.ThrowIfNull(key, nameof(key));
@@ -113,8 +97,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Appends a table from <paramref name="startCell"/>: static header row + sample row with per-column named ranges.</summary>
-    /// <remarks>列宽由 <see cref="TableFormat.ColumnWidthsCm"/> 近似换算（1cm ≈ 5 字符）。</remarks>
     public ExcelTemplateBuilder AddTable(
         string key,
         IReadOnlyList<string> columns,
@@ -122,8 +104,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         string startCell = "A1")
         => AddTableCore(key, columns, format, startCell, localizeHeaders: false);
 
-    /// <summary>Appends a table with i18n-key headers; column named ranges stay the raw keys so Fill/Parse match by name.</summary>
-    /// <remarks><paramref name="columnKeys"/> 是本地化键，表头按语言解析。</remarks>
     public ExcelTemplateBuilder AddTableKeys(
         string key,
         IReadOnlyList<string> columnKeys,
@@ -180,8 +160,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Places an image placeholder: cell-anchored (oneCellAnchor), default 1.5in × 1.5in, optional inch offsets.</summary>
-    /// <remarks>命名区域 <c>TF_&lt;Key&gt;</c> → 锚定格。</remarks>
     public ExcelTemplateBuilder AddImage(
         string key,
         string anchorCell,
@@ -194,7 +172,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         Guard.ThrowIfNull(key, nameof(key));
         var (row, col) = ExcelAddressHelper.ParseCell(anchorCell);
         var (bytes, _) = PlaceholderImage.Load(placeholderPath);
-        // 占位图也支持 GIF/BMP/TIFF，按实际字节选择 MIME，避免扩展名与内容不符。
         var contentType = ImageTypeDetector.DetectContentType(bytes);
 
         _drawingsPart ??= _worksheetPart!.AddNewPart<DrawingsPart>();
@@ -216,7 +193,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Merges a cell range (e.g. "A1:I1").</summary>
     public ExcelTemplateBuilder MergeCells(string range)
     {
         if (!string.IsNullOrWhiteSpace(range))
@@ -227,7 +203,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <inheritdoc />
     public void Save(Stream target)
     {
         Guard.ThrowIfNull(target, nameof(target));
@@ -236,67 +211,13 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
             throw new InvalidOperationException(Sr.Get("Excel.Builder.SaveOnce"));
         }
 
-        var worksheet = _worksheetPart!.Worksheet!;
-        var sheetData = _sheetData!;
-
-        foreach (var rowHeight in _rowHeights.OrderBy(p => p.Key))
-        {
-            var row = GetOrCreateRow(rowHeight.Key);
-            row.Height = rowHeight.Value;
-            row.CustomHeight = true;
-        }
-
-        if (_columnWidths.Count > 0)
-        {
-            var cols = new Columns();
-            foreach (var pair in _columnWidths.OrderBy(p => ExcelAddressHelper.ColumnIndex(p.Key)))
-            {
-                var colIndex = ExcelAddressHelper.ColumnIndex(pair.Key);
-                cols.Append(new Column { Min = (uint)colIndex, Max = (uint)colIndex, Width = pair.Value, CustomWidth = true });
-            }
-
-            worksheet.InsertBefore(cols, sheetData);
-        }
-
-        if (_mergedRanges.Count > 0)
-        {
-            var mergeCells = new MergeCells();
-            foreach (var range in _mergedRanges)
-            {
-                mergeCells.Append(new MergeCell { Reference = range });
-            }
-
-            worksheet.Append(mergeCells);
-        }
-
-        if (_drawingsPart is not null)
-        {
-            var drawing = new Xdr.WorksheetDrawing();
-            foreach (var anchor in _imageAnchors)
-            {
-                drawing.Append(anchor);
-            }
-
-            _drawingsPart.WorksheetDrawing = drawing;
-            worksheet.Append(new Drawing { Id = _worksheetPart.GetIdOfPart(_drawingsPart) });
-        }
-
-        if (_definedNames.Count > 0)
-        {
-            // 表名在 Save 时拼进引用（登记时只存 $B$2 形式的单元格部分），SetSheetName 晚调用不失效
-            var definedNames = new DefinedNames();
-            var quotedSheet = ExcelNamedRangeLocator.QuoteSheet(_sheetName);
-            foreach (var (name, reference) in _definedNames)
-            {
-                definedNames.Append(new DefinedName { Name = name, Text = quotedSheet + "!" + reference });
-            }
-
-            _workbookPart.Workbook!.Append(definedNames);
-        }
-
+        ApplyRowHeights();
+        AppendColumnWidths();
+        AppendMergedRanges();
+        AppendDrawings();
+        AppendDefinedNames();
         _styles.WriteTo(_workbookPart);
 
-        // 终结包（Dispose）后再复制：netfx 的 ZipPackage 仅 Save/Flush 时 deflate 流不定稿，产物无法重开
         _document.Save();
         _document.Dispose();
         _finalized = true;
@@ -305,7 +226,6 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         _saved = true;
     }
 
-    /// <inheritdoc />
     public void Dispose()
     {
         if (!_finalized)
@@ -316,11 +236,78 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         _stream.Dispose();
     }
 
+    private void ApplyRowHeights()
+    {
+        foreach (var rowHeight in _rowHeights.OrderBy(p => p.Key))
+        {
+            var row = ExcelWorksheetCells.GetOrCreateRow(_sheetData!, rowHeight.Key);
+            row.Height = rowHeight.Value;
+            row.CustomHeight = true;
+        }
+    }
+
+    private void AppendColumnWidths()
+    {
+        if (_columnWidths.Count > 0)
+        {
+            var cols = new Columns();
+            foreach (var pair in _columnWidths.OrderBy(p => ExcelAddressHelper.ColumnIndex(p.Key)))
+            {
+                var colIndex = ExcelAddressHelper.ColumnIndex(pair.Key);
+                cols.Append(new Column { Min = (uint)colIndex, Max = (uint)colIndex, Width = pair.Value, CustomWidth = true });
+            }
+
+            _worksheetPart!.Worksheet!.InsertBefore(cols, _sheetData!);
+        }
+    }
+
+    private void AppendMergedRanges()
+    {
+        if (_mergedRanges.Count > 0)
+        {
+            var mergeCells = new MergeCells();
+            foreach (var range in _mergedRanges)
+            {
+                mergeCells.Append(new MergeCell { Reference = range });
+            }
+
+            _worksheetPart!.Worksheet!.Append(mergeCells);
+        }
+    }
+
+    private void AppendDrawings()
+    {
+        if (_drawingsPart is not null)
+        {
+            var drawing = new Xdr.WorksheetDrawing();
+            foreach (var anchor in _imageAnchors)
+            {
+                drawing.Append(anchor);
+            }
+
+            _drawingsPart.WorksheetDrawing = drawing;
+            _worksheetPart!.Worksheet!.Append(new Drawing { Id = _worksheetPart.GetIdOfPart(_drawingsPart) });
+        }
+    }
+
+    private void AppendDefinedNames()
+    {
+        if (_definedNames.Count > 0)
+        {
+            var definedNames = new DefinedNames();
+            var quotedSheet = ExcelNamedRangeLocator.QuoteSheet(_sheetName);
+            foreach (var (name, reference) in _definedNames)
+            {
+                definedNames.Append(new DefinedName { Name = name, Text = quotedSheet + "!" + reference });
+            }
+
+            _workbookPart.Workbook!.Append(definedNames);
+        }
+    }
+
     private void EnsureWorksheet()
     {
         _worksheetPart = _workbookPart.AddNewPart<WorksheetPart>();
-        // sheetViews 必须存在：缺少时 Excel 打开会重算自定义行高（如 ht=37 变成 24.65），
-        // 与 Excel 自产文件保持一致。
         _worksheetPart.Worksheet = new Worksheet(
             new SheetViews(new SheetView { WorkbookViewId = 0, TabSelected = true }),
             new SheetData());
@@ -341,79 +328,14 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
             throw new InvalidOperationException(Sr.Get("Excel.Builder.DuplicateNamedRange", name));
         }
 
-        // 只存绝对单元格引用（$B$2）；表名在 Save 时才拼接——SetSheetName 晚于 AddElement/AddTable
-        // 调用时，已登记区域仍指向当前表名，不会失效
         var cell = ExcelAddressHelper.ParseCell(cellAddress);
         _definedNames.Add((name, "$" + ExcelAddressHelper.ColumnLetter(cell.Col) + "$" + cell.Row));
-    }
-
-    private Row GetOrCreateRow(int rowIndex)
-    {
-        var row = _sheetData!.Elements<Row>().FirstOrDefault(r => r.RowIndex?.Value == rowIndex);
-        if (row is not null)
-        {
-            return row;
-        }
-
-        row = new Row { RowIndex = (uint)rowIndex };
-
-        // 行必须按序：找到第一个行号更大的行，插到它前面
-        Row? next = null;
-        foreach (var existing in _sheetData.Elements<Row>())
-        {
-            if (existing.RowIndex?.Value > rowIndex)
-            {
-                next = existing;
-                break;
-            }
-        }
-
-        if (next is null)
-        {
-            _sheetData.Append(row);
-        }
-        else
-        {
-            _sheetData.InsertBefore(row, next);
-        }
-
-        return row;
     }
 
     private Cell GetOrCreateCell(string cellAddress)
     {
         var (rowIndex, colIndex) = ExcelAddressHelper.ParseCell(cellAddress);
-        var row = GetOrCreateRow(rowIndex);
-
-        var reference = ExcelAddressHelper.CellReference(rowIndex, colIndex);
-        var cell = row.Elements<Cell>().FirstOrDefault(c => c.CellReference?.Value == reference);
-        if (cell is null)
-        {
-            cell = new Cell { CellReference = reference };
-
-            // 单元格按列序插入
-            Cell? nextCell = null;
-            foreach (var existing in row.Elements<Cell>())
-            {
-                if (existing.CellReference?.Value is { } existingRef
-                    && ExcelAddressHelper.ParseCell(existingRef).Col > colIndex)
-                {
-                    nextCell = existing;
-                    break;
-                }
-            }
-
-            if (nextCell is null)
-            {
-                row.Append(cell);
-            }
-            else
-            {
-                row.InsertBefore(cell, nextCell);
-            }
-        }
-
-        return cell;
+        return ExcelWorksheetCells.GetOrCreateCell(_sheetData!, rowIndex, colIndex);
     }
 
     private void ApplyStyle(
