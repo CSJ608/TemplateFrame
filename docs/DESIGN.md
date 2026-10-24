@@ -368,11 +368,11 @@ TemplateFrame/
 ├─ src/TemplateFrame/               # 基础包：契约模型 + 引擎抽象 + 数据形状（格式无关）
 │  ├─ Contract/                     # TemplateContract, TemplateElement, TextElement, ImageElement, TableElement
 │  ├─ Data/                         # FillData（数据形状）
-│  ├─ Mapping/                      # DataPathMapper（DataPath 自动映射）
+│  ├─ Mapping/                      # DataPathMapper + ContractMapping / PropertyValueConverter / PropertyAssignment / MappingTarget
 │  ├─ Engine/                       # ITemplateEngine + TemplateFillResult / TemplateFillOptions / TemplateResourceLimits / MissingElementPolicy
 │  ├─ Builder/                      # ITemplateBuilder（版式组合抽象）
-│  ├─ Internal/                     # StreamUtil / TemplateResourceBudget / ImageTypeDetector / PlaceholderImage（插件共享内部工具）
-│  └─ Services/                     # TemplateService<TData, TBuilder>（泛型基类）
+│  ├─ Internal/                     # 流/资源预算/图片工具 + ContractTextParser / ContractValueConverter / ParseLocation / ValidationApplier
+│  └─ Services/                     # TemplateService<TData, TBuilder> + MappingWarnings（诊断合并）
 ├─ src/TemplateFrame.Word/          # 插件：MS Word（DocumentFormat.OpenXml）
 │  ├─ WordTemplateBuilder.cs        # 组装带 SDT 的 .docx（版式由业务服务驱动）
 │  ├─ WordXmlFactory.cs             # OpenXML 纯构造（run/表格/单元格/节属性/页码域/drawing）
@@ -386,6 +386,7 @@ TemplateFrame/
 │  ├─ ExcelNamedRangeLocator.cs     # 按命名区域定位（TF_ 前缀）
 │  ├─ ExcelAddressHelper.cs         # 单元格地址 / A1 引用互转
 │  ├─ ExcelStyleManager.cs          # 构建期单元格样式池（字体/边框/对齐去重）
+│  ├─ ExcelWorksheetCells.cs / ExcelCellWriter.cs # 有序单元格操作 / 填充期类型化值写入
 │  ├─ ExcelTemplateValidator.cs / ExcelTemplateFiller.cs / ExcelTemplateParser.cs
 │  ├─ ExcelRowShifter.cs            # 表格克隆后的行下移 + 命名区域/合并区域平移
 │  ├─ ExcelNumberFormat.cs          # .NET Format → Excel 数字格式映射与应用
@@ -395,6 +396,8 @@ TemplateFrame/
 │  ├─ SimpleExcel.cs                # 公共门面（Write / Read / ColumnDefinedName）
 │  ├─ SimpleExcelWriter.cs / SimpleExcelReader.cs / SimpleExcelAddress.cs   # 导出 / 导入 / 地址解析实现
 │  ├─ SimpleExcelContract.cs / SimpleExcelTemplateService.cs               # 契约感知读写 + 强类型服务基类
+│  ├─ SimpleExcelContractReader.cs / SimpleExcelContractValidator.cs        # 契约读取 / 校验
+│  ├─ DefinedNameLayoutResolver.cs / DefinedNameLayout.cs / SimpleExcelHeaderLookup.cs # 定义名布局 / 表头匹配
 │  ├─ SimpleExcelOptions.cs / SimpleExcelTable.cs / SimpleExcelStyles.cs
 │  └─ Localization/                 # Sr + Resources*.resx（中英消息）
 ├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射、图片探测）
