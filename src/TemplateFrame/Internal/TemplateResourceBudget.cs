@@ -3,7 +3,6 @@ using TemplateFrame.Localization;
 
 namespace TemplateFrame.Internal;
 
-/// <summary>Cumulative table work budget owned by one operation, never shared between calls.</summary>
 internal sealed class TemplateResourceBudget
 {
     private readonly TemplateResourceLimits _limits;

@@ -4,14 +4,11 @@ using TemplateFrame.Localization;
 
 namespace TemplateFrame.Internal;
 
-/// <summary>Bounded stream and Office package operations shared by the plugins.</summary>
 internal static class StreamUtil
 {
-    /// <summary>Reads a stream without Office package validation (used for arbitrary binary data).</summary>
     public static byte[] ReadAllBytes(Stream stream)
         => ReadBounded(stream, TemplateResourceLimits.Default.MaxInputBytes, nameof(TemplateResourceLimits.MaxInputBytes));
 
-    /// <summary>Reads and validates an Office package, including its actual expanded byte counts.</summary>
     public static byte[] ReadAllBytes(Stream stream, TemplateResourceLimits limits)
     {
         Guard.ThrowIfNull(limits, nameof(limits));
@@ -22,7 +19,6 @@ internal static class StreamUtil
         return bytes;
     }
 
-    /// <summary>Checks a seekable package without taking ownership or changing its position.</summary>
     public static void ValidatePackage(Stream stream, TemplateResourceLimits limits)
     {
         Guard.ThrowIfNull(stream, nameof(stream));
@@ -42,19 +38,7 @@ internal static class StreamUtil
             var buffer = new byte[81920];
             foreach (var entry in archive.Entries)
             {
-                // Reject excessive advertised sizes early, then count the bytes actually returned.
-                CheckLimit(entry.Length, limits.MaxPackageEntryBytes, nameof(limits.MaxPackageEntryBytes));
-                CheckLimit(entry.Length, limits.MaxExpandedBytes - total, nameof(limits.MaxExpandedBytes));
-                using var input = entry.Open();
-                long entryBytes = 0;
-                int count;
-                while ((count = input.Read(buffer, 0, buffer.Length)) != 0)
-                {
-                    CheckLimit(count, limits.MaxPackageEntryBytes - entryBytes, nameof(limits.MaxPackageEntryBytes));
-                    CheckLimit(count, limits.MaxExpandedBytes - total, nameof(limits.MaxExpandedBytes));
-                    entryBytes += count;
-                    total += count;
-                }
+                total = ValidateEntry(entry, limits, buffer, total);
             }
         }
         catch (InvalidDataException ex)
@@ -67,7 +51,23 @@ internal static class StreamUtil
         }
     }
 
-    /// <summary>Reads an image with the configured byte budget.</summary>
+    private static long ValidateEntry(ZipArchiveEntry entry, TemplateResourceLimits limits, byte[] buffer, long total)
+    {
+        CheckLimit(entry.Length, limits.MaxPackageEntryBytes, nameof(limits.MaxPackageEntryBytes));
+        CheckLimit(entry.Length, limits.MaxExpandedBytes - total, nameof(limits.MaxExpandedBytes));
+        using var input = entry.Open();
+        long entryBytes = 0;
+        int count;
+        while ((count = input.Read(buffer, 0, buffer.Length)) != 0)
+        {
+            CheckLimit(count, limits.MaxPackageEntryBytes - entryBytes, nameof(limits.MaxPackageEntryBytes));
+            CheckLimit(count, limits.MaxExpandedBytes - total, nameof(limits.MaxExpandedBytes));
+            entryBytes += count;
+            total += count;
+        }
+        return total;
+    }
+
     public static byte[] ReadImageBytes(Stream stream, TemplateResourceLimits limits)
     {
         Guard.ThrowIfNull(limits, nameof(limits));
@@ -75,10 +75,8 @@ internal static class StreamUtil
         return ReadBounded(stream, limits.MaxImageBytes, nameof(limits.MaxImageBytes));
     }
 
-    /// <summary>Converts an image value using the default limits.</summary>
     public static byte[]? ToBytes(object? value) => ToBytes(value, TemplateResourceLimits.Default);
 
-    /// <summary>Converts byte arrays or streams to bounded image bytes, leaving caller streams open.</summary>
     public static byte[]? ToBytes(object? value, TemplateResourceLimits limits)
     {
         Guard.ThrowIfNull(limits, nameof(limits));

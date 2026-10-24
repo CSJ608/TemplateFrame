@@ -135,4 +135,59 @@ public sealed class TemplateDataValidatorTests
 
         Assert.True(result.IsValid);
     }
+
+    [Fact]
+    public void ValidateData_MixedIssues_FollowElementThenRowThenExtraValueOrder()
+    {
+        var contract = Contract(
+            new TextElement { Key = "Missing", DisplayName = "Missing field" },
+            new ImageElement { Key = "Image" },
+            new TableElement
+            {
+                Key = "Lines",
+                Columns = [new TextElement { Key = "A" }, new TextElement { Key = "B" }],
+            });
+        var data = new FillData
+        {
+            Values = new Dictionary<string, object?> { ["Image"] = "image", ["A"] = null, ["Lines"] = null },
+            Tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>
+            {
+                ["Lines"] = [new Dictionary<string, object?>(), new Dictionary<string, object?> { ["A"] = null }],
+                ["UnknownTable"] = [],
+            },
+        };
+
+        var issues = new TemplateDataValidator().Validate(data, contract).Issues;
+
+        Assert.Equal(new[] { "Missing", "Image", "A", "B", "B", "Lines" }, issues.Select(i => i.Key));
+        Assert.Equal(new[]
+        {
+            "Validation.DataMissingRequiredField", "Validation.DataFieldTypeMismatch",
+            "Validation.DataTableRowMissingColumn", "Validation.DataTableRowMissingColumn",
+            "Validation.DataTableRowMissingColumn", "Validation.DataExtraField",
+        }, issues.Select(i => i.MessageKey));
+        Assert.Equal(new object?[] { "Missing", "Missing field" }, issues[0].MessageArgs);
+        Assert.Equal(new object?[] { "Image", "Byte[]", "String" }, issues[1].MessageArgs);
+        Assert.Equal(new object?[] { "Lines", 1, "A" }, issues[2].MessageArgs);
+        Assert.Equal(new object?[] { "Lines", 2, "B" }, issues[4].MessageArgs);
+        Assert.Equal(new[]
+        {
+            TemplateValidationSeverity.Error, TemplateValidationSeverity.Warning,
+            TemplateValidationSeverity.Error, TemplateValidationSeverity.Error,
+            TemplateValidationSeverity.Error, TemplateValidationSeverity.Warning,
+        }, issues.Select(i => i.Severity));
+    }
+
+    [Theory]
+    [InlineData(null)]
+    [InlineData("")]
+    [InlineData(" ")]
+    public void ValidateData_PresentRequiredScalar_DoesNotTreatNullOrBlankAsMissing(string? value)
+    {
+        var data = new FillData { Values = new Dictionary<string, object?> { ["A"] = value } };
+
+        var result = new TemplateDataValidator().Validate(data, Contract(new TextElement { Key = "A" }));
+
+        Assert.Empty(result.Issues);
+    }
 }

@@ -97,6 +97,33 @@ public sealed class ResourceLimitTests
             TemplateResourceLimits.Default with { MaxXmlCharactersPerPart = 0 }));
     }
 
+    [Fact]
+    public void PackageLimits_EntryLimitPrecedesTotalLimit_AndRestoresPosition()
+    {
+        using var package = CreatePackage(1, 1024);
+        package.Position = 5;
+
+        var error = Assert.Throws<InvalidOperationException>(() => StreamUtil.ValidatePackage(package,
+            TemplateResourceLimits.Default with { MaxPackageEntryBytes = 100, MaxExpandedBytes = 50 }));
+
+        Assert.Contains(nameof(TemplateResourceLimits.MaxPackageEntryBytes), error.Message);
+        Assert.Equal(5, package.Position);
+        Assert.True(package.CanRead);
+    }
+
+    [Fact]
+    public void InvalidPackage_WrapsInvalidData_AndRestoresPosition()
+    {
+        using var package = new MemoryStream(new byte[32]);
+        package.Position = 7;
+
+        var error = Assert.Throws<InvalidOperationException>(() => StreamUtil.ValidatePackage(package, TemplateResourceLimits.Default));
+
+        Assert.IsType<InvalidDataException>(error.InnerException);
+        Assert.Equal(7, package.Position);
+        Assert.True(package.CanRead);
+    }
+
     private static MemoryStream CreatePackage(int entries, int expandedBytes)
     {
         var stream = new MemoryStream();
