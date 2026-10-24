@@ -129,6 +129,28 @@ public sealed class ExcelTemplateBuilderTests
     }
 
     [Fact]
+    public void Build_ImageAnchor_PreservesIndependentAxesAndMatchingShapeSize()
+    {
+        using var stream = TestDocuments.BuildTemplate(builder =>
+            builder.AddImage("Logo", "D7", 2.25, 0.75, xOffsetInches: 0.125, yOffsetInches: -0.25));
+        using var document = SpreadsheetDocument.Open(stream, false);
+        var worksheetPart = document.WorkbookPart!.WorksheetParts.First();
+        var anchor = ExcelDrawingHelper.FindAnchor(worksheetPart, 3, 6);
+
+        Assert.NotNull(anchor);
+        Assert.Equal("114300", anchor!.FromMarker!.ColumnOffset!.Text);
+        Assert.Equal("-228600", anchor.FromMarker.RowOffset!.Text);
+        Assert.Equal(2057400L, anchor.Extent!.Cx!.Value);
+        Assert.Equal(685800L, anchor.Extent.Cy!.Value);
+        var shapeSize = anchor.GetFirstChild<DocumentFormat.OpenXml.Drawing.Spreadsheet.Picture>()!
+            .ShapeProperties!.GetFirstChild<DocumentFormat.OpenXml.Drawing.Transform2D>()!
+            .GetFirstChild<DocumentFormat.OpenXml.Drawing.Extents>()!;
+        Assert.Equal(anchor.Extent.Cx.Value, shapeSize.Cx!.Value);
+        Assert.Equal(anchor.Extent.Cy.Value, shapeSize.Cy!.Value);
+        Assert.NotNull(ExcelDrawingHelper.GetBlipEmbed(anchor));
+    }
+
+    [Fact]
     public void Build_WrapTextFormat_AppliesWrapTextStyle()
     {
         using var stream = TestDocuments.BuildTemplate(builder =>

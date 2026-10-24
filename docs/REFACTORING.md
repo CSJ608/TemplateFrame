@@ -4,7 +4,7 @@
 
 基线：`4be245c`，工作区干净；仓库及上级目录未发现适用的 AGENTS.md。前轮结构清单已完成，不重复执行。保持全部公开/受保护 API、默认值、诊断顺序、异常边界、资源生命周期与并发语义。
 
-- [ ] `ExcelDrawingHelper.CreateAnchor`：坐标基准、尺寸和偏移单位及调用组合。
+- [x] `ExcelDrawingHelper.CreateAnchor`：复用 SDK FromMarker（零基单元格、相对左上角 EMU 偏移）和 Extent（EMU 尺寸），八参数降为四个独立职责；形状尺寸从锚尺寸获取。没有新增参数模型/构造函数或额外节点分配。公开 AddImage 保留原签名、默认值与英寸单位，不需要公开 API 决策。
 - [ ] `SimpleExcelWriter.WriteDefinedNames`、`WriteRows`、`WriteHeader`：工作表和表格区域语义。
 - [x] `TemplateDataValidator.CheckScalarValue`：传递已有元素，避免拆散 Key/DisplayName/Required。保留四参数：元素、期望类型、输入数据、诊断输出；ImageElement 没有 ValueType，显式类型避免新增标量模型或隐含类型分派。
 - [ ] `ExcelTemplateParser`：单次解析的工作簿、缓存、诊断和预算归属。
@@ -15,6 +15,7 @@
 本轮验证和提交记录：
 
 - 标量校验：Release 全量构建零警告零错误；三框架 1,631 次测试通过；全仓库格式检查及 `git diff --check` 通过。复用已有混合诊断、缺键/null、类型检查回归；不增加热路径分配。
+- `4c5acf5` 为标量校验提交。绘图小步：新增非对称坐标/尺寸、正负偏移及形状尺寸一致性测试，Excel 三框架 504 次测试通过，相关文件格式与差异检查通过；现有默认图片、填充与行移动测试不变。
 
 交接约定：后续会话显式使用 `gpt-6-astra` / `medium`；用户授权在实际可获取的剩余上下文接近或低于 70% 时创建同项目、本地工作目录接续会话。不得以计费 token 推算占用。当前工具未提供当前上下文容量/剩余比例，不能声称已达到阈值。每个安全小步验证并本地提交，只提交本轮改动，不推送/发布/创建 PR；交接确认启动后旧会话停止修改。需要公开 API 或行为变化时先请用户决定。
 

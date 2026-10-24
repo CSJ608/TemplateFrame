@@ -183,12 +183,18 @@ public sealed class ExcelTemplateBuilder : ITemplateBuilder, IDisposable
         }
 
         var relId = _drawingsPart.GetIdOfPart(imagePart);
-        var cx = (long)((widthInches ?? 1.5) * 914400);
-        var cy = (long)((heightInches ?? 1.5) * 914400);
-        var colOffset = (long)(xOffsetInches * 914400);
-        var rowOffset = (long)(yOffsetInches * 914400);
+        var sizeEmu = new Xdr.Extent
+        {
+            Cx = (long)((widthInches ?? 1.5) * 914400),
+            Cy = (long)((heightInches ?? 1.5) * 914400),
+        };
+        var zeroBasedCellOrigin = new Xdr.FromMarker(
+            new Xdr.ColumnId { Text = (col - 1).ToString() },
+            new Xdr.ColumnOffset { Text = ((long)(xOffsetInches * 914400)).ToString() },
+            new Xdr.RowId { Text = (row - 1).ToString() },
+            new Xdr.RowOffset { Text = ((long)(yOffsetInches * 914400)).ToString() });
         _imageAnchors.Add(ExcelDrawingHelper.CreateAnchor(
-            _imageAnchors.Count + 1, relId, col - 1, row - 1, cx, cy, colOffset, rowOffset));
+            _imageAnchors.Count + 1, relId, zeroBasedCellOrigin, sizeEmu));
         AddDefinedName(ExcelNamedRangeLocator.ElementName(key), anchorCell);
         return this;
     }
