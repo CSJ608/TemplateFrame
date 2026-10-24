@@ -133,13 +133,15 @@ internal static class SimpleExcelReader
         TemplateResourceBudget budget)
     {
         var result = new List<IReadOnlyList<object?>>();
+        var cells = new SimpleExcelRowCells();
         foreach (var r in rowLookup.Keys.Where(r => r > header.Row).OrderBy(r => r))
         {
             budget.AddRows(1, header.ColumnCount);
+            cells.Load(rowLookup[r]);
             var values = new List<object?>();
             for (var c = 0; c < header.ColumnCount; c++)
             {
-                var cell = FindCell(rowLookup, r, header.StartColumn + c);
+                var cell = cells.Find(r, header.StartColumn + c);
                 values.Add(cell is null ? null : ReadCellValue(workbookPart, sharedStrings, cell));
             }
 

@@ -9,6 +9,45 @@ namespace TemplateFrame.Excel.Simple.Tests;
 public sealed class ReadOptimizationTests
 {
     [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void Read_DoesNotInspectUnusedOrUnparseableNumberStyles(int path)
+    {
+        var bytes = Workbook(6, path, workbook =>
+        {
+            var row = workbook.WorksheetParts.Single().Worksheet!.GetFirstChild<SheetData>()!.Elements<Row>().Last();
+            row.Elements<Cell>().First().CellValue = new CellValue("bad");
+            row.Elements<Cell>().First().SetAttribute(new DocumentFormat.OpenXml.OpenXmlAttribute("s", "", "invalid"));
+            var unused = Number("ZZ2", "1E100");
+            unused.SetAttribute(new DocumentFormat.OpenXml.OpenXmlAttribute("s", "", "invalid"));
+            row.Append(unused);
+            workbook.WorkbookStylesPart!.Stylesheet!.GetFirstChild<CellFormats>()!.Append(new CellFormat
+            {
+                NumberFormatId = new DocumentFormat.OpenXml.UInt32Value { InnerText = "invalid" },
+            });
+        });
+        var row = Assert.Single(Read(bytes, 6, path));
+        Assert.Null(row[0]);
+        Assert.All(row.Skip(1), value => Assert.Equal(45000d, value));
+    }
+
+    [Theory]
+    [InlineData(0)]
+    [InlineData(1)]
+    [InlineData(2)]
+    public void Read_MissingStylesDoNotParseInvalidStyleIndex(int path)
+    {
+        var bytes = Workbook(6, path, workbook =>
+        {
+            workbook.DeletePart(workbook.WorkbookStylesPart!);
+            var cell = workbook.WorksheetParts.Single().Worksheet!.GetFirstChild<SheetData>()!.Elements<Row>().Last().Elements<Cell>().First();
+            cell.SetAttribute(new DocumentFormat.OpenXml.OpenXmlAttribute("s", "", "invalid"));
+        });
+        Assert.All(Assert.Single(Read(bytes, 6, path)), value => Assert.Equal(45000d, value));
+    }
+
+    [Theory]
     [InlineData(0, 6)]
     [InlineData(1, 6)]
     [InlineData(2, 6)]
