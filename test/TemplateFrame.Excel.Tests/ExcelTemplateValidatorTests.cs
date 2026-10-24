@@ -8,6 +8,45 @@ namespace TemplateFrame.Excel.Tests;
 public sealed class ExcelTemplateValidatorTests
 {
     [Fact]
+    public void Validate_MixedIssues_PreservesPhaseOrderAndMessageArguments()
+    {
+        using var stream = TestDocuments.BuildDemoTemplate();
+        using (var document = SpreadsheetDocument.Open(stream, true))
+        {
+            var names = document.WorkbookPart!.Workbook!.DefinedNames!;
+            names.RemoveAllChildren();
+            names.Append(new DocumentFormat.OpenXml.Spreadsheet.DefinedName { Name = "TF_Dup", Text = "Sheet1!$A$1" });
+            names.Append(new DocumentFormat.OpenXml.Spreadsheet.DefinedName { Name = "TF_Dup", Text = "Sheet1!$A$2" });
+            names.Append(new DocumentFormat.OpenXml.Spreadsheet.DefinedName { Name = "TF_Extra", Text = "Sheet1!$A$3" });
+        }
+        var contract = new TemplateContract
+        {
+            Elements =
+            [
+                new TextElement { Key = "Dup" },
+                new TextElement { Key = "Dup" },
+                new ImageElement { Key = "Missing", DisplayName = "Picture", Required = false },
+            ],
+        };
+
+        var issues = new ExcelTemplateValidator().Validate(stream, contract).Issues;
+
+        Assert.Equal(new[]
+        {
+            "Excel.Validation.ContractDuplicateKey",
+            "Excel.Validation.AmbiguousNamedRange",
+            "Excel.Validation.MissingImageElement",
+            "Excel.Validation.ExtraNamedRange",
+        }, issues.Select(i => i.MessageKey));
+        Assert.Equal(new object?[] { "Dup" }, issues[0].MessageArgs);
+        Assert.Equal(new object?[] { "TF_Dup" }, issues[1].MessageArgs);
+        Assert.Equal(new object?[] { "Missing", "Picture" }, issues[2].MessageArgs);
+        Assert.Equal(new object?[] { "TF_Extra" }, issues[3].MessageArgs);
+        Assert.Equal(TemplateValidationSeverity.Warning, issues[2].Severity);
+        Assert.Equal(TemplateValidationSeverity.Warning, issues[3].Severity);
+    }
+
+    [Fact]
     public void Validate_ValidTemplate_Passes()
     {
         using var stream = TestDocuments.BuildDemoTemplate();

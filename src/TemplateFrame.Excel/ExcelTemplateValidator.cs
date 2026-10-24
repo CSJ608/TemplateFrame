@@ -10,29 +10,23 @@ using TemplateFrame.Validation;
 
 namespace TemplateFrame.Excel;
 
-/// <summary>Excel template validator — enumerates TF_ named ranges and reports Missing / WrongType / Ambiguous (§5.3).</summary>
-/// <remarks>Extra 只告警放行。</remarks>
 public sealed class ExcelTemplateValidator
 {
     private readonly TemplateResourceLimits _limits;
 
-    /// <summary>Creates a validator with default input budgets.</summary>
     public ExcelTemplateValidator() : this(TemplateResourceLimits.Default)
     {
     }
 
-    /// <summary>Creates a validator with the supplied input budgets.</summary>
     public ExcelTemplateValidator(TemplateResourceLimits resourceLimits)
     {
         _limits = resourceLimits ?? throw new ArgumentNullException(nameof(resourceLimits));
         _limits.Validate();
     }
 
-    /// <summary>Validates whether an .xlsx template matches the contract.</summary>
     public TemplateValidationResult Validate(Stream template, TemplateContract contract)
         => ValidatePackage(template, contract, packageChecked: false);
 
-    // Only callers that already ran StreamUtil's complete package preflight may use this path.
     internal TemplateValidationResult ValidateCheckedPackage(Stream template, TemplateContract contract)
         => ValidatePackage(template, contract, packageChecked: true);
 
@@ -63,7 +57,7 @@ public sealed class ExcelTemplateValidator
             return ValidateCore(document.WorkbookPart, contract);
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException or FileFormatException
-                                   or XmlException or FormatException or OverflowException) // zip 有效但 XML 损坏：惰性 DOM 在树访问时才抛
+                                   or XmlException or FormatException or OverflowException)
         {
             return Invalid("Excel.Validation.CannotOpen", ex.Message);
         }
@@ -76,7 +70,16 @@ public sealed class ExcelTemplateValidator
         var names = ExcelNamedRangeLocator.FindAll(workbookPart);
         var knownNames = new HashSet<string>(StringComparer.Ordinal);
 
-        // 1) 契约内部 Key 唯一性（含表格列 Key）
+        CheckDuplicateContractKeys(contract, issues);
+        CheckAmbiguousNames(names, issues);
+        CheckElements(workbookPart, contract, names, knownNames, issues, budget);
+        CheckExtraNames(names, knownNames, issues);
+
+        return new TemplateValidationResult { Issues = issues };
+    }
+
+    private static void CheckDuplicateContractKeys(TemplateContract contract, List<TemplateValidationIssue> issues)
+    {
         foreach (var duplicate in contract.EnumerateTagKeys()
                      .GroupBy(k => k)
                      .Where(g => g.Count() > 1))
@@ -90,8 +93,10 @@ public sealed class ExcelTemplateValidator
                 Message = Sr.Get("Excel.Validation.ContractDuplicateKey", duplicate.Key),
             });
         }
+    }
 
-        // 2) 命名区域名全局唯一（workbook.xml definedName 本身要求唯一，兜底检测）
+    private static void CheckAmbiguousNames(IReadOnlyList<NamedRangeMatch> names, List<TemplateValidationIssue> issues)
+    {
         foreach (var group in names.GroupBy(n => n.Name).Where(g => g.Count() > 1))
         {
             issues.Add(new TemplateValidationIssue
@@ -103,8 +108,16 @@ public sealed class ExcelTemplateValidator
                 Message = Sr.Get("Excel.Validation.AmbiguousNamedRange", group.Key),
             });
         }
+    }
 
-        // 3) 逐元素校验
+    private static void CheckElements(
+        WorkbookPart workbookPart,
+        TemplateContract contract,
+        IReadOnlyList<NamedRangeMatch> names,
+        HashSet<string> knownNames,
+        List<TemplateValidationIssue> issues,
+        TemplateResourceBudget budget)
+    {
         foreach (var element in contract.Elements)
         {
             switch (element)
@@ -125,12 +138,17 @@ public sealed class ExcelTemplateValidator
                         knownNames.Add(ExcelNamedRangeLocator.TableColumnName(table.Key, column.Key));
                     }
 
-                    CheckTableElement(table, workbookPart, names, issues, budget);
+                    CheckTableElement(table, names, issues, budget);
                     break;
             }
         }
+    }
 
-        // 4) 契约外命名区域：默认放行（告警）
+    private static void CheckExtraNames(
+        IReadOnlyList<NamedRangeMatch> names,
+        HashSet<string> knownNames,
+        List<TemplateValidationIssue> issues)
+    {
         foreach (var match in names)
         {
             if (!knownNames.Contains(match.Name))
@@ -146,8 +164,6 @@ public sealed class ExcelTemplateValidator
                 });
             }
         }
-
-        return new TemplateValidationResult { Issues = issues };
     }
 
     private static void CheckTextElement(
@@ -159,7 +175,6 @@ public sealed class ExcelTemplateValidator
         var match = names.FirstOrDefault(n => n.Name == name);
         if (match is null)
         {
-            // 可选元素缺失只告警（模板仍有效），必填缺失才失败
             issues.Add(Missing(
                 element.Key,
                 "Excel.Validation.MissingTextElement",
@@ -207,7 +222,6 @@ public sealed class ExcelTemplateValidator
 
     private static void CheckTableElement(
         TableElement element,
-        WorkbookPart workbookPart,
         IReadOnlyList<NamedRangeMatch> names,
         List<TemplateValidationIssue> issues,
         TemplateResourceBudget budget)
@@ -257,7 +271,6 @@ public sealed class ExcelTemplateValidator
         }
     }
 
-    /// <summary>按工作表名解析 WorksheetPart（定义名引用里的 Sheet 名）。</summary>
     internal static WorksheetPart? ResolveWorksheetPart(WorkbookPart workbookPart, string sheetName)
     {
         if (workbookPart.Workbook?.Sheets is not { } sheets)
