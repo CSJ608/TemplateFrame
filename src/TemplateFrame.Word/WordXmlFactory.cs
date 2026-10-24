@@ -11,10 +11,6 @@ using WPageSize = DocumentFormat.OpenXml.Wordprocessing.PageSize;
 
 namespace TemplateFrame.Word;
 
-/// <summary>
-/// Word OpenXML 工厂（<see cref="WordTemplateBuilder"/> 内部用）：run / 表格 / 单元格 / 节属性 /
-/// 页码域 / 图片 drawing 的纯构造逻辑，不持有构建器状态。
-/// </summary>
 internal static class WordXmlFactory
 {
     internal static void ApplyAlignment(Paragraph paragraph, TextAlign? alignment)
@@ -105,6 +101,9 @@ internal static class WordXmlFactory
         return run;
     }
 
+    internal static Table CreateTable(int columnCount, TableFormat? format)
+        => new(CreateTableProperties(format), CreateTableGrid(columnCount, format?.ColumnWidthsCm));
+
     internal static TableProperties CreateTableProperties(TableFormat? format)
     {
         var totalDxa = format?.ColumnWidthsCm is { } widths
@@ -127,8 +126,6 @@ internal static class WordXmlFactory
                 new InsideVerticalBorder { Val = BorderValues.Single, Size = 4U, Color = "000000" }));
         }
 
-        // tblPr 级默认单元格边距的元素是 w:tblCellMar（TableCellMarginDefault）；
-        // TableCellMargin 序列化为 w:tcMar（tcPr 级），混入 tblPr 通不过 schema 校验。
         props.Append(new TableCellMarginDefault(
             new TopMargin { Width = "60", Type = TableWidthUnitValues.Dxa },
             new TableCellLeftMargin { Width = 108, Type = TableWidthValues.Dxa },
@@ -277,7 +274,6 @@ internal static class WordXmlFactory
 
     internal static IEnumerable<(string Text, string? Instruction)> ParsePagePattern(string pattern)
     {
-        // string.CompareOrdinal 三 TFM 通用（Span 重载是 netcore/System.Memory 专属）
         static bool StartsAt(string source, int index, string literal) =>
             index + literal.Length <= source.Length
             && string.CompareOrdinal(source, index, literal, 0, literal.Length) == 0;
@@ -322,17 +318,17 @@ internal static class WordXmlFactory
 
     internal static IEnumerable<Run> CreateFieldRuns(string instruction, string cached, RunProperties? rPr)
     {
-        static Run WithRPr(params OpenXmlElement[] children)
+        Run WithProperties(params OpenXmlElement[] children)
         {
-            var run = new Run();
+            var run = new Run(rPr?.CloneNode(true) as RunProperties ?? new RunProperties());
             run.Append(children);
             return run;
         }
 
-        yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldChar { FieldCharType = FieldCharValues.Begin });
-        yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldCode { Text = instruction });
-        yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldChar { FieldCharType = FieldCharValues.Separate }, new Text(cached) { Space = SpaceProcessingModeValues.Preserve });
-        yield return WithRPr(rPr?.CloneNode(true) as RunProperties ?? new RunProperties(), new FieldChar { FieldCharType = FieldCharValues.End });
+        yield return WithProperties(new FieldChar { FieldCharType = FieldCharValues.Begin });
+        yield return WithProperties(new FieldCode { Text = instruction });
+        yield return WithProperties(new FieldChar { FieldCharType = FieldCharValues.Separate }, new Text(cached) { Space = SpaceProcessingModeValues.Preserve });
+        yield return WithProperties(new FieldChar { FieldCharType = FieldCharValues.End });
     }
 
     internal static Drawing CreateDrawing(string relId, double? widthInches, double? heightInches, string extension, uint drawingId)
@@ -341,7 +337,6 @@ internal static class WordXmlFactory
         var cx = (long)((widthInches ?? 2.0) * emuPerInch);
         var cy = (long)((heightInches ?? 1.0) * emuPerInch);
 
-        // docPr Id 须在正文、页眉和页脚间保持唯一，由构建器统一分配，避免严格阅读器丢图。
         var inline = new DW.Inline(
             new DW.Extent { Cx = cx, Cy = cy },
             new DW.DocProperties { Id = drawingId, Name = "Placeholder." + extension },

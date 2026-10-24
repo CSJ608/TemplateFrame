@@ -14,6 +14,64 @@ namespace TemplateFrame.Word.Tests;
 public sealed class WordTemplateBuilderCapabilitiesTests
 {
     [Fact]
+    public void AddTable_HeaderFormatOverridesLegacyStyle_WithoutFormattingTemplateRow()
+    {
+        using var stream = TestDocuments.BuildTemplate(b =>
+            b.AddTable("Lines", ["Item"], new TableFormat
+            {
+                HeaderFormat = new TextFormat { FontName = "Arial" },
+            }, headerStyle: "Title"));
+        using var document = WordprocessingDocument.Open(stream, false);
+        var rows = document.MainDocumentPart!.Document!.Body!.Elements<Table>().Single().Elements<TableRow>().ToList();
+        var header = rows[0].Descendants<Run>().Single();
+
+        Assert.Equal("Item", header.InnerText);
+        Assert.Equal("Arial", header.RunProperties!.RunFonts!.Ascii!.Value);
+        Assert.Null(header.RunProperties.Bold);
+        Assert.Null(header.RunProperties.FontSize);
+        Assert.Null(rows[1].Descendants<Run>().Single().RunProperties);
+        Assert.Equal("Item", rows[1].Descendants<Tag>().Single().Val!.Value);
+    }
+
+    [Fact]
+    public void AddPageNumber_RepeatedFields_CloneFormattingForEveryRun()
+    {
+        using var stream = TestDocuments.BuildTemplate(b =>
+            b.AddPageNumber("{page}{total} / {page} {unknown}", new TextFormat { Bold = true }));
+        using var document = WordprocessingDocument.Open(stream, false);
+        var paragraph = document.MainDocumentPart!.Document!.Body!.Elements<Paragraph>().Single();
+
+        Assert.Equal(new[] { "PAGE", "NUMPAGES", "PAGE" }, paragraph.Descendants<FieldCode>().Select(f => f.Text));
+        Assert.Equal(new[] { "", "1", "1", " / ", "1", " {unknown}" }, paragraph.Descendants<Text>().Select(t => t.Text));
+        Assert.Null(paragraph.Elements<Run>().First().RunProperties);
+        Assert.All(paragraph.Elements<Run>().Skip(1), run => Assert.NotNull(run.RunProperties!.Bold));
+        Assert.Equal(15, paragraph.Elements<Run>().Count());
+    }
+
+    [Fact]
+    public void Save_MovesExistingSectionToEnd_AndKeepsTargetOpen()
+    {
+        using var target = new MemoryStream();
+        using (var builder = new WordTemplateBuilder())
+        {
+            builder.AddHeader(h => h.AddText("Header"));
+            builder.AddParagraph("Body");
+            builder.AddTable("Lines", ["Item"]);
+            builder.Save(target);
+        }
+
+        Assert.True(target.CanWrite);
+        target.Position = 0;
+        using var document = WordprocessingDocument.Open(target, false);
+        var body = document.MainDocumentPart!.Document!.Body!;
+        var section = Assert.IsType<SectionProperties>(body.LastChild);
+        Assert.Single(body.Elements<SectionProperties>());
+        Assert.IsType<HeaderReference>(section.FirstChild);
+        Assert.NotNull(section.GetFirstChild<WPageSize>());
+        Assert.Equal("Header", document.MainDocumentPart.HeaderParts.Single().Header!.InnerText);
+    }
+
+    [Fact]
     public void SetPageSetup_A5Landscape_ProducesLandscapePageSize()
     {
         using var stream = TestDocuments.BuildTemplate(b =>
