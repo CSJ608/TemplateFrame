@@ -4,10 +4,10 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace TemplateFrame.Excel;
 
-/// <summary>.NET 风格 Format → Excel 数字格式代码的映射与单元格应用（ExcelTemplateFiller 内部用）。</summary>
-internal static class ExcelNumberFormat
+internal sealed class ExcelNumberFormat(WorkbookPart workbookPart)
 {
-    /// <summary>.NET 格式串（"N2" / "yyyy-MM-dd" / ...）→ Excel 数字格式代码；DateTime 默认 yyyy-mm-dd，其余空格式返回 null。</summary>
+    private readonly Dictionary<(uint BaseStyle, uint NumberFormat), uint> _formattedStyles = new();
+
     public static string? Map(string? format, Type valueType)
     {
         if (valueType == typeof(DateTime))
@@ -39,8 +39,7 @@ internal static class ExcelNumberFormat
         };
     }
 
-    /// <summary>给单元格补数字格式（克隆基样式 cellXf + numFmtId，保留字体/边框/对齐）。</summary>
-    public static void ApplyToCell(WorkbookPart workbookPart, Cell cell, string? formatCode)
+    public void ApplyToCell(Cell cell, string? formatCode)
     {
         if (string.IsNullOrEmpty(formatCode))
         {
@@ -83,6 +82,12 @@ internal static class ExcelNumberFormat
         }
 
         var baseIndex = cell.StyleIndex?.Value ?? 0u;
+        if (_formattedStyles.TryGetValue((baseIndex, numFmtId), out var cachedIndex))
+        {
+            cell.StyleIndex = cachedIndex;
+            return;
+        }
+
         var baseXf = cellFormats.Elements<CellFormat>().ElementAtOrDefault((int)baseIndex);
         if (baseXf is null)
         {
@@ -111,6 +116,7 @@ internal static class ExcelNumberFormat
             cellFormats.Count = newIndex + 1;
         }
 
+        _formattedStyles.Add((baseIndex, numFmtId), newIndex);
         cell.StyleIndex = newIndex;
     }
 

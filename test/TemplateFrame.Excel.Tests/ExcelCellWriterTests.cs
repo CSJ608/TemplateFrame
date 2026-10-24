@@ -32,7 +32,7 @@ public sealed class ExcelCellWriterTests
         using var document = SpreadsheetDocument.Open(template, true);
         var cell = new Cell(new CellFormula("1+1"), new CellValue("2")) { StyleIndex = 0U };
 
-        ExcelCellWriter.Write(document.WorkbookPart!, cell, new TextElement(), value);
+        new ExcelCellWriter(document.WorkbookPart!).Write(cell, new TextElement(), value);
 
         Assert.Equal(type, cell.DataType!.Value);
         Assert.Null(cell.CellFormula);
@@ -59,11 +59,12 @@ public sealed class ExcelCellWriterTests
             (0, "N2"), (0, "N0"), (1, "N2"), (0, "N2"), (1, "N0"), (1, "N2"),
         };
         var resolved = new Dictionary<(uint, string), uint>();
+        var writer = new ExcelCellWriter(workbook);
 
         foreach (var (baseStyle, format) in combinations)
         {
             var cell = new Cell { StyleIndex = baseStyle };
-            ExcelCellWriter.Write(workbook, cell, new TextElement { Format = format }, 12.5m);
+            writer.Write(cell, new TextElement { Format = format }, 12.5m);
 
             var targetIndex = cell.StyleIndex!.Value;
             var target = (CellFormat)formats.ChildElements[(int)targetIndex];
@@ -93,13 +94,14 @@ public sealed class ExcelCellWriterTests
         workbook.WorkbookStylesPart!.Stylesheet!.CellFormats = formats;
         var cell = new Cell { StyleIndex = 1U };
         var element = new TextElement { Format = "N2" };
+        var writer = new ExcelCellWriter(workbook);
 
-        ExcelCellWriter.Write(workbook, cell, element, 12.5m);
+        writer.Write(cell, element, 12.5m);
         Assert.Equal(1U, cell.StyleIndex!.Value);
         Assert.Single(formats.ChildElements);
 
         formats.Append(new CellFormat(new Protection { Locked = false }));
-        ExcelCellWriter.Write(workbook, cell, element, 25m);
+        writer.Write(cell, element, 25m);
 
         Assert.Equal(2U, cell.StyleIndex!.Value);
         Assert.False(((CellFormat)formats.ChildElements[2]).Protection!.Locked!.Value);
@@ -116,11 +118,12 @@ public sealed class ExcelCellWriterTests
         stylesheet.NumberingFormats = new NumberingFormats(new NumberingFormat { NumberFormatId = 164U, FormatCode = "#,##0.00" });
         var target = new CellFormat { NumberFormatId = 164U, ApplyNumberFormat = true };
         stylesheet.CellFormats = new CellFormats(new CellFormat(), target, target.CloneNode(true));
+        var writer = new ExcelCellWriter(workbook);
 
         foreach (var baseStyle in new uint[] { 0, 2, 1, 2, 0 })
         {
             var cell = new Cell { StyleIndex = baseStyle };
-            ExcelCellWriter.Write(workbook, cell, new TextElement { Format = "N2" }, 12.5m);
+            writer.Write(cell, new TextElement { Format = "N2" }, 12.5m);
             Assert.Equal(1U, cell.StyleIndex!.Value);
         }
 
@@ -137,7 +140,7 @@ public sealed class ExcelCellWriterTests
         var original = (CellFormat)formats.ChildElements[1];
         var cell = new Cell { StyleIndex = 1U };
 
-        ExcelCellWriter.Write(workbook, cell, new TextElement { ValueType = typeof(decimal), Format = "N2" }, 12.5m);
+        new ExcelCellWriter(workbook).Write(cell, new TextElement { ValueType = typeof(decimal), Format = "N2" }, 12.5m);
 
         var updated = (CellFormat)formats.ChildElements[(int)cell.StyleIndex!.Value];
         Assert.Equal(original.FontId, updated.FontId);
@@ -199,8 +202,9 @@ public sealed class ExcelCellWriterTests
         stylesheet.CellFormats = formats;
         var originalXml = original.CloneNode(true).OuterXml;
         var cell = new Cell { StyleIndex = 0U };
+        var writer = new ExcelCellWriter(workbook);
 
-        ExcelCellWriter.Write(workbook, cell, new TextElement { Format = "N2" }, 12.5m);
+        writer.Write(cell, new TextElement { Format = "N2" }, 12.5m);
 
         Assert.Equal(2U, cell.StyleIndex!.Value);
         var expected = (CellFormat)original.CloneNode(true);
@@ -211,8 +215,8 @@ public sealed class ExcelCellWriterTests
         Assert.Equal(3U, formats.Count!.Value);
 
         var nextCell = new Cell { StyleIndex = 0U };
-        ExcelCellWriter.Write(workbook, nextCell, new TextElement { Format = "N2" }, 25m);
-        ExcelCellWriter.Write(workbook, cell, new TextElement { Format = "N2" }, 50m);
+        writer.Write(nextCell, new TextElement { Format = "N2" }, 25m);
+        writer.Write(cell, new TextElement { Format = "N2" }, 50m);
         Assert.Equal(2U, nextCell.StyleIndex!.Value);
         Assert.Equal(2U, cell.StyleIndex!.Value);
         Assert.Equal(3, formats.ChildElements.Count);
@@ -243,7 +247,7 @@ public sealed class ExcelCellWriterTests
         stylesheet.CellFormats = new CellFormats(original, target) { Count = 2U };
         var cell = new Cell { StyleIndex = 0U };
 
-        ExcelCellWriter.Write(workbook, cell, new TextElement { Format = "N2" }, 12.5m);
+        new ExcelCellWriter(workbook).Write(cell, new TextElement { Format = "N2" }, 12.5m);
 
         Assert.Equal(1U, cell.StyleIndex!.Value);
         Assert.Equal(2, stylesheet.CellFormats.ChildElements.Count);

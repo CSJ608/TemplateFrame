@@ -89,6 +89,7 @@ public sealed class ExcelTemplateFiller
 
     private void FillCore(WorkbookPart workbookPart, TemplateContract contract, FillData data, TemplateResourceBudget budget)
     {
+        var writer = new ExcelCellWriter(workbookPart);
         foreach (var element in contract.Elements)
         {
             switch (element)
@@ -96,7 +97,7 @@ public sealed class ExcelTemplateFiller
                 case TextElement text:
                     if (data.Values.TryGetValue(text.Key, out var textValue))
                     {
-                        FillTextElement(workbookPart, text, textValue);
+                        FillTextElement(workbookPart, writer, text, textValue);
                     }
 
                     break;
@@ -112,7 +113,7 @@ public sealed class ExcelTemplateFiller
                 case TableElement table:
                     if (data.Tables.TryGetValue(table.Key, out var rows))
                     {
-                        FillTableRows(workbookPart, table, rows, budget);
+                        FillTableRows(workbookPart, writer, table, rows, budget);
                     }
 
                     break;
@@ -120,7 +121,7 @@ public sealed class ExcelTemplateFiller
         }
     }
 
-    private static void FillTextElement(WorkbookPart workbookPart, TextElement element, object? value)
+    private static void FillTextElement(WorkbookPart workbookPart, ExcelCellWriter writer, TextElement element, object? value)
     {
         var match = ExcelNamedRangeLocator.FindByName(workbookPart, ExcelNamedRangeLocator.ElementName(element.Key));
         if (match is null)
@@ -136,7 +137,7 @@ public sealed class ExcelTemplateFiller
         }
 
         var cell = ExcelWorksheetCells.GetOrCreateCell(worksheetPart.Worksheet!.GetFirstChild<SheetData>()!, start.Row, start.Col);
-        ExcelCellWriter.Write(workbookPart, cell, element, value);
+        writer.Write(cell, element, value);
     }
 
     private void FillImageElement(WorkbookPart workbookPart, ImageElement element, object? value)
@@ -165,6 +166,7 @@ public sealed class ExcelTemplateFiller
 
     private static void FillTableRows(
         WorkbookPart workbookPart,
+        ExcelCellWriter writer,
         TableElement table,
         IReadOnlyList<IReadOnlyDictionary<string, object?>> rows,
         TemplateResourceBudget budget)
@@ -232,7 +234,7 @@ public sealed class ExcelTemplateFiller
         var sampleCols = columnRanges.ToDictionary(c => c.Column.Key, c => c.Start.Col, StringComparer.Ordinal);
         for (var i = 0; i < clones.Count; i++)
         {
-            FillTableRow(workbookPart, clones[i], table, rows[i], sampleCols);
+            FillTableRow(writer, clones[i], table, rows[i], sampleCols);
         }
 
         if (delta > 0)
@@ -255,7 +257,7 @@ public sealed class ExcelTemplateFiller
     }
 
     private static void FillTableRow(
-        WorkbookPart workbookPart,
+        ExcelCellWriter writer,
         Row row,
         TableElement table,
         IReadOnlyDictionary<string, object?> values,
@@ -276,7 +278,7 @@ public sealed class ExcelTemplateFiller
             }
 
             values.TryGetValue(column.Key, out var value);
-            ExcelCellWriter.Write(workbookPart, cell, column, value);
+            writer.Write(cell, column, value);
         }
     }
 

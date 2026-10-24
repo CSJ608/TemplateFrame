@@ -6,9 +6,11 @@ using TemplateFrame.Contract;
 
 namespace TemplateFrame.Excel;
 
-internal static class ExcelCellWriter
+internal sealed class ExcelCellWriter(WorkbookPart workbookPart)
 {
-    public static void Write(WorkbookPart workbookPart, Cell cell, TextElement element, object? value)
+    private readonly ExcelNumberFormat _numberFormats = new(workbookPart);
+
+    public void Write(Cell cell, TextElement element, object? value)
     {
         switch (value)
         {
@@ -22,27 +24,27 @@ internal static class ExcelCellWriter
 
             case DateTime dateTime:
                 SetValue(cell, CellValues.Number, dateTime.ToOADate().ToString(CultureInfo.InvariantCulture));
-                ExcelNumberFormat.ApplyToCell(workbookPart, cell, ExcelNumberFormat.Map(element.Format, typeof(DateTime)));
+                _numberFormats.ApplyToCell(cell, ExcelNumberFormat.Map(element.Format, typeof(DateTime)));
                 break;
 
             case int intValue:
-                WriteNumber(workbookPart, cell, element, intValue.ToString(CultureInfo.InvariantCulture));
+                WriteNumber(cell, element, intValue.ToString(CultureInfo.InvariantCulture));
                 break;
 
             case long longValue:
-                WriteNumber(workbookPart, cell, element, longValue.ToString(CultureInfo.InvariantCulture));
+                WriteNumber(cell, element, longValue.ToString(CultureInfo.InvariantCulture));
                 break;
 
             case decimal decimalValue:
-                WriteNumber(workbookPart, cell, element, decimalValue.ToString(CultureInfo.InvariantCulture));
+                WriteNumber(cell, element, decimalValue.ToString(CultureInfo.InvariantCulture));
                 break;
 
             case double doubleValue:
-                WriteNumber(workbookPart, cell, element, doubleValue.ToString("R", CultureInfo.InvariantCulture));
+                WriteNumber(cell, element, doubleValue.ToString("R", CultureInfo.InvariantCulture));
                 break;
 
             case float floatValue:
-                WriteNumber(workbookPart, cell, element, floatValue.ToString("R", CultureInfo.InvariantCulture));
+                WriteNumber(cell, element, floatValue.ToString("R", CultureInfo.InvariantCulture));
                 break;
 
             default:
@@ -51,10 +53,10 @@ internal static class ExcelCellWriter
         }
     }
 
-    private static void WriteNumber(WorkbookPart workbookPart, Cell cell, TextElement element, string value)
+    private void WriteNumber(Cell cell, TextElement element, string value)
     {
         SetValue(cell, CellValues.Number, value);
-        ExcelNumberFormat.ApplyToCell(workbookPart, cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
+        _numberFormats.ApplyToCell(cell, ExcelNumberFormat.Map(element.Format, element.ValueType));
     }
 
     private static void SetValue(Cell cell, CellValues type, string value)
