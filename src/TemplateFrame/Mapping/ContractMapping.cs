@@ -24,7 +24,7 @@ internal sealed class ContractMapping
             {
                 case TemplateElement scalar when (scalar is TextElement or ImageElement) && scalar.DataPath is { Length: > 0 }:
                     {
-                        var property = FindProperty(dataType, scalar.DataPath!, contract, scalar);
+                        var property = FindProperty(dataType, contract, scalar);
                         if (!usedScalarProperties.Add(property.Name))
                         {
                             throw new InvalidOperationException(
@@ -49,7 +49,7 @@ internal sealed class ContractMapping
                             rootTableSeen = true;
                             var rootElementType = GetCollectionElementType(dataType, contract, table);
                             var rootMapping = new TableMapping { ElementType = rootElementType };
-                            BuildColumns(rootMapping, rootElementType, contract, table);
+                            BuildColumns(rootMapping, contract, table);
                             mapping.Tables[table.Key] = rootMapping;
                             break;
                         }
@@ -60,7 +60,7 @@ internal sealed class ContractMapping
                                 Sr.Get("Mapping.RootCollectionHasDataPath", contract.Name, table.Key, table.DataPath));
                         }
 
-                        var property = FindProperty(dataType, table.DataPath!, contract, table);
+                        var property = FindProperty(dataType, contract, table);
                         if (!usedTableProperties.Add(property.Name))
                         {
                             throw new InvalidOperationException(
@@ -69,7 +69,7 @@ internal sealed class ContractMapping
 
                         var elementType = GetCollectionElementType(property.PropertyType, contract, table);
                         var tableMapping = new TableMapping { CollectionProperty = property, ElementType = elementType };
-                        BuildColumns(tableMapping, elementType, contract, table);
+                        BuildColumns(tableMapping, contract, table);
                         mapping.Tables[table.Key] = tableMapping;
                         break;
                     }
@@ -81,7 +81,6 @@ internal sealed class ContractMapping
 
     private static void BuildColumns(
         TableMapping tableMapping,
-        Type elementType,
         TemplateContract contract,
         TableElement table)
     {
@@ -93,7 +92,7 @@ internal sealed class ContractMapping
                 continue;
             }
 
-            var columnProperty = FindProperty(elementType, column.DataPath!, contract, column);
+            var columnProperty = FindProperty(tableMapping.ElementType, contract, column);
             if (!usedColumns.Add(columnProperty.Name))
             {
                 throw new InvalidOperationException(
@@ -104,8 +103,9 @@ internal sealed class ContractMapping
         }
     }
 
-    private static PropertyInfo FindProperty(Type type, string path, TemplateContract contract, TemplateElement element)
+    private static PropertyInfo FindProperty(Type type, TemplateContract contract, TemplateElement element)
     {
+        var path = element.DataPath!;
         var property = type.GetProperty(path, BindingFlags.Instance | BindingFlags.Public | BindingFlags.IgnoreCase);
         if (property is null)
         {
