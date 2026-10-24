@@ -7,10 +7,6 @@ using Xunit;
 
 namespace TemplateFrame.Tests;
 
-/// <summary>
-/// 国际化（迭代 12）：运行时消息按 <see cref="CultureInfo.CurrentUICulture"/> 中英切换——中文为中性文化默认，
-/// en 卫星资源命中时返回英文。校验消息还暴露 MessageKey + MessageArgs 供调用方自行本地化。
-/// </summary>
 public sealed class LocalizationTests
 {
     public sealed class SampleData

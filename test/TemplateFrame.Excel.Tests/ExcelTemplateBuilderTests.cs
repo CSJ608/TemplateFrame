@@ -45,10 +45,6 @@ public sealed class ExcelTemplateBuilderTests
         Assert.Equal("'送货单'!$B$2", orderNo!.Reference);
     }
 
-    /// <summary>
-    /// 2.1.1 评审落地 B-4：SetSheetName 晚于 AddElement 调用时，命名区域引用此前仍指向旧表名
-    /// （登记时即拼死表名）——区域失效、Validate 报 Missing。现表名延迟到 Save 时拼接。
-    /// </summary>
     [Fact]
     public void Build_SheetNameRenamedAfterElements_NamedRangesFollowNewName()
     {

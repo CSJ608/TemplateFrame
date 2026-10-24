@@ -9,11 +9,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Simple.Tests;
 
-/// <summary>
-/// 读取容错回归测试（对应评审计划 P1–P5 + R1–R4）：
-/// 命名区域过窄/错位、行缺 RowIndex、共享字符串表头、富文本共享字符串、前导标题行，
-/// 覆盖"文件里有数据但解析结果为空"的全部已复现场景（探针 S1–S8 / C1–C3）。
-/// </summary>
 public sealed class ReadToleranceTests
 {
     // ---------------- P1：命名区域过窄 / 错位 ----------------
@@ -231,10 +226,6 @@ public sealed class ReadToleranceTests
 
     // ---------------- B-1（2.1.1 评审落地）：回退路径列定位 ----------------
 
-    /// <summary>
-    /// 表头不在 A 列起始（第三方工具产物常见）：回退路径此前固定 colStart=1——从 A 列错读，
-    /// 前两列恒空、末列被静默丢弃。现按表头行首个单元格列号起、最大列号计宽。
-    /// </summary>
     [Fact]
     public void Read_Fallback_TableNotStartingAtColumnA_ReadsActualColumns()
     {
@@ -256,7 +247,6 @@ public sealed class ReadToleranceTests
         Assert.Equal("箱", loaded.Rows[1][2]);
     }
 
-    /// <summary>表头行有空单元格（Excel 常不写空元素）：物理元素数会少计宽度导致末列被丢——现按最大列号推算。</summary>
     [Fact]
     public void Read_Fallback_HeaderWithHole_KeepsTrailingColumns()
     {

@@ -9,10 +9,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
 
-/// <summary>
-/// 迭代 13（文档内容 i18n）：Excel 占位符按语言生成（zh "待填充" / en "To be filled"，经本地化器解析），
-/// 回读把已知占位符规范化为 null（null=未填充、""=有意留空），不依赖模板语言。
-/// </summary>
 public sealed class DocumentContentLocalizationTests
 {
     private static readonly CultureInfo En = CultureInfo.GetCultureInfo("en");

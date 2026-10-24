@@ -2,7 +2,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
 
-/// <summary>单元格地址与命名区域引用的直接单测：列字母互转、A1 解析边界、工作表名引号转义、引用构造/解析往返。</summary>
 public sealed class ExcelLocatorTests
 {
     // ---------- ExcelAddressHelper（internal）----------

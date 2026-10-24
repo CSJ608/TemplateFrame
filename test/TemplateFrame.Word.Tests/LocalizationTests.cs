@@ -5,7 +5,6 @@ using Xunit;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>国际化（迭代 12）：Word 插件校验消息按 CurrentUICulture 中英切换。</summary>
 public sealed class LocalizationTests
 {
     [Fact]

@@ -10,7 +10,6 @@ using Xunit;
 
 namespace TemplateFrame.Tests;
 
-/// <summary>声明 DataPath 但不重写映射的服务（验证默认走自动映射）。</summary>
 public sealed class AutoMappedTemplateService : TemplateService<OrderData, FakeBuilder>
 {
     public AutoMappedTemplateService(ITemplateEngine engine) : base(engine)
@@ -24,7 +23,6 @@ public sealed class AutoMappedTemplateService : TemplateService<OrderData, FakeB
         => Builder.AddElement("单据编号");
 }
 
-/// <summary>记录填充数据的引擎（回读返回构造的 FillData）。</summary>
 public sealed class AutoMappingRecordingEngine : ITemplateEngine
 {
     public FillData? LastFillData { get; private set; }

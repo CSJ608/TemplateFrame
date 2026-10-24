@@ -3,7 +3,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
 
-/// <summary>非 PNG 图片（JPEG / BMP / GIF）填充：drawing 按 DetectContentType 替换图片 part，字节原样回读。</summary>
 public sealed class ImageFillTests
 {
     private static readonly byte[] Jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x00, 0x20];

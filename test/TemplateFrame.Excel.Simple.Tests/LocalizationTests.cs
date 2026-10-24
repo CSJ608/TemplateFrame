@@ -6,7 +6,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Simple.Tests;
 
-/// <summary>国际化（迭代 12）：SimpleExcel 插件校验消息按 CurrentUICulture 中英切换。</summary>
 public sealed class LocalizationTests
 {
     [Fact]

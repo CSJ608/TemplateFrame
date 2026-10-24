@@ -4,7 +4,6 @@ using TemplateFrame.Contract;
 
 namespace TemplateFrame.Excel.Tests;
 
-/// <summary>测试用契约与 .xlsx 模板构造。</summary>
 internal static class TestDocuments
 {
     public static TemplateContract DemoContract()
@@ -38,7 +37,6 @@ internal static class TestDocuments
             ],
         };
 
-    /// <summary>用 ExcelTemplateBuilder 组装一个含文本/日期/表格/图片/下方标量元素的模板。</summary>
     public static MemoryStream BuildDemoTemplate()
         => BuildTemplate(builder =>
         {
@@ -61,7 +59,6 @@ internal static class TestDocuments
             builder.AddImage("Logo", "H1", 1.5, 1.5);
         });
 
-    /// <summary>带表格下方标量元素（验证克隆后整体下移）的模板。</summary>
     public static MemoryStream BuildTemplateWithBelowElement()
         => BuildTemplate(builder =>
         {
@@ -81,7 +78,6 @@ internal static class TestDocuments
         return stream;
     }
 
-    /// <summary>1x1 PNG（合法最小 PNG），用于图片填充测试。</summary>
     public static byte[] TinyPng { get; } =
     [
         137, 80, 78, 71, 13, 10, 26, 10,

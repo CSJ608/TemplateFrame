@@ -7,10 +7,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
 
-/// <summary>
-/// 真实场景正确性护栏（迭代 21）：
-/// 表格下方图片随行下移平移锚点（印章/签名图典型版式）、0 行数据清空示例行占位、decimal/long 全精度往返。
-/// </summary>
 public sealed class RealScenarioTests
 {
     private static TemplateContract LinesContract(Type qtyType)

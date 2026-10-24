@@ -10,7 +10,6 @@ using WPageSize = DocumentFormat.OpenXml.Wordprocessing.PageSize;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>WordTemplateBuilder 直接能力测试：页面/页眉页脚/布局表/格式/页码/列宽/垂直对齐/下划线。</summary>
 public sealed class WordTemplateBuilderCapabilitiesTests
 {
     [Fact]
