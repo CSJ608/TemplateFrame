@@ -9,8 +9,8 @@
 - [x] `TemplateDataValidator.CheckScalarValue`：传递已有元素，避免拆散 Key/DisplayName/Required。保留四参数：元素、期望类型、输入数据、诊断输出；ImageElement 没有 ValueType，显式类型避免新增标量模型或隐含类型分派。
 - [x] `ExcelTemplateParser`：私有 ParseOperation 持有单次工作簿、缓存、诊断、预算；从解析器复制只读配置，三参数构造，不保存解析器引用。ReadText/ReadImage/ReadTableRows 各一个参数，ReadCellValue 三个参数。实例只在 ParseCore 局部使用，原有 using 和 catch 边界不变，不扩展资源生命周期或共享可变状态。
 - [x] Word/Excel Builder：保留私有 `localizeHeaders` 具名开关。公开入口已分 AddTable/AddTableKeys，开关只控制逐表头查词，不影响契约键或模板行。提前翻译会改变参数校验/表格创建/Excel 单元格定位与查词的时序；委托或惰性集合包装没有实际收益。新增两格式各四个场景，锁定校验早于查词、普通入口不查词、全部表头早于占位符、查词异常原样传播并中止后续调用。
-- [ ] 全仓库长参数审查：包含构造函数、record、参数对象和调用点；逐项记录合理保留理由。
-- [ ] 最终全量验证及交接复核。
+- [x] 全仓库长参数审查：扫描 src/test/samples 的方法、构造函数与 record 主构造函数，复核实际调用及现有参数对象；新增改动与保留理由见下。
+- [x] 最终全量验证及交接复核：Release 零警告零错误，三框架 1,661 次测试通过，全仓库格式与差异检查通过。
 
 本轮验证和提交记录：
 
@@ -22,6 +22,26 @@
 - `8512d28` 为表头区域提交。本地化时序新增测试三框架共 24 次通过，相关格式及差异检查通过；无生产代码变化或新增热路径分配。
 - `190be96` 为本地化时序提交。映射构建小步：FindProperty 直接读取元素 DataPath，BuildColumns 直接读取 TableMapping.ElementType，各四参数降为三参数，移除可推导的冗余依赖；核心三框架 399 次测试通过，相关格式/差异检查通过。仅引用读取，无新增分配，保留反射查找、异常参数与缓存行为。
 - 解析性能验证：运行现有 ExcelParseBenchmarks（100/1,000/5,000 行）改前/改后短基准；分配显示均为 1.58/9.88/47.05 MB。新增固定单次操作对象，无逐行/逐格对象新增。耗时均值改前 20.79/26.76/188.78 ms、改后 7.91/60.47/255.74 ms，改后波动很大、置信区间重叠，不能据此声称提速或无时间回归；后续再复测。原始报告位于系统临时目录 `TemplateFrame-parameters-parser-before` 与 `TemplateFrame-parameters-parser-after`。
+
+### 长参数审查与保留决定
+
+- 公开兼容性：Word/Excel AddTable、AddTableKeys、AddImage，SimpleExcel.Write、SimpleExcelContract.Write（六参数）、SimpleExcelTemplateService.Fill 保留。调用方已有具名/可选参数；没有必须新增公开重载才能完成的内部改动，因此本轮不请求扩展 API。
+- Builder 内部：AddTableCore（五参数）及 Word CreateHeaderRow（四参数）的保留理由和时序测试见上。Excel ApplyStyle（五参数）合并文字格式与表格边框/横纵对齐覆盖，保留覆盖优先级和普通文字不带边框的差异；现有 CellStyleSpec 是内聚样式值，未扩成万能选项。Word CreateDrawing（五参数）集中处理可空英寸尺寸的默认值、图片扩展名和绘图 ID；唯一调用直接对应公开图片输入，不为此增加另一尺寸包装或移动默认值。
+- 校验阶段：Excel CheckElements（六参数）是单一阶段入口，工作簿、契约、已定位命名区域、已知名集合、诊断输出和预算职责不同；没有逐单元格传播，强行包装会成为宽泛上下文。Word CheckElements/CheckTableElement 与 Excel CheckImageElement/CheckTableElement（四参数）保留显式文档或定位结果、元素、输出/预算。Missing、Issue、Ambiguous 等四/五参数消息工厂保持键、模板、消息参数和严重度的独立含义，避免把诊断契约藏进新的模型。
+- 解析与填充：Word ReadTableRows、两格式 FillTableRows、Excel FillWorkingCopy/FillCore（四参数）及 FillTableRow（五参数）保留；输入文档/契约/行数据/预算或物理列映射没有可相互推导关系。Word 没有 Excel 那样反复传递的缓存组，不为形式对称添加执行类。ExcelCellWriter.Write/WriteNumber（四参数）明确工作簿样式宿主、单元格、契约格式和值。
+- Excel 定位/移动：ReadImageBytes（四参数）、ReplaceImage（五参数）、CloneAndShiftRows（四参数）、ShiftBelow（五参数）、ShiftNamedRangesBelow（四参数）保留。绘图坐标名称 col0/row0 表达零基；行移动使用一基 sampleRow 与有符号 delta，不能把行号和位移合成不透明整数。sampleRowElement 是 XML 节点而 sampleRow 是命名区域坐标，sheet 是命名区域名称而 worksheetPart 是已解析宿主；不重新推导以改变缺节点、重复名称或格式异常边界。
+- SimpleExcel：Read/ReadCore、FindHeaderLayout、ReadHeaders、ValidatePackage、ValidateByDefinedNames、ReadByDefinedNames、ContractReader.ReadCore（四参数），ReadRows（五参数）保留。ReadRows 的工作簿用于日期样式，rowLookup/sharedStrings 为不同索引，HeaderLayout 和预算不能由它们推导；只在阶段间传递，单元格读取已经三个参数。packageChecked 是已完成包预算检查的内部状态，具名调用保留，不能删除以重复扫描/计费。Writer.Write/WriteColumnWidths 等四参数保留独立列键、XML 插入锚与列起点；不改变宽度转换异常或空表语义。
+- 映射：MapTableFromData/CreateLine（五参数）保留目标集合类型、契约、映射、赋值策略与行坐标的区分，根集合与属性集合不能简单互推。MappingTarget 六字段主构造描述一次属性赋值/告警位置（属性、契约键、路径、表键、数据行、格式）；Format 为具名可选参数，表列路径不是 Property.Name，列映射现有 Format 缺省行为不改。ParseLocation 四字段分别为键、表键、文档行和数据行，最后两者在 Excel 不相同，不能合并。
+- 其他构造/参数模型：TableRange 五字段为工作表及矩形边界，Writer 使用具名构造；DefinedNameLayout 五字段是定位结果，Headers/ColumnIndex/两类歧义各有独立消费者，不能合并两种诊断。私有 Word 子构建器三参数明确 owner/host/container；解析执行对象三参数已审查，未把原六参数原样搬入构造。其余生产构造函数/主构造函数至多三个参数。已有公开 Format/Options/ResourceLimits 按职责分组，保持属性与默认值，不新增万能 Context/Options。
+- ValidationApplier.Apply（五参数）保留结果、契约、缺失策略、插件消息前缀和格式化函数；它是两插件之间的显式适配边界。StreamUtil.ValidateEntry（四参数）保留条目、限额、复用缓冲和已累计字节，避免在共享字段中累计状态。
+- 测试/样例：Theory 的四至六参数是输入/期望矩阵；Workbook/BuildWorkbook/WithSdtText 等四至五参数显式制造缺行号、重复节点、列偏移等异常包；TrackingBuilder 四参数用于区分实例与回调阶段。样例 RunFill/RunValidation/FillAndPrint 的四至五参数对应语言、服务、输入/输出路径、业务数据或输出标签。均保留，避免测试数据或教学流程隐藏在额外选项对象中。SDK XML 节点的可变子节点构造器不是业务参数对象，不机械改写。
+
+### 本轮交付与验证限制
+
+- 解析短基准复测报告位于系统临时目录 `TemplateFrame-parameters-parser-repeat`：分配仍为 1.58/9.88/47.05 MB，耗时 314.9/171.5/309.3 ms，100 行甚至慢于 1,000 行，跨运行波动明显。时间数据不足以确认性能趋势，保留原始结果供安静环境独立对比；本轮不宣称性能提升或无耗时回归，也不据此混入算法优化。
+- 本轮仅内部签名/实现和测试/进度文档变化；公开/受保护签名、依赖、目标框架、发布配置、消息资源未改。保留前轮列出的独立行为问题，不混入修复。
+- `98ff6ef` 为映射冗余参数提交。最终执行 `dotnet build TemplateFrame.slnx -c Release --no-restore` 零警告零错误；`dotnet test TemplateFrame.slnx -c Release --no-build --no-restore` 三框架共 1,661 次全部通过（核心 399、Word 459、Excel 519、SimpleExcel 284）；`dotnet format TemplateFrame.slnx --verify-no-changes --no-restore` 与 `git diff --check` 通过。新增十个测试场景，共增加三十次执行，未删除测试或削弱断言。
+- 专项清单已完成，无未提交的代码工作或待用户决定的 API/行为事项；本地提交，不推送、不发布、不创建 PR。当前无上下文统计可用，没有估报阈值或自动新建接续会话；后续若复核，先读本节和 Git 日志，不重复旧结构清单。唯一验证限制是上述耗时基准不能给出可靠趋势，原始结果已记录。
 
 交接约定：后续会话显式使用 `gpt-6-astra` / `medium`；用户授权在实际可获取的剩余上下文接近或低于 70% 时创建同项目、本地工作目录接续会话。不得以计费 token 推算占用。当前工具未提供当前上下文容量/剩余比例，不能声称已达到阈值。每个安全小步验证并本地提交，只提交本轮改动，不推送/发布/创建 PR；交接确认启动后旧会话停止修改。需要公开 API 或行为变化时先请用户决定。
 
