@@ -207,6 +207,86 @@ public sealed class ExcelStreamingTests
         public override void Write(byte[] buffer, int offset, int count) => throw new IOException("target failure");
     }
 
+    [Fact]
+    public void FillStreaming_MissingOptionalTableWarnsWithoutEnumeratingItsSource()
+    {
+        using var template = TestDocuments.BuildTemplate(builder => builder.AddText("A1", "fixed"));
+        using var target = new MemoryStream();
+        var source = new SingleUseRows(Rows(1));
+        var contract = new TemplateContract
+        {
+            Elements = [new TableElement { Key = "First", Required = false, Columns = [new TextElement { Key = "Value" }] }],
+        };
+        var warnings = new ExcelTemplateFiller().FillStreaming(template, target, contract, Data(source));
+        Assert.Contains(warnings, warning => warning.Key == "First");
+        Assert.False(source.Started);
+        using var document = SpreadsheetDocument.Open(target, false);
+        Assert.Equal("fixed", document.WorkbookPart!.WorksheetParts.Single().Worksheet!.InnerText);
+    }
+
+    [Fact]
+    public void FillStreaming_ReadsForwardOnlyTemplateWithoutTakingOwnership()
+    {
+        using var template = BuildTemplate();
+        using var input = new ForwardReadStream(template);
+        using var target = new MemoryStream();
+        new ExcelTemplateFiller().FillStreaming(input, target, Contract(), Data(Rows(2)));
+        Assert.True(input.CanRead);
+        Assert.True(template.CanRead);
+        using var document = SpreadsheetDocument.Open(target, false);
+        Assert.Equal("Sheet1!$A$2:$A$3", ExcelNamedRangeLocator.FindByName(document.WorkbookPart!, "TF_First_Value")!.Reference);
+    }
+
+    private sealed class ForwardReadStream(Stream source) : Stream
+    {
+        public override bool CanRead => source.CanRead;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => throw new NotSupportedException(); set => throw new NotSupportedException(); }
+        public override int Read(byte[] buffer, int offset, int count) => source.Read(buffer, offset, count);
+        public override void Flush() => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+    }
+
+    [Fact]
+    public void FillStreaming_MultipleWorksheetsUseIndependentOffsetsAndWorkbookOrder()
+    {
+        using var template = BuildTemplate();
+        using (var document = SpreadsheetDocument.Open(template, true))
+        {
+            var workbook = document.WorkbookPart!;
+            var rows = workbook.WorksheetParts.Single().Worksheet!.GetFirstChild<SheetData>()!;
+            var other = workbook.AddNewPart<WorksheetPart>("rOther");
+            var moved = rows.Elements<Row>().Where(row => row.RowIndex!.Value is 5 or 6).ToArray();
+            foreach (var row in moved) row.Remove();
+            other.Worksheet = new Worksheet(new SheetData(moved));
+            workbook.Workbook!.Sheets!.Append(new Sheet { Id = "rOther", SheetId = 2, Name = "Other" });
+            ExcelRowShifter.SetDefinedName(workbook, "TF_Second_Other", "Other!$A$6");
+        }
+        template.Position = 0;
+        using var output = new MemoryStream();
+        var order = new List<string>();
+        new ExcelTemplateFiller().FillStreaming(template, output, Contract(), new ExcelStreamingData
+        {
+            Tables = new Dictionary<string, IEnumerable<IReadOnlyDictionary<string, object?>>> { ["First"] = Source("First", 3), ["Second"] = Source("Second", 2) },
+        });
+        Assert.Equal(new[] { "First", "Second" }, order);
+        using var documentResult = SpreadsheetDocument.Open(output, false);
+        var result = documentResult.WorkbookPart!;
+        Assert.Equal("Sheet1!$A$2:$A$4", ExcelNamedRangeLocator.FindByName(result, "TF_First_Value")!.Reference);
+        Assert.Equal("Other!$A$6:$A$7", ExcelNamedRangeLocator.FindByName(result, "TF_Second_Other")!.Reference);
+        Assert.Equal("Sheet1!$A$12", ExcelNamedRangeLocator.FindByName(result, "TF_Footer")!.Reference);
+
+        IEnumerable<IReadOnlyDictionary<string, object?>> Source(string key, int count)
+        {
+            order.Add(key);
+            foreach (var row in Rows(count)) yield return row;
+        }
+    }
+
     private static MemoryStream BuildTemplate() => TestDocuments.BuildTemplate(builder =>
     {
         builder.AddTable("First", ["Value"], new TableFormat(), "A1");

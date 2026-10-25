@@ -98,12 +98,14 @@ internal sealed class ExcelStreamingExport(WorkbookPart workbook, TemplateResour
         using var forward = new ExcelForwardOnlyStream(target);
         using var archive = new ZipArchive(forward, ZipArchiveMode.Create, leaveOpen: true);
         var written = new HashSet<string>(StringComparer.Ordinal);
-        foreach (var pair in _tables)
+        foreach (var sheet in workbook.Workbook!.Sheets!.Elements<Sheet>())
         {
+            if (workbook.GetPartById(sheet.Id!.Value!) is not WorksheetPart part
+                || !_tables.TryGetValue(part, out var plans)) continue;
             cancellation.ThrowIfCancellationRequested();
-            var path = pair.Key.Uri.OriginalString.TrimStart('/');
+            var path = part.Uri.OriginalString.TrimStart('/');
             using var destination = archive.CreateEntry(path).Open();
-            WriteWorksheet(pair.Key, pair.Value, destination);
+            WriteWorksheet(part, plans, destination);
             written.Add(path);
         }
         var snapshot = new ExcelPackageOutput(document);
