@@ -7,6 +7,16 @@ namespace TemplateFrame.Excel.Simple.Tests;
 public sealed class ReaderWriterSemanticsTests
 {
     [Fact]
+    public void Write_StylesheetConformsToOpenXmlSchema()
+    {
+        using var stream = new MemoryStream();
+        SimpleExcel.Write(stream, new SimpleExcelTable { Headers = ["Date"], Rows = [[new DateTime(2026, 10, 25)]] });
+        stream.Position = 0;
+        using var document = SpreadsheetDocument.Open(stream, false);
+        Assert.Empty(new DocumentFormat.OpenXml.Validation.OpenXmlValidator().Validate(document).Select(error => error.Description));
+    }
+
+    [Fact]
     public void Write_CompressesNullRowsButKeepsEmptyStringsAndNamedRange()
     {
         using var stream = new MemoryStream();

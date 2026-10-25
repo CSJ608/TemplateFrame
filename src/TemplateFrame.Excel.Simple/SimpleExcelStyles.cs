@@ -28,8 +28,8 @@ internal sealed class SimpleExcelStyles
             new NumberingFormat { NumberFormatId = 164, FormatCode = DateFormatCode })
         { Count = 1 });
         stylesheet.Append(new Fonts(
-            new Font(new FontName { Val = "Calibri" }, new FontSize { Val = 11 }),
-            new Font(new FontName { Val = "Calibri" }, new FontSize { Val = 11 }, new Bold()))
+            new Font(new FontSize { Val = 11 }, new FontName { Val = "Calibri" }),
+            new Font(new Bold(), new FontSize { Val = 11 }, new FontName { Val = "Calibri" }))
         { Count = 2 });
         stylesheet.Append(new Fills(
             new Fill(new PatternFill { PatternType = PatternValues.None }),
