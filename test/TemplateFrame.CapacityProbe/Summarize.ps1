@@ -1,8 +1,13 @@
 param(
     [Parameter(Mandatory)][string]$ResultDirectory,
-    [Parameter(Mandatory)][string]$OutputCsv
+    [Parameter(Mandatory)][string]$OutputCsv,
+    [string]$ExcludedCasesPath
 )
 $ErrorActionPreference = 'Stop'
+$excluded = @{}
+if ($ExcludedCasesPath) {
+    foreach ($item in Import-Csv -LiteralPath $ExcludedCasesPath) { $excluded[$item.Case] = $item.Reason }
+}
 $rows = foreach ($file in Get-ChildItem -LiteralPath $ResultDirectory -Filter summary.json -Recurse) {
     $summary = Get-Content -LiteralPath $file.FullName -Raw | ConvertFrom-Json
     $events = @(Get-Content -LiteralPath (Join-Path $file.DirectoryName 'stdout.jsonl') |
@@ -10,7 +15,7 @@ $rows = foreach ($file in Get-ChildItem -LiteralPath $ResultDirectory -Filter su
     $start = $events | Where-Object Phase -eq 'prepare' | Select-Object -First 1
     $operation = $events | Where-Object Phase -eq 'validation' | Select-Object -Last 1
     $finish = $events | Where-Object Phase -eq 'complete' | Select-Object -Last 1
-    $status = if ($summary.Mode -eq 'word-write' -and $file.Directory.Name -notlike 'pngv2-*') { 'invalid-image-fixture' }
+    $status = if ($excluded.ContainsKey($file.Directory.Name)) { $excluded[$file.Directory.Name] }
     elseif ($summary.Guard) { $summary.Guard }
     elseif ($finish.Error -like 'System.OutOfMemoryException:*') { 'out-of-memory' }
     elseif ($finish.Status) { $finish.Status } else { 'process-failed' }

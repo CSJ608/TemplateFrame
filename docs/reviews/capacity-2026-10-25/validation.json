@@ -1,0 +1,23 @@
+{
+  "Baseline": "30e4ee4",
+  "ProductionSourceChanged": false,
+  "FinalTrxDirectory": "artifacts/capacity-2026-10-25/final-tests-pngv2",
+  "TrxFiles": 12,
+  "Passed": 1820,
+  "Failed": 0,
+  "Skipped": 0,
+  "SolutionReleaseBuildWarnings": 0,
+  "SolutionReleaseBuildErrors": 0,
+  "ProbeReleaseBuildWarnings": 0,
+  "ProbeReleaseBuildErrors": 0,
+  "SolutionFormatExitCode": 0,
+  "ProbeFormatExitCode": 0,
+  "ProbeFormatLog": "artifacts/capacity-2026-10-25/format-probe-final2.log",
+  "CapacityCases": 93,
+  "ValidPassedBatches": 64,
+  "ExpectedDefaultLimitRejections": 5,
+  "OutOfMemoryUnderHeapBudget": 3,
+  "GuardSelfTests": 1,
+  "FixtureGenerationCases": 9,
+  "ExcludedImageFixtureCases": 11
+}

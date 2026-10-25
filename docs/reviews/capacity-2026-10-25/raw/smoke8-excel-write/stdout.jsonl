@@ -1,0 +1,5 @@
+{"Phase":"prepare","settings":{"Mode":"excel-write","Rows":1000,"Columns":6,"Concurrency":1,"Directory":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\capacity-2026-10-25\\smoke8-excel-write","DefaultLimits":false,"InputPath":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\capacity-2026-10-25\\smoke8-excel-write\\input-1000-6.xlsx","Limits":{"MaxInputBytes":536870912,"MaxPackageEntryBytes":2147483648,"MaxExpandedBytes":3221225472,"MaxPackageEntries":4096,"MaxImageBytes":16777216,"MaxXmlCharactersPerPart":1500000000,"MaxClonedXmlCharacters":1500000000,"MaxTableRows":1000000,"MaxTableCells":30000030}},"Runtime":".NET 8.0.32","ProcessId":54972}
+{"Phase":"operation","ManagedBytes":3285152}
+{"Phase":"validation","BatchMilliseconds":140.0517,"MinimumMilliseconds":138.4162,"MedianMilliseconds":138.4162,"MaximumMilliseconds":138.4162,"ManagedBytes":12802184}
+{"Phase":"complete","Status":"passed","OutputBytes":35680,"PeakWorkingSetBytes":63471616}
+

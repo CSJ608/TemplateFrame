@@ -8,6 +8,7 @@
     <IsPackable>false</IsPackable>
   </PropertyGroup>
   <ItemGroup>
+    <ProjectReference Include="../../src/TemplateFrame/TemplateFrame.csproj" />
     <ProjectReference Include="../../src/TemplateFrame.Word/TemplateFrame.Word.csproj" />
     <ProjectReference Include="../../src/TemplateFrame.Excel/TemplateFrame.Excel.csproj" />
     <ProjectReference Include="../../src/TemplateFrame.Excel.Simple/TemplateFrame.Excel.Simple.csproj" />

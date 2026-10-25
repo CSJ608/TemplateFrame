@@ -1,0 +1,5 @@
+{"Phase":"prepare","settings":{"Mode":"word-write","Rows":10000,"Columns":6,"Concurrency":16,"Directory":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\capacity-2026-10-25\\pngv2-net10.0-word-10000-cols6-c16-capacity","DefaultLimits":false,"InputPath":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\capacity-2026-10-25\\pngv2-net10.0-word-10000-cols6-c16-capacity\\input-10000-6.xlsx","Limits":{"MaxInputBytes":536870912,"MaxPackageEntryBytes":2147483648,"MaxExpandedBytes":3221225472,"MaxPackageEntries":4096,"MaxImageBytes":16777216,"MaxXmlCharactersPerPart":1500000000,"MaxClonedXmlCharacters":1500000000,"MaxTableRows":1000000,"MaxTableCells":30000030}},"Runtime":".NET 10.0.13","ProcessId":46084,"HeapBudgetBytes":5368709120,"ServerGc":false}
+{"Phase":"operation","ManagedBytes":113129776}
+{"Phase":"validation","BatchMilliseconds":13965.3349,"MinimumMilliseconds":13434.3464,"MedianMilliseconds":13731.2015,"MaximumMilliseconds":13962.9594,"ManagedBytes":2969172216}
+{"Phase":"complete","Status":"passed","OutputBytes":7362099,"PeakWorkingSetBytes":3097780224}
+

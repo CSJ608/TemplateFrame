@@ -4,6 +4,8 @@
 
 主场景 6 列，宽表 30 列。Excel 每六列含四列唯一中文文本、一列数值、一列日期；Word 全部为唯一中文文本，单表加两个 1×1 PNG 图片控件。两张微小图片只覆盖图片处理路径，不代表真实大图成本。Word 不调用解析器；输出校验通过流式 XML 计数行/单元格、检查末行文本及两个图片引用，不测试 Office/WPS 排版、打开或打印。
 
+PNG 样本先检查各块 CRC 和解压扫描行，导出后跟随图片关系检查实际字节。库会保留两份未再引用的模板占位图，实测包共四个媒体部件、两个活动图片引用。旧图片样本的排除名单仅用于本次历史报告，通过汇总脚本可选的 `-ExcludedCasesPath` CSV 传入，不根据未来 case 名字自动判定有效性。
+
 ```powershell
 dotnet build test/TemplateFrame.CapacityProbe -c Release
 ./test/TemplateFrame.CapacityProbe/Run-Guarded.ps1 -Mode generate -Rows 1000 -CaseDirectory artifacts/capacity/fixture

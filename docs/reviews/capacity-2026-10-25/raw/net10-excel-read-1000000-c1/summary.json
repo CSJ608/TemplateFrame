@@ -1,0 +1,19 @@
+{
+  "Mode": "excel-read",
+  "Rows": 1000000,
+  "Columns": 6,
+  "Concurrency": 1,
+  "Framework": "net10.0",
+  "Limits": "capacity",
+  "ExitCode": 0,
+  "Guard": null,
+  "WallSeconds": 45.5686202,
+  "SampledPeakPrivateBytes": 5403529216,
+  "SampledPeakWorkingSetBytes": 5416419328,
+  "MinimumFreeBytes": 7565246464,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 120,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation"
+}
