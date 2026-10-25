@@ -46,7 +46,7 @@ public class WordTableBenchmarks
             throw new InvalidOperationException("Unexpected row count.");
         for (var r = 0; r < parsed.Count; r++)
             foreach (var key in keys)
-                if (!Equals(parsed[r][key], Rows == 0 ? null : $"{r}:{key}"))
+                if (!Equals(parsed[r][key], Rows == 0 ? string.Empty : $"{r}:{key}"))
                     throw new InvalidOperationException("Unexpected cell value.");
     }
 
