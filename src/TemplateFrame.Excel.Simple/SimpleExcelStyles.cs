@@ -17,6 +17,11 @@ internal sealed class SimpleExcelStyles
     public void WriteTo(WorkbookPart workbookPart)
     {
         var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
+        stylesPart.Stylesheet = CreateStylesheet();
+    }
+
+    internal static Stylesheet CreateStylesheet()
+    {
         var stylesheet = new Stylesheet();
 
         stylesheet.Append(new NumberingFormats(
@@ -46,6 +51,6 @@ internal sealed class SimpleExcelStyles
             })
         { Count = 3 });
 
-        stylesPart.Stylesheet = stylesheet;
+        return stylesheet;
     }
 }

@@ -52,7 +52,7 @@ internal static class SimpleExcelWriter
         var writtenRange = new SimpleExcelAddress.TableRange(
             Sheet: sheetName, StartRow: startRow, StartCol: startCol,
             EndRow: (int)(rowIndex - 1), EndCol: startCol + headers.Count - 1);
-        WriteDefinedNames(workbookPart, options.TableName, writtenRange, columnKeys);
+        SimpleExcelDefinedNames.AppendTo(workbookPart.Workbook!, options.TableName, writtenRange, columnKeys);
 
         styles.WriteTo(workbookPart);
         document.Save();
@@ -100,7 +100,7 @@ internal static class SimpleExcelWriter
             {
                 var value = c < row.Count ? row[c] : null;
                 var cell = new Cell { CellReference = SimpleExcelAddress.CellReference(rowIndex, startCell.Col + c) };
-                WriteValue(cell, value, dateStyle);
+                SimpleExcelCellWriter.Write(cell, value, dateStyle);
                 if (cell.HasChildren || cell.StyleIndex is not null)
                 {
                     dataRow.Append(cell);
@@ -129,104 +129,6 @@ internal static class SimpleExcelWriter
             }
 
             worksheet.InsertBefore(cols, sheetData);
-        }
-    }
-
-    private static void WriteDefinedNames(
-        WorkbookPart workbookPart,
-        string? requestedTableName,
-        SimpleExcelAddress.TableRange range,
-        IReadOnlyList<string>? columnKeys)
-    {
-        var columnCount = range.EndCol - range.StartCol + 1;
-        if (!string.IsNullOrWhiteSpace(requestedTableName) && columnCount > 0)
-        {
-            var tableName = requestedTableName!.Trim();
-            var regionReference = SimpleExcelAddress.QuoteSheet(range.Sheet)
-                                  + "!$" + SimpleExcelAddress.ColumnLetter(range.StartCol) + "$" + range.StartRow
-                                  + ":$" + SimpleExcelAddress.ColumnLetter(range.EndCol) + "$" + range.EndRow;
-            var definedNames = new List<DefinedName>
-            {
-                new() { Name = tableName, Text = regionReference },
-            };
-
-            if (columnKeys is { Count: > 0 })
-            {
-                for (var i = 0; i < columnCount && i < columnKeys.Count; i++)
-                {
-                    var columnKey = columnKeys[i]?.Trim();
-                    if (string.IsNullOrEmpty(columnKey))
-                    {
-                        continue;
-                    }
-
-                    definedNames.Add(new DefinedName
-                    {
-                        Name = SimpleExcel.ColumnDefinedName(tableName, columnKey!),
-                        Text = SimpleExcelAddress.QuoteSheet(range.Sheet) + "!$" + SimpleExcelAddress.ColumnLetter(range.StartCol + i) + "$" + range.StartRow,
-                    });
-                }
-            }
-
-            workbookPart.Workbook!.AppendChild(new DefinedNames(definedNames.ToArray()));
-        }
-    }
-
-    private static void WriteValue(Cell cell, object? value, uint dateStyle)
-    {
-        switch (value)
-        {
-            case null:
-                return;
-
-            case bool boolValue:
-                cell.DataType = CellValues.Boolean;
-                cell.CellValue = new CellValue(boolValue ? "1" : "0");
-                break;
-
-            case DateTime dateTime:
-                cell.DataType = CellValues.Number;
-                cell.CellValue = new CellValue(dateTime.ToOADate().ToString(CultureInfo.InvariantCulture));
-                cell.StyleIndex = dateStyle;
-                break;
-
-            case string text:
-                cell.DataType = CellValues.InlineString;
-                cell.InlineString = new InlineString(new Text(text) { Space = SpaceProcessingModeValues.Preserve });
-                break;
-
-            case decimal decimalValue:
-                cell.DataType = CellValues.Number;
-                cell.CellValue = new CellValue(decimalValue.ToString(CultureInfo.InvariantCulture));
-                break;
-
-            case long longValue:
-                cell.DataType = CellValues.Number;
-                cell.CellValue = new CellValue(longValue.ToString(CultureInfo.InvariantCulture));
-                break;
-
-            case double doubleValue:
-                cell.DataType = CellValues.Number;
-                cell.CellValue = new CellValue(doubleValue.ToString("R", CultureInfo.InvariantCulture));
-                break;
-
-            case float floatValue:
-                cell.DataType = CellValues.Number;
-                cell.CellValue = new CellValue(floatValue.ToString("R", CultureInfo.InvariantCulture));
-                break;
-
-            case IFormattable number:
-                cell.DataType = CellValues.Number;
-                cell.CellValue = new CellValue(Convert.ToString(number, CultureInfo.InvariantCulture) ?? "0");
-                break;
-
-            default:
-                cell.DataType = CellValues.InlineString;
-                cell.InlineString = new InlineString(new Text(Convert.ToString(value, CultureInfo.InvariantCulture) ?? string.Empty)
-                {
-                    Space = SpaceProcessingModeValues.Preserve,
-                });
-                break;
         }
     }
 
