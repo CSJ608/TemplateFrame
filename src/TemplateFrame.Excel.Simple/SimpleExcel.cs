@@ -9,6 +9,9 @@ public static class SimpleExcel
     public static void Write(Stream target, SimpleExcelTable table, SimpleExcelOptions? options = null, IReadOnlyList<string>? columnKeys = null)
         => SimpleExcelWriter.Write(target, table, options, columnKeys);
 
+    public static void WriteStreaming(Stream target, SimpleExcelStreamingTable table, SimpleExcelStreamingOptions? options = null, CancellationToken cancellationToken = default)
+        => SimpleExcelStreamingWriter.Write(target, table, options, cancellationToken);
+
     public static SimpleExcelTable Read(Stream source, string? tableName = null)
         => Read(source, tableName, TemplateResourceLimits.Default);
 

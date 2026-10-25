@@ -46,6 +46,47 @@ var loaded = SimpleExcel.Read(input); // Headers + Rows（string / bool / DateTi
 - `Write/Read` 处理表头和数据行，不提供合并、图片或页面设置。数值回读为 `double`，日期格式值为 `DateTime`，缺格为 null；decimal/long 写入不经 double 中转不等于回读同等精度。
 - Read 优先按命名区域定位，区域缺失或表头为空时回退；数据读到工作表末行并跳过空行，下方无关内容也可能被读入。完整[定位、回退和数值规则](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences)集中在 DESIGN。
 
+## 大表流式导出
+
+`WriteStreaming` 是独立入口，不改变 `Write` 的完整数据扫描列宽策略，也不自动替换契约服务的 `Fill`。
+
+```csharp
+using TemplateFrame.Engine;
+
+IEnumerable<IReadOnlyList<object?>> ExportRows()
+{
+    for (var row = 0; row < 1_000_000; row++)
+        yield return new object?[] { "M" + row, row };
+}
+
+using var output = File.Create("large-items.xlsx");
+SimpleExcel.WriteStreaming(output, new SimpleExcelStreamingTable
+{
+    Headers = ["物料", "数量"],
+    ColumnKeys = ["Code", "Quantity"],
+    Rows = ExportRows(),
+}, new SimpleExcelStreamingOptions
+{
+    WorkbookOptions = new SimpleExcelOptions
+    {
+        ResourceLimits = new TemplateResourceLimits
+        {
+            MaxTableRows = 1_000_000,
+            MaxTableCells = 2_000_002,
+        },
+    },
+    WidthSampleRows = 100,
+});
+```
+
+- 只枚举一次 `Rows`，边转换边写入 ZIP；请提供惰性数据源，并优先输出到文件。事先 `ToList()` 或输出到 `MemoryStream` 仍会占用相应内存。
+- 自动列宽默认只检查前 100 个源数据行；`WidthSampleRows` 可设为 0–1024，0 表示仅表头。宽表另以 65,536 个采样单元格限制采样行数，实际取两者较小值；空行也占用采样名额。自动宽度限定 8–60，后续长文本不会改变列宽。采样按已序列化文本长度估算（日期 10、布尔 4/5），不重复调用值的格式化函数。
+- `ColumnWidths = [20d, 14d]` 可指定每列固定宽度，跳过数据采样；必须与表头数量一致，且每项为 `(0, 255]` 内有限数值。`WidthSampleRows` 即使在固定宽度模式也须合法。
+- 至少一个表头；可选 `ColumnKeys` 须与表头数量一致。保留起始位置、表头加粗、日期样式和定义名；数值序列化沿用 `Write`，回读的 double 精度限制不变。缺列视为 null，多余列忽略，全 null 行不输出，空字符串保留。
+- 资源预算不变：默认仍限制 10 万源数据行、100 万单元格（含表头）；空行也计入预算。未知行数在枚举时逐行检查；工作表上限另按实际输出行检查。提高写入预算不自动提高以后读取文件的预算。
+- 可传 `CancellationToken`，在行枚举与写入边界协作取消；不能中断阻塞中的数据源或底层同步写入。成功、异常和取消均释放枚举器，始终保留调用方输出流的所有权；支持不可定位输出流，包括 .NET Framework。
+- 不保证失败时输出为空：异常、取消或后续超限可能留下部分 ZIP，调用方必须丢弃该次输出；文件发布可先写临时文件，成功后再移动。没有全局锁或限流器，100 个提交请求仍应由宿主按资源预算排队执行。
+
 ## 契约 + 强类型服务
 
 简单表格也可以接入 TemplateFrame 契约体系，像 Word 那样 `service.Parse` 直接得到强类型数据：

@@ -46,6 +46,47 @@ var loaded = SimpleExcel.Read(input); // Headers + Rows (string / bool / DateTim
 - `Write/Read` handles header + data rows, with no merges, images or page setup. Read returns numbers as `double`, date-formatted values as `DateTime`, and missing cells as null; writing decimal/long without double conversion does not imply equal read-back precision.
 - Read uses the named range, with header fallback when it is absent or empty. It reads to the worksheet's last row and skips empty rows; unrelated content below the table can also be included. Full [location, fallback and value rules](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences) are in DESIGN (Chinese).
 
+## Streaming large-table export
+
+`WriteStreaming` is an explicit opt-in API. Existing `Write` still scans the entire table for column widths; contract/service `Fill` does not switch to streaming automatically.
+
+```csharp
+using TemplateFrame.Engine;
+
+IEnumerable<IReadOnlyList<object?>> ExportRows()
+{
+    for (var row = 0; row < 1_000_000; row++)
+        yield return new object?[] { "M" + row, row };
+}
+
+using var output = File.Create("large-items.xlsx");
+SimpleExcel.WriteStreaming(output, new SimpleExcelStreamingTable
+{
+    Headers = ["Material", "Quantity"],
+    ColumnKeys = ["Code", "Quantity"],
+    Rows = ExportRows(),
+}, new SimpleExcelStreamingOptions
+{
+    WorkbookOptions = new SimpleExcelOptions
+    {
+        ResourceLimits = new TemplateResourceLimits
+        {
+            MaxTableRows = 1_000_000,
+            MaxTableCells = 2_000_002,
+        },
+    },
+    WidthSampleRows = 100,
+});
+```
+
+- Rows are enumerated once and written directly into ZIP entries. Use a lazy source and preferably a file output; pre-materializing rows or using `MemoryStream` still consumes memory proportional to those inputs/outputs.
+- Automatic widths sample only the first 100 source rows by default. `WidthSampleRows` accepts 0–1024 (0 uses headers only); a 65,536 sampled-cell cap can further reduce the effective row count for wide tables. Blank rows consume sample slots. Widths are clamped to 8–60; later long values do not resize columns. Measurement uses serialized text length (10 for dates, 4/5 for booleans) without formatting values twice.
+- Set `ColumnWidths = [20d, 14d]` for fixed widths without data sampling. Supply one finite width in `(0, 255]` per header. `WidthSampleRows` must remain valid even with fixed widths.
+- At least one header is required. Optional `ColumnKeys` must match the header count. Offsets, bold headers, date styles, defined names and numeric serialization are retained; reading numbers as double retains its precision limitations. Missing values are null, extra values are ignored, all-null rows are omitted, and empty strings are retained.
+- Default budgets remain 100,000 source rows and 1,000,000 cells including headers; blank rows also consume budget. Unknown row counts are checked incrementally, while worksheet row bounds apply to emitted rows. Raising export limits does not raise limits for a subsequent read.
+- Optional `CancellationToken` supports cooperative cancellation at enumeration/write boundaries, not interruption of a blocking source or synchronous output operation. Enumerators are disposed on completion, failure and cancellation. The caller always owns the output stream; non-seekable streams work on .NET Framework too.
+- Errors, cancellation or late limit violations can leave a partial ZIP: discard failed output. For atomic file publication, write a temporary file and move it only on success. There is no global throttling; hosts should queue up to 100 submitted requests and choose execution concurrency from their resource budget.
+
 ## Contract + strongly-typed service
 
 Simple tables can also join the TemplateFrame contract system, so `service.Parse` yields strongly-typed data just like Word:

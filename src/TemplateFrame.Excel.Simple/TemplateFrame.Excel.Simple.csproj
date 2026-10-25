@@ -27,4 +27,7 @@
   <ItemGroup>
     <ProjectReference Include="..\TemplateFrame\TemplateFrame.csproj" />
   </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <Reference Include="System.IO.Compression" />
+  </ItemGroup>
 </Project>
