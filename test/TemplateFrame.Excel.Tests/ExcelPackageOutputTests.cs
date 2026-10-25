@@ -4,12 +4,33 @@ using DocumentFormat.OpenXml.Spreadsheet;
 using System.IO.Compression;
 using System.Text;
 using System.Xml.Linq;
+using TemplateFrame.Contract;
 using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
 
 public sealed class ExcelPackageOutputTests
 {
+    [Theory]
+    [InlineData("Data%20Sheet.xml")]
+    [InlineData("Data_Sheet.xml")]
+    public void Streaming_UpdatesWorksheetWithNonDefaultPartName(string filename)
+    {
+        using var template = TestDocuments.BuildTemplate(builder => builder.AddTable("Items", ["Code"], startCell: "A1"));
+        using var renamed = RenameSheet(template, filename);
+        using var output = new MemoryStream();
+        var contract = new TemplateContract { Elements = [new TableElement { Key = "Items", Columns = [new TextElement { Key = "Code" }] }] };
+        new ExcelTemplateFiller().FillStreaming(renamed, output, contract, new ExcelStreamingData
+        {
+            Tables = new Dictionary<string, IEnumerable<IReadOnlyDictionary<string, object?>>>
+            {
+                ["Items"] = new[] { new Dictionary<string, object?> { ["Code"] = "changed" } },
+            },
+        });
+        using var result = SpreadsheetDocument.Open(output, false);
+        Assert.Contains("changed", result.WorkbookPart!.WorksheetParts.Single().Worksheet!.InnerText);
+    }
+
     [Fact]
     public void Write_MatchesSdkSaveForLoadedAndNewParts()
     {

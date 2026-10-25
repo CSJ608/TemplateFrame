@@ -15,8 +15,10 @@ public sealed class ExcelPackagePreservationTests
         Elements = [new TableElement { Key = "Items", Columns = [new TextElement { Key = "Code" }] }],
     };
 
-    [Fact]
-    public void Fill_PreservesRowFormattingFormulasMergesAndPageSettings()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Fill_PreservesRowFormattingFormulasMergesAndPageSettings(bool streaming)
     {
         using var template = CreateTemplate();
         using (var document = SpreadsheetDocument.Open(template, true))
@@ -31,7 +33,7 @@ public sealed class ExcelPackagePreservationTests
             worksheet.Append(new PageSetup { Orientation = OrientationValues.Landscape, PaperSize = 9 });
         }
         template.Position = 0;
-        using var output = new ExcelTemplateFiller().Fill(template, Contract, Data()).Output;
+        using var output = Fill(template, Contract, Data(), streaming);
         Assert.Equal(0, output.Position);
         Assert.True(template.CanRead);
         using var result = SpreadsheetDocument.Open(output, false);
@@ -52,8 +54,10 @@ public sealed class ExcelPackagePreservationTests
         Assert.Equal("Sheet1!$A$2:$A$4", ExcelNamedRangeLocator.FindByName(result.WorkbookPart, "TF_Items_Code")!.Reference);
     }
 
-    [Fact]
-    public void Fill_PreservesOpaquePartsUnrelatedSheetAndRelationships()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Fill_PreservesOpaquePartsUnrelatedSheetAndRelationships(bool streaming)
     {
         using var template = CreateTemplate();
         string opaquePath;
@@ -69,7 +73,7 @@ public sealed class ExcelPackagePreservationTests
             other.Worksheet = new Worksheet(new SheetData(new Row(new Cell(new CellFormula("2+3"), new CellValue("5")) { CellReference = "A1" }) { RowIndex = 1 }));
             workbook.Workbook!.Sheets!.Append(new Sheet { Id = "rOther", SheetId = 2, Name = "Untouched" });
             otherSheetPath = other.Uri.OriginalString.TrimStart('/');
-            var sheet = workbook.WorksheetParts.First();
+            var sheet = streaming ? other : workbook.WorksheetParts.First();
             sheet.AddHyperlinkRelationship(new Uri("https://example.invalid/reference"), true, "rExternal");
             sheet.Worksheet!.Append(new Hyperlinks(new Hyperlink { Reference = "A5", Id = "rExternal" }));
             document.PackageProperties.Title = "保留标题";
@@ -78,7 +82,7 @@ public sealed class ExcelPackagePreservationTests
         var originalOpaque = EntryBytes(template, opaquePath);
         var originalSheet = EntryBytes(template, otherSheetPath);
         template.Position = 0;
-        using var output = new ExcelTemplateFiller().Fill(template, Contract, Data()).Output;
+        using var output = Fill(template, Contract, Data(), streaming);
         Assert.Equal(originalOpaque, EntryBytes(output, opaquePath));
         Assert.Equal(originalSheet, EntryBytes(output, otherSheetPath));
         output.Position = 0;
@@ -86,13 +90,15 @@ public sealed class ExcelPackagePreservationTests
         Assert.Equal("保留标题", result.PackageProperties.Title);
         Assert.Equal("fixture", result.PackageProperties.Creator);
         Assert.Equal("urn:test:opaque", result.WorkbookPart!.GetPartById("rOpaque").RelationshipType);
-        var link = result.WorkbookPart.WorksheetParts.First().HyperlinkRelationships.Single();
+        var link = result.WorkbookPart.WorksheetParts.SelectMany(part => part.HyperlinkRelationships).Single();
         Assert.Equal("rExternal", link.Id);
         Assert.Equal("https://example.invalid/reference", link.Uri.OriginalString);
     }
 
-    [Fact]
-    public void Fill_PreservesSharedStringsAndNewImageParts()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Fill_PreservesSharedStringsAndNewImageParts(bool streaming)
     {
         var image = Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=");
         using var template = TestDocuments.BuildTemplate(builder =>
@@ -110,7 +116,7 @@ public sealed class ExcelPackagePreservationTests
         template.Position = 0;
         var contract = Contract with { Elements = [.. Contract.Elements, new ImageElement { Key = "Logo" }] };
         var data = new FillData { Tables = Data().Tables, Values = new Dictionary<string, object?> { ["Logo"] = image } };
-        using var output = new ExcelTemplateFiller().Fill(template, contract, data).Output;
+        using var output = Fill(template, contract, data, streaming);
         var parsed = new ExcelTemplateParser().Parse(output, contract);
         Assert.Equal(image, Assert.IsType<byte[]>(parsed.Values["Logo"]));
         output.Position = 0;
@@ -122,8 +128,10 @@ public sealed class ExcelPackagePreservationTests
         Assert.Equal("0", sheet.Worksheet!.GetFirstChild<SheetData>()!.Elements<Row>().Last().Elements<Cell>().Single().CellValue!.Text);
     }
 
-    [Fact]
-    public void Fill_PreservesXmlCommentsInUnloadedCustomPart()
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Fill_PreservesXmlCommentsInUnloadedCustomPart(bool streaming)
     {
         using var template = CreateTemplate();
         string partPath;
@@ -136,7 +144,7 @@ public sealed class ExcelPackagePreservationTests
             partPath = part.Uri.OriginalString.TrimStart('/');
         }
         template.Position = 0;
-        using var output = new ExcelTemplateFiller().Fill(template, Contract, Data()).Output;
+        using var output = Fill(template, Contract, Data(), streaming);
         Assert.Equal(bytes, EntryBytes(output, partPath));
     }
 
@@ -193,6 +201,19 @@ public sealed class ExcelPackagePreservationTests
                 new Dictionary<string, object?> { ["Code"] = "item" + index }).ToArray(),
         },
     };
+
+    private static Stream Fill(Stream template, TemplateContract contract, FillData data, bool streaming)
+    {
+        if (!streaming) return new ExcelTemplateFiller().Fill(template, contract, data).Output;
+        var target = new MemoryStream();
+        new ExcelTemplateFiller().FillStreaming(template, target, contract, new ExcelStreamingData
+        {
+            Values = data.Values,
+            Tables = data.Tables.ToDictionary(pair => pair.Key, pair => (IEnumerable<IReadOnlyDictionary<string, object?>>)pair.Value),
+        });
+        target.Position = 0;
+        return target;
+    }
 
     private static byte[] EntryBytes(Stream source, string path)
     {

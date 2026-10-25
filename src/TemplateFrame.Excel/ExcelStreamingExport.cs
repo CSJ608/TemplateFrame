@@ -5,6 +5,7 @@ using System.IO.Compression;
 using TemplateFrame.Contract;
 using TemplateFrame.Engine;
 using TemplateFrame.Internal;
+using Xdr = DocumentFormat.OpenXml.Drawing.Spreadsheet;
 
 namespace TemplateFrame.Excel;
 
@@ -55,14 +56,21 @@ internal sealed class ExcelStreamingExport(WorkbookPart workbook, TemplateResour
                     or SheetData or MergeCells or PrintOptions or PageMargins or PageSetup or HeaderFooter or Drawing))
                     throw Unsupported($"Worksheet structure '{child.LocalName}' requires reference handling not supported by streaming export.");
             uint previous = 0;
+            if (sheet.GetFirstChild<SheetData>()!.ChildElements.Any(child => child is not Row))
+                throw Unsupported("Sheet data must contain only rows.");
             foreach (var row in sheet.GetFirstChild<SheetData>()!.Elements<Row>())
             {
                 if (row.RowIndex is null || row.RowIndex.Value <= previous || row.RowIndex.Value > ExcelAddressHelper.MaxRow)
                     throw Unsupported("Worksheet rows must have unique, increasing valid indices.");
                 previous = row.RowIndex.Value;
                 foreach (var cell in row.Elements<Cell>())
+                {
                     if (cell.CellReference?.Value is not { } reference || ExcelAddressHelper.ParseCell(reference).Row != previous)
                         throw Unsupported("Cells must have addresses matching their containing row.");
+                    if (cell.CellFormula is { } formula && (formula.Reference is not null
+                        || formula.FormulaType is { } type && type.Value != CellFormulaValues.Normal))
+                        throw Unsupported("Shared, array and data-table formulas are not supported on expanded worksheets.");
+                }
             }
             foreach (var element in contract.Elements.Where(element => element is not TableElement))
             {
@@ -75,7 +83,12 @@ internal sealed class ExcelStreamingExport(WorkbookPart workbook, TemplateResour
             }
             foreach (var merge in sheet.Descendants<MergeCell>())
                 ExcelNamedRangeLocator.ParseReference(merge.Reference!.Value!);
-            _ = ExcelDrawingHelper.GetDrawingsPart(pair.Key)?.WorksheetDrawing;
+            var drawing = ExcelDrawingHelper.GetDrawingsPart(pair.Key)?.WorksheetDrawing;
+            if (drawing?.Descendants<Xdr.GraphicFrame>().Any() == true)
+                throw Unsupported("Chart and other graphic-frame references are not supported on expanded worksheets.");
+            foreach (var marker in drawing?.Descendants<Xdr.RowId>() ?? Enumerable.Empty<Xdr.RowId>())
+                if (!int.TryParse(marker.Text, out var index) || index < 0 || index >= ExcelAddressHelper.MaxRow)
+                    throw Unsupported("Drawing row markers must be within the worksheet boundary.");
         }
     }
 
@@ -117,7 +130,7 @@ internal sealed class ExcelStreamingExport(WorkbookPart workbook, TemplateResour
     private void WriteRows(WorksheetPart part, List<TablePlan> plans, OpenXmlWriter writer, SheetData rows)
     {
         var offset = 0;
-        var lastTemplateRow = (int)(rows.Elements<Row>().LastOrDefault()?.RowIndex?.Value ?? 0);
+        var lastTemplateRow = LastReferencedRow(part, plans[0].Sheet);
         writer.WriteStartElement(rows);
         while (rows.FirstChild is Row row)
         {
@@ -155,8 +168,9 @@ internal sealed class ExcelStreamingExport(WorkbookPart workbook, TemplateResour
         while (true)
         {
             cancellation.ThrowIfCancellationRequested();
-            if (!source.MoveNext()) break;
+            var hasRow = source.MoveNext();
             cancellation.ThrowIfCancellationRequested();
+            if (!hasRow) break;
             _budget.AddRows(1, columns);
             if (count >= availableRows) throw new InvalidOperationException("Rows exceed the worksheet boundary.");
             if (count > 0) _budget.AddClonedXml(characters, 1);
@@ -187,7 +201,24 @@ internal sealed class ExcelStreamingExport(WorkbookPart workbook, TemplateResour
             if (cell is null) continue;
             values.TryGetValue(column.Key, out var value);
             _cells.Write(cell, column, value);
+            if (cell.InlineString?.InnerText.Length > 32767)
+                throw new InvalidOperationException("Cell text exceeds the Excel limit of 32767 characters.");
         }
+    }
+
+    private int LastReferencedRow(WorksheetPart part, string sheet)
+    {
+        var maximum = (int)(part.Worksheet!.GetFirstChild<SheetData>()!.Elements<Row>().LastOrDefault()?.RowIndex?.Value ?? 0);
+        foreach (var match in ExcelNamedRangeLocator.FindAll(workbook))
+        {
+            var range = ExcelNamedRangeLocator.ParseReference(match.Reference);
+            if (range.Sheet == sheet) maximum = Math.Max(maximum, range.End.Row);
+        }
+        foreach (var merge in part.Worksheet.Descendants<MergeCell>())
+            maximum = Math.Max(maximum, ExcelNamedRangeLocator.ParseReference(merge.Reference!.Value!).End.Row);
+        foreach (var marker in ExcelDrawingHelper.GetDrawingsPart(part)?.WorksheetDrawing?.Descendants<Xdr.RowId>() ?? Enumerable.Empty<Xdr.RowId>())
+            maximum = Math.Max(maximum, int.Parse(marker.Text) + 1);
+        return maximum;
     }
 
     private static NotSupportedException Unsupported(string message) => new(message);

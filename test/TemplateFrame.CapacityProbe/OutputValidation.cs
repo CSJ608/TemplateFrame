@@ -52,7 +52,7 @@ internal static class OutputValidation
         var letter = column < 26 ? ((char)('A' + column)).ToString() : "A" + (char)('A' + column - 26);
         var expected = row < 0 ? "C" + column : Workload.Value(row, column, false);
         var type = expected is string ? "inlineStr" : "n";
-        var style = row < 0 ? "1" : expected is DateTime ? "2" : settings.Mode == "excel-write" ? "1" : null;
+        var style = row < 0 ? "1" : expected is DateTime ? "2" : settings.Mode is "excel-write" or "template-streaming-write" ? "1" : null;
         if (reader.GetAttribute("r") != letter + (row + 2) || reader.GetAttribute("t") != type || reader.GetAttribute("s") != style)
             throw new InvalidDataException($"Excel cell metadata mismatch at {row}:{column}.");
         if (expected is DateTime date) expected = date.ToOADate();

@@ -39,6 +39,15 @@ internal sealed class Workload
             Format = c % 6 == 5 ? "yyyy-MM-dd" : null,
         }).ToArray();
         _contract = new TemplateContract { Elements = [new TableElement { Key = "Items", Columns = columns }] };
+        if (settings.Mode == "template-streaming-write")
+        {
+            using var streamingTemplate = new MemoryStream();
+            var builder = new ExcelTemplateBuilder();
+            builder.AddTable("Items", _keys, startCell: "A1");
+            builder.Save(streamingTemplate);
+            _template = streamingTemplate.ToArray();
+            return;
+        }
         if (!settings.Mode.EndsWith("write", StringComparison.Ordinal) || settings.Mode.EndsWith("streaming-write", StringComparison.Ordinal)) return;
         var rows = Enumerable.Range(0, settings.Rows).Select(r => (IReadOnlyList<object?>)
             Enumerable.Range(0, settings.Columns).Select(c => Value(r, c, settings.Mode == "word-write")).ToArray()).ToArray();
@@ -94,6 +103,15 @@ internal sealed class Workload
             using var target = File.Create(_outputPath);
             if (_settings.Mode == "simple-write")
                 SimpleExcel.Write(target, _table!, new SimpleExcelOptions { TableName = "Items", ResourceLimits = _settings.Limits }, _keys);
+            else if (_settings.Mode == "template-streaming-write")
+            {
+                using var template = new MemoryStream(_template!, writable: false);
+                new ExcelTemplateFiller(new TemplateFillOptions { ResourceLimits = _settings.Limits }).FillStreaming(template, target, _contract,
+                    new ExcelStreamingData
+                    {
+                        Tables = new Dictionary<string, IEnumerable<IReadOnlyDictionary<string, object?>>> { ["Items"] = StreamTemplateRows() },
+                    });
+            }
             else if (_settings.Mode.EndsWith("streaming-write", StringComparison.Ordinal))
                 SimpleExcel.WriteStreaming(target, new SimpleExcelStreamingTable { Headers = _keys, ColumnKeys = _keys, Rows = StreamRows() }, new SimpleExcelStreamingOptions
                 {
@@ -143,6 +161,13 @@ internal sealed class Workload
     {
         for (var row = 0; row < _settings.Rows; row++)
             yield return Enumerable.Range(0, _settings.Columns).Select(column => Value(row, column, false)).ToArray();
+    }
+
+    private IEnumerable<IReadOnlyDictionary<string, object?>> StreamTemplateRows()
+    {
+        for (var row = 0; row < _settings.Rows; row++)
+            yield return _keys.Select((key, column) => (key, Value: Value(row, column, false)))
+                .ToDictionary(pair => pair.key, pair => (object?)pair.Value);
     }
 
     internal static object Value(int row, int column, bool textOnly) => !textOnly && column % 6 == 3 ? 10m + row

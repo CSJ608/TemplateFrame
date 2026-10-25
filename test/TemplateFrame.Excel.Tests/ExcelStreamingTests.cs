@@ -125,6 +125,88 @@ public sealed class ExcelStreamingTests
         Assert.True(target.CanWrite);
     }
 
+    [Theory]
+    [InlineData("scalar")]
+    [InlineData("table")]
+    [InlineData("formula")]
+    public void FillStreaming_RejectsOrderDependentStructuresWithoutConsumingData(string structure)
+    {
+        using var template = BuildTemplate();
+        using (var document = SpreadsheetDocument.Open(template, true))
+        {
+            var workbook = document.WorkbookPart!;
+            if (structure == "scalar") ExcelRowShifter.SetDefinedName(workbook, "TF_Footer", "Sheet1!$B$2");
+            else if (structure == "table") ExcelRowShifter.SetDefinedName(workbook, "TF_Second_Other", "Sheet1!$B$2");
+            else workbook.WorksheetParts.Single().Worksheet!.Descendants<Cell>().First().CellFormula =
+                new CellFormula("A2") { FormulaType = CellFormulaValues.Shared, SharedIndex = 0 };
+        }
+        template.Position = 0;
+        using var target = new MemoryStream();
+        var source = new SingleUseRows(Rows(1));
+        var data = new ExcelStreamingData
+        {
+            Tables = new Dictionary<string, IEnumerable<IReadOnlyDictionary<string, object?>>> { ["First"] = source, ["Second"] = source },
+        };
+        Assert.Throws<NotSupportedException>(() => new ExcelTemplateFiller().FillStreaming(template, target, Contract(), data));
+        Assert.False(source.Started);
+        Assert.Equal(0, target.Length);
+    }
+
+    [Theory]
+    [InlineData("cells")]
+    [InlineData("clones")]
+    [InlineData("text")]
+    [InlineData("null")]
+    [InlineData("boundary")]
+    public void FillStreaming_RejectsUnsafeDataAndReleasesEnumerator(string kind)
+    {
+        using var template = BuildTemplate();
+        if (kind == "boundary")
+        {
+            using var document = SpreadsheetDocument.Open(template, true);
+            document.WorkbookPart!.WorksheetParts.Single().Worksheet!.Append(new MergeCells(new MergeCell { Reference = "A1048576:B1048576" }));
+        }
+        template.Position = 0;
+        using var target = new MemoryStream();
+        var limits = new TemplateResourceLimits { MaxTableCells = kind == "cells" ? 2 : 1000, MaxClonedXmlCharacters = kind == "clones" ? 1 : 10000 };
+        var source = new SingleUseRows(kind == "text" ? [new Dictionary<string, object?> { ["Value"] = new string('x', 32768) }]
+            : kind == "null" ? [null!] : Rows(3));
+        var filler = new ExcelTemplateFiller(new TemplateFillOptions { ResourceLimits = limits });
+        if (kind == "null") Assert.Throws<ArgumentException>(() => filler.FillStreaming(template, target, Contract(), Data(source)));
+        else Assert.Throws<InvalidOperationException>(() => filler.FillStreaming(template, target, Contract(), Data(source)));
+        Assert.True(source.Disposed);
+        Assert.True(target.CanWrite);
+    }
+
+    [Fact]
+    public void FillStreaming_CancelledBeforeStartDoesNotTouchStreamsOrSource()
+    {
+        using var template = BuildTemplate();
+        using var target = new MemoryStream();
+        var source = new SingleUseRows(Rows(1));
+        Assert.Throws<OperationCanceledException>(() => new ExcelTemplateFiller().FillStreaming(template, target, Contract(), Data(source), new CancellationToken(true)));
+        Assert.False(source.Started);
+        Assert.Equal(0, target.Length);
+        Assert.Equal(0, template.Position);
+    }
+
+    [Fact]
+    public void FillStreaming_OutputFailureLeavesCallerStreamsOpenAndDisposesSource()
+    {
+        using var template = BuildTemplate();
+        using var target = new FailingStream();
+        var source = new SingleUseRows(Rows(1000));
+        Assert.Throws<IOException>(() => new ExcelTemplateFiller().FillStreaming(template, target, Contract(), Data(source)));
+        Assert.True(source.Disposed);
+        Assert.True(target.CanWrite);
+        Assert.True(template.CanRead);
+    }
+
+    private sealed class FailingStream : MemoryStream
+    {
+        public override void Write(byte[] buffer, int offset, int count) => throw new IOException("target failure");
+    }
+
     private static MemoryStream BuildTemplate() => TestDocuments.BuildTemplate(builder =>
     {
         builder.AddTable("First", ["Value"], new TableFormat(), "A1");
