@@ -142,6 +142,28 @@ public sealed class WordTableLookupTests
         await Task.WhenAll(Enumerable.Range(2, 8).Select(i => Task.Run(() => Check(i))));
     }
 
+    [Fact]
+    public void Fill_FormattingFailureFollowsControlOrderAndLeavesInputUnchanged()
+    {
+        using var input = TestDocuments.BuildTemplate(b => b.AddTable("Items", ["B", "A"]));
+        var original = input.ToArray();
+        var contract = new TemplateContract
+        {
+            Elements = [new TableElement { Key = "Items", Columns =
+                [new TextElement { Key = "A", Format = "F2" }, new TextElement { Key = "B", Format = "F2" }] }],
+        };
+        var error = Assert.Throws<FormatException>(() => new WordTemplateFiller().Fill(input, contract,
+            Data(new Dictionary<string, object?> { ["A"] = new InvalidValue("A"), ["B"] = new InvalidValue("B") })));
+        Assert.Equal("B", error.Message);
+        Assert.Equal(original, input.ToArray());
+        Assert.True(input.CanRead);
+    }
+
+    private sealed class InvalidValue(string key) : IFormattable
+    {
+        public string ToString(string? format, IFormatProvider? formatProvider) => throw new FormatException(key);
+    }
+
     private static TemplateContract Contract(params string[] keys) => new()
     {
         Elements = [new TableElement { Key = "Items", Columns = keys.Select(k => new TextElement { Key = k }).ToArray() }],
