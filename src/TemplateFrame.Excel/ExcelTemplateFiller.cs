@@ -55,8 +55,9 @@ public sealed class ExcelTemplateFiller
         using var working = new MemoryStream();
         working.Write(bytes, 0, bytes.Length);
         working.Position = 0;
+        ExcelPackageOutput packageOutput;
         using (var document = SpreadsheetDocument.Open(working, true,
-                   new OpenSettings { MaxCharactersInPart = _options.ResourceLimits.MaxXmlCharactersPerPart }))
+                   new OpenSettings { AutoSave = false, MaxCharactersInPart = _options.ResourceLimits.MaxXmlCharactersPerPart }))
         {
             try
             {
@@ -70,14 +71,11 @@ public sealed class ExcelTemplateFiller
             {
                 throw new InvalidOperationException(Sr.Get("Excel.Validation.CannotOpen", ex.Message), ex);
             }
+            packageOutput = new ExcelPackageOutput(document);
         }
 
         working.Position = 0;
-        var output = new MemoryStream();
-        working.CopyTo(output);
-
-        output.Position = 0;
-        return output;
+        return packageOutput.Write(working);
     }
 
     private IReadOnlyList<TemplateValidationIssue> ApplyValidation(
