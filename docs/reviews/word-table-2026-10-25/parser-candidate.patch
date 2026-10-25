@@ -35,3 +35,4 @@ index 5cff806..c5973c2 100644
 +                        rowValues[column.Key!] = null;
                          continue;
                      }
+ 

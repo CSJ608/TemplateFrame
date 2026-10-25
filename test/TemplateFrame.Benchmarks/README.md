@@ -7,6 +7,7 @@
 | 组 | 基准 | 说明 |
 |---|---|---|
 | `WordBenchmarks` | Build / Fill(100·1000 行) / Parse(1000 行) | A5 横版 + 6 标量 + 6 列表格 + 图片 |
+| `WordTableBenchmarks` | Parse / Fill(0·1·100·1000 行) | 6/30 列，GlobalSetup 生成输入并逐格检查回读，默认资源限额 |
 | `ExcelBenchmarks` | Build / Fill(100·1000 行) / Parse(1000 行) | 网格版式 + 表格**下方元素**（行使行下移/区域平移逻辑） |
 | `ExcelParseBenchmarks` | Parse(100·1000·5000 行) | 相同 Excel 版式，GlobalSetup 构建并填充，计时内仅完整回读 |
 | `SimpleExcelBenchmarks` | Write / Read(1k·10k 行) + 契约路径 Read(10k 行) | 简单表格导入导出 + 定义名列定位 |
@@ -30,6 +31,7 @@ dotnet run -c Release --project test/TemplateFrame.Benchmarks -- --filter "*Word
 
 - 每次操作调用完整路径（Build/Fill 含保存，Parse 含打开和回读、不保存），数字是**端到端**耗时；BenchmarkDotNet 可在一次迭代中执行多次操作，结果按单次操作归一化；
 - `ExcelParseBenchmarks` 使用 `--filter '*ExcelParseBenchmarks*'`；输入生成及行数/末行值校验在 GlobalSetup 内，不计入回读耗时；
+- Word 专项使用 `--word-study --filter '*WordTableBenchmarks.Parse*'` 或 `Fill`，单独测量；该开关使用独立进程、4 次预热/8 次测量、目标迭代 200 ms。前后版本须放在仓库外的独立目录，避免历史副本同名项目导致 BDN 定位失败。完整命令、JIT 配置、误差与未采用方案见 [专项报告](../../docs/reviews/word-table-2026-10-25/README.md)；
 - SimpleExcel 读取专项使用 `--filter '*SimpleExcelRead*Benchmarks*'`，保持默认资源限额；独立进程前后对照配置与原始证据见 [专项报告](../../docs/reviews/simple-excel-read-2026-10-24/README.md)；
 - Allocated 是单次操作累计托管分配量，不是峰值内存、存活堆或进程工作集；
 - `Fill` 内部先跑一遍 `Validate` 软校验（设计如此），数字包含这一遍；

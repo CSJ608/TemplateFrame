@@ -1,0 +1,72 @@
+// Validating benchmarks:
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 8 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// ***** Done, took 00:00:00 (0.23 sec)   *****
+// Found 8 benchmarks:
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=0]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=1]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=100]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=1000]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=0]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=1]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=100]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=1000]
+
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// Generate Exception: System.NotSupportedException: Found more than one matching project file for TemplateFrame.Benchmarks in C:\work\OpenCode\TemplateFrame and its subfolders: 'C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Benchmarks\TemplateFrame.Benchmarks.csproj','C:\work\OpenCode\TemplateFrame\artifacts\review-r3-baseline\test\TemplateFrame.Benchmarks\TemplateFrame.Benchmarks.csproj','C:\work\OpenCode\TemplateFrame\artifacts\review-r5-baseline\test\TemplateFrame.Benchmarks\TemplateFrame.Benchmarks.csproj','C:\work\OpenCode\TemplateFrame\artifacts\word-study\baseline\test\TemplateFrame.Benchmarks\TemplateFrame.Benchmarks.csproj','C:\work\OpenCode\TemplateFrame\artifacts\word-study\before\test\TemplateFrame.Benchmarks\TemplateFrame.Benchmarks.csproj'. Benchmark project names needs to be unique.
+   at BenchmarkDotNet.Toolchains.CsProj.CsProjGenerator.GetProjectFilePath(Type benchmarkTarget, ILogger logger)
+   at BenchmarkDotNet.Toolchains.CsProj.CsProjGenerator.GenerateProject(BuildPartition buildPartition, ArtifactsPaths artifactsPaths, ILogger logger)
+   at BenchmarkDotNet.Toolchains.GeneratorBase.GenerateProject(BuildPartition buildPartition, ILogger logger, String rootArtifactsFolderPath)
+
+// BenchmarkDotNet has failed to build the auto-generated boilerplate code.
+// It can be found in C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1
+// Please follow the troubleshooting guide: https://benchmarkdotnet.org/articles/guides/troubleshooting.html
+
+// ** Remained 0 (0.0%) benchmark(s) to run. Estimated finish 2026-10-25 8:16 (0h 0m from now) **
+Successfully reverted power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  C:\work\OpenCode\TemplateFrame\artifacts\word-study\parse-before-valid\results\TemplateFrame.Benchmarks.WordTableBenchmarks-report.csv
+  C:\work\OpenCode\TemplateFrame\artifacts\word-study\parse-before-valid\results\TemplateFrame.Benchmarks.WordTableBenchmarks-report-github.md
+  C:\work\OpenCode\TemplateFrame\artifacts\word-study\parse-before-valid\results\TemplateFrame.Benchmarks.WordTableBenchmarks-report.html
+
+// * Detailed results *
+WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=0]
+Runtime = ; GC = 
+There are not any results runs
+
+// * Summary *
+
+BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6466/22H2/2022Update)
+12th Gen Intel Core i5-12500H 3.10GHz, 1 CPU, 16 logical and 12 physical cores
+.NET SDK 10.0.402
+  [Host] : .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+
+Job=Word-Isolated  OutlierMode=DontRemove  IterationCount=8  
+IterationTime=200ms  LaunchCount=1  WarmupCount=4  
+
+| Method | Columns | Rows | Mean | Error |
+|------- |-------- |----- |-----:|------:|
+| Parse  | 6       | 0    |   NA |    NA |
+
+Benchmarks with issues:
+  WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=0]
+
+// * Legends *
+  Columns : Value of the 'Columns' parameter
+  Rows    : Value of the 'Rows' parameter
+  Mean    : Arithmetic mean of all measurements
+  Error   : Half of 99.9% confidence interval
+  1 ns    : 1 Nanosecond (0.000000001 sec)
+
+// * Diagnostic Output - MemoryDiagnoser *
+
+
+// ***** BenchmarkRunner: End *****
+Run time: 00:00:00 (0.15 sec), executed benchmarks: 0
+
+Global total time: 00:00:01 (1.2 sec), executed benchmarks: 0
+// * Artifacts cleanup *
+Artifacts cleanup is finished
