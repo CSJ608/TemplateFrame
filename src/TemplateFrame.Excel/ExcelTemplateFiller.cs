@@ -50,6 +50,35 @@ public sealed class ExcelTemplateFiller
         return new TemplateFillResult { Output = output, Warnings = warnings };
     }
 
+    public IReadOnlyList<TemplateValidationIssue> FillStreaming(
+        Stream template, Stream target, TemplateContract contract, ExcelStreamingData data,
+        CancellationToken cancellationToken = default)
+    {
+        Guard.ThrowIfNull(template, nameof(template));
+        Guard.ThrowIfNull(target, nameof(target));
+        Guard.ThrowIfNull(contract, nameof(contract));
+        Guard.ThrowIfNull(data, nameof(data));
+        Guard.ThrowIfNull(data.Values, nameof(data.Values));
+        Guard.ThrowIfNull(data.Tables, nameof(data.Tables));
+        if (ReferenceEquals(template, target)) throw new ArgumentException("Template and target must be different streams.", nameof(target));
+        if (!target.CanWrite) throw new ArgumentException("The target stream must be writable.", nameof(target));
+        cancellationToken.ThrowIfCancellationRequested();
+        var bytes = StreamUtil.ReadAllBytes(template, _options.ResourceLimits);
+        using var validationInput = new MemoryStream(bytes, writable: false);
+        var warnings = ApplyValidation(new ExcelTemplateValidator(_options.ResourceLimits)
+            .ValidateCheckedPackage(validationInput, contract), contract);
+        using var working = new MemoryStream();
+        working.Write(bytes, 0, bytes.Length);
+        working.Position = 0;
+        using var document = SpreadsheetDocument.Open(working, true,
+            new OpenSettings { AutoSave = false, MaxCharactersInPart = _options.ResourceLimits.MaxXmlCharactersPerPart });
+        var export = new ExcelStreamingExport(document.WorkbookPart!, _options.ResourceLimits, cancellationToken);
+        export.Plan(contract, data);
+        FillCore(document.WorkbookPart!, contract, new FillData { Values = data.Values }, new TemplateResourceBudget(_options.ResourceLimits));
+        export.Write(document, working, target);
+        return warnings;
+    }
+
     private MemoryStream FillWorkingCopy(byte[] bytes, TemplateContract contract, FillData data, TemplateResourceBudget budget)
     {
         using var working = new MemoryStream();

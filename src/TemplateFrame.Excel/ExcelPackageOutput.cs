@@ -36,6 +36,16 @@ internal sealed class ExcelPackageOutput
         }
     }
 
+    internal void CopyRemaining(Stream finalizedPackage, ZipArchive target, ISet<string> written, CancellationToken cancellation)
+    {
+        using var source = new ZipArchive(finalizedPackage, ZipArchiveMode.Read, leaveOpen: true);
+        foreach (var entry in source.Entries)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            if (!written.Contains(entry.FullName)) CopyEntry(entry, target);
+        }
+    }
+
     private void CopyEntry(ZipArchiveEntry source, ZipArchive target)
     {
         var entry = target.CreateEntry(source.FullName);

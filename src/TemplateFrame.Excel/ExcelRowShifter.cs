@@ -54,7 +54,7 @@ internal static class ExcelRowShifter
         }
     }
 
-    private static void SetRowIndex(Row row, uint index)
+    internal static void SetRowIndex(Row row, uint index)
     {
         row.RowIndex = index;
         foreach (var cell in row.Elements<Cell>())
