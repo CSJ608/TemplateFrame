@@ -227,12 +227,13 @@ public sealed class ExcelTemplateFiller
             budget.AddClonedXml(sampleRowElement.OuterXml.Length, delta);
         }
 
-        var clones = ExcelRowShifter.CloneAndShiftRows(sheetData, sampleRowElement, sampleRow, rows.Count);
+        var clones = ExcelRowShifter.EnumerateClonedRows(sheetData, sampleRowElement, sampleRow, rows.Count);
 
         var sampleCols = columnRanges.ToDictionary(c => c.Column.Key, c => c.Start.Col, StringComparer.Ordinal);
-        for (var i = 0; i < clones.Count; i++)
+        var index = 0;
+        foreach (var clone in clones)
         {
-            FillTableRow(writer, clones[i], table, rows[i], sampleCols);
+            FillTableRow(writer, clone, table, rows[index++], sampleCols);
         }
 
         if (delta > 0)

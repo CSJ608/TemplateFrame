@@ -146,6 +146,45 @@ public sealed class ExcelPackagePreservationTests
         builder.AddText("A5", "footer");
     });
 
+    [Theory]
+    [InlineData(false)]
+    [InlineData(true)]
+    public void Fill_PreservesMultipleTablesInEitherContractOrder(bool reverse)
+    {
+        using var template = TestDocuments.BuildTemplate(builder =>
+        {
+            builder.AddTable("First", ["Code"], startCell: "A1");
+            builder.AddTable("Second", ["OtherCode"], startCell: "A6");
+            builder.AddElement("Footer", "A10");
+        });
+        var tables = new[]
+        {
+            new TableElement { Key = "First", Columns = [new TextElement { Key = "Code" }] },
+            new TableElement { Key = "Second", Columns = [new TextElement { Key = "OtherCode" }] },
+        };
+        var contract = new TemplateContract { Elements = [.. reverse ? tables.AsEnumerable().Reverse() : tables, new TextElement { Key = "Footer" }] };
+        var values = Data().Tables["Items"];
+        var data = new FillData
+        {
+            Tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>
+            {
+                ["First"] = values,
+                ["Second"] = values.Take(2).Select(row => (IReadOnlyDictionary<string, object?>)new Dictionary<string, object?> { ["OtherCode"] = row["Code"] }).ToArray(),
+            },
+            Values = new Dictionary<string, object?> { ["Footer"] = "after both tables" },
+        };
+        using var output = new ExcelTemplateFiller().Fill(template, contract, data).Output;
+        var parsed = new ExcelTemplateParser().Parse(output, contract);
+        Assert.Equal(3, parsed.Tables["First"].Count);
+        Assert.Equal(2, parsed.Tables["Second"].Count);
+        Assert.Equal("item3", parsed.Tables["First"][2]["Code"]);
+        Assert.Equal("item2", parsed.Tables["Second"][1]["OtherCode"]);
+        Assert.Equal("after both tables", parsed.Values["Footer"]);
+        output.Position = 0;
+        using var document = SpreadsheetDocument.Open(output, false);
+        Assert.Equal("Sheet1!$A$13", ExcelNamedRangeLocator.FindByName(document.WorkbookPart!, "TF_Footer")!.Reference);
+    }
+
     private static FillData Data() => new()
     {
         Tables = new Dictionary<string, IReadOnlyList<IReadOnlyDictionary<string, object?>>>

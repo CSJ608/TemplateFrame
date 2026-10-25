@@ -6,7 +6,7 @@ namespace TemplateFrame.Excel;
 
 internal static class ExcelRowShifter
 {
-    internal static List<Row> CloneAndShiftRows(SheetData sheetData, Row sampleRowElement, int sampleRow, int dataRowCount)
+    internal static IEnumerable<Row> EnumerateClonedRows(SheetData sheetData, Row sampleRowElement, int sampleRow, int dataRowCount)
     {
         var delta = dataRowCount - 1;
         var belowRowsToShift = delta > 0
@@ -22,17 +22,10 @@ internal static class ExcelRowShifter
             throw new FormatException(Localization.Sr.Get("Excel.Address.CannotParse", sampleRow));
         }
 
-        var clones = new List<Row> { sampleRowElement };
-        var anchor = sampleRowElement;
-        for (var i = 1; i < dataRowCount; i++)
+        if (delta > 0)
         {
-            var clone = (Row)sampleRowElement.CloneNode(true);
-            var newRowIndex = sampleRow + i;
-            SetRowIndex(clone, (uint)newRowIndex);
-
-            anchor.InsertAfterSelf(clone);
-            anchor = clone;
-            clones.Add(clone);
+            foreach (var cell in sampleRowElement.Elements<Cell>())
+                if (cell.CellReference?.Value is { } reference) ExcelAddressHelper.ParseCell(reference);
         }
 
         foreach (var belowRow in belowRowsToShift)
@@ -42,7 +35,23 @@ internal static class ExcelRowShifter
             SetRowIndex(belowRow, newIndex);
         }
 
-        return clones;
+        return CloneRows(sampleRowElement, dataRowCount);
+    }
+
+    private static IEnumerable<Row> CloneRows(Row sampleRow, int count)
+    {
+        var prototype = count > 1 ? (Row)sampleRow.CloneNode(true) : null;
+        var firstIndex = sampleRow.RowIndex!.Value;
+        var anchor = sampleRow;
+        yield return sampleRow;
+        for (var index = 1; index < count; index++)
+        {
+            var clone = (Row)prototype!.CloneNode(true);
+            SetRowIndex(clone, firstIndex + (uint)index);
+            anchor.InsertAfterSelf(clone);
+            anchor = clone;
+            yield return clone;
+        }
     }
 
     private static void SetRowIndex(Row row, uint index)
