@@ -75,6 +75,7 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
 
 - 目标框架 `netstandard2.0 / net462 / net8.0`（NuGet 按运行时自动选择）。
 - 依赖 `DocumentFormat.OpenXml`（3.5.1，与 Word 插件同款）。
+- 大表填充采用边克隆边填充，最终 XML 直接写入 ZIP，并释放已写出的私有行对象；公开接口、模板功能和默认预算不变。这不是低内存流式接口，仍需保留输入数据和完整工作表 DOM，并返回内存输出流；大文件请求应由宿主按内存预算排队。合成容量及限制见 [模板 Excel 导出专项](https://github.com/CSJ608/TemplateFrame/blob/main/docs/reviews/excel-save-2026-10-25/README.md)。
 - 历史性能快照（2026-08-24，仅描述当时样本，不保证线性伸缩或当前版本耗时）：千行明细填充 ~60ms、回读 ~115ms、构建 ~1ms；快照见仓库 [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md)，基准项目 [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md)。
 - 测试 `test/TemplateFrame.Excel.Tests`：生成 → 校验 → 填充 → 回读 → 断言（含命名区域清单、类型化值、
   表格行克隆后范围重指、下方元素下移、图片替换、未填充占位等边界）。

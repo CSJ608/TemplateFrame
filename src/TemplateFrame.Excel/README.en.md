@@ -75,6 +75,7 @@ Use `FillDetailed` / `ParseDetailed` for warnings. Engine failures retain raw te
 
 - Target frameworks `netstandard2.0 / net462 / net8.0` (NuGet picks per runtime automatically).
 - Depends on `DocumentFormat.OpenXml` (3.5.1, same as the Word plugin).
+- Large-table filling now interleaves cloning and value writes, serializes XML directly into the final ZIP, and releases private rows after writing. Public APIs, template semantics and default budgets remain unchanged. This is not a low-memory streaming API: input data and the complete worksheet DOM are still retained during filling, and the result is an in-memory stream. Hosts should queue large requests according to their memory budget. See the [template Excel export study](https://github.com/CSJ608/TemplateFrame/blob/main/docs/reviews/excel-save-2026-10-25/README.md) for measured capacity and limitations.
 - Historical snapshot (2026-08-24; sample-specific, with no guarantee of linear scaling or current-version timings): 1k-row detail fill ~60ms, parse ~115ms, build ~1ms; snapshots in [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md), benchmark project [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md).
 - Tests in `test/TemplateFrame.Excel.Tests`: generate → validate → fill → parse → assert (including named-range inventories, typed values,
   range re-pointing after row cloning, elements below shifted down, image replacement, unfilled placeholders and other edge cases).

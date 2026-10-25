@@ -1,0 +1,33 @@
+{
+  "SolutionReleaseBuild": { "Passed": true, "Warnings": 0, "Errors": 0 },
+  "ProbeReleaseBuild": { "Passed": true, "Warnings": 0, "Errors": 0 },
+  "Tests": {
+    "Frameworks": ["net472", "net8.0", "net10.0"],
+    "Core": 399,
+    "Word": 492,
+    "Excel": 621,
+    "SimpleExcel": 413,
+    "Total": 1925,
+    "Passed": 1925,
+    "Failed": 0,
+    "NewScenarios": 13,
+    "LocalTrxDirectory": "artifacts/excel-save-2026-10-25/final-tests"
+  },
+  "SolutionFormatVerify": true,
+  "ProbeFormatVerify": true,
+  "RawLogs": "Retained with original trailing blank lines; excluded from source/document whitespace checks",
+  "CapacityCases": {
+    "Total": 14,
+    "Passed": 11,
+    "ExpectedDefaultLimitRejections": 1,
+    "IntermediateCandidateOutOfMemory": 1,
+    "IntermediateCandidateSystemMemoryGuard": 1,
+    "FinalImplementationUnexpectedFailures": 0
+  },
+  "PublicApiChanged": false,
+  "DefaultResourceLimitsChanged": false,
+  "OfficeOrWpsInteractiveValidation": false,
+  "MaximumSize100WayConcurrencyTested": false,
+  "WordImportTested": false,
+  "Pushed": false
+}
