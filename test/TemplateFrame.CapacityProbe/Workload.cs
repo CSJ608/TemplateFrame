@@ -59,7 +59,7 @@ internal sealed class Workload
         if (settings.Mode == "word-write")
         {
             _contract = _contract with { Elements = [.. _contract.Elements, new ImageElement { Key = "Logo" }, new ImageElement { Key = "Stamp" }] };
-            _data = new FillData { Tables = _data.Tables, Values = new Dictionary<string, object?> { ["Logo"] = Image, ["Stamp"] = Image } };
+            _data = new FillData { Tables = _data.Tables, Values = new Dictionary<string, object?> { ["Logo"] = ProbeImage.Bytes, ["Stamp"] = ProbeImage.Bytes } };
             var builder = new WordTemplateBuilder();
             builder.AddParagraph("合成容量验证单据");
             builder.AddImage("Logo", widthInches: 0.8, heightInches: 0.8);
@@ -137,5 +137,4 @@ internal sealed class Workload
         : !textOnly && column % 6 == 5 ? new DateTime(2026, 1, 1).AddDays(row % 365)
         : $"物料{row:D7}-字段{column:D2}";
 
-    private static readonly byte[] Image = Convert.FromBase64String("iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=");
 }

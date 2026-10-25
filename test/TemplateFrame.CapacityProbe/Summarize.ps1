@@ -10,7 +10,10 @@ $rows = foreach ($file in Get-ChildItem -LiteralPath $ResultDirectory -Filter su
     $start = $events | Where-Object Phase -eq 'prepare' | Select-Object -First 1
     $operation = $events | Where-Object Phase -eq 'validation' | Select-Object -Last 1
     $finish = $events | Where-Object Phase -eq 'complete' | Select-Object -Last 1
-    $status = if ($summary.Guard) { $summary.Guard } elseif ($finish.Status) { $finish.Status } else { 'process-failed' }
+    $status = if ($summary.Mode -eq 'word-write' -and $file.Directory.Name -notlike 'pngv2-*') { 'invalid-image-fixture' }
+    elseif ($summary.Guard) { $summary.Guard }
+    elseif ($finish.Error -like 'System.OutOfMemoryException:*') { 'out-of-memory' }
+    elseif ($finish.Status) { $finish.Status } else { 'process-failed' }
     [pscustomobject]@{
         Case = $file.Directory.Name
         Mode = $summary.Mode

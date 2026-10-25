@@ -7,8 +7,12 @@ var settings = ProbeSettings.Parse(args);
 Directory.CreateDirectory(settings.Directory);
 Emit(new
 {
-    Phase = "prepare", settings, Runtime = RuntimeInformation.FrameworkDescription, ProcessId = Environment.ProcessId,
-    HeapBudgetBytes = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes, ServerGc = System.Runtime.GCSettings.IsServerGC,
+    Phase = "prepare",
+    settings,
+    Runtime = RuntimeInformation.FrameworkDescription,
+    ProcessId = Environment.ProcessId,
+    HeapBudgetBytes = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes,
+    ServerGc = System.Runtime.GCSettings.IsServerGC,
 });
 try
 {
