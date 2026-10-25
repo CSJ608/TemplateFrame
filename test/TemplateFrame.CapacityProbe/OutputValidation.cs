@@ -1,4 +1,5 @@
 using System.IO.Compression;
+using System.Globalization;
 using System.Xml;
 using System.Xml.Linq;
 
@@ -25,6 +26,12 @@ internal static class OutputValidation
             {
                 if (reader.NamespaceURI == tableNamespace && reader.LocalName == (word ? "tr" : "row")) rows++;
                 if (reader.NamespaceURI == tableNamespace && reader.LocalName == (word ? "tc" : "c")) cells++;
+                if (!word && settings.Mode.EndsWith("streaming-write", StringComparison.Ordinal)
+                    && reader.NamespaceURI == tableNamespace && reader.LocalName == "c")
+                {
+                    var value = CheckStreamingCell(reader, settings, cells - 1);
+                    if (value == last) foundLast = true;
+                }
                 if (reader.LocalName == "blip" && reader.NamespaceURI == "http://schemas.openxmlformats.org/drawingml/2006/main")
                 {
                     pictures++;
@@ -36,6 +43,26 @@ internal static class OutputValidation
         if (rows != settings.Rows + 1 || cells != (long)(settings.Rows + 1) * settings.Columns || !foundLast || word && pictures != 2)
             throw new InvalidDataException($"Output mismatch: rows={rows}, cells={cells}, pictures={pictures}, last={foundLast}.");
         if (word) CheckImages(zip, imageIds);
+    }
+
+    private static string CheckStreamingCell(XmlReader reader, ProbeSettings settings, int cellIndex)
+    {
+        var row = cellIndex / settings.Columns - 1;
+        var column = cellIndex % settings.Columns;
+        var letter = column < 26 ? ((char)('A' + column)).ToString() : "A" + (char)('A' + column - 26);
+        var expected = row < 0 ? "C" + column : Workload.Value(row, column, false);
+        var type = expected is string ? "inlineStr" : "n";
+        var style = row < 0 ? "1" : expected is DateTime ? "2" : null;
+        if (reader.GetAttribute("r") != letter + (row + 2) || reader.GetAttribute("t") != type || reader.GetAttribute("s") != style)
+            throw new InvalidDataException($"Streaming cell metadata mismatch at {row}:{column}.");
+        if (expected is DateTime date) expected = date.ToOADate();
+        var expectedText = Convert.ToString(expected, CultureInfo.InvariantCulture);
+        using var cell = reader.ReadSubtree();
+        string? actual = null;
+        while (cell.Read())
+            if (cell.NodeType is XmlNodeType.Text or XmlNodeType.SignificantWhitespace) actual = cell.Value;
+        if (actual != expectedText) throw new InvalidDataException($"Streaming value mismatch at {row}:{column}.");
+        return actual!;
     }
 
     private static void CheckImages(ZipArchive zip, HashSet<string> imageIds)

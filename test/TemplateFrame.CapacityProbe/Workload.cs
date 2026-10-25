@@ -39,7 +39,7 @@ internal sealed class Workload
             Format = c % 6 == 5 ? "yyyy-MM-dd" : null,
         }).ToArray();
         _contract = new TemplateContract { Elements = [new TableElement { Key = "Items", Columns = columns }] };
-        if (!settings.Mode.EndsWith("write", StringComparison.Ordinal)) return;
+        if (!settings.Mode.EndsWith("write", StringComparison.Ordinal) || settings.Mode.EndsWith("streaming-write", StringComparison.Ordinal)) return;
         var rows = Enumerable.Range(0, settings.Rows).Select(r => (IReadOnlyList<object?>)
             Enumerable.Range(0, settings.Columns).Select(c => Value(r, c, settings.Mode == "word-write")).ToArray()).ToArray();
         if (settings.Mode == "simple-write")
@@ -94,6 +94,12 @@ internal sealed class Workload
             using var target = File.Create(_outputPath);
             if (_settings.Mode == "simple-write")
                 SimpleExcel.Write(target, _table!, new SimpleExcelOptions { TableName = "Items", ResourceLimits = _settings.Limits }, _keys);
+            else if (_settings.Mode.EndsWith("streaming-write", StringComparison.Ordinal))
+                SimpleExcel.WriteStreaming(target, new SimpleExcelStreamingTable { Headers = _keys, ColumnKeys = _keys, Rows = StreamRows() }, new SimpleExcelStreamingOptions
+                {
+                    WorkbookOptions = new SimpleExcelOptions { TableName = "Items", ResourceLimits = _settings.Limits },
+                    ColumnWidths = _settings.Mode == "fixed-streaming-write" ? Enumerable.Repeat(20d, _settings.Columns).ToArray() : null,
+                });
             else
             {
                 using var template = new MemoryStream(_template!, writable: false);
@@ -131,6 +137,12 @@ internal sealed class Workload
         var expected = Value(row, column, false);
         var valid = expected is decimal number ? Convert.ToDecimal(actual, CultureInfo.InvariantCulture) == number : Equals(actual, expected);
         if (!valid) throw new InvalidDataException($"Value mismatch at {row}:{column}.");
+    }
+
+    private IEnumerable<IReadOnlyList<object?>> StreamRows()
+    {
+        for (var row = 0; row < _settings.Rows; row++)
+            yield return Enumerable.Range(0, _settings.Columns).Select(column => Value(row, column, false)).ToArray();
     }
 
     internal static object Value(int row, int column, bool textOnly) => !textOnly && column % 6 == 3 ? 10m + row
