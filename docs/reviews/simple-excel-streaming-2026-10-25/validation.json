@@ -1,0 +1,30 @@
+{
+  "SolutionReleaseBuild": { "Passed": true, "Warnings": 0, "Errors": 0 },
+  "ProbeReleaseBuild": { "Passed": true, "Warnings": 0, "Errors": 0 },
+  "Tests": {
+    "Frameworks": ["net472", "net8.0", "net10.0"],
+    "Core": 399,
+    "Word": 492,
+    "Excel": 582,
+    "SimpleExcel": 413,
+    "Total": 1886,
+    "Passed": 1886,
+    "Failed": 0,
+    "LocalTrxDirectory": "artifacts/streaming-2026-10-25/final-tests"
+  },
+  "SolutionFormatVerify": true,
+  "ProbeFormatVerify": true,
+  "DiffWhitespaceCheck": "Passed for source and documentation; raw captured logs retain their original trailing blank lines",
+  "CapacityCases": {
+    "Total": 14,
+    "Passed": 13,
+    "ExpectedDefaultLimitRejections": 1,
+    "UnexpectedFailures": 0,
+    "GuardTerminations": 0,
+    "InitialStructuralSmokeOnly": "net10-1m-sampled"
+  },
+  "OfficeOrWpsInteractiveValidation": false,
+  "MaximumSize100WayConcurrencyTested": false,
+  "WordImportTested": false,
+  "Pushed": false
+}

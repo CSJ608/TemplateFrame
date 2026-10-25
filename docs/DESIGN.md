@@ -263,6 +263,8 @@ Excel 解析的行、单元格及共享字符串索引在单次 Parse 内创建�
 
 **Simple 的表头与数据区**：底层 `SimpleExcel.Write/Read` 可独立使用，默认 `TF_Table` 标记区域，`TableName` / `StartCell` 可配置。Read 优先取区域表头；区域缺失、`#REF!` / 不支持的公式定义名，或区域表头为空时保留表头回退：优先第一个至少两个非空单元格的行，没有这样的行时取首个非空行。无效的 A1 坐标、越界或反向范围直接拒绝，不靠回退掩盖。
 
+**Simple 的显式流式导出**：`WriteStreaming(Stream, SimpleExcelStreamingTable, SimpleExcelStreamingOptions?, CancellationToken)` 接收单次枚举的行源。`WorkbookOptions` 复用现有工作表/预算配置；列宽可固定，或只采样前 N 个源行（默认 100，最多 1024，且采样网格最多 65,536 格）。缓存的是已转换的采样行，兼容数据源重复使用行缓冲区；剩余数据逐行直接写入 ZIP 条目，不经工作表 DOM 或 Packaging 的整部件缓冲。保留数值、日期、空行压缩和定义名语义，但列宽不再保证覆盖后续全部数据。至少一个表头，预算逐源行累计；取消/超限/错误可能留下部分输出，调用方负责丢弃。枚举器由方法释放、输出流始终由调用方拥有；非可定位流适配器记录当前位置，以兼容 .NET Framework ZIP 的位置读取。没有全局限流，宿主负责排队。旧 `Write`、契约写入和强类型 `Fill` 不自动迁移，新 API 不提供流式读取。用法及完整边界见 [Simple README](../src/TemplateFrame.Excel.Simple/README.md#大表流式导出)。
+
 数据仍读到工作表末行并跳过全空行，区域下方其他非空内容也可能被读入；实现按实际存在的行号排序遍历，不再为稀疏行号之间的缺失行分配临时行数据。重复行号保留首次出现的行，缺 RowIndex 时按前一行加一推断；不支持缺单元格引用的输入。共享字符串与富文本拼接保持原语义，读取内复用共享字符串索引。定义名与文本回退读路均使用资源预算；表头也计入 Simple 的单元格预算。
 
 契约路径优先用每列定义名 `<TableName>_<ColumnKey>` 定位（`ColumnDefinedName` 仅拼接表名与列 Key，不额外添加 `TF_`；默认如 `TF_Table_Code`）。定义名布局不可用时，先按上述规则定位表头，再执行统一的文本名称选择（表头去除首尾空白，按 Ordinal 区分大小写）：
@@ -393,12 +395,16 @@ TemplateFrame/
 │  ├─ ExcelDrawingHelper.cs         # drawing 强类型操作（xdr:cNvPr 命名空间，兼容 Excel）
 │  └─ Localization/                 # Sr + Resources*.resx（中英消息）
 ├─ src/TemplateFrame.Excel.Simple/  # 插件：MS Excel 简单表格
-│  ├─ SimpleExcel.cs                # 公共门面（Write / Read / ColumnDefinedName）
+│  ├─ SimpleExcel.cs                # 公共门面（Write / WriteStreaming / Read / ColumnDefinedName）
 │  ├─ SimpleExcelWriter.cs / SimpleExcelReader.cs / SimpleExcelAddress.cs   # 导出 / 导入 / 地址解析实现
 │  ├─ SimpleExcelContract.cs / SimpleExcelTemplateService.cs               # 契约感知读写 + 强类型服务基类
 │  ├─ SimpleExcelContractReader.cs / SimpleExcelContractValidator.cs        # 契约读取 / 校验
 │  ├─ DefinedNameLayoutResolver.cs / DefinedNameLayout.cs / SimpleExcelHeaderLookup.cs # 定义名布局 / 表头匹配
 │  ├─ SimpleExcelOptions.cs / SimpleExcelTable.cs / SimpleExcelStyles.cs
+│  ├─ SimpleExcelStreamingTable.cs / SimpleExcelStreamingOptions.cs       # 单次枚举行源 / 有界列宽配置
+│  ├─ SimpleExcelStreamingWriter.cs / SimpleExcelStreamingRows.cs / SimpleExcelStreamingLayout.cs # 流式编排 / 行预算与转换 / 布局与采样
+│  ├─ SimpleExcelStreamingPackage.cs / SimpleExcelForwardOnlyStream.cs    # ZIP 部件输出 / 非可定位流兼容
+│  ├─ SimpleExcelCellWriter.cs / SimpleExcelDefinedNames.cs                # 新旧写入路径共享值与定义名序列化
 │  └─ Localization/                 # Sr + Resources*.resx（中英消息）
 ├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射、图片探测）
 ├─ test/TemplateFrame.Word.Tests/   # Word 插件测试：生成→校验→填充→回读→断言

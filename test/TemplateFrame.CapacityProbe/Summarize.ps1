@@ -36,7 +36,7 @@ $rows = foreach ($file in Get-ChildItem -LiteralPath $ResultDirectory -Filter su
         SampledPeakWorkingMiB = $summary.SampledPeakWorkingSetBytes / 1MB
         OsPeakWorkingMiB = if ($finish.PeakWorkingSetBytes) { $finish.PeakWorkingSetBytes / 1MB } else { $null }
         MinimumFreeMiB = $summary.MinimumFreeBytes / 1MB
-        OutputMiB = if ($finish) { $finish.OutputBytes / 1MB } else { $null }
+        OutputMiB = if ($finish -and $null -ne $finish.OutputBytes) { $finish.OutputBytes / 1MB } else { $null }
         Error = if ($finish.Error) { ($finish.Error -split "`r?`n")[0] } else { $null }
     }
 }
