@@ -17,7 +17,7 @@ internal static class ExcelFixture
         for (var c = 0; c < settings.Columns; c++)
         {
             var reference = $"'Data'!${Letter(c)}$2:${Letter(c)}${settings.Rows + 1}";
-            names.Append(new DefinedName { Name = $"Items_C{c}", Text = reference });
+            names.Append(new DefinedName { Name = $"Items_C{c}", Text = $"'Data'!${Letter(c)}$1" });
             names.Append(new DefinedName { Name = $"TF_Items_C{c}", Text = reference });
         }
         workbook.Workbook.Append(names);

@@ -5,7 +5,11 @@ using TemplateFrame.CapacityProbe;
 
 var settings = ProbeSettings.Parse(args);
 Directory.CreateDirectory(settings.Directory);
-Emit(new { Phase = "prepare", settings, Runtime = RuntimeInformation.FrameworkDescription, ProcessId = Environment.ProcessId });
+Emit(new
+{
+    Phase = "prepare", settings, Runtime = RuntimeInformation.FrameworkDescription, ProcessId = Environment.ProcessId,
+    HeapBudgetBytes = GC.GetGCMemoryInfo().TotalAvailableMemoryBytes, ServerGc = System.Runtime.GCSettings.IsServerGC,
+});
 try
 {
     if (settings.Mode == "generate")
