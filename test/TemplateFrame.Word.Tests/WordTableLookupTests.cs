@@ -93,6 +93,55 @@ public sealed class WordTableLookupTests
         if (columns > 0) Assert.All(rows[0].Values, value => Assert.Null(value));
     }
 
+    [Fact]
+    public void Table_NestedControlsKeepOwnTextDuringFillAndParse()
+    {
+        using var input = TestDocuments.BuildTemplate(b => b.AddTable("Items", ["Outer", "Inner"]));
+        using (var document = WordprocessingDocument.Open(input, true))
+        {
+            var controls = document.MainDocumentPart!.Document!.Descendants<SdtRun>().ToArray();
+            controls[0].Descendants<Text>().Single().Text = "outer";
+            controls[1].Descendants<Text>().Single().Text = "inner";
+            controls[1].Remove();
+            controls[0].GetFirstChild<SdtContentRun>()!.Append(controls[1]);
+        }
+        input.Position = 0;
+        var contract = Contract("Outer", "Inner");
+        var parsed = new WordTemplateParser().Parse(input, contract).Tables["Items"][0];
+        Assert.Equal("outer", parsed["Outer"]);
+        Assert.Equal("inner", parsed["Inner"]);
+        input.Position = 0;
+        using var output = new WordTemplateFiller().Fill(input, contract,
+            Data(new Dictionary<string, object?> { ["Outer"] = "OUT", ["Inner"] = "IN" })).Output;
+        var filled = new WordTemplateParser().Parse(output, contract).Tables["Items"][0];
+        Assert.Equal("OUT", filled["Outer"]);
+        Assert.Equal("IN", filled["Inner"]);
+    }
+
+    [Fact]
+    public async Task Table_SharedInstancesIsolateSequentialAndConcurrentOperations()
+    {
+        using var input = TestDocuments.BuildTemplate(b => b.AddTable("Items", ["A", "B"]));
+        var bytes = input.ToArray();
+        var parser = new WordTemplateParser();
+        var filler = new WordTemplateFiller();
+        var contract = Contract("A", "B");
+        void Check(int index)
+        {
+            using var template = new MemoryStream(bytes, writable: false);
+            using var output = filler.Fill(template, contract,
+                Data(new Dictionary<string, object?> { ["A"] = index.ToString(), ["B"] = "B" + index })).Output;
+            var row = parser.Parse(output, contract).Tables["Items"][0];
+            Assert.Equal(index.ToString(), row["A"]);
+            Assert.Equal("B" + index, row["B"]);
+            Assert.True(template.CanRead);
+            Assert.True(output.CanRead);
+        }
+        Check(0);
+        Check(1);
+        await Task.WhenAll(Enumerable.Range(2, 8).Select(i => Task.Run(() => Check(i))));
+    }
+
     private static TemplateContract Contract(params string[] keys) => new()
     {
         Elements = [new TableElement { Key = "Items", Columns = keys.Select(k => new TextElement { Key = k }).ToArray() }],
