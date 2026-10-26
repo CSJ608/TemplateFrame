@@ -7,6 +7,7 @@ param(
     [ValidateSet('default', 'capacity')][string]$Limits = 'capacity',
     [Parameter(Mandatory)][string]$CaseDirectory,
     [string]$FixtureDirectory,
+    [string]$ProbeAssembly,
     [int]$TimeoutSeconds = 180,
     [double]$MaxPrivateGiB = 6,
     [double]$MinimumFreeGiB = 4
@@ -19,7 +20,7 @@ if ($Mode.EndsWith('read')) {
     $source = Join-Path $FixtureDirectory "input-$Rows-$Columns.xlsx"
     Copy-Item -LiteralPath $source -Destination $casePath
 }
-$assembly = Join-Path $PSScriptRoot "bin/Release/$Framework/TemplateFrame.CapacityProbe.dll"
+$assembly = if ($ProbeAssembly) { [IO.Path]::GetFullPath($ProbeAssembly) } else { Join-Path $PSScriptRoot "bin/Release/$Framework/TemplateFrame.CapacityProbe.dll" }
 $standardOutput = Join-Path $casePath 'stdout.jsonl'
 $standardError = Join-Path $casePath 'stderr.txt'
 $start = [Diagnostics.ProcessStartInfo]::new('dotnet')
@@ -78,6 +79,7 @@ try {
         SampledPeakPrivateBytes=$peakPrivate;SampledPeakWorkingSetBytes=$peakWorking;MinimumFreeBytes=$minimumFree
         MaxPrivateGiB=$MaxPrivateGiB;MinimumFreeGiB=$MinimumFreeGiB;TimeoutSeconds=$TimeoutSeconds
         ManagedHeapHardLimitGiB=5;MemoryScope='process lifetime including preparation and validation'
+        ProbeAssembly=$assembly;ProbeAssemblySha256=(Get-FileHash -LiteralPath $assembly).Hash
     }
     $summary | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $casePath 'summary.json') -Encoding utf8
     $summary | ConvertTo-Json -Compress

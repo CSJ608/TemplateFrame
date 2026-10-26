@@ -16,6 +16,11 @@ Emit(new
 });
 try
 {
+    if (settings.Mode == "shared-profile-read")
+    {
+        SharedStringProfile.Run(settings);
+        return;
+    }
     if (settings.Mode is "generate" or "generate-shared")
     {
         ExcelFixture.Write(settings);

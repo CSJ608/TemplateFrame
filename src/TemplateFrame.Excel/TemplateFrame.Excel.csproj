@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="TemplateFrame.Excel.Tests" />
+    <InternalsVisibleTo Include="TemplateFrame.CapacityProbe" />
     <Compile Include="..\Shared\Excel\*.cs" Link="Shared\Excel\%(Filename)%(Extension)" />
   </ItemGroup>
 
