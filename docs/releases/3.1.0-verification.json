@@ -1,0 +1,228 @@
+{
+  "Version": "3.1.0",
+  "Commit": "d018501e8a9c4fbc54b9ff9fd583d6331667c782",
+  "CheckedAtUtc": "2026-10-26T07:20:27.4553541+00:00",
+  "ReleaseUrl": "https://github.com/CSJ608/TemplateFrame/releases/tag/v3.1.0",
+  "Assets": [
+    {
+      "name": "TemplateFrame.3.1.0.nupkg",
+      "size": 137581,
+      "digest": "sha256:affa8326f73cbf2e3d5ce3e33d0c1fe8ea59c978542f5509da888f7778aaafd5"
+    },
+    {
+      "name": "TemplateFrame.3.1.0.snupkg",
+      "size": 43979,
+      "digest": "sha256:56ee9a9c340f26a2a3b3e4c3e401b7d28948110632389141eb016a630e1aea73"
+    },
+    {
+      "name": "TemplateFrame.Excel.3.1.0.nupkg",
+      "size": 198641,
+      "digest": "sha256:6ca97e099c5ee6cfbd3f8fe1184691272d441c311c8df12718cb0f122f229f00"
+    },
+    {
+      "name": "TemplateFrame.Excel.3.1.0.snupkg",
+      "size": 67428,
+      "digest": "sha256:08c1f129769da47004f85bd5db5e8725fefb7edde4481a15bf61848d84a6fb4c"
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple.3.1.0.nupkg",
+      "size": 166088,
+      "digest": "sha256:7f8b9f06e0176dde4145d09e8cb4569450ac2417349bf93cec81ba5db2d02cee"
+    },
+    {
+      "name": "TemplateFrame.Excel.Simple.3.1.0.snupkg",
+      "size": 60704,
+      "digest": "sha256:4ef09882955c0f874aeab8823a78739fee0cd0c07bb63f06de2a85800b458421"
+    },
+    {
+      "name": "TemplateFrame.Word.3.1.0.nupkg",
+      "size": 119451,
+      "digest": "sha256:b631e4e137d7ff2b0b5fa9b25bfe521aed261196d32eafb46f7ee27331229f03"
+    },
+    {
+      "name": "TemplateFrame.Word.3.1.0.snupkg",
+      "size": 39799,
+      "digest": "sha256:aaaefd96f79eb500d6b7ac73edd1231edd0525d6153cf55a45f8c3a776b1aa2f"
+    }
+  ],
+  "Packages": [
+    {
+      "Package": "TemplateFrame",
+      "Version": "3.1.0",
+      "EntriesCompared": 15,
+      "RepositoryCommit": "d018501e8a9c4fbc54b9ff9fd583d6331667c782",
+      "Result": "Passed"
+    },
+    {
+      "Package": "TemplateFrame.Word",
+      "Version": "3.1.0",
+      "EntriesCompared": 15,
+      "RepositoryCommit": "d018501e8a9c4fbc54b9ff9fd583d6331667c782",
+      "Result": "Passed"
+    },
+    {
+      "Package": "TemplateFrame.Excel",
+      "Version": "3.1.0",
+      "EntriesCompared": 15,
+      "RepositoryCommit": "d018501e8a9c4fbc54b9ff9fd583d6331667c782",
+      "Result": "Passed"
+    },
+    {
+      "Package": "TemplateFrame.Excel.Simple",
+      "Version": "3.1.0",
+      "EntriesCompared": 15,
+      "RepositoryCommit": "d018501e8a9c4fbc54b9ff9fd583d6331667c782",
+      "Result": "Passed"
+    }
+  ],
+  "SymbolDistinctSuccessCount": 12,
+  "Symbols": [
+    {
+      "Package": "TemplateFrame",
+      "Framework": "net462",
+      "Status": 200,
+      "SHA256": "2B73D8FAF6B23762C2D3B306AE947EEA565AACEADC9B1EDD4F58FC7E09EA43DB",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-004c0db274934fb19fd9f4bfedebfc82.json",
+      "RecordedAtUtc": "2026-10-26T07:15:21.4517973Z"
+    },
+    {
+      "Package": "TemplateFrame",
+      "Framework": "net8.0",
+      "Status": 200,
+      "SHA256": "71BA1D76021A1B81FFAC5D7FCD31ED5C6407D68AFBA915FBEF802A7D0BF12AAE",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-3236f60c2e8e4136a541df57477d9113.json",
+      "RecordedAtUtc": "2026-10-26T07:16:54.5170079Z"
+    },
+    {
+      "Package": "TemplateFrame",
+      "Framework": "netstandard2.0",
+      "Status": 200,
+      "SHA256": "F20BF8C68A16CDE34CB6ADE76B45984EE03ECE88CA9CD0EF1993E8754DBB17F7",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-3236f60c2e8e4136a541df57477d9113.json",
+      "RecordedAtUtc": "2026-10-26T07:16:54.5170079Z"
+    },
+    {
+      "Package": "TemplateFrame.Excel",
+      "Framework": "net462",
+      "Status": 200,
+      "SHA256": "EA46E39A1AD3CF64C36CC16025F82E9ED48A5AA2E320C1E0CEF7B99257A40703",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-3236f60c2e8e4136a541df57477d9113.json",
+      "RecordedAtUtc": "2026-10-26T07:16:54.5170079Z"
+    },
+    {
+      "Package": "TemplateFrame.Excel",
+      "Framework": "net8.0",
+      "Status": 200,
+      "SHA256": "32D089E64E7EF015BBD039427153D2A888E4B4014C28834C5D40BB4F6DBE0EC5",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-68894f9cbfbd4050bf194dbe8d9695fb.json",
+      "RecordedAtUtc": "2026-10-26T07:19:34.3172760Z"
+    },
+    {
+      "Package": "TemplateFrame.Excel",
+      "Framework": "netstandard2.0",
+      "Status": 200,
+      "SHA256": "440CB97BCDE5A46CAD6D5030526608CE722DF83812E91A7471B5091730B98F16",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-004c0db274934fb19fd9f4bfedebfc82.json",
+      "RecordedAtUtc": "2026-10-26T07:15:21.4517973Z"
+    },
+    {
+      "Package": "TemplateFrame.Excel.Simple",
+      "Framework": "net462",
+      "Status": 200,
+      "SHA256": "8D5C3E832A80252113DA96EA4D797B3992B595E0C747027C9A6C29468E23841F",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-68894f9cbfbd4050bf194dbe8d9695fb.json",
+      "RecordedAtUtc": "2026-10-26T07:19:34.3172760Z"
+    },
+    {
+      "Package": "TemplateFrame.Excel.Simple",
+      "Framework": "net8.0",
+      "Status": 200,
+      "SHA256": "22054733B81B7BD90E9C93DCE38AC9244CB34888BB1D30E356671C74F2441074",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-3236f60c2e8e4136a541df57477d9113.json",
+      "RecordedAtUtc": "2026-10-26T07:16:54.5170079Z"
+    },
+    {
+      "Package": "TemplateFrame.Excel.Simple",
+      "Framework": "netstandard2.0",
+      "Status": 200,
+      "SHA256": "AA6D74A3E3792DE5367DADE836A28E0C13236893E1C49840AAD244C9717856A2",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-3236f60c2e8e4136a541df57477d9113.json",
+      "RecordedAtUtc": "2026-10-26T07:16:54.5170079Z"
+    },
+    {
+      "Package": "TemplateFrame.Word",
+      "Framework": "net462",
+      "Status": 200,
+      "SHA256": "0043A8CA5A699D5FAF14F5C05E3B424F2C0C092903957F5FA1E2C87D3B992BE2",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-68894f9cbfbd4050bf194dbe8d9695fb.json",
+      "RecordedAtUtc": "2026-10-26T07:19:34.3172760Z"
+    },
+    {
+      "Package": "TemplateFrame.Word",
+      "Framework": "net8.0",
+      "Status": 200,
+      "SHA256": "7572454242CD96DE7B9F31A344EA78D01A282838800090B0DBE59DAB44839339",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-3236f60c2e8e4136a541df57477d9113.json",
+      "RecordedAtUtc": "2026-10-26T07:16:54.5170079Z"
+    },
+    {
+      "Package": "TemplateFrame.Word",
+      "Framework": "netstandard2.0",
+      "Status": 200,
+      "SHA256": "A7859198FD4557F5CC35E24A2BCC9A66A84D011961454CACDFE7BA4D62076E51",
+      "Result": "Passed",
+      "EvidenceFile": "symbols-3236f60c2e8e4136a541df57477d9113.json",
+      "RecordedAtUtc": "2026-10-26T07:16:54.5170079Z"
+    }
+  ],
+  "SymbolAttempts": [
+    {
+      "File": "symbols-573ad30fdc8e4211b098bbb178951470.json",
+      "RecordedAtUtc": "2026-10-26T07:07:13.5930282Z",
+      "Passed": 0,
+      "NotVerified": 12
+    },
+    {
+      "File": "symbols-e3aff3ab173144f183dfcff479404fd3.json",
+      "RecordedAtUtc": "2026-10-26T07:13:42.1769418Z",
+      "Passed": 4,
+      "NotVerified": 8
+    },
+    {
+      "File": "symbols-004c0db274934fb19fd9f4bfedebfc82.json",
+      "RecordedAtUtc": "2026-10-26T07:15:21.4517973Z",
+      "Passed": 4,
+      "NotVerified": 8
+    },
+    {
+      "File": "symbols-3236f60c2e8e4136a541df57477d9113.json",
+      "RecordedAtUtc": "2026-10-26T07:16:54.5170079Z",
+      "Passed": 7,
+      "NotVerified": 5
+    },
+    {
+      "File": "symbols-656fba5e58a44370b20a615828b30b56.json",
+      "RecordedAtUtc": "2026-10-26T07:18:08.3053186Z",
+      "Passed": 0,
+      "NotVerified": 3
+    },
+    {
+      "File": "symbols-68894f9cbfbd4050bf194dbe8d9695fb.json",
+      "RecordedAtUtc": "2026-10-26T07:19:34.3172760Z",
+      "Passed": 3,
+      "NotVerified": 0
+    }
+  ],
+  "Limitations": "Symbols verified across retries, not a claim of simultaneous or uninterrupted availability. Earlier 404 and 200/404 fluctuations retained in local raw records. NuGet payload comparison excludes repository signature only; 60 other entries matched GitHub byte-for-byte."
+}

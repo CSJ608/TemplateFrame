@@ -48,13 +48,15 @@
 ## 发布门槛
 
 - [x] 用户确认版本、完整范围、已知文本差异以及发布目标，并解除本次发布禁止 push。
-- [ ] 确认后同步四包 Version、CHANGELOG 正式段与拟用 tag；确认 tag/包版本尚未使用。
-- [ ] 最终内容 Release 构建、三框架测试、完整 format 与依赖审计；探针如改动须独立构建/format。
-- [ ] 最终版本本地四包 pack：4 nupkg + 4 snupkg；检查 ID/版本/依赖、三目标 DLL/XML/en 资源、README/icon、PDB，无测试/日志混入。
-- [ ] 审阅最终提交，授权后才 push；确认该提交 Windows/Linux CI 成功。
-- [ ] 发布者确认 Trusted Publisher 与 NUGET_USER 配置可用（不能从代码断言平台授权正常）。
-- [ ] 单独授权 tag 推送：现有 `release.yml` 会在 Windows 测试后，自动向 nuget.org 推送四主包及四符号包，再创建 GitHub Release。若只要 GitHub 或仅本地包，不能推 tag 沿用此流程。
-- [ ] 发布后核对 Actions 提交、Release 八资产、NuGet 四包及符号处理结果。
+- [x] 同步四包 Version、CHANGELOG 正式段与 tag；发布前确认版本未占用。
+- [x] 最终内容 Release 构建、三框架测试、完整 format 与依赖审计；本轮探针未改动。
+- [x] 最终版本本地四包 pack：4 nupkg + 4 snupkg；ID/版本/依赖、三目标 DLL/XML/en 资源、README/icon、PDB 与条目白名单通过。
+- [x] 授权后 push；PR 与合并提交 Windows/Linux CI 均成功。
+- [x] NUGET_USER 非空，Trusted Publisher 通过正式工作流 OIDC 登录及上传实证可用，未导出凭据。
+- [x] 用户确认完整发布目标后推送 tag；现有工作流完成四主包、四符号包与 GitHub Release 发布。
+- [x] Actions 提交、Release 八资产、NuGet 四包及 12 个符号文件完成核验，传播期失败与重试保留。
+
+最终状态与证据见 [3.1.0 发布记录](3.1.0.md)。下方本地检查及准备阶段描述保留当时状态，不代表发布仍待执行。
 
 ## 本轮本地检查结果
 
