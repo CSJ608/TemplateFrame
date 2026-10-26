@@ -2,7 +2,9 @@
 
 控制器 summary 新增 `ProcessCpuMilliseconds`，统计整个子进程 CPU 时间（包含准备、校验及多个线程），不同于库操作时间和墙钟时间；多线程累计 CPU 可以高于 wall time。用于补充判断耗时波动，不用于证明未记录 CPU 的历史慢样本一定是环境原因。
 
-`shared-profile-read` 为六列、单任务的分阶段剖析模式：实际 ZIP 预检、元数据、SST 建库、worksheet 加值级校验、独立顺序字符串查询、SST XML-only、独立字符串追加。阶段记录当前线程累计分配字节及时间，不是峰值内存。后面三个是额外隔离实验，不能与前面相加当作端到端耗时，且受前序 JIT/文件缓存影响；XML-only 使用同一有界元素读取器和 SharedStringItem，但不写磁盘；append-only 包含合成字符串生成。使用独立的 `template-streaming-read` 等入口做最终端到端对照。可传 `-ProbeAssembly` 选择保存的基线程序集，保护不变，summary 记录程序集路径与 SHA256。
+`shared-profile-read` 为六列、单任务的分阶段剖析模式：实际 ZIP 预检、元数据、SST 建库、worksheet 加值级校验、独立顺序字符串查询、SST XML-only、独立字符串追加。阶段记录当前线程累计分配字节及时间，不是峰值内存。后面三个是额外隔离实验，不能与前面相加当作端到端耗时，且受前序 JIT/文件缓存影响；历史 `sst-xml-only` 刻意保留 fresh writer 加 SharedStringItem，不是当前 SST 的复用路径；append-only 包含合成字符串生成。使用独立的 `template-streaming-read` 等入口做最终端到端对照。可传 `-ProbeAssembly` 选择保存的基线程序集，保护不变，summary 记录程序集路径与 SHA256。
+
+新增 `sst-reuse-serialize-only` / `sst-reuse-sdk-select`：同一输入、当前 ElementReader，按 serialize→SDK→SDK→serialize 顺序，均计算序列化字符总数并检查项数；SDK 阶段另检查直属 Text 非 null，不写磁盘。前面的 worksheet-and-lookup 执行完整逐值校验。这些阶段的差额仅定位 SDK 构造加取值成本，不能当作候选收益。新增 `sdk-sample-*` 使用预建单个 XML 字符串，隔离 SDK 构造与构造加选择器两条路径（构造→取值→取值→构造）；重复短文本/双 run 富文本最多 400,006 次，32,767 字符长文本最多 1,000 次，不累计样本或 DOM。富文本选择器按直属 Text 优先，否则直属 Run 的首 Text 拼接；这是探针辅助方法，不是生产替代解析器。`Result` 只记录 int/long 结果，其他阶段为 null。短/富样本的次数是合成调用次数，不是输入中的真实重复率；不据此声称缓存收益。性能实验与构建/测试串行执行，避免主动引入竞争负载。
 
 新增 `template-streaming-read`：独立调用 `ExcelTemplateParser.ParseStreaming`，回调内按契约键逐格严格校验值及运行时类型、表键、逻辑行号、键数量；任何转换诊断视为失败。只保留计数，不保存回调行，退出后检查临时文件零残留。与 `streaming-read` / `contract-streaming-read` 一样将库的 `TemporaryBytesWritten` 记为 `ScratchPeakBytes`，不依赖打开文件的目录项长度。三种流式导入均在操作计时内逐格验证，不适用下文旧导入“完整物化后再校验”的口径。样本生成器已有模板定义名，可复用同一 inline/shared 输入。
 

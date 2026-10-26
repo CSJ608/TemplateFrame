@@ -89,6 +89,11 @@ internal static class SharedStringProfile
                 if (appended.Count != strings.Count) throw new InvalidDataException("Append count mismatch.");
                 return appended.Count;
             });
+            Measure("sst-reuse-serialize-only", () => ScanReused(package, paths.Strings, options, strings.Count, false));
+            Measure("sst-reuse-sdk-select", () => ScanReused(package, paths.Strings, options, strings.Count, true));
+            Measure("sst-reuse-sdk-select-repeat", () => ScanReused(package, paths.Strings, options, strings.Count, true));
+            Measure("sst-reuse-serialize-only-repeat", () => ScanReused(package, paths.Strings, options, strings.Count, false));
+            ProfileSdkSamples(settings.Rows);
             temporary = storage.ReservedBytes;
         }
         var remaining = Directory.GetFiles(scratch).Length;
@@ -102,6 +107,57 @@ internal static class SharedStringProfile
             PeakWorkingSetBytes = Process.GetCurrentProcess().PeakWorkingSet64,
         }));
     }
+
+    private static long ScanReused(ExcelReadPackage package, string path, ExcelStreamingParseOptions options, int expectedCount, bool select)
+    {
+        using var reader = package.OpenXml(path);
+        using var elements = new ExcelBoundedXml.ElementReader(options.MaxRowCharacters, default);
+        var count = 0;
+        long characters = 0;
+        while (reader.Read())
+        {
+            if (reader.NodeType != XmlNodeType.Element || reader.LocalName != "si" || reader.Depth != 1
+                || reader.NamespaceURI != "http://schemas.openxmlformats.org/spreadsheetml/2006/main") continue;
+            var xml = elements.ReadElement(reader);
+            characters += xml.Length;
+            if (select && new SharedStringItem(xml).Text?.Text is null)
+                throw new InvalidDataException("Expected direct text.");
+            count++;
+        }
+        if (count != expectedCount) throw new InvalidDataException("Reused XML item count mismatch.");
+        return characters;
+    }
+
+    private static void ProfileSdkSamples(int rows)
+    {
+        var samples = new[]
+        {
+            (Name: "short", Body: "<t>重复中文 &amp; text</t>", Iterations: Math.Min(rows * 4 + 6, 400006)),
+            (Name: "rich", Body: "<r><rPr><b/></rPr><t>first</t></r><r><t>second</t></r>", Iterations: Math.Min(rows * 4 + 6, 400006)),
+            (Name: "long", Body: "<t>" + new string('中', 32767) + "</t>", Iterations: Math.Min(rows, 1000)),
+        };
+        foreach (var sample in samples)
+        {
+            var xml = "<si xmlns='http://schemas.openxmlformats.org/spreadsheetml/2006/main'>" + sample.Body + "</si>";
+            var expected = SelectSample(new SharedStringItem(xml));
+            foreach (var select in new[] { false, true, true, false })
+            {
+                Measure("sdk-sample-" + sample.Name + (select ? "-construct-select" : "-construct"), () =>
+                {
+                    for (var index = 0; index < sample.Iterations; index++)
+                    {
+                        var item = new SharedStringItem(xml);
+                        if (select && SelectSample(item) != expected) throw new InvalidDataException("SDK sample mismatch.");
+                        GC.KeepAlive(item);
+                    }
+                    return sample.Iterations;
+                });
+            }
+        }
+    }
+
+    private static string SelectSample(SharedStringItem item)
+        => item.Text?.Text ?? string.Concat(item.Elements<Run>().Select(run => run.Text?.Text));
 
     private static IEnumerable<string> Texts(ProbeSettings settings)
     {
@@ -118,7 +174,8 @@ internal static class SharedStringProfile
         var result = operation();
         timer.Stop();
         var bytes = GC.GetAllocatedBytesForCurrentThread() - allocated;
-        Console.WriteLine(JsonSerializer.Serialize(new { Phase = "profile", Name = name, Milliseconds = timer.Elapsed.TotalMilliseconds, AllocatedBytes = bytes }));
+        object? scalar = result is int or long ? result : null;
+        Console.WriteLine(JsonSerializer.Serialize(new { Phase = "profile", Name = name, Milliseconds = timer.Elapsed.TotalMilliseconds, AllocatedBytes = bytes, Result = scalar }));
         return result;
     }
 }
