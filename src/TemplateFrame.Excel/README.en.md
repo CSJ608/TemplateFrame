@@ -143,4 +143,3 @@ Partial callbacks may precede errors; application transactions/rollback remain t
 The host protects the temporary directory, which may contain business data. No encryption, secure erasure,
 or crash/forced-termination cleanup guarantee is provided; other tasks' files are never scanned/deleted.
 There is no global concurrency semaphore or expansion of template support.
-

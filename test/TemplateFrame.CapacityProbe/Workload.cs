@@ -102,6 +102,7 @@ internal sealed class Workload
                 "simple-read" => SimpleExcel.Read(input, "Items", _settings.Limits),
                 "streaming-read" => ReadStreaming(input),
                 "contract-streaming-read" => ReadContractStreaming(input),
+                "template-streaming-read" => ReadTemplateStreaming(input),
                 "contract-read" => SimpleExcelContract.Read(input, _contract, new SimpleExcelOptions { TableName = "Items", ResourceLimits = _settings.Limits }),
                 _ => new ExcelTemplateParser(_settings.Limits, null).Parse(input, _contract),
             };
@@ -141,7 +142,13 @@ internal sealed class Workload
 
     public void Validate()
     {
-        if (_result is SimpleExcelStreamingReadResult streamed)
+        if (_result is ExcelStreamingParseResult parsed)
+        {
+            if (!parsed.Completed || parsed.RowsRead != _settings.Rows || parsed.ValuesRead != 0
+                || _streamedRows != _settings.Rows || ScratchRemainingFiles != 0)
+                throw new InvalidDataException("Template streaming read shape or cleanup mismatch.");
+        }
+        else if (_result is SimpleExcelStreamingReadResult streamed)
         {
             if (!streamed.Completed || streamed.RowsRead != _settings.Rows || _streamedRows != _settings.Rows
                 || !streamed.Headers.SequenceEqual(_keys) || ScratchRemainingFiles != 0)
@@ -202,6 +209,32 @@ internal sealed class Workload
             TemporaryDirectory = _scratchDirectory,
             MaxTemporaryBytes = 1024L * 1024 * 1024,
         });
+        ScratchPeakBytes = result.TemporaryBytesWritten;
+        return result;
+    }
+
+    private ExcelStreamingParseResult ReadTemplateStreaming(Stream input)
+    {
+        Directory.CreateDirectory(_scratchDirectory);
+        var result = new ExcelTemplateParser().ParseStreaming(input, _contract, item =>
+        {
+            if (item is not ExcelStreamingParseRow row || row.Key != "Items"
+                || row.DataRowNumber != _streamedRows + 1 || row.Values.Count != _settings.Columns)
+                throw new InvalidDataException("Template streaming row shape mismatch.");
+            for (var column = 0; column < _settings.Columns; column++)
+            {
+                var actual = row.Values[_keys[column]];
+                var expected = Value(_streamedRows, column, false);
+                if (!Equals(actual, expected)) throw new InvalidDataException($"Template typed value mismatch at {_streamedRows}:{column}.");
+            }
+            _streamedRows++;
+            return true;
+        }, new ExcelStreamingParseOptions
+        {
+            ResourceLimits = _settings.Limits,
+            TemporaryDirectory = _scratchDirectory,
+            MaxTemporaryBytes = 1024L * 1024 * 1024,
+        }, warning: issue => throw new InvalidDataException("Unexpected template warning: " + issue.Message));
         ScratchPeakBytes = result.TemporaryBytesWritten;
         return result;
     }
