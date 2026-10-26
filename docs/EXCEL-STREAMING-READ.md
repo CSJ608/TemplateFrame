@@ -30,7 +30,17 @@
 
 第一批验证：Release 全量构建零警告零错误；net472/net8/net10 全量共 2,030 次测试通过（Core399、Word492、Excel702、Simple437），含新增8场景×3框架。已执行方案格式化。尚未实现公开 ReadStreaming 入口、ZIP/XML 逐行读取、契约/模板接入或导入容量实验；这些是下一批，不得将底层存储完成视为流式导入完成。
 
-## 当前接续点（普通读取已完成，契约入口已接入，模板待做）
+## 当前接续点（模板入口及语义测试完成，模板容量验证待做）
+
+本会话已核对 `1cf54e4` 干净工作区及仓库/祖先无 AGENTS.md。`35f2eb6` 提取共享 worksheet/SST 扫描，并为磁盘字符串索引加入 null 标记（与空串区别）；普通/契约三框架回归通过，共 2,147 测试。
+
+新 `ExcelTemplateParser.ParseStreaming` 按契约元素顺序同步回调 `ExcelStreamingParseValue` / `ExcelStreamingParseRow`，false 停止；返回计数/完成标记/临时写入字节，不保留表或警告。`ExcelStreamingParseOptions` 与 Simple 同级预算，warning 回调逐单元格投递、清空。`ExcelCellValueParser` 提取并由旧、新入口共用。错位起点按组使用前向游标；保留最后匹配列的工作表、最大范围长度、短列越界继续读取、全空逻辑行、精确 cell 首值和显式行号规则。图片直接 ZIP 读取，不打开 SpreadsheetDocument；保留旧 oneCellAnchor/首 drawing/embed 规则，二进制受 MaxImageBytes，drawing 受元数据预算。
+
+模板新增 36 场景 × 三框架，含逐值/逐键/全部诊断字段与旧 ParseDetailed 对照、多表、错位起点、跨 sheet、大小写、缺行号/单元格、重复 cell/name、富文本 null、公式/布尔/日期、无定义名/无 SST/空 sheet、无效范围、图片锚点/预算及非 Seek 成功/停止/取消/消费者和警告异常/各预算清理。全方案 format、Release build 零警告错误，2,255 测试通过（Core399、Word492、Excel810、Simple554）。
+
+下一步：模板独立探针逐格容量验证（千/万/十万/百万 inline/shared，保护不变），补充容量证据并更新总体状态。普通/契约容量无需重做；本批不能因单元测试通过而声称模板百万行已验证。新入口错误不承诺旧异常包装；只拒绝实际扫描到的乱序/重复行，未使用范围后的 XML 无需全扫描。使用/责任边界见 Excel 中英文 README。
+
+### 前轮接续记录（历史）
 
 2026-10-26 接续批次 `7114a1e` 新增 `SimpleExcelContract.ReadStreaming` 与 `SimpleExcelContractReadRow`，复用直接 ZIP/XML 和磁盘 SST 读取，不构造完整表格。抽取定义名布局映射核心供旧接口和新接口共用，保留重复定义名、位置冲突、无效列范围回退等旧语义；定义名路径缺键补 null/契约列全空跳过，表头回退路径仅匹配键且保留空字典行。新增 12 场景覆盖旧接口逐键对照与非 Seek 成功、提前停止、取消、消费者异常、磁盘预算清理。模板接口仍待完成，不代表整体交付。
 

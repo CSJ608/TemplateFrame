@@ -115,3 +115,36 @@ dotnet run --project samples/TemplateFrame.Demo.Excel
 本轮 Excel 回读索引优化及同环境三档比较见仓库 [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md) 的 R5 章节；旧快照不能用作新版本耗时承诺，累计托管分配也不是峰值内存。
 
 输入包、XML、图片和表数据默认启用可配置资源预算；超限会拒绝输入。Validate 不进行宏或外部关系净化。配置方式与适用边界见[安全说明](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md)。
+## 显式低内存模板导入
+
+`ExcelTemplateParser.ParseStreaming` 是独立 opt-in 入口，旧 `Parse` / `ParseDetailed` 不变：
+
+```csharp
+var result = new ExcelTemplateParser().ParseStreaming(input, contract, item =>
+{
+    switch (item)
+    {
+        case ExcelStreamingParseValue value:
+            ProcessValue(value.Key, value.Value); // 文本标量或 byte[] 图片
+            break;
+        case ExcelStreamingParseRow row:
+            ProcessRow(row.Key, row.DataRowNumber, row.Values);
+            break;
+    }
+    return true; // false 停止整个解析
+}, new ExcelStreamingParseOptions { TemporaryDirectory = scratchDirectory },
+warning: issue => ProcessWarning(issue), cancellationToken: cancellationToken);
+```
+
+按契约元素顺序同步回调；表格行号 `DataRowNumber` 从 1 开始，为逻辑行号，不是工作表行号。`ValuesRead` / `RowsRead` 只计已经交给消费者的标量/图片及表格行；回调返回 false 时 `Completed` 为 false。没有匹配的标量、图片和表不回调；已匹配表的全空逻辑行仍回调，未匹配列不添加键。返回值不包含整表或警告集合；调用方自行保留回调数据会增加内存。
+
+定义名首匹配、大小写精确工作表匹配、契约类型转换、占位文本、缺键与转换诊断字段保持旧模板语义。表行数取匹配列的最大范围长度，各列从自己的起点读取相同逻辑行数，所有列使用最后匹配列的工作表，包含超出较短列范围的单元格。不同起点按组使用独立前向游标，内存随起点组数和当前行宽增长，不随总行数增长。仅显式行号参与定位，单元格引用精确匹配且首值优先；新入口拒绝扫描到的重复/倒序或越界行号，旧接口不变。不会为了读取范围后未使用的单元格而扫描完整工作表 XML。
+
+模板 SST 只取直属 Text，纯富文本项为 null；inline 也只取直属 Text（再回退单元格缓存值），与 Simple 的富文本拼接不同。布尔值不经契约类型转换；显式数字类型加 DateTime 契约才按 OADate 转换，不依赖样式；公式只读缓存。图片保持首 drawing、首匹配 oneCellAnchor、精确零基位置和 embed 关系规则，不新增 twoCellAnchor 支持。图片单项受 `MaxImageBytes` 限制，drawing 受元数据限额限制。
+
+直接 ZIP/XML 读取，不打开 SpreadsheetDocument、不构造完整 worksheet/SST。先校验全 ZIP 的实际解压预算，再将共享字符串正文及固定长度索引落盘；非 Seek 输入也暂存至磁盘。默认临时累计预算 256 MiB，字符串缓存 1 Mi 字符/1024 项，元数据每部件 1 Mi 字符，单行/单项 SST 序列化 XML 1 Mi 字符。数据及包限额默认值不变，大文件需显式提高 `ResourceLimits`；未传 options 时沿用 parser 构造器限额，传入 options 时使用其限额。
+
+成功、提前停止、异常或取消均释放本次临时文件；`TemporaryBytesWritten` 是临时内容累计字节（不含文件系统开销）。输入归调用方，解析期间不要修改源流。消费者/警告回调异常原样传播；格式、XML、包及预算错误不承诺与旧入口使用同一异常包装。错误前可能已交付部分数据，事务和回滚由应用负责。警告逐单元格交付且立即清空，不累计整个文件的警告。
+
+临时目录必须存在，权限由宿主负责；文件可能含业务数据，不提供加密、安全擦除或强杀/崩溃零残留保证。库不扫描删除其他任务文件，不添加全局并发信号量。此入口不进行 Office/WPS 真实模板验收或扩大模板支持范围。
+

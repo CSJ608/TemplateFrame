@@ -1,9 +1,9 @@
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Collections.ObjectModel;
-using PhysicalRow = TemplateFrame.Internal.Excel.ExcelStreamingXml.PhysicalRow;
 using TemplateFrame.Contract;
 using TemplateFrame.Internal;
 using TemplateFrame.Internal.Excel;
+using PhysicalRow = TemplateFrame.Internal.Excel.ExcelStreamingXml.PhysicalRow;
 
 namespace TemplateFrame.Excel.Simple;
 

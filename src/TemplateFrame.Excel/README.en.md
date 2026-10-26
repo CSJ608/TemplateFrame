@@ -103,3 +103,44 @@ Design: [DESIGN](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.m
 See the R5 section of repository [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md) for the Excel lookup optimization and three-size comparison. Historical timings do not promise current performance; cumulative managed allocation is not peak memory.
 
 Input packages, XML, images and table data use configurable finite resource budgets. Validate does not sanitize macros or external relationships. See the [security guidance](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md) for configuration and boundaries.
+## Opt-in low-memory template import
+
+Use `ExcelTemplateParser.ParseStreaming(input, contract, consume, options, warning, cancellationToken)`.
+The synchronous consumer receives `ExcelStreamingParseValue` (scalar or image bytes) or
+`ExcelStreamingParseRow` (table key, one-based logical `DataRowNumber`, read-only values).
+Return false to stop the entire operation. The result contains `ValuesRead`, `RowsRead`,
+`Completed` and `TemporaryBytesWritten`, never complete tables. Warnings are delivered individually.
+Callbacks run in contract element order; retaining their data is the caller's memory responsibility.
+
+`ExcelStreamingParseOptions` exposes resource limits, an existing temporary directory, a default
+256 MiB cumulative temporary-write budget, a 1 Mi-character/1024-entry string cache, a 1 Mi-character
+metadata-part limit and a 1 Mi-character serialized row/shared-string-item limit. Increase finite
+package/XML/table limits explicitly for large inputs. Omitted options inherit the parser's resource
+limits; explicitly supplied options use their own limits.
+
+This reads ZIP/XML directly, without SpreadsheetDocument or complete worksheet/SST objects.
+Shared-string text and its fixed-size index go to disk; non-seekable input is also staged there.
+ZIP expanded-byte validation and SST indexing precede business callbacks. Each distinct table-column
+start row uses one forward cursor, so memory depends on start groups and current row width, not total rows.
+
+Legacy template semantics are preserved: first matching defined name, exact sheet names, missing scalar
+keys omitted, unmatched columns omitted, blank logical rows retained, maximum matched range length,
+each column's own start offset, and the last matched column's sheet for the whole table. Boolean values
+bypass contract conversion; explicit numeric dates use OADate rather than styles; formulas use cached
+values. Template shared strings use direct Text only (rich-text-only items remain null), unlike Simple.
+Images retain first drawing/first matching oneCellAnchor/embed behavior and `MaxImageBytes`; drawings
+also obey metadata limits. No twoCellAnchor support is added.
+
+Only explicit row indices participate. Encountered duplicate, descending or out-of-range row indices
+are rejected by this new API; exact cell references retain their first value. Unused XML beyond the
+requested range need not be scanned. Original Parse/ParseDetailed behavior is unchanged. Conversion
+warnings retain all diagnostic fields. Callback exceptions propagate unchanged; other exception wrappers
+are not guaranteed to match legacy APIs.
+
+The caller owns the source and must not modify it during parsing. Success, early stop, cancellation and
+exceptions dispose operation-owned temporary files. Temporary bytes exclude filesystem overhead.
+Partial callbacks may precede errors; application transactions/rollback remain the caller's responsibility.
+The host protects the temporary directory, which may contain business data. No encryption, secure erasure,
+or crash/forced-termination cleanup guarantee is provided; other tasks' files are never scanned/deleted.
+There is no global concurrency semaphore or expansion of template support.
+

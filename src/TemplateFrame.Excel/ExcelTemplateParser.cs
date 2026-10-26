@@ -17,7 +17,6 @@ public sealed class ExcelTemplateParser
 {
     private readonly ITemplateLocalizer _localizer;
     private readonly TemplateResourceLimits _limits;
-    private readonly ContractTextParser _textParser = new("Excel", (key, args) => Sr.Get(key, args));
 
     public ExcelTemplateParser(ITemplateLocalizer? localizer = null)
         : this(TemplateResourceLimits.Default, localizer)
@@ -36,6 +35,12 @@ public sealed class ExcelTemplateParser
 
     public TemplateParseResult ParseDetailed(Stream template, TemplateContract contract)
         => ParseCore(template, contract, []);
+
+    public ExcelStreamingParseResult ParseStreaming(Stream template, TemplateContract contract,
+        Func<ExcelStreamingParseItem, bool> consume, ExcelStreamingParseOptions? options = null,
+        Action<TemplateValidationIssue>? warning = null, CancellationToken cancellationToken = default)
+        => ExcelStreamingParser.Parse(template, contract, consume,
+            options ?? new ExcelStreamingParseOptions { ResourceLimits = _limits }, _localizer, warning, cancellationToken);
 
     private TemplateParseResult ParseCore(
         Stream template,
@@ -127,16 +132,14 @@ public sealed class ExcelTemplateParser
         private readonly CellLookup _lookup = new();
         private readonly TemplateResourceBudget _budget;
         private readonly TemplateResourceLimits _limits;
-        private readonly ITemplateLocalizer _localizer;
-        private readonly ContractTextParser _textParser;
+        private readonly ExcelCellValueParser _cellParser;
 
         public ParseOperation(ExcelTemplateParser parser, WorkbookPart workbookPart, List<TemplateValidationIssue>? issues)
         {
             _workbookPart = workbookPart;
             _issues = issues;
             _limits = parser._limits;
-            _localizer = parser._localizer;
-            _textParser = parser._textParser;
+            _cellParser = new ExcelCellValueParser(parser._localizer, text => _lookup.ReadSharedString(_workbookPart, text));
             _budget = new TemplateResourceBudget(_limits);
         }
 
@@ -230,67 +233,7 @@ public sealed class ExcelTemplateParser
         }
 
         private object? ReadCellValue(Cell cell, TextElement element, ParseLocation location)
-        {
-            var dataType = cell.DataType?.Value;
-            if (dataType == CellValues.Boolean)
-            {
-                if (cell.CellValue?.Text is { } boolText)
-                {
-                    if (boolText is "1" or "0")
-                    {
-                        return boolText == "1";
-                    }
-
-                    if (bool.TryParse(boolText, out var boolValue))
-                    {
-                        return boolValue;
-                    }
-                }
-
-                return null;
-            }
-
-            if (dataType == CellValues.Number)
-            {
-                if (cell.CellValue?.Text is not { } numberText)
-                {
-                    return null;
-                }
-
-                if (element.ValueType == typeof(DateTime)
-                    && double.TryParse(numberText, NumberStyles.Float, CultureInfo.InvariantCulture, out var serial))
-                {
-                    return DateTime.FromOADate(serial);
-                }
-
-                return _textParser.Parse(numberText, element, location, _issues);
-            }
-
-            if (dataType == CellValues.SharedString)
-            {
-                if (cell.CellValue?.Text is not { } sharedIndexText)
-                {
-                    return null;
-                }
-
-                var sharedText = _lookup.ReadSharedString(_workbookPart, sharedIndexText);
-                if (sharedText is null)
-                {
-                    return null;
-                }
-
-                return _localizer.IsPlaceholderText(sharedText)
-                    ? null
-                    : _textParser.Parse(sharedText, element, location, _issues);
-            }
-
-            var text = cell.InlineString?.Text?.Text
-                       ?? cell.CellValue?.Text
-                       ?? string.Empty;
-            return _localizer.IsPlaceholderText(text)
-                ? null
-                : _textParser.Parse(text, element, location, _issues);
-        }
+            => _cellParser.Read(cell, element, location, _issues);
     }
 
     private sealed class CellLookup

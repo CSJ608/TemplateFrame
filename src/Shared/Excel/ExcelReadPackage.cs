@@ -60,6 +60,25 @@ internal sealed class ExcelReadPackage : IDisposable
         return XDocument.Load(reader);
     }
 
+    internal byte[] ReadImage(string part)
+    {
+        _cancellation.ThrowIfCancellationRequested();
+        if (!_entries.TryGetValue(part, out var entry)) throw new InvalidDataException("Missing package part: " + part);
+        Check(entry.Length, _options.ResourceLimits.MaxImageBytes, "MaxImageBytes");
+        Check(entry.Length, int.MaxValue, "image array length");
+        var bytes = new byte[(int)entry.Length];
+        using var input = new CheckedReadStream(entry.Open(), _options.ResourceLimits.MaxImageBytes, _cancellation);
+        var read = 0;
+        while (read < bytes.Length)
+        {
+            var count = input.Read(bytes, read, Math.Min(81920, bytes.Length - read));
+            if (count == 0) throw new EndOfStreamException();
+            read += count;
+        }
+        if (input.Read(new byte[1], 0, 1) != 0) throw new InvalidDataException("Image part length mismatch.");
+        return bytes;
+    }
+
     internal IReadOnlyList<PartRelationship> ReadRelationships(string part)
     {
         var slash = part.LastIndexOf('/');
