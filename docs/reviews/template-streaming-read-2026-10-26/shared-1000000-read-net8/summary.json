@@ -1,0 +1,19 @@
+{
+  "Mode": "template-streaming-read",
+  "Rows": 1000000,
+  "Columns": 6,
+  "Concurrency": 1,
+  "Framework": "net8.0",
+  "Limits": "capacity",
+  "ExitCode": -1,
+  "Guard": "system-free-memory-limit",
+  "WallSeconds": 71.8588239,
+  "SampledPeakPrivateBytes": 22446080,
+  "SampledPeakWorkingSetBytes": 51900416,
+  "MinimumFreeBytes": 4248313856,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 180,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation"
+}
