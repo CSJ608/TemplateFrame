@@ -169,3 +169,13 @@ Outputs go to the system temp directory `%TEMP%\TemplateFrame.Demo.Excel.Simple`
 - The console prints the **re-parse** result (read the filled file → `SimpleExcel.Read` → print headers and each row)
 
 Input packages, XML, images and table data use configurable finite resource budgets. Validate does not sanitize macros or external relationships. See the [security guidance](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md) for configuration and boundaries.
+
+## Opt-in bounded-memory import
+
+`SimpleExcel.ReadStreaming(source, consume, options, cancellationToken)` invokes `Func<SimpleExcelReadRow, bool>` synchronously for each non-null data row. Return `false` to stop early. The result contains `Headers`, `RowsRead`, `Completed`, and `TemporaryBytesWritten`; it does not retain data rows. Retaining rows in the consumer is the application's responsibility.
+
+Shared-string text and its fixed-width index are stored in temporary files with a bounded cache. Non-seekable input is also spooled to disk. Configure an existing `TemporaryDirectory` and `MaxTemporaryBytes` (default 256 MiB). Files owned by the operation are disposed on completion, early stop, exceptions, and cancellation; the caller's input stream remains open. `TemporaryBytesWritten` reports charged logical content bytes, not filesystem allocation overhead. Files have been released when the method returns.
+
+The ZIP is validated and shared strings indexed before callbacks begin. Header fallback may require additional worksheet scans. Only the current row is materialized; `MaxRowCharacters` bounds each serialized row or shared-string item (default 1 Mi characters), while `MaxMetadataCharacters` independently bounds each metadata part (default 1 Mi characters). Increase the existing `ResourceLimits` explicitly for large trusted inputs. Physical row numbers must be unique and strictly increasing; the original `Read` behavior is unchanged. Formula results come from cached values only. Defined ranges locate headers and columns, but do not truncate reading at their final row.
+
+Callbacks may already have processed data when an error or cancellation occurs; transaction rollback belongs to the application. Protect the scratch directory: files may contain business data and are not encrypted or securely erased. Crashes, forced termination, or filesystem failures may leave remnants; the library does not scan for or delete other operations' files. Scheduling is application-owned; there is no global concurrency gate. Contract and template streaming readers are not yet connected to this ordinary table API.

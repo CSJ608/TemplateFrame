@@ -1,5 +1,6 @@
 using System.IO.Compression;
 using System.Text;
+using System.Xml;
 using TemplateFrame.Engine;
 using Xunit;
 
@@ -7,6 +8,18 @@ namespace TemplateFrame.Excel.Simple.Tests;
 
 public sealed class StreamingReadTests
 {
+    [Fact]
+    public void ReadStreaming_PreCancelledOrInvalidOptionsDoNotConsumeSource()
+    {
+        using var source = new MemoryStream(new byte[20]);
+        source.Position = 7;
+        Assert.Throws<OperationCanceledException>(() => SimpleExcel.ReadStreaming(source, _ => true, cancellationToken: new CancellationToken(true)));
+        Assert.Equal(7, source.Position);
+        Assert.Throws<DirectoryNotFoundException>(() => SimpleExcel.ReadStreaming(source, _ => true,
+            new SimpleExcelStreamingReadOptions { TemporaryDirectory = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString("N")) }));
+        Assert.Equal(7, source.Position);
+    }
+
     [Fact]
     public void ReadStreaming_MatchesLegacyValuesIncludingRichStringsDatesAndFormulaCaches()
     {
@@ -56,6 +69,8 @@ public sealed class StreamingReadTests
     [InlineData("cancel")]
     [InlineData("disk")]
     [InlineData("row")]
+    [InlineData("xml")]
+    [InlineData("package")]
     public void ReadStreaming_NonSeekInputCleansScratchAndLeavesCallerSourceOpen(string outcome)
     {
         var directory = Path.Combine(Path.GetTempPath(), "TemplateFrame-read-" + Guid.NewGuid().ToString("N"));
@@ -66,7 +81,8 @@ public sealed class StreamingReadTests
                 <row r="1"><c r="A1" t="str"><v>header</v></c></row>
                 <row r="2"><c r="A2" t="s"><v>1</v></c></row>
                 <row r="3"><c r="A3" t="s"><v>0</v></c></row>
-                """, "Data!$A$1:$A$3");
+                """ + (outcome == "xml" ? "<broken>" : ""), "Data!$A$1:$A$3");
+            if (outcome == "package") source.SetLength(10);
             using var input = new NonSeekStream(source);
             using var cancellation = new CancellationTokenSource();
             var options = new SimpleExcelStreamingReadOptions
@@ -86,6 +102,8 @@ public sealed class StreamingReadTests
             }, options, cancellation.Token);
             if (outcome == "consumer") Assert.Throws<ApplicationException>(() => Read());
             else if (outcome == "cancel") Assert.Throws<OperationCanceledException>(() => Read());
+            else if (outcome == "xml") Assert.Throws<XmlException>(() => Read());
+            else if (outcome == "package") Assert.Throws<InvalidDataException>(() => Read());
             else if (outcome is "disk" or "row") Assert.Throws<InvalidOperationException>(() => Read());
             else
             {
@@ -93,6 +111,7 @@ public sealed class StreamingReadTests
                 Assert.Equal(outcome == "complete", result.Completed);
                 Assert.Equal(outcome == "complete" ? 2 : 1, result.RowsRead);
                 Assert.Equal(result.RowsRead, calls);
+                Assert.True(result.TemporaryBytesWritten > source.Length);
             }
             Assert.Empty(Directory.GetFiles(directory));
             Assert.True(source.CanRead);

@@ -43,7 +43,7 @@ internal sealed class SimpleExcelStreamingReader
         var input = source.CanSeek ? source : storage.BufferInput(source, cancellation);
         using var package = new SimpleExcelReadPackage(input, options, cancellation);
         var reader = new SimpleExcelStreamingReader(package, storage, options, cancellation);
-        return reader.Consume(consume);
+        return reader.Consume(consume) with { TemporaryBytesWritten = storage.ReservedBytes };
     }
 
     private SimpleExcelStreamingReadResult Consume(Func<SimpleExcelReadRow, bool> consume)
@@ -123,13 +123,14 @@ internal sealed class SimpleExcelStreamingReader
     {
         if (_worksheet is null) yield break;
         using var reader = _package.OpenXml(_worksheet);
+        RequireRoot(reader, "worksheet");
         var previous = 0;
         var sheetDataDepth = -1;
         while (reader.Read())
         {
             _cancellation.ThrowIfCancellationRequested();
             if (reader.NamespaceURI != SpreadsheetNamespace) continue;
-            if (reader.LocalName == "sheetData")
+            if (reader.LocalName == "sheetData" && reader.Depth == 1)
             {
                 sheetDataDepth = reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement ? reader.Depth : -1;
                 continue;
@@ -150,6 +151,7 @@ internal sealed class SimpleExcelStreamingReader
         if (path is null) return Array.Empty<string>();
         var strings = new SimpleExcelDiskStrings(storage, _options);
         using var reader = _package.OpenXml(path);
+        RequireRoot(reader, "sst");
         while (reader.Read())
         {
             _cancellation.ThrowIfCancellationRequested();
@@ -159,6 +161,12 @@ internal sealed class SimpleExcelStreamingReader
             strings.Add(SimpleExcelReader.GetSharedStringText(item));
         }
         return strings;
+    }
+
+    private static void RequireRoot(XmlReader reader, string name)
+    {
+        if (reader.MoveToContent() != XmlNodeType.Element || reader.LocalName != name || reader.NamespaceURI != SpreadsheetNamespace)
+            throw new InvalidDataException("Invalid or unsupported spreadsheet XML root: " + name);
     }
 
     private static string? FindPart(IReadOnlyList<SimpleExcelReadPackage.PartRelationship> relationships, string kind)

@@ -70,6 +70,18 @@ public sealed class StreamingReadPackageTests
     }
 
     [Fact]
+    public void Xml_CancellationAfterOpeningReaderInterruptsReading()
+    {
+        using var source = Package(("part.xml", "<x>" + new string('a', 100000) + "</x>"));
+        using var cancellation = new CancellationTokenSource();
+        using var package = new SimpleExcelReadPackage(source, new(), cancellation.Token);
+        using var reader = package.OpenXml("part.xml");
+        cancellation.Cancel();
+        Assert.Throws<OperationCanceledException>(() => { while (reader.Read()) { } });
+        Assert.True(source.CanRead);
+    }
+
+    [Fact]
     public void Package_RejectsDuplicatePartsAndCancellation()
     {
         using var source = Package(("one", "a"), ("one", "b"));

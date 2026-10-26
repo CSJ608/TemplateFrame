@@ -34,7 +34,7 @@ internal sealed class SimpleExcelReadPackage : IDisposable
     {
         _cancellation.ThrowIfCancellationRequested();
         if (!_entries.TryGetValue(part, out var entry)) throw new InvalidDataException("Missing package part: " + part);
-        var stream = entry.Open();
+        var stream = new CheckedReadStream(entry.Open(), _options.ResourceLimits.MaxPackageEntryBytes, _cancellation);
         try
         {
             return XmlReader.Create(stream, new XmlReaderSettings
@@ -122,4 +122,32 @@ internal sealed class SimpleExcelReadPackage : IDisposable
     public void Dispose() => _archive.Dispose();
 
     internal sealed record PartRelationship(string Id, string Type, string Target);
+
+    private sealed class CheckedReadStream(Stream source, long maximum, CancellationToken cancellation) : Stream
+    {
+        private long _read;
+        public override bool CanRead => source.CanRead;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => _read; set => throw new NotSupportedException(); }
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var received = source.Read(buffer, offset, count);
+            cancellation.ThrowIfCancellationRequested();
+            Check(received, maximum - _read, "MaxPackageEntryBytes");
+            _read += received;
+            return received;
+        }
+        public override void Flush() => throw new NotSupportedException();
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) source.Dispose();
+            base.Dispose(disposing);
+        }
+    }
 }
