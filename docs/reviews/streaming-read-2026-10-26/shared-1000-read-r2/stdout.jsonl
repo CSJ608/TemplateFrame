@@ -2,4 +2,3 @@
 {"Phase":"operation","ManagedBytes":364568}
 {"Phase":"validation","BatchMilliseconds":375.7624,"MinimumMilliseconds":371.4112,"MedianMilliseconds":371.4112,"MaximumMilliseconds":371.4112,"ManagedBytes":10163968}
 {"Phase":"complete","Status":"passed","OutputBytes":0,"PeakWorkingSetBytes":51515392,"ScratchPeakBytes":136084,"ScratchRemainingFiles":0}
-

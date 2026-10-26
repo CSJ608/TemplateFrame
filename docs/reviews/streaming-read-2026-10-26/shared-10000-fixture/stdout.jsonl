@@ -1,3 +1,2 @@
 {"Phase":"prepare","settings":{"Mode":"generate-shared","Rows":10000,"Columns":6,"Concurrency":1,"Directory":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\streaming-read-20261026\\shared-10000-fixture","DefaultLimits":false,"InputPath":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\streaming-read-20261026\\shared-10000-fixture\\input-10000-6.xlsx","Limits":{"MaxInputBytes":536870912,"MaxPackageEntryBytes":2147483648,"MaxExpandedBytes":3221225472,"MaxPackageEntries":4096,"MaxImageBytes":16777216,"MaxXmlCharactersPerPart":1500000000,"MaxClonedXmlCharacters":1500000000,"MaxTableRows":1000000,"MaxTableCells":30000030}},"Runtime":".NET 10.0.13","ProcessId":8120,"HeapBudgetBytes":5368709120,"ServerGc":false}
 {"Phase":"complete","Status":"generated"}
-

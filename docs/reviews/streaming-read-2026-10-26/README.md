@@ -33,6 +33,8 @@ inline 输入使用 `-Mode generate`，.NET 8 使用 `-Framework net8.0`。每�
 
 操作时间包含 ZIP 全条目实际解压校验、共享字符串落盘、表头定位、逐行读取与回调内逐格验证。不是单纯遍历计数，也不是稳态基准。默认分层 JIT、工作站 GC、无预热；进程峰值为 PeakWorkingSet64 全生命周期峰值，非库独占内存、非托管堆峰值。`ManagedBytes` 仅为阶段快照。原始目录含 summary.json、stdout.jsonl、stderr.txt 和 memory.csv。
 
+归档中的 stdout.jsonl 仅规范化 UTF-8 BOM 与末尾多余空行，JSON 事件内容未改；artifacts 下的原始文件保留。
+
 保护原样保留：GC heap 5 GiB、进程 private 6 GiB、系统可用至少 4 GiB、180 秒。启动前还要求至少 5 GiB 可用。第一次千行样本生成在启动前被可用内存检查拒绝（当时约 4.4 GiB，未启动子进程，因此没有进程结果文件）；执行正常 `dotnet build-server shutdown` 释放本轮构建服务器缓存后，用新 case 目录重试成功。没有终止用户应用、调低阈值或覆盖旧 case。
 
 ## 后续
