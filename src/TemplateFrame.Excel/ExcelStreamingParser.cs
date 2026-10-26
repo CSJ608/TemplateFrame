@@ -74,6 +74,7 @@ internal sealed class ExcelStreamingParser
                 if (!ReadTable(table, consume)) return false;
                 continue;
             }
+            if (element is not (TextElement or ImageElement)) continue;
             var range = FindRange(ExcelNamedRangeLocator.ElementName(element.Key));
             if (range is null || FindWorksheet(range.Sheet) is not { } path) continue;
             object? value;

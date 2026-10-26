@@ -166,6 +166,22 @@ public sealed class StreamingParseTests
         Assert.Equal(0, source.Position);
     }
 
+    [Fact]
+    public void UnknownContractElementsRemainIgnored()
+    {
+        using var source = Fixture("values");
+        using (var document = SpreadsheetDocument.Open(source, true))
+            document.WorkbookPart!.Workbook!.DefinedNames!.Append(Name("TF_Unknown", "invalid reference"));
+        source.Position = 0;
+        var contract = new TemplateContract { Elements = [new UnknownElement { Key = "Unknown" }] };
+        var parser = new ExcelTemplateParser();
+        Assert.Empty(parser.Parse(source, contract).Values);
+        var result = parser.ParseStreaming(source, contract, _ => throw new InvalidOperationException("Unexpected callback"));
+        Assert.True(result.Completed);
+        Assert.Equal(0, result.ValuesRead);
+        Assert.Equal(0, result.RowsRead);
+    }
+
     [Theory]
     [InlineData("invalid-range")]
     [InlineData("range-overflow")]
@@ -269,6 +285,8 @@ public sealed class StreamingParseTests
     private static Cell Inline(string reference, string text) => new(new InlineString(new Text(text))) { CellReference = reference, DataType = CellValues.InlineString };
     private static Cell Shared(string reference, string index) => Value(reference, index, CellValues.SharedString);
     private static Cell Value(string reference, string text, CellValues type) => new(new CellValue(text)) { CellReference = reference, DataType = type };
+
+    private sealed record UnknownElement : TemplateElement;
 
     private sealed class NonSeekStream(Stream inner) : Stream
     {
