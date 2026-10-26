@@ -1,6 +1,6 @@
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Collections.ObjectModel;
-using System.Xml;
+using PhysicalRow = TemplateFrame.Internal.Excel.ExcelStreamingXml.PhysicalRow;
 using TemplateFrame.Contract;
 using TemplateFrame.Internal;
 using TemplateFrame.Internal.Excel;
@@ -9,7 +9,6 @@ namespace TemplateFrame.Excel.Simple;
 
 internal sealed class SimpleExcelStreamingReader
 {
-    private const string SpreadsheetNamespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
     private readonly ExcelReadPackage _package;
     private readonly SimpleExcelStreamingReadOptions _options;
     private readonly CancellationToken _cancellation;
@@ -199,54 +198,12 @@ internal sealed class SimpleExcelStreamingReader
     }
 
     private IEnumerable<PhysicalRow> Rows()
-    {
-        if (_worksheet is null) yield break;
-        using var reader = _package.OpenXml(_worksheet);
-        RequireRoot(reader, "worksheet");
-        var previous = 0;
-        var sheetDataDepth = -1;
-        while (reader.Read())
-        {
-            _cancellation.ThrowIfCancellationRequested();
-            if (reader.NamespaceURI != SpreadsheetNamespace) continue;
-            if (reader.LocalName == "sheetData" && reader.Depth == 1)
-            {
-                sheetDataDepth = reader.NodeType == XmlNodeType.Element && !reader.IsEmptyElement ? reader.Depth : -1;
-                continue;
-            }
-            if (sheetDataDepth < 0 || reader.Depth != sheetDataDepth + 1
-                || reader.NodeType != XmlNodeType.Element || reader.LocalName != "row") continue;
-            var row = new Row(ExcelBoundedXml.ReadElement(reader, _options.MaxRowCharacters, _cancellation));
-            var index = row.RowIndex?.Value is { } explicitIndex ? (long)explicitIndex : (long)previous + 1;
-            if (index <= previous || index > SimpleExcelAddress.MaxRow)
-                throw new InvalidDataException("Streaming import requires strictly increasing, unique worksheet row numbers within Excel limits.");
-            previous = (int)index;
-            yield return new PhysicalRow(previous, row);
-        }
-    }
+        => _worksheet is null ? Enumerable.Empty<PhysicalRow>()
+            : ExcelStreamingXml.Rows(_package, _worksheet, _options, _cancellation, inferRowNumbers: true);
 
     private IReadOnlyList<string> ReadSharedStrings(ExcelTemporaryStorage storage, string? path)
-    {
-        if (path is null) return Array.Empty<string>();
-        var strings = new ExcelDiskStrings(storage, _options);
-        using var reader = _package.OpenXml(path);
-        RequireRoot(reader, "sst");
-        while (reader.Read())
-        {
-            _cancellation.ThrowIfCancellationRequested();
-            if (reader.NodeType != XmlNodeType.Element || reader.LocalName != "si"
-                || reader.NamespaceURI != SpreadsheetNamespace || reader.Depth != 1) continue;
-            var item = new SharedStringItem(ExcelBoundedXml.ReadElement(reader, _options.MaxRowCharacters, _cancellation));
-            strings.Add(SimpleExcelReader.GetSharedStringText(item));
-        }
-        return strings;
-    }
-
-    private static void RequireRoot(XmlReader reader, string name)
-    {
-        if (reader.MoveToContent() != XmlNodeType.Element || reader.LocalName != name || reader.NamespaceURI != SpreadsheetNamespace)
-            throw new InvalidDataException("Invalid or unsupported spreadsheet XML root: " + name);
-    }
+        => path is null ? Array.Empty<string>()
+            : ExcelStreamingXml.ReadStrings(_package, storage, path, _options, _cancellation, SimpleExcelReader.GetSharedStringText);
 
     private static string? FindPart(IReadOnlyList<ExcelReadPackage.PartRelationship> relationships, string kind)
         => relationships.FirstOrDefault(relationship => relationship.Type.EndsWith("/" + kind, StringComparison.Ordinal))?.Target;
@@ -269,6 +226,5 @@ internal sealed class SimpleExcelStreamingReader
         return null;
     }
 
-    private sealed record PhysicalRow(int Index, Row Value);
     private sealed record Header(int Row, int StartColumn, IReadOnlyList<string> Headers);
 }

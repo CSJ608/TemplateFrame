@@ -7,6 +7,28 @@ namespace TemplateFrame.Excel.Simple.Tests;
 public sealed class StreamingStorageTests
 {
     [Fact]
+    public void DiskStrings_PreservesNullSeparatelyFromEmptyText()
+    {
+        using var fixture = new ScratchDirectory();
+        var options = new SimpleExcelStreamingReadOptions { TemporaryDirectory = fixture.Path };
+        using (var storage = new ExcelTemporaryStorage(options))
+        {
+            var strings = new ExcelDiskStrings(storage, options);
+            strings.AddNullable(null);
+            strings.Add("");
+            strings.Add("中");
+            for (var repeat = 0; repeat < 3; repeat++)
+            {
+                Assert.Equal("中", strings.ReadNullable(2));
+                Assert.Equal("", strings.ReadNullable(1));
+                Assert.Null(strings.ReadNullable(0));
+            }
+            Assert.Equal(39, storage.ReservedBytes);
+        }
+        Assert.Empty(Directory.GetFiles(fixture.Path));
+    }
+
+    [Fact]
     public void DiskStrings_RandomReadsUseBoundedCacheAndCleanupFiles()
     {
         using var fixture = new ScratchDirectory();
