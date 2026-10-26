@@ -80,6 +80,28 @@ public sealed class DeliveryOrderExcelTemplateService : TemplateService<Delivery
 - 测试 `test/TemplateFrame.Excel.Tests`：生成 → 校验 → 填充 → 回读 → 断言（含命名区域清单、类型化值、
   表格行克隆后范围重指、下方元素下移、图片替换、未填充占位等边界）。
 
+## 模板大表流式导出
+
+显式使用 `ExcelTemplateFiller.FillStreaming`；旧 `Fill` 和业务服务不自动切换。输入为单次枚举的行字典，输出直接写调用方流：
+
+```csharp
+using var template = File.OpenRead("template.xlsx");
+using var target = File.Create("result.xlsx");
+var warnings = new ExcelTemplateFiller().FillStreaming(template, target, contract,
+    new ExcelStreamingData
+    {
+        Values = scalarValues,
+        Tables = new Dictionary<string, IEnumerable<IReadOnlyDictionary<string, object?>>>
+        {
+            ["Lines"] = ReadRowsLazily(),
+        },
+    }, cancellationToken);
+```
+
+`ReadRowsLazily()` 应逐行产生数据，不先 `ToList()`；目标可为非 Seek 流。模板仍加载内存，但不会物化全部输出行或压缩结果。保留默认十万行/一百万单元格及克隆 XML 限额，可信容量任务显式配置 `TemplateFillOptions.ResourceLimits`。失败、超限、取消后目标可能含部分 ZIP，调用方负责丢弃；输入和输出流始终保持开启。
+
+支持多个独立单行原型表、页脚位移、合并、图片、样式和共享字符串；普通公式保持字面值。表/标量原型行重叠、共享/数组公式、图表、超链接、条件格式和其他需要额外引用重写的展开工作表结构提前拒绝，不自动退回完整 DOM。非 TF_ 定义名仍原样保留。枚举顺序按工作簿工作表顺序和行顺序，不按契约顺序；应用负责调度，无全局并发锁。完整规则见 [流式模板边界](https://github.com/CSJ608/TemplateFrame/blob/main/docs/EXCEL-STREAMING.md)。
+
 ## 完整示例
 
 见仓库 `samples/TemplateFrame.Demo.Excel` 的**送货单 Excel 版**（复用送货单数据，3×9 网格版头 / 9 列明细）：

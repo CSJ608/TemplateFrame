@@ -1,0 +1,19 @@
+{
+  "Mode": "template-streaming-write",
+  "Rows": 10000,
+  "Columns": 6,
+  "Concurrency": 16,
+  "Framework": "net10.0",
+  "Limits": "capacity",
+  "ExitCode": 0,
+  "Guard": null,
+  "WallSeconds": 4.6410395,
+  "SampledPeakPrivateBytes": 37277696,
+  "SampledPeakWorkingSetBytes": 68558848,
+  "MinimumFreeBytes": 9358684160,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 180,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation"
+}

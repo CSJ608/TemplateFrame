@@ -80,6 +80,16 @@ Use `FillDetailed` / `ParseDetailed` for warnings. Engine failures retain raw te
 - Tests in `test/TemplateFrame.Excel.Tests`: generate → validate → fill → parse → assert (including named-range inventories, typed values,
   range re-pointing after row cloning, elements below shifted down, image replacement, unfilled placeholders and other edge cases).
 
+## Streaming template export
+
+Opt in with `ExcelTemplateFiller.FillStreaming(template, target, contract, data, cancellationToken)`.
+`ExcelStreamingData.Values` holds scalar values; `Tables` maps keys to `IEnumerable<IReadOnlyDictionary<string, object?>>`.
+Sources are consumed once, in workbook-sheet and physical-row order, and may reuse a row dictionary. Generate rows lazily and use a file or forward-only target to avoid retaining input/output yourself. The method returns validation warnings and leaves both caller streams open.
+
+The bounded template is still loaded, but generated rows are cloned, filled and immediately written to ZIP without accumulating an output DOM. Existing Fill/services and default budgets (100,000 rows, 1,000,000 cells and the cloned-XML budget) are unchanged. Failure, cancellation or a limit violation can leave partial output that must be discarded. Scheduling belongs to the application; there is no global semaphore.
+
+Supported layouts include independent single-row prototype tables across sheets, footers, merges, images, styles and shared strings. Ordinary formulas retain literal text; non-TF_ names remain unchanged. Overlapping prototype rows/scalars, shared/array formulas, charts, hyperlinks, conditional formatting and other unsupported structures on expanded sheets are rejected before output/source enumeration, with no materializing fallback. See the [complete boundaries](https://github.com/CSJ608/TemplateFrame/blob/main/docs/EXCEL-STREAMING.md) (Chinese).
+
 ## Full example
 
 See the **Excel delivery order** in `samples/TemplateFrame.Demo.Excel` (reuses the delivery-order data, 3×9 grid header / 9-column detail):
