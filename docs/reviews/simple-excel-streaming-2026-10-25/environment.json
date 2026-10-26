@@ -1,0 +1,22 @@
+{
+  "Date": "2026-10-25",
+  "Timezone": "Asia/Shanghai",
+  "Baseline": "bfd9f7d",
+  "Implementation": "139fcbc",
+  "Probe": "5dfa21e",
+  "OS": "Microsoft Windows 10 专业版",
+  "OSVersion": "10.0.19045",
+  "TotalPhysicalKiB": 33341944,
+  "Cpu": "12th Gen Intel(R) Core(TM) i5-12500H",
+  "LogicalProcessors": 16,
+  "Sdk": "10.0.402",
+  "Runtimes": [".NET 10.0.13", ".NET 8.0.32"],
+  "Gc": "Workstation, default tiered JIT, no warmup, fresh process per case",
+  "HeapHardLimitGiB": 5,
+  "SampledPrivateLimitGiB": 6,
+  "SystemFreeMemoryFloorGiB": 4,
+  "TimeoutSeconds": 180,
+  "MemoryMetric": "OS peak working set over the entire process, including preparation and validation",
+  "TimingMetric": "Operation including file close; streaming modes also generate rows inside this interval",
+  "InitialSmoke": "net10-1m-sampled ran before full-cell validation was added; retain as structural smoke only"
+}

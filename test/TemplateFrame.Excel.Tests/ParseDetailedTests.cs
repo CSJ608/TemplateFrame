@@ -10,10 +10,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
 
-/// <summary>
-/// ParseDetailed（迭代 20）：导入方向的告警出口——值转换失败以 ConversionFailed（Warning）随结果返回，
-/// 数据中保留原始文本（null 仍专指未填充）；Parse 行为不变。
-/// </summary>
 public sealed class ParseDetailedTests
 {
     private static TemplateContract TypedContract()
@@ -42,7 +38,6 @@ public sealed class ParseDetailedTests
             builder.AddTable("Lines", ["Name", "Qty"], new TableFormat { Bordered = true }, "A4");
         });
 
-    /// <summary>把指定地址的单元格改写为内联字符串（模拟用户在 Excel 里填了无法转换的内容）。</summary>
     private static MemoryStream WithCellText(Stream source, string cellAddress, string newText)
     {
         source.Position = 0;

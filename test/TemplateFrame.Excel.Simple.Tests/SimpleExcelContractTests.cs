@@ -215,13 +215,11 @@ public sealed class SimpleExcelContractTests
         Assert.Contains(result.Issues, i => i.Code == TemplateValidationIssueCode.Invalid);
     }
 
-    /// <summary>声明 DataPath 的测试服务（自动映射）。</summary>
     public sealed class TestMaterialsService : SimpleExcelTemplateService<MaterialsData>
     {
         protected override TemplateContract DefineContract() => MaterialsContract();
     }
 
-    /// <summary>表格未声明 DataPath 的服务（构造即抛错）。</summary>
     public sealed class NoDataPathService : SimpleExcelTemplateService<MaterialsData>
     {
         protected override TemplateContract DefineContract()

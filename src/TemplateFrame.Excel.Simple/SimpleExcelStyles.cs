@@ -4,7 +4,6 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace TemplateFrame.Excel.Simple;
 
-/// <summary>简单表格的最小样式池：默认 / 标题加粗 / 日期数字格式。</summary>
 internal sealed class SimpleExcelStyles
 {
     private const string DateFormatCode = "yyyy-mm-dd";
@@ -15,18 +14,22 @@ internal sealed class SimpleExcelStyles
 
     public uint DateStyleIndex { get; } = 2;
 
-    /// <summary>写入 styles.xml（WorkbookStylesPart）。</summary>
     public void WriteTo(WorkbookPart workbookPart)
     {
         var stylesPart = workbookPart.AddNewPart<WorkbookStylesPart>();
+        stylesPart.Stylesheet = CreateStylesheet();
+    }
+
+    internal static Stylesheet CreateStylesheet()
+    {
         var stylesheet = new Stylesheet();
 
         stylesheet.Append(new NumberingFormats(
             new NumberingFormat { NumberFormatId = 164, FormatCode = DateFormatCode })
         { Count = 1 });
         stylesheet.Append(new Fonts(
-            new Font(new FontName { Val = "Calibri" }, new FontSize { Val = 11 }),
-            new Font(new FontName { Val = "Calibri" }, new FontSize { Val = 11 }, new Bold()))
+            new Font(new FontSize { Val = 11 }, new FontName { Val = "Calibri" }),
+            new Font(new Bold(), new FontSize { Val = 11 }, new FontName { Val = "Calibri" }))
         { Count = 2 });
         stylesheet.Append(new Fills(
             new Fill(new PatternFill { PatternType = PatternValues.None }),
@@ -48,6 +51,6 @@ internal sealed class SimpleExcelStyles
             })
         { Count = 3 });
 
-        stylesPart.Stylesheet = stylesheet;
+        return stylesheet;
     }
 }

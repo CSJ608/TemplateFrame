@@ -1,0 +1,5 @@
+{"Phase":"prepare","settings":{"Mode":"excel-write","Rows":1000,"Columns":6,"Concurrency":100,"Directory":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\capacity-2026-10-25\\net10-excel-write-1000-c100","DefaultLimits":false,"InputPath":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\capacity-2026-10-25\\net10-excel-write-1000-c100\\input-1000-6.xlsx","Limits":{"MaxInputBytes":536870912,"MaxPackageEntryBytes":2147483648,"MaxExpandedBytes":3221225472,"MaxPackageEntries":4096,"MaxImageBytes":16777216,"MaxXmlCharactersPerPart":1500000000,"MaxClonedXmlCharacters":1500000000,"MaxTableRows":1000000,"MaxTableCells":30000030}},"Runtime":".NET 10.0.13","ProcessId":47504,"HeapBudgetBytes":5368709120,"ServerGc":false}
+{"Phase":"operation","ManagedBytes":69043784}
+{"Phase":"validation","BatchMilliseconds":5930.1773,"MinimumMilliseconds":3515.6937,"MedianMilliseconds":5652.2,"MaximumMilliseconds":5927.6482,"ManagedBytes":765452712}
+{"Phase":"complete","Status":"passed","OutputBytes":3598663,"PeakWorkingSetBytes":902737920}
+

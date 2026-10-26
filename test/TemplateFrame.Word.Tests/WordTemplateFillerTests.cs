@@ -339,7 +339,6 @@ public sealed class WordTemplateFillerTests
     }
 }
 
-/// <summary>端到端验证 TemplateService.Fill 用的测试服务（真实 WordTemplateEngine + 手写映射）。</summary>
 public sealed record FillTestOrder(string OrderNo, IReadOnlyList<FillTestLine> Lines);
 
 public sealed record FillTestLine(string MC, string Qty);

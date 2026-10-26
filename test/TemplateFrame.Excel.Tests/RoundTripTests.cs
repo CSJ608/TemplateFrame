@@ -5,11 +5,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
 
-/// <summary>
-/// Fill→Parse 往返对称矩阵（文本/数字/日期/布尔 × 标量与表格列 + 图片）。
-/// 缘起 2.1.1：布尔列 Fill 写 "1"/"0"（OOXML 规范形态，与 Excel 一致），Parse 端只认 True/False → 回读恒 null。
-/// 此矩阵保证任一值类型的「导出↔导入」闭环不静默断链。
-/// </summary>
 public sealed class RoundTripTests
 {
     private static readonly DateTime SampleDate = new(2026, 8, 27);

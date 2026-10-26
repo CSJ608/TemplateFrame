@@ -1,0 +1,16 @@
+using BenchmarkDotNet.Configs;
+using BenchmarkDotNet.Jobs;
+using BenchmarkDotNet.Running;
+using Perfolizer.Horology;
+using Perfolizer.Mathematics.OutlierDetection;
+
+var config = ManualConfig.Create(DefaultConfig.Instance)
+    .AddJob(Job.Default
+        .WithLaunchCount(2)
+        .WithWarmupCount(3)
+        .WithIterationCount(10)
+        .WithIterationTime(TimeInterval.FromMilliseconds(250))
+        .WithOutlierMode(OutlierMode.DontRemove)
+        .WithId("Isolated-2x10"));
+
+BenchmarkSwitcher.FromAssembly(typeof(Program).Assembly).Run(args, config);

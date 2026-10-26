@@ -1,0 +1,172 @@
+using System.IO.Compression;
+using System.Xml;
+using System.Xml.Linq;
+
+namespace TemplateFrame.Internal.Excel;
+
+internal sealed class ExcelReadPackage : IDisposable
+{
+    private readonly ZipArchive _archive;
+    private readonly IExcelStreamingReadSettings _options;
+    private readonly CancellationToken _cancellation;
+    private readonly Dictionary<string, ZipArchiveEntry> _entries = new(StringComparer.Ordinal);
+
+    internal ExcelReadPackage(Stream source, IExcelStreamingReadSettings options, CancellationToken cancellation)
+    {
+        _options = options;
+        _cancellation = cancellation;
+        cancellation.ThrowIfCancellationRequested();
+        Check(source.Length, options.ResourceLimits.MaxInputBytes, "MaxInputBytes");
+        source.Position = 0;
+        _archive = new ZipArchive(source, ZipArchiveMode.Read, leaveOpen: true);
+        try
+        {
+            ValidateEntries();
+        }
+        catch
+        {
+            _archive.Dispose();
+            throw;
+        }
+    }
+
+    internal XmlReader OpenXml(string part, bool metadata = false)
+    {
+        _cancellation.ThrowIfCancellationRequested();
+        if (!_entries.TryGetValue(part, out var entry)) throw new InvalidDataException("Missing package part: " + part);
+        var stream = new CheckedReadStream(entry.Open(), _options.ResourceLimits.MaxPackageEntryBytes, _cancellation);
+        try
+        {
+            return XmlReader.Create(stream, new XmlReaderSettings
+            {
+                CloseInput = true,
+                DtdProcessing = DtdProcessing.Prohibit,
+                XmlResolver = null,
+                MaxCharactersInDocument = metadata
+                    ? Math.Min(_options.MaxMetadataCharacters, _options.ResourceLimits.MaxXmlCharactersPerPart)
+                    : _options.ResourceLimits.MaxXmlCharactersPerPart,
+            });
+        }
+        catch
+        {
+            stream.Dispose();
+            throw;
+        }
+    }
+
+    internal XDocument ReadMetadata(string part)
+    {
+        using var reader = OpenXml(part, metadata: true);
+        return XDocument.Load(reader);
+    }
+
+    internal byte[] ReadImage(string part)
+    {
+        _cancellation.ThrowIfCancellationRequested();
+        if (!_entries.TryGetValue(part, out var entry)) throw new InvalidDataException("Missing package part: " + part);
+        Check(entry.Length, _options.ResourceLimits.MaxImageBytes, "MaxImageBytes");
+        Check(entry.Length, int.MaxValue, "image array length");
+        var bytes = new byte[(int)entry.Length];
+        using var input = new CheckedReadStream(entry.Open(), _options.ResourceLimits.MaxImageBytes, _cancellation);
+        var read = 0;
+        while (read < bytes.Length)
+        {
+            var count = input.Read(bytes, read, Math.Min(81920, bytes.Length - read));
+            if (count == 0) throw new EndOfStreamException();
+            read += count;
+        }
+        if (input.Read(new byte[1], 0, 1) != 0) throw new InvalidDataException("Image part length mismatch.");
+        return bytes;
+    }
+
+    internal IReadOnlyList<PartRelationship> ReadRelationships(string part)
+    {
+        var slash = part.LastIndexOf('/');
+        var path = part.Length == 0 ? "_rels/.rels"
+            : part.Substring(0, slash + 1) + "_rels/" + part.Substring(slash + 1) + ".rels";
+        if (!_entries.ContainsKey(path)) return [];
+        XNamespace ns = "http://schemas.openxmlformats.org/package/2006/relationships";
+        return ReadMetadata(path).Root?.Elements(ns + "Relationship")
+            .Where(element => (string?)element.Attribute("TargetMode") != "External")
+            .Select(element => new PartRelationship(
+                (string?)element.Attribute("Id") ?? throw new InvalidDataException("Missing relationship Id."),
+                (string?)element.Attribute("Type") ?? throw new InvalidDataException("Missing relationship Type."),
+                ResolvePart(part, (string?)element.Attribute("Target") ?? throw new InvalidDataException("Missing relationship Target."))))
+            .ToArray() ?? [];
+    }
+
+    private static string ResolvePart(string source, string target)
+    {
+        var root = new Uri("http://package/");
+        var resolved = new Uri(new Uri(root, source), target);
+        if (resolved.Scheme != root.Scheme || resolved.Host != root.Host || resolved.Query.Length != 0 || resolved.Fragment.Length != 0)
+            throw new InvalidDataException("Invalid internal package relationship.");
+        return Uri.UnescapeDataString(resolved.AbsolutePath.TrimStart('/'));
+    }
+
+    private void ValidateEntries()
+    {
+        var limits = _options.ResourceLimits;
+        Check(_archive.Entries.Count, limits.MaxPackageEntries, "MaxPackageEntries");
+        var buffer = new byte[81920];
+        long total = 0;
+        foreach (var entry in _archive.Entries)
+        {
+            _cancellation.ThrowIfCancellationRequested();
+            if (_entries.ContainsKey(entry.FullName)) throw new InvalidDataException("Duplicate package part: " + entry.FullName);
+            _entries.Add(entry.FullName, entry);
+            Check(entry.Length, limits.MaxPackageEntryBytes, "MaxPackageEntryBytes");
+            Check(entry.Length, limits.MaxExpandedBytes - total, "MaxExpandedBytes");
+            using var input = entry.Open();
+            long size = 0;
+            while (true)
+            {
+                _cancellation.ThrowIfCancellationRequested();
+                var count = input.Read(buffer, 0, buffer.Length);
+                _cancellation.ThrowIfCancellationRequested();
+                if (count == 0) break;
+                Check(count, limits.MaxPackageEntryBytes - size, "MaxPackageEntryBytes");
+                Check(count, limits.MaxExpandedBytes - total, "MaxExpandedBytes");
+                size += count;
+                total += count;
+            }
+        }
+    }
+
+    private static void Check(long value, long remaining, string name)
+    {
+        if (value > remaining) throw new InvalidOperationException("Streaming import exceeds " + name + ".");
+    }
+
+    public void Dispose() => _archive.Dispose();
+
+    internal sealed record PartRelationship(string Id, string Type, string Target);
+
+    private sealed class CheckedReadStream(Stream source, long maximum, CancellationToken cancellation) : Stream
+    {
+        private long _read;
+        public override bool CanRead => source.CanRead;
+        public override bool CanSeek => false;
+        public override bool CanWrite => false;
+        public override long Length => throw new NotSupportedException();
+        public override long Position { get => _read; set => throw new NotSupportedException(); }
+        public override int Read(byte[] buffer, int offset, int count)
+        {
+            cancellation.ThrowIfCancellationRequested();
+            var received = source.Read(buffer, offset, count);
+            cancellation.ThrowIfCancellationRequested();
+            Check(received, maximum - _read, "MaxPackageEntryBytes");
+            _read += received;
+            return received;
+        }
+        public override void Flush() => throw new NotSupportedException();
+        public override long Seek(long offset, SeekOrigin origin) => throw new NotSupportedException();
+        public override void SetLength(long value) => throw new NotSupportedException();
+        public override void Write(byte[] buffer, int offset, int count) => throw new NotSupportedException();
+        protected override void Dispose(bool disposing)
+        {
+            if (disposing) source.Dispose();
+            base.Dispose(disposing);
+        }
+    }
+}

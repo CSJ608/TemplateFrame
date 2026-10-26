@@ -1,0 +1,25 @@
+{
+  "CompletedDate": "2026-10-26",
+  "Timezone": "Asia/Shanghai",
+  "ImplementationRevision": "269bdea",
+  "ReleaseBuild": { "Warnings": 0, "Errors": 0 },
+  "Tests": {
+    "Frameworks": ["net472", "net8.0", "net10.0"],
+    "Core": 399,
+    "Word": 492,
+    "Excel": 702,
+    "SimpleExcel": 413,
+    "Total": 2006,
+    "Failed": 0,
+    "Skipped": 0
+  },
+  "Formatting": { "Solution": "passed", "CapacityProbe": "passed" },
+  "CapacityCases": {
+    "Total": 12,
+    "FullCellValidationPassed": 11,
+    "ExpectedDefaultBudgetRejection": 1,
+    "RejectionLimit": "MaxClonedXmlCharacters",
+    "GuardTerminations": 0
+  },
+  "NotRun": ["Office/WPS open and rendering", "arbitrary complex million-row templates", "100 concurrent million-row tasks", "Word import"]
+}

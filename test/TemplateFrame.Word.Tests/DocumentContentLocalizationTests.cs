@@ -10,11 +10,6 @@ using Xunit;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>
-/// 迭代 13（文档内容 i18n）：Word 模板按语言生成（占位符 / 页码 / 版式文本 / 表头），
-/// 回读把已知占位符规范化为 null（null=未填充、""=有意留空），不依赖模板语言；业务可注入覆盖。
-/// 列 Key 即内容控件 tag（不本地化，保证 Fill/Parse 匹配），表头文案经本地化键解析。
-/// </summary>
 public sealed class DocumentContentLocalizationTests
 {
     private static readonly CultureInfo Zh = CultureInfo.GetCultureInfo("zh-CN");

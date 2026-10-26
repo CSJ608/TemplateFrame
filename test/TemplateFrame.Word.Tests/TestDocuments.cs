@@ -5,7 +5,6 @@ using TemplateFrame.Contract;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>测试用契约与模板构造。</summary>
 internal static class TestDocuments
 {
     public static TemplateContract DemoContract()
@@ -32,22 +31,16 @@ internal static class TestDocuments
             ],
         };
 
-    /// <summary>用 WordTemplateBuilder 组装一个含文本/表格/图片控件的模板。</summary>
     public static MemoryStream BuildDemoTemplate()
-    {
-        var builder = new WordTemplateBuilder();
-        builder.AddParagraph("示例单据", "Title");
-        builder.AddParagraph("单号：").AddElement("OrderNo");
-        builder.AddText("客户：").AddElement("CustomerName");
-        builder.AddTable("Lines", ["MC", "MName", "Qty"], headerStyle: "TableHeader");
-        builder.AddImage("Logo", widthInches: 2.0, heightInches: 1.0);
-        builder.AddStaticText("签字：____________");
-
-        var stream = new MemoryStream();
-        builder.Save(stream);
-        stream.Position = 0;
-        return stream;
-    }
+        => BuildTemplate(builder =>
+        {
+            builder.AddParagraph("示例单据", "Title");
+            builder.AddParagraph("单号：").AddElement("OrderNo");
+            builder.AddText("客户：").AddElement("CustomerName");
+            builder.AddTable("Lines", ["MC", "MName", "Qty"], headerStyle: "TableHeader");
+            builder.AddImage("Logo", widthInches: 2.0, heightInches: 1.0);
+            builder.AddStaticText("签字：____________");
+        });
 
     public static MemoryStream BuildTemplate(Action<WordTemplateBuilder> compose)
     {
@@ -59,7 +52,6 @@ internal static class TestDocuments
         return stream;
     }
 
-    /// <summary>1x1 PNG（合法最小 PNG），用于图片填充测试。</summary>
     public static byte[] TinyPng { get; } =
     [
         137, 80, 78, 71, 13, 10, 26, 10,
@@ -73,10 +65,6 @@ internal static class TestDocuments
         68, 174, 66, 96, 130,
     ];
 
-    /// <summary>
-    /// 构造一个含正文/页眉/页脚内容控件的 .docx（用于页眉页脚健壮性测试）。
-    /// 注意：Word 手做模板里控件可出现在页眉/页脚，定位/填充/回读都按 tag 全局生效。
-    /// </summary>
     public static MemoryStream BuildTemplateWithHeaderFooter(string bodyTag, string headerTag, string footerTag)
     {
         var stream = new MemoryStream();
@@ -108,7 +96,6 @@ internal static class TestDocuments
                 new SdtAlias { Val = tag }),
             new SdtContentRun(new Run(new Text(tag))));
 
-    /// <summary>构造一个含静态表（无内容控件）+ 明细表（每格一个 SDT）的 .docx，用于多表健壮性测试。</summary>
     public static MemoryStream BuildTemplateWithStaticTableAndDetailTable()
     {
         var stream = new MemoryStream();

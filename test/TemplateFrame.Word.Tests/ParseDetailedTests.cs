@@ -9,10 +9,6 @@ using Xunit;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>
-/// ParseDetailed（迭代 20）：导入方向的告警出口——值转换失败以 ConversionFailed（Warning）随结果返回，
-/// 数据中保留原始文本（null 仍专指未填充）；Parse 行为不变。
-/// </summary>
 public sealed class ParseDetailedTests
 {
     private static TemplateContract TypedContract()
@@ -40,7 +36,6 @@ public sealed class ParseDetailedTests
             builder.AddTable("Lines", ["Name", "Qty"]);
         });
 
-    /// <summary>把指定 tag 的内容控件文本改为新值（模拟用户在 Word 里填了无法转换的内容）。</summary>
     private static MemoryStream WithSdtText(Stream source, string tag, string newText, int occurrence = 0)
     {
         source.Position = 0;
@@ -171,10 +166,6 @@ public sealed class ParseDetailedTests
         }
     }
 
-    /// <summary>
-    /// 服务层端到端：转换失败的字段保持默认值（宽容映射，不抛错），告警随强类型结果返回；
-    /// 干净数据往返零告警。
-    /// </summary>
     [Fact]
     public void Service_ParseDetailed_BadValueKeepsDefaultAndReportsWarning()
     {

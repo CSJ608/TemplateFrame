@@ -6,10 +6,6 @@ using Xunit;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>
-/// 损坏流（非 OOXML 字节 / 截断 zip）下 Fill / Parse 的异常契约：
-/// 统一抛 <see cref="InvalidOperationException"/> + 本地化消息（与 Validate 一致），不漏出底层 OpenXML 异常。
-/// </summary>
 public sealed class CorruptStreamTests
 {
     private static readonly TemplateContract Contract = new()
@@ -62,7 +58,6 @@ public sealed class CorruptStreamTests
 
     // ---------------- zip 有效但 XML 损坏（惰性 DOM，Open 阶段不抛、树访问时才抛） ----------------
 
-    /// <summary>把 zip 内首个匹配的 XML 条目重写为无法解析的内容：包结构合法、条目 XML 损坏。</summary>
     private static MemoryStream WithCorruptXmlEntry(Stream source, string entryPattern)
     {
         source.Position = 0;

@@ -7,6 +7,42 @@ namespace TemplateFrame.Word.Tests;
 public sealed class WordTemplateValidatorTests
 {
     [Fact]
+    public void Validate_MixedIssues_PreservesPhaseOrderAndMessageArguments()
+    {
+        using var stream = TestDocuments.BuildTemplate(b =>
+        {
+            b.AddElement("Dup");
+            b.AddElement("Dup");
+            b.AddElement("Extra");
+        });
+        var contract = new TemplateContract
+        {
+            Elements =
+            [
+                new TextElement { Key = "Dup" },
+                new TextElement { Key = "Dup" },
+                new ImageElement { Key = "Missing", DisplayName = "Picture", Required = false },
+            ],
+        };
+
+        var issues = new WordTemplateValidator().Validate(stream, contract).Issues;
+
+        Assert.Equal(new[]
+        {
+            "Word.Validation.ContractDuplicateKey",
+            "Word.Validation.AmbiguousTag",
+            "Word.Validation.MissingImageElement",
+            "Word.Validation.ExtraTag",
+        }, issues.Select(i => i.MessageKey));
+        Assert.Equal(new object?[] { "Dup" }, issues[0].MessageArgs);
+        Assert.Equal(new object?[] { "Dup", 2 }, issues[1].MessageArgs);
+        Assert.Equal(new object?[] { "Missing", "Picture" }, issues[2].MessageArgs);
+        Assert.Equal(new object?[] { "Extra" }, issues[3].MessageArgs);
+        Assert.Equal(TemplateValidationSeverity.Warning, issues[2].Severity);
+        Assert.Equal(TemplateValidationSeverity.Warning, issues[3].Severity);
+    }
+
+    [Fact]
     public void Validate_ValidTemplate_Passes()
     {
         using var stream = TestDocuments.BuildDemoTemplate();

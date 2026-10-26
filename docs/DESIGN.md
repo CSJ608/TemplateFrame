@@ -261,7 +261,13 @@ public abstract class TemplateService<TData, TBuilder> where TBuilder : class, I
 
 Excel 解析的行、单元格及共享字符串索引在单次 Parse 内创建并复用，不跨文档缓存 DOM。命名范围内的空行及各列原有起点偏移语义保留；在分配返回行集合前，按所有契约表累计检查行/单元格预算。坐标须位于 1–1,048,576 行、A–XFD 列内，范围必须正向；合法坐标也可能超出业务预算。历史实测范围及空间成本见 [PERFORMANCE 的 R5 比较](PERFORMANCE.md)，本轮新增预检与限额后的性能需另测，不能由查找优化推导全路径线性伸缩或峰值内存下降。
 
+Excel 填充在私有工作副本中逐行克隆并立即填充，克隆源是未填充样例的快照，避免后续行继承首行的值或数字格式；保留契约遍历、下方元素移位和定义名重指语义。所有填充完成后，捕获已加载的部件根元素，关闭 AutoSave 的包仍先正常 Dispose，以终结新增部件、关系和包属性。`ExcelPackageOutput` 再重建输出 ZIP：已加载 XML 直接序列化到条目，未加载部件按内容复制；工作表逐行写出后移除私有行对象。它避免整部件 XML 保存缓冲，但不是全流程流式填充：输入 FillData、填充期间的完整 DOM 及最终压缩输出 MemoryStream 仍在内存中。输出位置归零、调用方模板流所有权、公开入口和默认限额不变；ZIP 压缩字节、XML 属性/命名空间声明顺序与空元素写法不保证相同。
+
+**Excel 模板的显式流式导出**：`ExcelTemplateFiller.FillStreaming` 配合 `ExcelStreamingData` 接收单次枚举的行字典，返回警告，直接写入调用方目标。先预检布局和填充不与原型行交叠的标量，再按工作簿/行顺序逐行克隆、填充和写 ZIP。展开工作表先写出；期间累计位移并调整 TF_ 定义名、合并和绘图，最后捕获元数据根、终结工作包并复制剩余条目。样式可在流式填值时生成，最后统一序列化。内存只保留有界模板、当前行和元数据，不累积输出 DOM/压缩结果。保留旧 Fill 和默认预算；不支持的布局在枚举/输出前拒绝，运行时超限或取消可能留下部分输出。模板/输出流保持开启，支持非 Seek，宿主调度，无全局并发锁。支持边界、执行顺序、公式/定义名规则和失败责任见 [EXCEL-STREAMING](EXCEL-STREAMING.md)。
+
 **Simple 的表头与数据区**：底层 `SimpleExcel.Write/Read` 可独立使用，默认 `TF_Table` 标记区域，`TableName` / `StartCell` 可配置。Read 优先取区域表头；区域缺失、`#REF!` / 不支持的公式定义名，或区域表头为空时保留表头回退：优先第一个至少两个非空单元格的行，没有这样的行时取首个非空行。无效的 A1 坐标、越界或反向范围直接拒绝，不靠回退掩盖。
+
+**Simple 的显式流式导出**：`WriteStreaming(Stream, SimpleExcelStreamingTable, SimpleExcelStreamingOptions?, CancellationToken)` 接收单次枚举的行源。`WorkbookOptions` 复用现有工作表/预算配置；列宽可固定，或只采样前 N 个源行（默认 100，最多 1024，且采样网格最多 65,536 格）。缓存的是已转换的采样行，兼容数据源重复使用行缓冲区；剩余数据逐行直接写入 ZIP 条目，不经工作表 DOM 或 Packaging 的整部件缓冲。保留数值、日期、空行压缩和定义名语义，但列宽不再保证覆盖后续全部数据。至少一个表头，预算逐源行累计；取消/超限/错误可能留下部分输出，调用方负责丢弃。枚举器由方法释放、输出流始终由调用方拥有；非可定位流适配器记录当前位置，以兼容 .NET Framework ZIP 的位置读取。没有全局限流，宿主负责排队。旧 `Write`、契约写入和强类型 `Fill` 不自动迁移，新 API 不提供流式读取。用法及完整边界见 [Simple README](../src/TemplateFrame.Excel.Simple/README.md#大表流式导出)。
 
 数据仍读到工作表末行并跳过全空行，区域下方其他非空内容也可能被读入；实现按实际存在的行号排序遍历，不再为稀疏行号之间的缺失行分配临时行数据。重复行号保留首次出现的行，缺 RowIndex 时按前一行加一推断；不支持缺单元格引用的输入。共享字符串与富文本拼接保持原语义，读取内复用共享字符串索引。定义名与文本回退读路均使用资源预算；表头也计入 Simple 的单元格预算。
 
@@ -368,11 +374,11 @@ TemplateFrame/
 ├─ src/TemplateFrame/               # 基础包：契约模型 + 引擎抽象 + 数据形状（格式无关）
 │  ├─ Contract/                     # TemplateContract, TemplateElement, TextElement, ImageElement, TableElement
 │  ├─ Data/                         # FillData（数据形状）
-│  ├─ Mapping/                      # DataPathMapper（DataPath 自动映射）
+│  ├─ Mapping/                      # DataPathMapper + ContractMapping / PropertyValueConverter / PropertyAssignment / MappingTarget
 │  ├─ Engine/                       # ITemplateEngine + TemplateFillResult / TemplateFillOptions / TemplateResourceLimits / MissingElementPolicy
 │  ├─ Builder/                      # ITemplateBuilder（版式组合抽象）
-│  ├─ Internal/                     # StreamUtil / TemplateResourceBudget / ImageTypeDetector / PlaceholderImage（插件共享内部工具）
-│  └─ Services/                     # TemplateService<TData, TBuilder>（泛型基类）
+│  ├─ Internal/                     # 流/资源预算/图片工具 + ContractTextParser / ContractValueConverter / ParseLocation / ValidationApplier
+│  └─ Services/                     # TemplateService<TData, TBuilder> + MappingWarnings（诊断合并）
 ├─ src/TemplateFrame.Word/          # 插件：MS Word（DocumentFormat.OpenXml）
 │  ├─ WordTemplateBuilder.cs        # 组装带 SDT 的 .docx（版式由业务服务驱动）
 │  ├─ WordXmlFactory.cs             # OpenXML 纯构造（run/表格/单元格/节属性/页码域/drawing）
@@ -386,16 +392,24 @@ TemplateFrame/
 │  ├─ ExcelNamedRangeLocator.cs     # 按命名区域定位（TF_ 前缀）
 │  ├─ ExcelAddressHelper.cs         # 单元格地址 / A1 引用互转
 │  ├─ ExcelStyleManager.cs          # 构建期单元格样式池（字体/边框/对齐去重）
+│  ├─ ExcelWorksheetCells.cs / ExcelCellWriter.cs # 有序单元格操作 / 填充期类型化值写入
 │  ├─ ExcelTemplateValidator.cs / ExcelTemplateFiller.cs / ExcelTemplateParser.cs
+│  ├─ ExcelPackageOutput.cs         # 包终结后直接 ZIP 序列化；逐行释放私有工作表 DOM
 │  ├─ ExcelRowShifter.cs            # 表格克隆后的行下移 + 命名区域/合并区域平移
 │  ├─ ExcelNumberFormat.cs          # .NET Format → Excel 数字格式映射与应用
 │  ├─ ExcelDrawingHelper.cs         # drawing 强类型操作（xdr:cNvPr 命名空间，兼容 Excel）
 │  └─ Localization/                 # Sr + Resources*.resx（中英消息）
 ├─ src/TemplateFrame.Excel.Simple/  # 插件：MS Excel 简单表格
-│  ├─ SimpleExcel.cs                # 公共门面（Write / Read / ColumnDefinedName）
+│  ├─ SimpleExcel.cs                # 公共门面（Write / WriteStreaming / Read / ColumnDefinedName）
 │  ├─ SimpleExcelWriter.cs / SimpleExcelReader.cs / SimpleExcelAddress.cs   # 导出 / 导入 / 地址解析实现
 │  ├─ SimpleExcelContract.cs / SimpleExcelTemplateService.cs               # 契约感知读写 + 强类型服务基类
+│  ├─ SimpleExcelContractReader.cs / SimpleExcelContractValidator.cs        # 契约读取 / 校验
+│  ├─ DefinedNameLayoutResolver.cs / DefinedNameLayout.cs / SimpleExcelHeaderLookup.cs # 定义名布局 / 表头匹配
 │  ├─ SimpleExcelOptions.cs / SimpleExcelTable.cs / SimpleExcelStyles.cs
+│  ├─ SimpleExcelStreamingTable.cs / SimpleExcelStreamingOptions.cs       # 单次枚举行源 / 有界列宽配置
+│  ├─ SimpleExcelStreamingWriter.cs / SimpleExcelStreamingRows.cs / SimpleExcelStreamingLayout.cs # 流式编排 / 行预算与转换 / 布局与采样
+│  ├─ SimpleExcelStreamingPackage.cs / SimpleExcelForwardOnlyStream.cs    # ZIP 部件输出 / 非可定位流兼容
+│  ├─ SimpleExcelCellWriter.cs / SimpleExcelDefinedNames.cs                # 新旧写入路径共享值与定义名序列化
 │  └─ Localization/                 # Sr + Resources*.resx（中英消息）
 ├─ test/TemplateFrame.Tests/        # 基础包单测（契约、数据形状、映射、图片探测）
 ├─ test/TemplateFrame.Word.Tests/   # Word 插件测试：生成→校验→填充→回读→断言

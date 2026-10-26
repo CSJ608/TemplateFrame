@@ -5,15 +5,6 @@ using TemplateFrame.Localization;
 
 namespace TemplateFrame.Demo.Excel.Simple.I18n;
 
-/// <summary>
-/// TemplateFrame.Excel.Simple 插件 i18n 演示（作为一个整体）：
-/// 迭代 12 消息层 —— 缺列模板对完整契约 Validate，Missing 消息随 CurrentUICulture 中英切换；
-/// 迭代 14 文档内容 —— 中英表头模板 + 填充（表头按语言，每列定义名标记表头单元格），
-/// 回读走定义名定位（语言无关，无需知道文件语言）。
-/// 输出文件带 I18n 标识：Excel-Simple-I18n-Materials-{zh,en}-{template,filled}.xlsx 与根集合版
-/// Excel-Simple-I18n-Materials-rootlist-{zh,en}-filled.xlsx（TData 直接为 List&lt;MaterialLine&gt;），
-/// 默认输出到系统临时目录（Windows %TEMP% / Linux·macOS /tmp）下的 TemplateFrame.Demo.Excel.Simple.I18n。
-/// </summary>
 internal static class Program
 {
     private static void Main(string[] args)
@@ -30,8 +21,6 @@ internal static class Program
 
         Console.WriteLine($"契约：{full.Contract.Name} v{full.Contract.Version}，列：{string.Join(" | ", table.Columns.Select(c => c.DisplayName))}（DataPath 自动映射）");
 
-        // ==================== 消息层 i18n（迭代 12） ====================
-        // [1] 生成"缺列模板"：用缺「型号」的契约生成（4 列），再对完整契约（5 列）做 Validate
         var missingPath = Path.Combine(dir, "Excel-Simple-I18n-Materials-template-missing-model.xlsx");
         using (var template = reduced.BuildTemplate(options))
         {
@@ -40,7 +29,6 @@ internal static class Program
 
         Console.WriteLine($"\n[1] 缺列模板（仅 4 列，缺「型号」）：{missingPath}");
 
-        // [2][3] Validate：同一缺列模板，两种文化下的校验消息
         Console.WriteLine("\n[2][3] Validate —— 同一份缺列模板对完整契约，两种文化的校验消息（MessageKey / MessageArgs 结构化输出）");
         RunValidation("zh-CN", full, missingPath, options);
         RunValidation("en", full, missingPath, options);
@@ -49,7 +37,6 @@ internal static class Program
         Console.WriteLine("  - SimpleExcelContract.Validate 的 Missing 消息随 CurrentUICulture 自动中英切换（中文为中性文化默认，行为不变）；");
         Console.WriteLine("  - MessageKey + MessageArgs 是稳定结构（不随语言变），调用方可用它自行翻译/映射 UI 文案。");
 
-        // ==================== 文档内容 i18n（迭代 14）：中英表头 + 定义名回读 ====================
         Console.WriteLine("\n════════ 文档内容 i18n：中英表头 + 定义名回读（迭代 14）════════");
 
         var enLocalizer = new DefaultTemplateLocalizer(new Dictionary<string, string>
@@ -66,7 +53,6 @@ internal static class Program
         var zhFilledPath = Path.Combine(dir, "Excel-Simple-I18n-Materials-zh-filled.xlsx");
         var enFilledPath = Path.Combine(dir, "Excel-Simple-I18n-Materials-en-filled.xlsx");
 
-        // [5] 中英模板（仅表头，表头按语言；en 模板同时写每列定义名 → 表头单元格）
         using (var template = full.BuildTemplate(options))
         {
             File.WriteAllBytes(zhTemplatePath, ((MemoryStream)template).ToArray());
@@ -89,7 +75,6 @@ internal static class Program
             ],
         };
 
-        // [6] 填充：同一份数据 → 中英两份填充文件（表头按语言）
         using (var filled = full.Fill(materials, options))
         {
             File.WriteAllBytes(zhFilledPath, ((MemoryStream)filled).ToArray());
@@ -108,16 +93,21 @@ internal static class Program
         Console.WriteLine($"    英文表头：{string.Join(" | ", table.Columns.Select(c => enLocalizer.GetString(c.Key, new CultureInfo("en"))))}");
         Console.WriteLine("    → 回读走每列定义名定位（语言无关），不依赖表头文本匹配");
 
-        // [7] 回读：zh（文本匹配回退）+ en（定义名定位，语言无关）→ 强类型 MaterialsData
         Console.WriteLine("\n[7] 回读（语言无关）：");
-        PrintReadback("zh 文件", full.Parse(File.OpenRead(zhFilledPath), options));
-        PrintReadback("en 文件", full.Parse(File.OpenRead(enFilledPath), options));
+        using (var input = File.OpenRead(zhFilledPath))
+        {
+            PrintReadback("zh 文件", full.Parse(input, options));
+        }
+
+        using (var input = File.OpenRead(enFilledPath))
+        {
+            PrintReadback("en 文件", full.Parse(input, options));
+        }
 
         Console.WriteLine("\n[8] 结论（Excel.Simple i18n）：");
         Console.WriteLine("  - 表头按语言（en 表头经本地化器），每列定义名承载列身份 → 框架产物回读语言无关（无需知道文件语言）；");
         Console.WriteLine("  - 手改文件（无定义名）回退按表头文本匹配（中文 DisplayName 匹配契约列）；表头按语言匹配继续搁置（需语言元数据）。");
 
-        // ==================== 根集合 + i18n（迭代 16）：List<T> 直接填充 / 解析 ====================
         Console.WriteLine("\n════════ 根集合 List<T> + i18n：同一份 List<MaterialLine> 中英填充 + 语言无关回读 ════════");
 
         var listService = new MaterialListTemplateService();
@@ -126,7 +116,6 @@ internal static class Program
         var zhRootListPath = Path.Combine(dir, "Excel-Simple-I18n-Materials-rootlist-zh-filled.xlsx");
         var enRootListPath = Path.Combine(dir, "Excel-Simple-I18n-Materials-rootlist-en-filled.xlsx");
 
-        // [9] 填充：同一份 List<MaterialLine> → 中英两份填充文件（表头按语言，每列定义名标记表头单元格）
         using (var filled = listService.Fill(materialList, options))
         {
             File.WriteAllBytes(zhRootListPath, ((MemoryStream)filled).ToArray());
@@ -141,10 +130,16 @@ internal static class Program
         Console.WriteLine($"  - zh 填充：{zhRootListPath}");
         Console.WriteLine($"  - en 填充：{enRootListPath}");
 
-        // [10] 回读：直接得到 List<MaterialLine>（定义名定位，语言无关）
         Console.WriteLine("\n[10] 根集合回读（语言无关，直接 List<MaterialLine>）：");
-        PrintListReadback("zh 文件", listService.Parse(File.OpenRead(zhRootListPath), options));
-        PrintListReadback("en 文件", listService.Parse(File.OpenRead(enRootListPath), options));
+        using (var input = File.OpenRead(zhRootListPath))
+        {
+            PrintListReadback("zh 文件", listService.Parse(input, options));
+        }
+
+        using (var input = File.OpenRead(enRootListPath))
+        {
+            PrintListReadback("en 文件", listService.Parse(input, options));
+        }
 
         Console.WriteLine("\n[11] 结论（根集合 + i18n）：");
         Console.WriteLine("  - TData 直接是 List<MaterialLine>（表格 DataPath 留空），无需再包一层容器对象；");
@@ -172,17 +167,11 @@ internal static class Program
     }
 
     private static void PrintReadback(string label, MaterialsData data)
-    {
-        Console.WriteLine($"  [{label}] {data.Items.Count} 行（强类型 MaterialsData）");
-        foreach (var item in data.Items)
-        {
-            Console.WriteLine($"      {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");
-        }
-    }
+        => PrintListReadback(label, data.Items, "MaterialsData");
 
-    private static void PrintListReadback(string label, List<MaterialLine> items)
+    private static void PrintListReadback(string label, IReadOnlyList<MaterialLine> items, string dataType = "List<MaterialLine>")
     {
-        Console.WriteLine($"  [{label}] {items.Count} 行（强类型 List<MaterialLine>）");
+        Console.WriteLine($"  [{label}] {items.Count} 行（强类型 {dataType}）");
         foreach (var item in items)
         {
             Console.WriteLine($"      {item.Code} | {item.Name} | {item.Unit} | {item.Package} | {item.Model}");

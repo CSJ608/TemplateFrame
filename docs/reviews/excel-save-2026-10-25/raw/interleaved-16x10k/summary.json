@@ -1,0 +1,19 @@
+{
+  "Mode": "excel-write",
+  "Rows": 10000,
+  "Columns": 6,
+  "Concurrency": 16,
+  "Framework": "net10.0",
+  "Limits": "capacity",
+  "ExitCode": 0,
+  "Guard": null,
+  "WallSeconds": 8.1185389,
+  "SampledPeakPrivateBytes": 829308928,
+  "SampledPeakWorkingSetBytes": 855818240,
+  "MinimumFreeBytes": 9126526976,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 180,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation"
+}

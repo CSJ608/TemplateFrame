@@ -4,10 +4,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Simple.Tests;
 
-/// <summary>
-/// 根集合模式：TData 本身为 List&lt;T&gt; / IReadOnlyList&lt;T&gt; / 数组时，
-/// 契约表格 DataPath 留空，即可直接 Fill / Parse 行集合（无需再包一层容器对象）。
-/// </summary>
 public sealed class SimpleExcelRootListTests
 {
     private static TemplateContract RootContract()
@@ -56,7 +52,6 @@ public sealed class SimpleExcelRootListTests
         protected override TemplateContract DefineContract() => RootContract();
     }
 
-    /// <summary>根集合却声明了 DataPath：构造可通过（契约惰性），首次 Fill 时应抛清晰错误。</summary>
     public sealed class AmbiguousRootService : SimpleExcelTemplateService<List<MaterialLine>>
     {
         protected override TemplateContract DefineContract()
@@ -134,10 +129,6 @@ public sealed class SimpleExcelRootListTests
         Assert.Contains("DataPath", ex.Message);
     }
 
-    /// <summary>
-    /// 2.1.1 评审落地 B-12：Fill(null) 此前根集合模式静默导出仅表头的空文件、容器模式抛裸反射异常——
-    /// 现统一抛 <see cref="ArgumentNullException"/>（参数名 data）。
-    /// </summary>
     [Fact]
     public void Service_FillNull_ThrowsArgumentNull_InBothModes()
     {

@@ -209,10 +209,6 @@ public sealed class SimpleExcelTests
         Assert.Equal("物料一", loaded.Rows[0][1]);
     }
 
-    /// <summary>
-    /// 迭代 21（B-13）：decimal / long 写入不再经 double 中转——此前 28-29 位 decimal 静默截到 15 位、
-    /// &gt; 2^53 的 long 失真。读侧按公开契约仍返回 double（与 Excel 一致），故直接断言单元格 XML 文本。
-    /// </summary>
     [Fact]
     public void Write_DecimalAndLongHighPrecision_PreservesFullCellText()
     {

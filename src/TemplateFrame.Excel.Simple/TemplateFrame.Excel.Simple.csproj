@@ -22,9 +22,13 @@
 
   <ItemGroup>
     <InternalsVisibleTo Include="TemplateFrame.Excel.Simple.Tests" />
+    <Compile Include="..\Shared\Excel\*.cs" Link="Shared\Excel\%(Filename)%(Extension)" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TemplateFrame\TemplateFrame.csproj" />
+  </ItemGroup>
+  <ItemGroup Condition="'$(TargetFramework)' == 'net462'">
+    <Reference Include="System.IO.Compression" />
   </ItemGroup>
 </Project>

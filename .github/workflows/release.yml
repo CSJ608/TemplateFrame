@@ -6,12 +6,19 @@ on:
   push:
     tags:
       - "v*"
+  workflow_dispatch:
+    inputs:
+      release_tag:
+        description: "Existing stable release tag whose four symbol packages should be recovered (vX.Y.Z)"
+        required: true
+        type: string
 
 permissions:
   contents: read
 
 jobs:
   test:
+    if: github.event_name == 'push'
     runs-on: windows-latest
     timeout-minutes: 40
     steps:
@@ -52,6 +59,7 @@ jobs:
         run: dotnet test TemplateFrame.slnx -c Release --no-build
 
   release:
+    if: github.event_name == 'push'
     needs: test
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -102,13 +110,22 @@ jobs:
         with:
           user: ${{ vars.NUGET_USER }}
 
-      - name: Push to nuget.org
+      - name: Push primary packages to nuget.org
         env:
           NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
         run: |
           dotnet nuget push "artifacts/*.nupkg" \
             --api-key "$NUGET_API_KEY" \
-            --source https://www.nuget.org/api/v2/package \
+            --source https://api.nuget.org/v3/index.json \
+            --no-symbols --skip-duplicate
+
+      - name: Push symbol packages to nuget.org
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push "artifacts/*.snupkg" \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
             --skip-duplicate
 
       - name: Extract changelog section for this version
@@ -149,3 +166,117 @@ jobs:
           files: |
             artifacts/*.nupkg
             artifacts/*.snupkg
+
+  symbols:
+    if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Set up .NET SDK for symbol publishing
+        uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
+        with:
+          dotnet-version: 10.0.402
+
+      - name: Download and verify existing release symbol packages
+        shell: python
+        env:
+          GH_TOKEN: ${{ github.token }}
+          RELEASE_TAG: ${{ inputs.release_tag }}
+        run: |
+          import hashlib
+          import io
+          import json
+          import os
+          from pathlib import Path
+          import re
+          import subprocess
+          import time
+          import xml.etree.ElementTree as ET
+          import zipfile
+
+          tag = os.environ["RELEASE_TAG"]
+          if not re.fullmatch(r"v(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)\.(0|[1-9][0-9]*)", tag):
+              raise ValueError("release_tag must be a stable tag in vX.Y.Z format.")
+          version = tag[1:]
+          repository = os.environ["GITHUB_REPOSITORY"]
+          api_url = os.environ["GITHUB_API_URL"].rstrip("/")
+
+          def get_api(endpoint, accept="application/vnd.github+json"):
+              for attempt in range(3):
+                  try:
+                      result = subprocess.run([
+                          "gh", "api", endpoint, "--header", "Accept: " + accept,
+                      ], check=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE, timeout=90)
+                      return result.stdout
+                  except (subprocess.CalledProcessError, subprocess.TimeoutExpired):
+                      if attempt == 2:
+                          raise RuntimeError("GitHub API request failed after three attempts: " + endpoint) from None
+                      time.sleep(2 * (attempt + 1))
+
+          release = json.loads(get_api(f"repos/{repository}/releases/tags/{tag}"))
+          if release.get("tag_name") != tag or release.get("draft") is not False or release.get("prerelease") is not False:
+              raise ValueError("Recovery requires an existing non-draft, non-prerelease GitHub Release.")
+          package_ids = ("TemplateFrame", "TemplateFrame.Word", "TemplateFrame.Excel", "TemplateFrame.Excel.Simple")
+          expected = {f"{package_id}.{version}.snupkg": package_id for package_id in package_ids}
+          assets = [asset for asset in release["assets"] if asset["name"] in expected]
+          if len(assets) != 4 or {asset["name"] for asset in assets} != set(expected):
+              raise ValueError("Release must contain exactly one asset for each of the four expected symbol package names.")
+
+          output = Path("symbol-packages")
+          output.mkdir()
+          for asset in assets:
+              name = asset["name"]
+              asset_id = asset["id"]
+              endpoint = f"repos/{repository}/releases/assets/{asset_id}"
+              if not isinstance(asset_id, int) or asset.get("url") != f"{api_url}/{endpoint}" or asset.get("state") != "uploaded":
+                  raise ValueError(f"Asset is not an uploaded asset of the current repository: {name}")
+              digest = asset.get("digest", "")
+              if not isinstance(digest, str) or not re.fullmatch(r"sha256:[0-9a-f]{64}", digest):
+                  raise ValueError(f"Asset has no usable GitHub SHA256 digest: {name}")
+              content = get_api(endpoint, "application/octet-stream")
+              if len(content) != asset["size"] or "sha256:" + hashlib.sha256(content).hexdigest() != digest:
+                  raise ValueError(f"GitHub size/digest verification failed: {name}")
+              with zipfile.ZipFile(io.BytesIO(content)) as package:
+                  entries = package.namelist()
+                  nuspecs = [entry for entry in entries if entry.endswith(".nuspec")]
+                  if len(entries) != len(set(entries)) or len(nuspecs) != 1:
+                      raise ValueError(f"Duplicate ZIP entries or unexpected nuspec count: {name}")
+                  metadata = ET.fromstring(package.read(nuspecs[0])).find("{*}metadata")
+                  if metadata is None or metadata.findtext("{*}id") != expected[name] or metadata.findtext("{*}version") != version:
+                      raise ValueError(f"Package ID/version does not match the release: {name}")
+                  required_pdbs = {f"lib/{tfm}/{expected[name]}.pdb" for tfm in ("netstandard2.0", "net462", "net8.0")}
+                  if {entry for entry in entries if entry.endswith(".pdb")} != required_pdbs:
+                      raise ValueError(f"Unexpected target framework PDB set: {name}")
+                  for pdb in required_pdbs:
+                      with package.open(pdb) as stream:
+                          if stream.read(4) != b"BSJB":
+                              raise ValueError(f"Not a portable PDB: {name} / {pdb}")
+              (output / name).write_bytes(content)
+              print(f"Verified {name}: {digest}")
+
+      - name: Verify NUGET_USER variable
+        env:
+          NUGET_USER: ${{ vars.NUGET_USER }}
+        run: |
+          if [ -z "$NUGET_USER" ]; then
+            echo "::error::NUGET_USER is empty. Add it as a repository Actions variable."
+            exit 1
+          fi
+
+      - name: NuGet Login (OIDC)
+        id: login
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER }}
+
+      - name: Recover only verified symbol packages
+        env:
+          NUGET_API_KEY: ${{ steps.login.outputs.NUGET_API_KEY }}
+        run: |
+          dotnet nuget push "symbol-packages/*.snupkg" \
+            --api-key "$NUGET_API_KEY" \
+            --source https://api.nuget.org/v3/index.json \
+            --skip-duplicate

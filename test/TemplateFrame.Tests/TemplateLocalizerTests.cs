@@ -4,11 +4,6 @@ using Xunit;
 
 namespace TemplateFrame.Tests;
 
-/// <summary>
-/// 迭代 13（文档内容 i18n）：<see cref="DefaultTemplateLocalizer"/>——
-/// 占位符 / 页码默认文案按语言解析（zh 中性 + en 卫星）、查找顺序（业务注入 → 框架资源 → 键本身）、
-/// 占位符一等语义（PlaceholderText / IsPlaceholderText，业务可覆盖 + 注册扩展）。
-/// </summary>
 public sealed class TemplateLocalizerTests
 {
     private static readonly CultureInfo Zh = CultureInfo.GetCultureInfo("zh-CN");

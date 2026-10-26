@@ -1,0 +1,5 @@
+{"Phase":"prepare","settings":{"Mode":"streaming-write","Rows":10000,"Columns":30,"Concurrency":1,"Directory":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\streaming-2026-10-25\\net10-wide-10k","DefaultLimits":false,"InputPath":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\streaming-2026-10-25\\net10-wide-10k\\input-10000-30.xlsx","Limits":{"MaxInputBytes":536870912,"MaxPackageEntryBytes":2147483648,"MaxExpandedBytes":3221225472,"MaxPackageEntries":4096,"MaxImageBytes":16777216,"MaxXmlCharactersPerPart":1500000000,"MaxClonedXmlCharacters":1500000000,"MaxTableRows":1000000,"MaxTableCells":30000030}},"Runtime":".NET 10.0.13","ProcessId":13480,"HeapBudgetBytes":5368709120,"ServerGc":false}
+{"Phase":"operation","ManagedBytes":372792}
+{"Phase":"validation","BatchMilliseconds":1262.5211,"MinimumMilliseconds":1260.2713,"MedianMilliseconds":1260.2713,"MaximumMilliseconds":1260.2713,"ManagedBytes":6212856}
+{"Phase":"complete","Status":"passed","OutputBytes":1220753,"PeakWorkingSetBytes":60665856}
+

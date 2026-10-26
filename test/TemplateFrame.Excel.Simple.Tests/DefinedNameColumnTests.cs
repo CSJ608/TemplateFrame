@@ -10,10 +10,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Simple.Tests;
 
-/// <summary>
-/// 迭代 14：SimpleExcel 契约路径"每列定义名定位"——框架产物回读与表头语言解耦（语言无关），
-/// 表头文本匹配作分级回退；重复定义名 Validate 报 Ambiguous。
-/// </summary>
 public sealed class DefinedNameColumnTests
 {
     private static readonly CultureInfo En = CultureInfo.GetCultureInfo("en");
@@ -149,10 +145,6 @@ public sealed class DefinedNameColumnTests
         Assert.DoesNotContain(result.Issues, i => i.Code == TemplateValidationIssueCode.Extra && i.Key == "编码");
     }
 
-    /// <summary>
-    /// 2.1.1 回归：两个不同列的定义名指向同一单元格（各自只出现一次，非重名）——
-    /// Validate 应报 Ambiguous（两列、位置歧义消息），而不是 ToDictionary 抛 ArgumentException 崩溃。
-    /// </summary>
     [Fact]
     public void Validate_ReportsAmbiguous_WhenTwoColumnDefinedNamesPointToSameCell()
     {

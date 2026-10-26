@@ -1,0 +1,19 @@
+{
+  "Mode": "word-write",
+  "Rows": 1000,
+  "Columns": 6,
+  "Concurrency": 16,
+  "Framework": "net10.0",
+  "Limits": "capacity",
+  "ExitCode": 0,
+  "Guard": null,
+  "WallSeconds": 2.9302027,
+  "SampledPeakPrivateBytes": 322727936,
+  "SampledPeakWorkingSetBytes": 352546816,
+  "MinimumFreeBytes": 12214181888,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 180,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation"
+}
