@@ -1,12 +1,12 @@
 using System.Collections;
 using System.Text;
 
-namespace TemplateFrame.Excel.Simple;
+namespace TemplateFrame.Internal.Excel;
 
-internal sealed class SimpleExcelDiskStrings : IReadOnlyList<string>
+internal sealed class ExcelDiskStrings : IReadOnlyList<string>
 {
-    private readonly SimpleExcelTemporaryStorage _storage;
-    private readonly SimpleExcelStreamingReadOptions _options;
+    private readonly ExcelTemporaryStorage _storage;
+    private readonly IExcelStreamingReadSettings _options;
     private readonly FileStream _index;
     private readonly FileStream _text;
     private readonly BinaryReader _indexReader;
@@ -15,7 +15,7 @@ internal sealed class SimpleExcelDiskStrings : IReadOnlyList<string>
     private readonly LinkedList<(int Index, string Text)> _recent = new();
     private int _cacheCharacters;
 
-    internal SimpleExcelDiskStrings(SimpleExcelTemporaryStorage storage, SimpleExcelStreamingReadOptions options)
+    internal ExcelDiskStrings(ExcelTemporaryStorage storage, IExcelStreamingReadSettings options)
     {
         _storage = storage;
         _options = options;

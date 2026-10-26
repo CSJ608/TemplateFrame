@@ -2,16 +2,16 @@ using System.IO.Compression;
 using System.Xml;
 using System.Xml.Linq;
 
-namespace TemplateFrame.Excel.Simple;
+namespace TemplateFrame.Internal.Excel;
 
-internal sealed class SimpleExcelReadPackage : IDisposable
+internal sealed class ExcelReadPackage : IDisposable
 {
     private readonly ZipArchive _archive;
-    private readonly SimpleExcelStreamingReadOptions _options;
+    private readonly IExcelStreamingReadSettings _options;
     private readonly CancellationToken _cancellation;
     private readonly Dictionary<string, ZipArchiveEntry> _entries = new(StringComparer.Ordinal);
 
-    internal SimpleExcelReadPackage(Stream source, SimpleExcelStreamingReadOptions options, CancellationToken cancellation)
+    internal ExcelReadPackage(Stream source, IExcelStreamingReadSettings options, CancellationToken cancellation)
     {
         _options = options;
         _cancellation = cancellation;

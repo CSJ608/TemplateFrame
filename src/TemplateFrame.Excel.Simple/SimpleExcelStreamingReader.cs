@@ -1,3 +1,4 @@
+using TemplateFrame.Internal.Excel;
 using DocumentFormat.OpenXml.Spreadsheet;
 using System.Collections.ObjectModel;
 using System.Xml;
@@ -9,7 +10,7 @@ namespace TemplateFrame.Excel.Simple;
 internal sealed class SimpleExcelStreamingReader
 {
     private const string SpreadsheetNamespace = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
-    private readonly SimpleExcelReadPackage _package;
+    private readonly ExcelReadPackage _package;
     private readonly SimpleExcelStreamingReadOptions _options;
     private readonly CancellationToken _cancellation;
     private readonly IReadOnlyList<string> _strings;
@@ -18,7 +19,7 @@ internal sealed class SimpleExcelStreamingReader
     private readonly SimpleExcelAddress.TableRange? _range;
     private readonly Workbook _workbook;
 
-    private SimpleExcelStreamingReader(SimpleExcelReadPackage package, SimpleExcelTemporaryStorage storage,
+    private SimpleExcelStreamingReader(ExcelReadPackage package, ExcelTemporaryStorage storage,
         SimpleExcelStreamingReadOptions options, CancellationToken cancellation)
     {
         _package = package;
@@ -43,9 +44,9 @@ internal sealed class SimpleExcelStreamingReader
         Guard.ThrowIfNull(consume, nameof(consume));
         options.Validate();
         cancellation.ThrowIfCancellationRequested();
-        using var storage = new SimpleExcelTemporaryStorage(options);
+        using var storage = new ExcelTemporaryStorage(options);
         var input = source.CanSeek ? source : storage.BufferInput(source, cancellation);
-        using var package = new SimpleExcelReadPackage(input, options, cancellation);
+        using var package = new ExcelReadPackage(input, options, cancellation);
         var reader = new SimpleExcelStreamingReader(package, storage, options, cancellation);
         return reader.Consume(consume) with { TemporaryBytesWritten = storage.ReservedBytes };
     }
@@ -89,9 +90,9 @@ internal sealed class SimpleExcelStreamingReader
         var table = SimpleExcelContract.RequireSingleTable(contract);
         options.Validate();
         cancellation.ThrowIfCancellationRequested();
-        using var storage = new SimpleExcelTemporaryStorage(options);
+        using var storage = new ExcelTemporaryStorage(options);
         var input = source.CanSeek ? source : storage.BufferInput(source, cancellation);
-        using var package = new SimpleExcelReadPackage(input, options, cancellation);
+        using var package = new ExcelReadPackage(input, options, cancellation);
         var reader = new SimpleExcelStreamingReader(package, storage, options, cancellation);
         return reader.ConsumeContract(table, consume) with { TemporaryBytesWritten = storage.ReservedBytes };
     }
@@ -215,7 +216,7 @@ internal sealed class SimpleExcelStreamingReader
             }
             if (sheetDataDepth < 0 || reader.Depth != sheetDataDepth + 1
                 || reader.NodeType != XmlNodeType.Element || reader.LocalName != "row") continue;
-            var row = new Row(SimpleExcelBoundedXml.ReadElement(reader, _options.MaxRowCharacters, _cancellation));
+            var row = new Row(ExcelBoundedXml.ReadElement(reader, _options.MaxRowCharacters, _cancellation));
             var index = row.RowIndex?.Value is { } explicitIndex ? (long)explicitIndex : (long)previous + 1;
             if (index <= previous || index > SimpleExcelAddress.MaxRow)
                 throw new InvalidDataException("Streaming import requires strictly increasing, unique worksheet row numbers within Excel limits.");
@@ -224,10 +225,10 @@ internal sealed class SimpleExcelStreamingReader
         }
     }
 
-    private IReadOnlyList<string> ReadSharedStrings(SimpleExcelTemporaryStorage storage, string? path)
+    private IReadOnlyList<string> ReadSharedStrings(ExcelTemporaryStorage storage, string? path)
     {
         if (path is null) return Array.Empty<string>();
-        var strings = new SimpleExcelDiskStrings(storage, _options);
+        var strings = new ExcelDiskStrings(storage, _options);
         using var reader = _package.OpenXml(path);
         RequireRoot(reader, "sst");
         while (reader.Read())
@@ -235,7 +236,7 @@ internal sealed class SimpleExcelStreamingReader
             _cancellation.ThrowIfCancellationRequested();
             if (reader.NodeType != XmlNodeType.Element || reader.LocalName != "si"
                 || reader.NamespaceURI != SpreadsheetNamespace || reader.Depth != 1) continue;
-            var item = new SharedStringItem(SimpleExcelBoundedXml.ReadElement(reader, _options.MaxRowCharacters, _cancellation));
+            var item = new SharedStringItem(ExcelBoundedXml.ReadElement(reader, _options.MaxRowCharacters, _cancellation));
             strings.Add(SimpleExcelReader.GetSharedStringText(item));
         }
         return strings;
@@ -247,10 +248,10 @@ internal sealed class SimpleExcelStreamingReader
             throw new InvalidDataException("Invalid or unsupported spreadsheet XML root: " + name);
     }
 
-    private static string? FindPart(IReadOnlyList<SimpleExcelReadPackage.PartRelationship> relationships, string kind)
+    private static string? FindPart(IReadOnlyList<ExcelReadPackage.PartRelationship> relationships, string kind)
         => relationships.FirstOrDefault(relationship => relationship.Type.EndsWith("/" + kind, StringComparison.Ordinal))?.Target;
 
-    private static string? FindWorksheet(Workbook workbook, IReadOnlyList<SimpleExcelReadPackage.PartRelationship> relationships, string? sheet)
+    private static string? FindWorksheet(Workbook workbook, IReadOnlyList<ExcelReadPackage.PartRelationship> relationships, string? sheet)
     {
         var sheetId = workbook.Sheets?.Elements<Sheet>()
             .FirstOrDefault(element => string.Equals(element.Name?.Value, sheet, StringComparison.OrdinalIgnoreCase))?.Id?.Value;

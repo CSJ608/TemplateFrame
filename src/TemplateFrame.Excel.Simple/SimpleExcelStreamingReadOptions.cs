@@ -1,8 +1,9 @@
 using TemplateFrame.Engine;
+using TemplateFrame.Internal.Excel;
 
 namespace TemplateFrame.Excel.Simple;
 
-public sealed record SimpleExcelStreamingReadOptions
+public sealed record SimpleExcelStreamingReadOptions : IExcelStreamingReadSettings
 {
     public TemplateResourceLimits ResourceLimits { get; init; } = TemplateResourceLimits.Default;
     public string? TableName { get; init; }

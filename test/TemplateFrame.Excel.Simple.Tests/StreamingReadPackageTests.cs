@@ -1,3 +1,4 @@
+using TemplateFrame.Internal.Excel;
 using System.IO.Compression;
 using System.Text;
 using System.Xml;
@@ -18,7 +19,7 @@ public sealed class StreamingReadPackageTests
               <Relationship Id="r3" Type="external" Target="https://example.com/" TargetMode="External"/>
             </Relationships>
             """), ("data/sheet 1.xml", "<worksheet/>"));
-        using (var package = new SimpleExcelReadPackage(source, new(), default))
+        using (var package = new ExcelReadPackage(source, new SimpleExcelStreamingReadOptions(), default))
         {
             var relationships = package.ReadRelationships("custom/book.xml");
             Assert.Equal(2, relationships.Count);
@@ -43,7 +44,7 @@ public sealed class StreamingReadPackageTests
             MaxMetadataCharacters = failure == "metadata" ? 100 : 1000,
             ResourceLimits = new TemplateResourceLimits { MaxXmlCharactersPerPart = failure == "xml" ? 100 : 1000 },
         };
-        using var package = new SimpleExcelReadPackage(source, options, default);
+        using var package = new ExcelReadPackage(source, options, default);
         Assert.Throws<XmlException>(() => package.ReadMetadata("part.xml"));
     }
 
@@ -65,7 +66,7 @@ public sealed class StreamingReadPackageTests
                 MaxPackageEntries = failure == "count" ? 1 : 10,
             },
         };
-        Assert.Throws<InvalidOperationException>(() => new SimpleExcelReadPackage(source, options, default));
+        Assert.Throws<InvalidOperationException>(() => new ExcelReadPackage(source, options, default));
         Assert.True(source.CanRead);
     }
 
@@ -74,7 +75,7 @@ public sealed class StreamingReadPackageTests
     {
         using var source = Package(("part.xml", "<x>" + new string('a', 100000) + "</x>"));
         using var cancellation = new CancellationTokenSource();
-        using var package = new SimpleExcelReadPackage(source, new(), cancellation.Token);
+        using var package = new ExcelReadPackage(source, new SimpleExcelStreamingReadOptions(), cancellation.Token);
         using var reader = package.OpenXml("part.xml");
         cancellation.Cancel();
         Assert.Throws<OperationCanceledException>(() => { while (reader.Read()) { } });
@@ -85,8 +86,8 @@ public sealed class StreamingReadPackageTests
     public void Package_RejectsDuplicatePartsAndCancellation()
     {
         using var source = Package(("one", "a"), ("one", "b"));
-        Assert.Throws<InvalidDataException>(() => new SimpleExcelReadPackage(source, new(), default));
-        Assert.Throws<OperationCanceledException>(() => new SimpleExcelReadPackage(source, new(), new CancellationToken(true)));
+        Assert.Throws<InvalidDataException>(() => new ExcelReadPackage(source, new SimpleExcelStreamingReadOptions(), default));
+        Assert.Throws<OperationCanceledException>(() => new ExcelReadPackage(source, new SimpleExcelStreamingReadOptions(), new CancellationToken(true)));
         Assert.True(source.CanRead);
     }
 

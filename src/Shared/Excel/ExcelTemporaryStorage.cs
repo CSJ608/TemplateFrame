@@ -1,6 +1,6 @@
-namespace TemplateFrame.Excel.Simple;
+namespace TemplateFrame.Internal.Excel;
 
-internal sealed class SimpleExcelTemporaryStorage(SimpleExcelStreamingReadOptions options) : IDisposable
+internal sealed class ExcelTemporaryStorage(IExcelStreamingReadSettings options) : IDisposable
 {
     private readonly List<FileStream> _files = new();
     private long _reserved;

@@ -1,9 +1,9 @@
 using System.Text;
 using System.Xml;
 
-namespace TemplateFrame.Excel.Simple;
+namespace TemplateFrame.Internal.Excel;
 
-internal static class SimpleExcelBoundedXml
+internal static class ExcelBoundedXml
 {
     internal static string ReadElement(XmlReader reader, int maximum, CancellationToken cancellation)
     {

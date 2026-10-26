@@ -1,3 +1,4 @@
+using TemplateFrame.Internal.Excel;
 using TemplateFrame.Engine;
 using Xunit;
 
@@ -15,9 +16,9 @@ public sealed class StreamingStorageTests
             SharedStringCacheCharacters = 12,
             SharedStringCacheEntries = 2,
         };
-        using (var storage = new SimpleExcelTemporaryStorage(options))
+        using (var storage = new ExcelTemporaryStorage(options))
         {
-            var strings = new SimpleExcelDiskStrings(storage, options);
+            var strings = new ExcelDiskStrings(storage, options);
             for (var index = 0; index < 1000; index++) strings.Add("中文" + index);
             for (var index = 999; index >= 0; index--)
             {
@@ -38,9 +39,9 @@ public sealed class StreamingStorageTests
     {
         using var fixture = new ScratchDirectory();
         var options = new SimpleExcelStreamingReadOptions { TemporaryDirectory = fixture.Path, MaxTemporaryBytes = 15 };
-        using (var storage = new SimpleExcelTemporaryStorage(options))
+        using (var storage = new ExcelTemporaryStorage(options))
         {
-            var strings = new SimpleExcelDiskStrings(storage, options);
+            var strings = new ExcelDiskStrings(storage, options);
             strings.Add("中");
             Assert.Equal(15, storage.ReservedBytes);
             Assert.Throws<InvalidOperationException>(() => strings.Add(""));
@@ -62,8 +63,8 @@ public sealed class StreamingStorageTests
             SharedStringCacheCharacters = characters,
             SharedStringCacheEntries = entries,
         };
-        using var storage = new SimpleExcelTemporaryStorage(options);
-        var strings = new SimpleExcelDiskStrings(storage, options);
+        using var storage = new ExcelTemporaryStorage(options);
+        var strings = new ExcelDiskStrings(storage, options);
         strings.Add(new string('x', 32767));
         for (var index = 0; index < 100; index++) strings.Add("");
         Assert.Equal(32767, strings[0].Length);
@@ -86,7 +87,7 @@ public sealed class StreamingStorageTests
             MaxTemporaryBytes = failure == "disk" ? 50 : 1000,
             ResourceLimits = new TemplateResourceLimits { MaxInputBytes = failure == "input" ? 50 : 1000 },
         };
-        using (var storage = new SimpleExcelTemporaryStorage(options))
+        using (var storage = new ExcelTemporaryStorage(options))
         {
             if (failure == "cancel") Assert.Throws<OperationCanceledException>(() => storage.BufferInput(source, new CancellationToken(true)));
             else Assert.Throws<InvalidOperationException>(() => storage.BufferInput(source, default));
@@ -100,13 +101,13 @@ public sealed class StreamingStorageTests
     {
         using var fixture = new ScratchDirectory();
         var options = new SimpleExcelStreamingReadOptions { TemporaryDirectory = fixture.Path, MaxTemporaryBytes = 20 };
-        using var storage = new SimpleExcelTemporaryStorage(options);
+        using var storage = new ExcelTemporaryStorage(options);
         using var source = new MemoryStream(new byte[10]);
         var buffered = storage.BufferInput(source, default);
         Assert.Equal(0, buffered.Position);
         Assert.Equal(10, buffered.Length);
         Assert.Equal(10, storage.ReservedBytes);
-        var strings = new SimpleExcelDiskStrings(storage, options);
+        var strings = new ExcelDiskStrings(storage, options);
         Assert.Throws<InvalidOperationException>(() => strings.Add(""));
         Assert.True(source.CanRead);
     }
