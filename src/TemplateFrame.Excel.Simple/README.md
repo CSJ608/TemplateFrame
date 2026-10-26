@@ -206,3 +206,5 @@ var result = SimpleExcelContract.ReadStreaming(input, contract, row =>
 契约仍须只有一个表元素。定义名定位成功时按契约键返回值，缺失列补 null，契约列全空的行跳过；回退到表头匹配时优先 DisplayName 再 Key，只返回匹配键，普通表格非空但契约列未匹配的行仍回调空字典。两条路径均保持旧契约读取的值转换规则，不按契约 ValueType 做额外转换。`Headers` 返回实际表头，`RowsRead` 仅计已回调行；回调停止、异常、部分成功和源所有权规则与普通入口相同。
 
 模板流式解析使用 Excel 包独立的 `ExcelTemplateParser.ParseStreaming`，不依赖 Simple 包，详见 Excel README。普通、契约、模板各有独立语义与容量验证，不能相互代替。
+
+已知文本兼容边界：SST 中 `<t>a&#13;&#10;b</t>` 在旧完整 SDK 路径保留 CRLF，在普通/契约流式路径有界序列化后变为 LF，net472/net8/net10 均已复现，尚未修复。需逐字保留此类文本时继续使用旧入口，不将新旧接口视为无条件等价。`MaxRowCharacters` 计算实际序列化 XML，包含命名空间及转义字符。

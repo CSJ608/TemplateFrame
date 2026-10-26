@@ -143,3 +143,5 @@ Partial callbacks may precede errors; application transactions/rollback remain t
 The host protects the temporary directory, which may contain business data. No encryption, secure erasure,
 or crash/forced-termination cleanup guarantee is provided; other tasks' files are never scanned/deleted.
 There is no global concurrency semaphore or expansion of template support.
+
+Known text compatibility boundary: SST text `<t>a&#13;&#10;b</t>` retains CRLF with the legacy full-SDK path but becomes LF after bounded serialization in the streaming path. This is reproduced on net472/net8/net10 and is not fixed. Keep using the legacy API when exact preservation of this text is required; the paths are not unconditionally text-equivalent. `MaxRowCharacters` counts actual serialized XML, including namespace declarations and escaping.
