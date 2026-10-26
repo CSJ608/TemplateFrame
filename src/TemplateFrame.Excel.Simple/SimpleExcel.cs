@@ -18,6 +18,10 @@ public static class SimpleExcel
     public static SimpleExcelTable Read(Stream source, string? tableName, TemplateResourceLimits resourceLimits)
         => SimpleExcelReader.Read(source, tableName, resourceLimits);
 
+    public static SimpleExcelStreamingReadResult ReadStreaming(Stream source, Func<SimpleExcelReadRow, bool> consume,
+        SimpleExcelStreamingReadOptions? options = null, CancellationToken cancellationToken = default)
+        => SimpleExcelStreamingReader.Read(source, consume, options ?? new(), cancellationToken);
+
     public static string ColumnDefinedName(string tableName, string columnKey)
         => tableName.Trim() + "_" + columnKey.Trim();
 }

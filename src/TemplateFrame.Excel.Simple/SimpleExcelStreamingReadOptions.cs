@@ -11,6 +11,7 @@ public sealed record SimpleExcelStreamingReadOptions
     public int SharedStringCacheCharacters { get; init; } = 1024 * 1024;
     public int SharedStringCacheEntries { get; init; } = 1024;
     public long MaxMetadataCharacters { get; init; } = 1024 * 1024;
+    public int MaxRowCharacters { get; init; } = 1024 * 1024;
 
     internal void Validate()
     {
@@ -20,6 +21,7 @@ public sealed record SimpleExcelStreamingReadOptions
         if (SharedStringCacheCharacters < 0) throw new ArgumentOutOfRangeException(nameof(SharedStringCacheCharacters));
         if (SharedStringCacheEntries < 0) throw new ArgumentOutOfRangeException(nameof(SharedStringCacheEntries));
         if (MaxMetadataCharacters < 1) throw new ArgumentOutOfRangeException(nameof(MaxMetadataCharacters));
+        if (MaxRowCharacters < 1) throw new ArgumentOutOfRangeException(nameof(MaxRowCharacters));
         if (TemporaryDirectory is not null && !Directory.Exists(TemporaryDirectory))
             throw new DirectoryNotFoundException("The configured temporary directory must already exist.");
     }

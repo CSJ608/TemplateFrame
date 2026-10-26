@@ -237,7 +237,7 @@ internal static class SimpleExcelReader
         return result;
     }
 
-    private static string GetSharedStringText(SharedStringItem item)
+    internal static string GetSharedStringText(SharedStringItem item)
     {
         if (item.Text?.Text is { } direct)
         {

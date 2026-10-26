@@ -3,19 +3,25 @@ using DocumentFormat.OpenXml.Spreadsheet;
 
 namespace TemplateFrame.Excel.Simple;
 
-internal sealed class SimpleExcelDateStyles(WorkbookPart workbookPart)
+internal sealed class SimpleExcelDateStyles
 {
     private readonly Dictionary<uint, bool> _dates = new();
+    private readonly Stylesheet? _stylesheet;
+
+    internal SimpleExcelDateStyles(WorkbookPart workbookPart) : this(workbookPart.WorkbookStylesPart?.Stylesheet) { }
+
+    internal SimpleExcelDateStyles(Stylesheet? stylesheet) => _stylesheet = stylesheet;
 
     internal bool IsDateCell(Cell cell)
     {
         if (cell.StyleIndex is not { } styleIndex
-            || workbookPart.WorkbookStylesPart?.Stylesheet?.GetFirstChild<CellFormats>() is not { } cellFormats)
+            || _stylesheet?.GetFirstChild<CellFormats>() is not { } cellFormats)
         {
             return false;
         }
 
         var index = styleIndex.Value;
+        if (index >= cellFormats.ChildElements.Count) return false;
         if (!_dates.TryGetValue(index, out var isDate))
         {
             isDate = IsDateFormat(cellFormats, index);
@@ -42,7 +48,7 @@ internal sealed class SimpleExcelDateStyles(WorkbookPart workbookPart)
             return true;
         }
 
-        var formatCode = workbookPart.WorkbookStylesPart?.Stylesheet?.GetFirstChild<NumberingFormats>()
+        var formatCode = _stylesheet?.GetFirstChild<NumberingFormats>()
             ?.Elements<NumberingFormat>().FirstOrDefault(n => n.NumberFormatId?.Value == numberFormatId)?.FormatCode?.Value;
         return formatCode is not null
                && (formatCode.IndexOf("yy", StringComparison.OrdinalIgnoreCase) >= 0

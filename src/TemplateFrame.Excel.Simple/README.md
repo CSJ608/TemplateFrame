@@ -169,3 +169,29 @@ dotnet run --project samples/TemplateFrame.Demo.Excel.Simple
 - 控制台输出**反解析**结果（读回填充后文件 → `SimpleExcel.Read` → 打印表头与每行数据）
 
 输入包、XML、图片和表数据默认启用可配置资源预算；超限会拒绝输入。Validate 不进行宏或外部关系净化。配置方式与适用边界见[安全说明](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md)。
+# 显式低内存导入
+
+`SimpleExcel.ReadStreaming` 使用同步逐行回调，不返回完整数据集合：
+
+```csharp
+var result = SimpleExcel.ReadStreaming(input, row =>
+{
+    Process(row.RowNumber, row.Headers, row.Values);
+    return true; // false 提前停止
+}, new SimpleExcelStreamingReadOptions
+{
+    TemporaryDirectory = scratchDirectory,
+    MaxTemporaryBytes = 256L * 1024 * 1024,
+});
+```
+
+`result.Headers` 是表头，`RowsRead` 是已交给回调的数据行数，`Completed` 表示是否读到末尾（回调返回 false 时为 false）。表头、当前行和缓存有界；调用方保留行对象会自行增加内存。空值行跳过，但逐物理数据行计入原资源限额。公式只读缓存值。命名范围只用于定位表头和列，不在范围末行截断数据。
+
+共享字符串正文和索引落盘；不可 Seek 的输入也暂存到磁盘。调用方拥有输入流，方法成功、提前停止、异常或取消时都释放本次临时文件。回调发生前会校验整个 ZIP 的实际解压预算并建立共享字符串索引；表头回退可能额外扫描工作表，因此这不是网络边到边处理接口。方法退出前不要修改输入流或源文件。
+
+新入口要求工作表物理行号严格递增且唯一；缺省行号按前一行加一。原 `Read` 保留原有行为。默认 `MaxRowCharacters` 为 1 Mi 字符，约束单行或单个共享字符串项序列化后的 XML；`MaxMetadataCharacters` 为每个元数据部件 1 Mi 字符。大批量输入需显式提高 `ResourceLimits` 中的数据行、单元格、XML、输入和解压限额；提高工作表限额不会取消独立元数据及单行限额。
+
+发生异常或取消之前，可能已经执行若干次业务回调，事务与回滚由应用负责。临时目录必须预先存在，其权限由宿主负责；临时文件可能含业务数据，不提供加密或安全擦除保证。正常释放会清理文件，但强杀、系统崩溃或文件系统故障可能留下残留；库不扫描删除其他任务文件。不设置全局并发限制，调度由应用负责。
+
+此入口目前是普通表格流式读取，不代表契约或模板流式解析已接入。
+
