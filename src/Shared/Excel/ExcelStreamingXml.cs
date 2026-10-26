@@ -42,12 +42,13 @@ internal static class ExcelStreamingXml
         var strings = new ExcelDiskStrings(storage, options);
         using var reader = package.OpenXml(path);
         RequireRoot(reader, "sst");
+        using var elements = new ExcelBoundedXml.ElementReader(options.MaxRowCharacters, cancellation);
         while (reader.Read())
         {
             cancellation.ThrowIfCancellationRequested();
             if (reader.NodeType != XmlNodeType.Element || reader.LocalName != "si"
                 || reader.NamespaceURI != SpreadsheetNamespace || reader.Depth != 1) continue;
-            var item = new SharedStringItem(ExcelBoundedXml.ReadElement(reader, options.MaxRowCharacters, cancellation));
+            var item = new SharedStringItem(elements.ReadElement(reader));
             strings.AddNullable(getText(item));
         }
         return strings;

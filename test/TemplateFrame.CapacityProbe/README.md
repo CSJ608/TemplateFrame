@@ -1,5 +1,7 @@
 # 有保护的合成容量探针
 
+控制器 summary 新增 `ProcessCpuMilliseconds`，统计整个子进程 CPU 时间（包含准备、校验及多个线程），不同于库操作时间和墙钟时间；多线程累计 CPU 可以高于 wall time。用于补充判断耗时波动，不用于证明未记录 CPU 的历史慢样本一定是环境原因。
+
 `shared-profile-read` 为六列、单任务的分阶段剖析模式：实际 ZIP 预检、元数据、SST 建库、worksheet 加值级校验、独立顺序字符串查询、SST XML-only、独立字符串追加。阶段记录当前线程累计分配字节及时间，不是峰值内存。后面三个是额外隔离实验，不能与前面相加当作端到端耗时，且受前序 JIT/文件缓存影响；XML-only 使用同一有界元素读取器和 SharedStringItem，但不写磁盘；append-only 包含合成字符串生成。使用独立的 `template-streaming-read` 等入口做最终端到端对照。可传 `-ProbeAssembly` 选择保存的基线程序集，保护不变，summary 记录程序集路径与 SHA256。
 
 新增 `template-streaming-read`：独立调用 `ExcelTemplateParser.ParseStreaming`，回调内按契约键逐格严格校验值及运行时类型、表键、逻辑行号、键数量；任何转换诊断视为失败。只保留计数，不保存回调行，退出后检查临时文件零残留。与 `streaming-read` / `contract-streaming-read` 一样将库的 `TemporaryBytesWritten` 记为 `ScratchPeakBytes`，不依赖打开文件的目录项长度。三种流式导入均在操作计时内逐格验证，不适用下文旧导入“完整物化后再校验”的口径。样本生成器已有模板定义名，可复用同一 inline/shared 输入。

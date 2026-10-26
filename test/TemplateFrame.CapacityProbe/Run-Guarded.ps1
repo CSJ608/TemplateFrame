@@ -76,6 +76,7 @@ try {
     $summary = [pscustomobject]@{
         Mode=$Mode;Rows=$Rows;Columns=$Columns;Concurrency=$Concurrency;Framework=$Framework;Limits=$Limits
         ExitCode=$process.ExitCode;Guard=$guard;WallSeconds=$timer.Elapsed.TotalSeconds
+        ProcessCpuMilliseconds=$process.TotalProcessorTime.TotalMilliseconds
         SampledPeakPrivateBytes=$peakPrivate;SampledPeakWorkingSetBytes=$peakWorking;MinimumFreeBytes=$minimumFree
         MaxPrivateGiB=$MaxPrivateGiB;MinimumFreeGiB=$MinimumFreeGiB;TimeoutSeconds=$TimeoutSeconds
         ManagedHeapHardLimitGiB=5;MemoryScope='process lifetime including preparation and validation'
