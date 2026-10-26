@@ -1,0 +1,23 @@
+{
+  "Mode": "template-streaming-read",
+  "Rows": 100000,
+  "Columns": 6,
+  "Concurrency": 1,
+  "Framework": "net8.0",
+  "Limits": "capacity",
+  "ExitCode": 0,
+  "Guard": null,
+  "WallSeconds": 13.3750577,
+  "SampledPeakPrivateBytes": 23633920,
+  "SampledPeakWorkingSetBytes": 57622528,
+  "MinimumFreeBytes": 9605967872,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 180,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation",
+  "ProbeAssembly": "C:\\work\\OpenCode\\TemplateFrame\\artifacts\\shared-profile-20261026\\baseline-net8\\TemplateFrame.CapacityProbe.dll",
+  "ProbeAssemblySha256": "8ADE8CFF7F5205027B8D973E84B22E070ED435C84C0EC686C9653EA823F81543",
+  "ExcelAssemblySha256": "75EC3406F7832090E2C24CFF654C88CFF3F8ECC4402E7E828766D5A0967E52A5",
+  "SimpleAssemblySha256": "D2E0CF710A3469C0E81CD76034713C3007FDAD2C598A44F1B097DD5CDDECBC1D"
+}

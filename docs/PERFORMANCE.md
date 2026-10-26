@@ -1,5 +1,7 @@
 # 性能快照（Performance Snapshot）
 
+最新专项：[2026-10-26 共享字符串磁盘追加优化](reviews/shared-string-append-2026-10-26/README.md)。先分阶段测量，仅去掉 SST 每项追加时的文件 Length 查询和无条件定位，保留读写交错、null、预算及原缓存。模板 .NET 10 十万行 shared 的 before→after→after→before 均值 13.023→9.702 秒；百万行同轮单组 107.986→81.969 秒（约 -24.1%），逐格严格验证，零残留。百万行峰值工作集 61.63→64.53 MiB，不宣称内存下降；其他入口和 .NET 8 有方向性补充对照。单项 XML 解析仍有高累计分配，本轮未改它，不能将磁盘追加隔离实验的降幅当作端到端收益。
+
 最新专项：2026-10-26 显式低内存 Excel 导入，三条独立入口和证据：[普通](reviews/streaming-read-2026-10-26/README.md)、[契约](reviews/contract-streaming-read-2026-10-26/README.md)、[模板](reviews/template-streaming-read-2026-10-26/README.md)。直接 ZIP/XML、磁盘 SST 正文/索引、有界缓存和同步回调，不替换旧集合接口。模板 .NET 10 六列百万行 inline 36.980 秒 / 56.92 MiB、shared 109.343 秒 / 61.84 MiB，逐格严格校验值/类型，零临时残留；shared 临时内容约 136 MB。.NET 8 百万 inline 39.103 秒 / 56.81 MiB，shared 102.598 秒 / 56.92 MiB；shared 首轮触发系统空闲内存保护，系统恢复后新 case 成功，失败日志保留。峰值为整个进程工作集，不是库独占或托管堆；不是任意模板和任意并发保证。4 个千行小任务并发也通过，不代表 100 个百万行任务。库不设置全局并发限制。
 
 最新专项：[2026-10-25 模板 Excel 显式端到端流式导出](reviews/template-streaming-2026-10-25/README.md)。新增 `FillStreaming`，惰性单次行源直接写调用方流；旧 Fill 与默认预算不变。6 列百万行 .NET 10 两次 17.43–17.81 秒 / 63.22–63.36 MiB 进程峰值工作集，.NET 8 24.32 秒 / 62.75 MiB；全部逐格验证。模板仍加载内存，支持边界明确，复杂结构预检拒绝；不宣称任意复杂模板容量。与旧 Fill 预物化输入计时口径不同，不发布纯库提速倍数。

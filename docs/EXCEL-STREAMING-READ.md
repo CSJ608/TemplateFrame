@@ -32,6 +32,8 @@
 
 ## 当前状态（普通、契约、模板流式导入均已实现并独立验证）
 
+后续共享字符串性能专项：独立剖析后仅优化磁盘字符串追加位置管理，不改 API、默认限额或缓存；模板百万 shared 同轮 107.986→81.969 秒，三条入口值级对照通过。详见 [共享字符串追加报告](reviews/shared-string-append-2026-10-26/README.md)。下文原容量数据保持历史口径，不覆盖为新结果。
+
 本会话已核对 `1cf54e4` 干净工作区及仓库/祖先无 AGENTS.md。`35f2eb6` 提取共享 worksheet/SST 扫描，并为磁盘字符串索引加入 null 标记（与空串区别）；普通/契约三框架回归通过，共 2,147 测试。
 
 新 `ExcelTemplateParser.ParseStreaming` 按契约元素顺序同步回调 `ExcelStreamingParseValue` / `ExcelStreamingParseRow`，false 停止；返回计数/完成标记/临时写入字节，不保留表或警告。`ExcelStreamingParseOptions` 与 Simple 同级预算，warning 回调逐单元格投递、清空。`ExcelCellValueParser` 提取并由旧、新入口共用。错位起点按组使用前向游标；保留最后匹配列的工作表、最大范围长度、短列越界继续读取、全空逻辑行、精确 cell 首值和显式行号规则。图片直接 ZIP 读取，不打开 SpreadsheetDocument；保留旧 oneCellAnchor/首 drawing/embed 规则，二进制受 MaxImageBytes，drawing 受元数据预算。
