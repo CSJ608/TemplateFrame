@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [3.1.0] - 2026-10-26
+
 ### 新增
 - Excel.Simple 新增 `WriteStreaming`：单次消费惰性行源，直接写入目标流，支持有限前缀列宽采样或固定列宽；旧 `Write` 和契约服务不自动切换。
 - 模板 Excel 新增 `ExcelTemplateFiller.FillStreaming` 与 `ExcelStreamingData`：支持受限模板布局的惰性表格导出，不构造完整输出工作表 DOM；不支持的展开工作表结构提前拒绝，详见 [支持边界](docs/EXCEL-STREAMING.md)。
