@@ -16,7 +16,7 @@ Emit(new
 });
 try
 {
-    if (settings.Mode == "generate")
+    if (settings.Mode is "generate" or "generate-shared")
     {
         ExcelFixture.Write(settings);
         Emit(new { Phase = "complete", Status = "generated" });
@@ -49,7 +49,15 @@ try
         ManagedBytes = GC.GetTotalMemory(false),
     });
     foreach (var item in work) item.Validate();
-    Emit(new { Phase = "complete", Status = "passed", OutputBytes = work.Sum(item => item.OutputBytes), PeakWorkingSetBytes = Process.GetCurrentProcess().PeakWorkingSet64 });
+    Emit(new
+    {
+        Phase = "complete",
+        Status = "passed",
+        OutputBytes = work.Sum(item => item.OutputBytes),
+        PeakWorkingSetBytes = Process.GetCurrentProcess().PeakWorkingSet64,
+        ScratchPeakBytes = work.Sum(item => item.ScratchPeakBytes),
+        ScratchRemainingFiles = work.Sum(item => item.ScratchRemainingFiles)
+    });
 }
 catch (Exception exception)
 {

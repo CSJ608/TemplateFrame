@@ -19,12 +19,18 @@ internal sealed class Workload
     private readonly FillData? _data;
     private readonly byte[]? _template;
     private object? _result;
+    private readonly string _scratchDirectory;
+    private int _streamedRows;
+
+    public long ScratchPeakBytes { get; private set; }
+    public int ScratchRemainingFiles => Directory.Exists(_scratchDirectory) ? Directory.GetFiles(_scratchDirectory).Length : 0;
 
     public long OutputBytes => File.Exists(_outputPath) ? new FileInfo(_outputPath).Length : 0;
 
     public Workload(ProbeSettings settings, int worker)
     {
         _settings = settings;
+        _scratchDirectory = Path.Combine(settings.Directory, $"scratch-{worker}");
         _keys = Enumerable.Range(0, settings.Columns).Select(c => "C" + c).ToArray();
         _outputPath = Path.Combine(settings.Directory, $"output-{worker}.{(settings.Mode == "word-write" ? "docx" : "xlsx")}");
         var columns = _keys.Select((key, c) => new TextElement
@@ -94,6 +100,7 @@ internal sealed class Workload
             _result = _settings.Mode switch
             {
                 "simple-read" => SimpleExcel.Read(input, "Items", _settings.Limits),
+                "streaming-read" => ReadStreaming(input),
                 "contract-read" => SimpleExcelContract.Read(input, _contract, new SimpleExcelOptions { TableName = "Items", ResourceLimits = _settings.Limits }),
                 _ => new ExcelTemplateParser(_settings.Limits, null).Parse(input, _contract),
             };
@@ -133,7 +140,13 @@ internal sealed class Workload
 
     public void Validate()
     {
-        if (_result is SimpleExcelTable table)
+        if (_result is SimpleExcelStreamingReadResult streamed)
+        {
+            if (!streamed.Completed || streamed.RowsRead != _settings.Rows || _streamedRows != _settings.Rows
+                || !streamed.Headers.SequenceEqual(_keys) || ScratchRemainingFiles != 0)
+                throw new InvalidDataException("Streaming read shape or cleanup mismatch.");
+        }
+        else if (_result is SimpleExcelTable table)
         {
             if (table.Rows.Count != _settings.Rows || table.Headers.Count != _settings.Columns) throw new InvalidDataException("Read shape mismatch.");
             for (var r = 0; r < table.Rows.Count; r++)
@@ -148,6 +161,27 @@ internal sealed class Workload
         }
         else OutputValidation.Check(_outputPath, _settings);
         GC.KeepAlive(_result);
+    }
+
+    private SimpleExcelStreamingReadResult ReadStreaming(Stream input)
+    {
+        Directory.CreateDirectory(_scratchDirectory);
+        var result = SimpleExcel.ReadStreaming(input, row =>
+        {
+            if (row.RowNumber != _streamedRows + 2 || row.Values.Count != _settings.Columns)
+                throw new InvalidDataException("Streaming row shape mismatch.");
+            for (var column = 0; column < _settings.Columns; column++) Check(row.Values[column], _streamedRows, column);
+            _streamedRows++;
+            return true;
+        }, new SimpleExcelStreamingReadOptions
+        {
+            TableName = "Items",
+            ResourceLimits = _settings.Limits,
+            TemporaryDirectory = _scratchDirectory,
+            MaxTemporaryBytes = 1024L * 1024 * 1024,
+        });
+        ScratchPeakBytes = result.TemporaryBytesWritten;
+        return result;
     }
 
     private static void Check(object? actual, int row, int column)
