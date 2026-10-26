@@ -31,6 +31,15 @@ internal static class DefinedNameLayoutResolver
         var rows = sheetData.Elements<Row>().ToList();
         var sharedStrings = SimpleExcelReader.MaterializeSharedStrings(workbookPart);
         var rowLookup = SimpleExcelReader.BuildRowLookup(rows);
+        return Resolve(workbookPart.Workbook!, tableName, tableRange.Value, table, options.ResourceLimits,
+            column => SimpleExcelReader.GetCellText(sharedStrings,
+                SimpleExcelReader.FindCell(rowLookup, tableRange.Value.StartRow, column)) ?? string.Empty);
+    }
+
+    internal static DefinedNameLayout? Resolve(Workbook workbook, string tableName,
+        SimpleExcelAddress.TableRange range, TableElement table, TemplateFrame.Engine.TemplateResourceLimits limits,
+        Func<int, string> readHeader)
+    {
         var columnIndex = new Dictionary<string, int>(StringComparer.Ordinal);
         var ambiguous = new List<string>();
         var positionAmbiguous = new List<string>();
@@ -39,20 +48,21 @@ internal static class DefinedNameLayoutResolver
         foreach (var column in table.Columns)
         {
             var name = SimpleExcel.ColumnDefinedName(tableName, column.Key);
-            if (SimpleExcelReader.CountDefinedName(workbookPart, name) > 1)
+            var names = workbook.DefinedNames?.Elements<DefinedName>().Where(item => item.Name?.Value == name).ToArray() ?? [];
+            if (names.Length > 1)
             {
                 ambiguous.Add(column.Key);
                 continue;
             }
 
-            var reference = SimpleExcelReader.FindDefinedNameReference(workbookPart, name);
+            var reference = names.FirstOrDefault()?.Text?.TrimStart('=');
             if (reference is null
                 || !SimpleExcelAddress.TryParseReference(reference, out var columnRange))
             {
                 continue;
             }
 
-            if (!IsSingleHeaderCell(columnRange, tableRange.Value))
+            if (!IsSingleHeaderCell(columnRange, range))
             {
                 return null;
             }
@@ -74,14 +84,12 @@ internal static class DefinedNameLayoutResolver
             return null;
         }
 
-        new TemplateResourceBudget(options.ResourceLimits).AddCells(
-            checked((long)tableRange.Value.EndCol - tableRange.Value.StartCol + 1));
+        new TemplateResourceBudget(limits).AddCells(checked((long)range.EndCol - range.StartCol + 1));
 
         var headers = new List<string>();
-        for (var c = tableRange.Value.StartCol; c <= tableRange.Value.EndCol; c++)
+        for (var c = range.StartCol; c <= range.EndCol; c++)
         {
-            var cell = SimpleExcelReader.FindCell(rowLookup, tableRange.Value.StartRow, c);
-            headers.Add(SimpleExcelReader.GetCellText(sharedStrings, cell) ?? string.Empty);
+            headers.Add(readHeader(c));
         }
 
         if (headers.All(string.IsNullOrEmpty))
@@ -89,7 +97,7 @@ internal static class DefinedNameLayoutResolver
             return null;
         }
 
-        return new DefinedNameLayout(tableRange.Value, headers, columnIndex, ambiguous, positionAmbiguous);
+        return new DefinedNameLayout(range, headers, columnIndex, ambiguous, positionAmbiguous);
     }
 
     private static bool IsSingleHeaderCell(SimpleExcelAddress.TableRange column, SimpleExcelAddress.TableRange table)

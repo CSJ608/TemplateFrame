@@ -1,5 +1,7 @@
 using DocumentFormat.OpenXml.Spreadsheet;
+using System.Collections.ObjectModel;
 using System.Xml;
+using TemplateFrame.Contract;
 using TemplateFrame.Internal;
 
 namespace TemplateFrame.Excel.Simple;
@@ -14,6 +16,7 @@ internal sealed class SimpleExcelStreamingReader
     private readonly SimpleExcelDateStyles _styles;
     private readonly string? _worksheet;
     private readonly SimpleExcelAddress.TableRange? _range;
+    private readonly Workbook _workbook;
 
     private SimpleExcelStreamingReader(SimpleExcelReadPackage package, SimpleExcelTemporaryStorage storage,
         SimpleExcelStreamingReadOptions options, CancellationToken cancellation)
@@ -24,6 +27,7 @@ internal sealed class SimpleExcelStreamingReader
         var workbookPath = FindPart(package.ReadRelationships(""), "officeDocument")
             ?? throw new InvalidDataException("Missing workbook relationship.");
         var workbook = new Workbook(package.ReadMetadata(workbookPath).ToString());
+        _workbook = workbook;
         var relationships = package.ReadRelationships(workbookPath);
         _range = FindRange(workbook, options.TableName);
         _worksheet = FindWorksheet(workbook, relationships, _range?.Sheet);
@@ -75,6 +79,80 @@ internal sealed class SimpleExcelStreamingReader
             if (!proceed) return new SimpleExcelStreamingReadResult(header.Headers, count, false);
         }
         return new SimpleExcelStreamingReadResult(header.Headers, count, true);
+    }
+
+    internal static SimpleExcelStreamingReadResult ReadContract(Stream source, TemplateContract contract,
+        Func<SimpleExcelContractReadRow, bool> consume, SimpleExcelStreamingReadOptions options, CancellationToken cancellation)
+    {
+        Guard.ThrowIfNull(source, nameof(source));
+        Guard.ThrowIfNull(consume, nameof(consume));
+        var table = SimpleExcelContract.RequireSingleTable(contract);
+        options.Validate();
+        cancellation.ThrowIfCancellationRequested();
+        using var storage = new SimpleExcelTemporaryStorage(options);
+        var input = source.CanSeek ? source : storage.BufferInput(source, cancellation);
+        using var package = new SimpleExcelReadPackage(input, options, cancellation);
+        var reader = new SimpleExcelStreamingReader(package, storage, options, cancellation);
+        return reader.ConsumeContract(table, consume) with { TemporaryBytesWritten = storage.ReservedBytes };
+    }
+
+    private SimpleExcelStreamingReadResult ConsumeContract(TableElement table, Func<SimpleExcelContractReadRow, bool> consume)
+    {
+        var layout = FindContractLayout(table);
+        if (layout is null)
+        {
+            SimpleExcelHeaderLookup? lookup = null;
+            return Consume(row =>
+            {
+                lookup ??= new SimpleExcelHeaderLookup(table, row.Headers);
+                var values = new Dictionary<string, object?>();
+                for (var column = 0; column < row.Headers.Count; column++)
+                    if (lookup.Columns.TryGetValue(row.Headers[column].Trim(), out var matched))
+                        values[matched.Key] = row.Values[column];
+                return consume(new SimpleExcelContractReadRow(row.RowNumber, new ReadOnlyDictionary<string, object?>(values)));
+            });
+        }
+
+        var budget = new TemplateResourceBudget(_options.ResourceLimits);
+        budget.AddCells(layout.Headers.Count);
+        var cells = new SimpleExcelRowCells();
+        var count = 0;
+        foreach (var row in Rows())
+        {
+            if (row.Index <= layout.Range.StartRow) continue;
+            budget.AddRows(1, table.Columns.Count);
+            cells.Load(row.Value);
+            var values = new Dictionary<string, object?>();
+            var any = false;
+            foreach (var column in table.Columns)
+            {
+                _cancellation.ThrowIfCancellationRequested();
+                var cell = layout.ColumnIndex.TryGetValue(column.Key, out var position) ? cells.Find(row.Index, position) : null;
+                var value = cell is null ? null : SimpleExcelReader.ReadCellValue(_styles, _strings, cell);
+                values[column.Key] = value;
+                any |= value is not null;
+            }
+            if (!any) continue;
+            count++;
+            var proceed = consume(new SimpleExcelContractReadRow(row.Index, new ReadOnlyDictionary<string, object?>(values)));
+            _cancellation.ThrowIfCancellationRequested();
+            if (!proceed) return new SimpleExcelStreamingReadResult(layout.Headers, count, false);
+        }
+        return new SimpleExcelStreamingReadResult(layout.Headers, count, true);
+    }
+
+    private DefinedNameLayout? FindContractLayout(TableElement table)
+    {
+        if (_range is not { } range) return null;
+        var cells = new SimpleExcelRowCells();
+        foreach (var row in Rows())
+        {
+            if (row.Index > range.StartRow) break;
+            if (row.Index == range.StartRow) cells.Load(row.Value);
+        }
+        var name = string.IsNullOrWhiteSpace(_options.TableName) ? SimpleExcel.DefaultTableName : _options.TableName!.Trim();
+        return DefinedNameLayoutResolver.Resolve(_workbook, name, range, table, _options.ResourceLimits,
+            column => SimpleExcelReader.GetCellText(_strings, cells.Find(range.StartRow, column)) ?? string.Empty);
     }
 
     private Header? FindHeader()

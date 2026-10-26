@@ -72,6 +72,11 @@ public static class SimpleExcelContract
     public static FillData Read(Stream source, TemplateContract contract, SimpleExcelOptions? options = null)
         => SimpleExcelContractReader.Read(source, contract, options);
 
+    public static SimpleExcelStreamingReadResult ReadStreaming(Stream source, TemplateContract contract,
+        Func<SimpleExcelContractReadRow, bool> consume, SimpleExcelStreamingReadOptions? options = null,
+        CancellationToken cancellationToken = default)
+        => SimpleExcelStreamingReader.ReadContract(source, contract, consume, options ?? new(), cancellationToken);
+
     public static TemplateValidationResult Validate(Stream template, TemplateContract contract, SimpleExcelOptions? options = null)
         => SimpleExcelContractValidator.Validate(template, contract, options);
 

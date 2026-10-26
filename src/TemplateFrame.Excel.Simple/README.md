@@ -193,4 +193,16 @@ var result = SimpleExcel.ReadStreaming(input, row =>
 
 发生异常或取消之前，可能已经执行若干次业务回调，事务与回滚由应用负责。临时目录必须预先存在，其权限由宿主负责；临时文件可能含业务数据，不提供加密或安全擦除保证。正常释放会清理文件，但强杀、系统崩溃或文件系统故障可能留下残留；库不扫描删除其他任务文件。不设置全局并发限制，调度由应用负责。
 
-此入口目前是普通表格流式读取，不代表契约或模板流式解析已接入。
+契约读取使用独立 opt-in 入口，复用相同的临时存储、预算和取消选项：
+
+```csharp
+var result = SimpleExcelContract.ReadStreaming(input, contract, row =>
+{
+    Process(row.RowNumber, row.Values);
+    return true;
+}, new SimpleExcelStreamingReadOptions { TemporaryDirectory = scratchDirectory });
+```
+
+契约仍须只有一个表元素。定义名定位成功时按契约键返回值，缺失列补 null，契约列全空的行跳过；回退到表头匹配时优先 DisplayName 再 Key，只返回匹配键，普通表格非空但契约列未匹配的行仍回调空字典。两条路径均保持旧契约读取的值转换规则，不按契约 ValueType 做额外转换。`Headers` 返回实际表头，`RowsRead` 仅计已回调行；回调停止、异常、部分成功和源所有权规则与普通入口相同。
+
+模板流式解析尚未接入；普通读取的百万行容量结论不能代替契约或模板路径的独立容量验证。

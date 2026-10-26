@@ -21,7 +21,7 @@ internal sealed record ProbeSettings(string Mode, int Rows, int Columns, int Con
     {
         if (args.Length != 6) throw new ArgumentException("mode rows columns concurrency directory default|capacity");
         var value = new ProbeSettings(args[0], int.Parse(args[1]), int.Parse(args[2]), int.Parse(args[3]), Path.GetFullPath(args[4]), args[5] == "default");
-        if (value.Mode is not ("generate" or "generate-shared" or "streaming-read" or "simple-write" or "streaming-write" or "fixed-streaming-write" or "template-streaming-write" or "simple-read" or "contract-read" or "excel-write" or "excel-read" or "word-write")
+        if (value.Mode is not ("generate" or "generate-shared" or "streaming-read" or "contract-streaming-read" or "simple-write" or "streaming-write" or "fixed-streaming-write" or "template-streaming-write" or "simple-read" or "contract-read" or "excel-write" or "excel-read" or "word-write")
             || value.Rows < 1 || value.Rows > (value.Mode == "word-write" ? 100_000 : 1_000_000)
             || value.Columns is < 1 or > 30 || value.Concurrency is < 1 or > 100
             || args[5] is not ("default" or "capacity"))

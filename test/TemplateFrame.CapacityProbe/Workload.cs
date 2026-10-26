@@ -101,6 +101,7 @@ internal sealed class Workload
             {
                 "simple-read" => SimpleExcel.Read(input, "Items", _settings.Limits),
                 "streaming-read" => ReadStreaming(input),
+                "contract-streaming-read" => ReadContractStreaming(input),
                 "contract-read" => SimpleExcelContract.Read(input, _contract, new SimpleExcelOptions { TableName = "Items", ResourceLimits = _settings.Limits }),
                 _ => new ExcelTemplateParser(_settings.Limits, null).Parse(input, _contract),
             };
@@ -171,6 +172,27 @@ internal sealed class Workload
             if (row.RowNumber != _streamedRows + 2 || row.Values.Count != _settings.Columns)
                 throw new InvalidDataException("Streaming row shape mismatch.");
             for (var column = 0; column < _settings.Columns; column++) Check(row.Values[column], _streamedRows, column);
+            _streamedRows++;
+            return true;
+        }, new SimpleExcelStreamingReadOptions
+        {
+            TableName = "Items",
+            ResourceLimits = _settings.Limits,
+            TemporaryDirectory = _scratchDirectory,
+            MaxTemporaryBytes = 1024L * 1024 * 1024,
+        });
+        ScratchPeakBytes = result.TemporaryBytesWritten;
+        return result;
+    }
+
+    private SimpleExcelStreamingReadResult ReadContractStreaming(Stream input)
+    {
+        Directory.CreateDirectory(_scratchDirectory);
+        var result = SimpleExcelContract.ReadStreaming(input, _contract, row =>
+        {
+            if (row.RowNumber != _streamedRows + 2 || row.Values.Count != _settings.Columns)
+                throw new InvalidDataException("Contract streaming row shape mismatch.");
+            for (var column = 0; column < _settings.Columns; column++) Check(row.Values[_keys[column]], _streamedRows, column);
             _streamedRows++;
             return true;
         }, new SimpleExcelStreamingReadOptions
