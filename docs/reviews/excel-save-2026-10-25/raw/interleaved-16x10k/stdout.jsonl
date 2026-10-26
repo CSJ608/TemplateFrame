@@ -1,0 +1,5 @@
+{"Phase":"prepare","settings":{"Mode":"excel-write","Rows":10000,"Columns":6,"Concurrency":16,"Directory":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\excel-save-2026-10-25\\interleaved-16x10k","DefaultLimits":false,"InputPath":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\excel-save-2026-10-25\\interleaved-16x10k\\input-10000-6.xlsx","Limits":{"MaxInputBytes":536870912,"MaxPackageEntryBytes":2147483648,"MaxExpandedBytes":3221225472,"MaxPackageEntries":4096,"MaxImageBytes":16777216,"MaxXmlCharactersPerPart":1500000000,"MaxClonedXmlCharacters":1500000000,"MaxTableRows":1000000,"MaxTableCells":30000030}},"Runtime":".NET 10.0.13","ProcessId":10904,"HeapBudgetBytes":5368709120,"ServerGc":false}
+{"Phase":"operation","ManagedBytes":104790408}
+{"Phase":"validation","BatchMilliseconds":4978.2483,"MinimumMilliseconds":4827.1966,"MedianMilliseconds":4952.943,"MaximumMilliseconds":4976.3543,"ManagedBytes":764683584}
+{"Phase":"complete","Status":"passed","OutputBytes":5295498,"PeakWorkingSetBytes":856403968}
+

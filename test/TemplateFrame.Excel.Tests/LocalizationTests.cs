@@ -5,7 +5,6 @@ using Xunit;
 
 namespace TemplateFrame.Excel.Tests;
 
-/// <summary>国际化（迭代 12）：Excel 插件校验消息按 CurrentUICulture 中英切换。</summary>
 public sealed class LocalizationTests
 {
     [Fact]

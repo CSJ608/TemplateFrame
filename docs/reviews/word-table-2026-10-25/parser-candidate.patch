@@ -1,0 +1,38 @@
+diff --git a/src/TemplateFrame.Word/WordTemplateParser.cs b/src/TemplateFrame.Word/WordTemplateParser.cs
+index 5cff806..c5973c2 100644
+--- a/src/TemplateFrame.Word/WordTemplateParser.cs
++++ b/src/TemplateFrame.Word/WordTemplateParser.cs
+@@ -177,11 +177,17 @@ public sealed class WordTemplateParser
+ 
+             var rows = new List<IReadOnlyDictionary<string, object?>>();
+             var dataRowNumber = 0;
++            var rowSdts = new Dictionary<string, SdtElement>(StringComparer.Ordinal);
+             foreach (var row in tbl.Elements<TableRow>())
+             {
+-                var rowSdts = row.Descendants<SdtElement>()
+-                    .Where(s => SdtLocator.GetTag(s) is { } tag && columnKeys.Contains(tag))
+-                    .ToList();
++                rowSdts.Clear();
++                foreach (var sdt in row.Descendants<SdtElement>())
++                {
++                    if (SdtLocator.GetTag(sdt) is { } tag && columnKeys.Contains(tag) && !rowSdts.ContainsKey(tag))
++                    {
++                        rowSdts.Add(tag, sdt);
++                    }
++                }
+                 if (rowSdts.Count == 0)
+                 {
+                     continue;
+@@ -192,10 +198,9 @@ public sealed class WordTemplateParser
+                 var rowValues = new Dictionary<string, object?>();
+                 foreach (var column in table.Columns)
+                 {
+-                    var sdt = rowSdts.FirstOrDefault(s => SdtLocator.GetTag(s) == column.Key);
+-                    if (sdt is null)
++                    if (column.Key is null || !rowSdts.TryGetValue(column.Key, out var sdt))
+                     {
+-                        rowValues[column.Key] = null;
++                        rowValues[column.Key!] = null;
+                         continue;
+                     }
+ 

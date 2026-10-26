@@ -1,0 +1,5 @@
+{"Phase":"prepare","settings":{"Mode":"contract-read","Rows":100000,"Columns":6,"Concurrency":1,"Directory":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\capacity-2026-10-25\\net10-contract-read-100000-c1","DefaultLimits":false,"InputPath":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\capacity-2026-10-25\\net10-contract-read-100000-c1\\input-100000-6.xlsx","Limits":{"MaxInputBytes":536870912,"MaxPackageEntryBytes":2147483648,"MaxExpandedBytes":3221225472,"MaxPackageEntries":4096,"MaxImageBytes":16777216,"MaxXmlCharactersPerPart":1500000000,"MaxClonedXmlCharacters":1500000000,"MaxTableRows":1000000,"MaxTableCells":30000030}},"Runtime":".NET 10.0.13","ProcessId":39576}
+{"Phase":"operation","ManagedBytes":364568}
+{"Phase":"validation","BatchMilliseconds":6158.7031,"MinimumMilliseconds":6157.0768,"MedianMilliseconds":6157.0768,"MaximumMilliseconds":6157.0768,"ManagedBytes":846522688}
+{"Phase":"complete","Status":"passed","OutputBytes":0,"PeakWorkingSetBytes":1005318144}
+

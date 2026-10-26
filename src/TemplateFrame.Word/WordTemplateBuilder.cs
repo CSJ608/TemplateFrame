@@ -10,12 +10,6 @@ using Sr = TemplateFrame.Word.Localization.Sr;
 
 namespace TemplateFrame.Word;
 
-/// <summary>Word layout builder — the full-typography entry (page setup, header/footer, layout tables, text, tables, images, page numbers).</summary>
-/// <remarks>
-/// 业务服务声明 <c>TemplateService&lt;TData, WordTemplateBuilder&gt;</c> 后，在无参数 <c>BuildInitialTemplate()</c> 里直接调用本类的全部能力；
-/// 框架只认 <see cref="ITemplateBuilder.Save"/>。
-/// tag 全局唯一、每个 SDT 带唯一 w:id（正文/页眉/页脚/单元格共享分配器）。
-/// </remarks>
 public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
 {
     private readonly MemoryStream _stream = new();
@@ -37,14 +31,11 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
     private bool _saved;
     private bool _finalized;
 
-    /// <summary>Creates an empty document builder (body); default localizer + Chinese culture.</summary>
     public WordTemplateBuilder()
         : this(null, null)
     {
     }
 
-    /// <summary>Creates the builder with a localizer and target culture (document content i18n).</summary>
-    /// <remarks><paramref name="localizer"/> 为 null 时用 <see cref="DefaultTemplateLocalizer.Instance"/>；<paramref name="culture"/> 为 null 时用中文（zh-CN，向后兼容）。</remarks>
     public WordTemplateBuilder(ITemplateLocalizer? localizer, CultureInfo? culture)
     {
         _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
@@ -59,8 +50,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         _ids = new SdtIdAllocator();
     }
 
-    /// <summary>Header/footer/cell sub-builder sharing the document and the global w:id allocator.</summary>
-    /// <remarks>图片 part 归属所在宿主。</remarks>
     private WordTemplateBuilder(WordTemplateBuilder owner, OpenXmlPart hostPart, OpenXmlCompositeElement container)
     {
         _document = owner._document;
@@ -74,14 +63,12 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         _pageSetup = owner._pageSetup;
     }
 
-    /// <summary>Sets up the page: paper size + orientation + optional margins (A4/A5, portrait/landscape).</summary>
     public WordTemplateBuilder SetPageSetup(PageSetup setup)
     {
         _pageSetup = setup ?? throw new ArgumentNullException(nameof(setup));
         return this;
     }
 
-    /// <summary>Adds a header (one default reference per section), composed with the same builder API.</summary>
     public void AddHeader(Action<WordTemplateBuilder> compose)
     {
         Guard.ThrowIfNull(compose, nameof(compose));
@@ -91,7 +78,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         AddPartReference(new HeaderReference { Type = HeaderFooterValues.Default, Id = _mainPart.GetIdOfPart(headerPart) });
     }
 
-    /// <summary>Adds a footer (one default reference per section), composed with the same builder API.</summary>
     public void AddFooter(Action<WordTemplateBuilder> compose)
     {
         Guard.ThrowIfNull(compose, nameof(compose));
@@ -101,7 +87,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         AddPartReference(new FooterReference { Type = HeaderFooterValues.Default, Id = _mainPart.GetIdOfPart(footerPart) });
     }
 
-    /// <summary>Appends a styled paragraph (style e.g. "Title" / "Heading1" / "Normal", or null).</summary>
     public WordTemplateBuilder AddParagraph(string text, string? style = null)
     {
         var paragraph = new Paragraph(WordXmlFactory.CreateRun(text, WordXmlFactory.CreateStyleRunProperties(style)));
@@ -110,7 +95,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Appends a paragraph with text formatting (font / size / bold / alignment).</summary>
     public WordTemplateBuilder AddParagraph(string text, TextFormat format)
     {
         var paragraph = new Paragraph(WordXmlFactory.CreateRun(text, WordXmlFactory.CreateRunProperties(format)));
@@ -120,15 +104,12 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Appends a paragraph whose copy is resolved from an i18n key (see <see cref="ITemplateLocalizer"/>).</summary>
     public WordTemplateBuilder AddParagraphKey(string key, string? style = null)
         => AddParagraph(_localizer.GetString(key, _culture), style);
 
-    /// <summary>Appends a paragraph from an i18n key, with text formatting.</summary>
     public WordTemplateBuilder AddParagraphKey(string key, TextFormat format)
         => AddParagraph(_localizer.GetString(key, _culture), format);
 
-    /// <summary>Appends static text to the current paragraph.</summary>
     public WordTemplateBuilder AddText(string text)
     {
         EnsureParagraph();
@@ -136,7 +117,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Appends formatted static text to the current paragraph.</summary>
     public WordTemplateBuilder AddText(string text, TextFormat format)
     {
         EnsureParagraph();
@@ -144,15 +124,12 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Appends static text resolved from an i18n key to the current paragraph.</summary>
     public WordTemplateBuilder AddTextKey(string key)
         => AddText(_localizer.GetString(key, _culture));
 
-    /// <summary>Appends formatted static text resolved from an i18n key.</summary>
     public WordTemplateBuilder AddTextKey(string key, TextFormat format)
         => AddText(_localizer.GetString(key, _culture), format);
 
-    /// <summary>Appends a text element (content control, tag = key) to the current paragraph.</summary>
     public WordTemplateBuilder AddElement(string key)
     {
         EnsureParagraph();
@@ -160,7 +137,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Appends a formatted text element (content control, tag = key).</summary>
     public WordTemplateBuilder AddElement(string key, TextFormat format)
     {
         EnsureParagraph();
@@ -168,16 +144,12 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Appends a standalone paragraph of static text (e.g. a signature line).</summary>
     public WordTemplateBuilder AddStaticText(string text)
         => AddParagraph(text);
 
-    /// <summary>Appends a standalone paragraph of static text resolved from an i18n key.</summary>
     public WordTemplateBuilder AddStaticTextKey(string key)
         => AddParagraphKey(key);
 
-    /// <summary>Appends a table: static header row + a sample row with one content control per cell (tag = column key).</summary>
-    /// <remarks><paramref name="format"/> 控制表头/单元格格式、边框、对齐、列宽、垂直对齐；<paramref name="headerStyle"/> 是旧式表头样式（仅当 format.HeaderFormat 为空时生效）。</remarks>
     public WordTemplateBuilder AddTable(
         string key,
         IReadOnlyList<string> columns,
@@ -185,8 +157,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         string? headerStyle = null)
         => AddTableCore(key, columns, format, headerStyle, localizeHeaders: false);
 
-    /// <summary>Appends a table with i18n-key headers; cell tags stay the raw column keys so Fill/Parse match by tag.</summary>
-    /// <remarks><paramref name="columnKeys"/> 是本地化键，表头按语言解析。</remarks>
     public WordTemplateBuilder AddTableKeys(
         string key,
         IReadOnlyList<string> columnKeys,
@@ -208,11 +178,21 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             throw new ArgumentException(Sr.Get("Word.Builder.TableNeedsColumns"), nameof(columns));
         }
 
-        var table = new Table();
-        table.Append(WordXmlFactory.CreateTableProperties(format));
-        table.Append(WordXmlFactory.CreateTableGrid(columns.Count, format?.ColumnWidthsCm));
+        var table = WordXmlFactory.CreateTable(columns.Count, format);
+        table.Append(CreateHeaderRow(columns, format, headerStyle, localizeHeaders));
+        table.Append(CreateTemplateRow(columns, format));
 
-        // 表头行：静态文本（i18n 键版按本地化器解析表头，tag 仍用列 Key）
+        _container.Append(table);
+        _currentParagraph = null;
+        return this;
+    }
+
+    private TableRow CreateHeaderRow(
+        IReadOnlyList<string> columns,
+        TableFormat? format,
+        string? headerStyle,
+        bool localizeHeaders)
+    {
         var headerRow = new TableRow();
         for (var i = 0; i < columns.Count; i++)
         {
@@ -226,9 +206,11 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             headerRow.Append(WordXmlFactory.CreateCell(headerParagraph, WordXmlFactory.GetColumnWidth(format, i), format?.VerticalAlignment));
         }
 
-        table.Append(headerRow);
+        return headerRow;
+    }
 
-        // 示例数据行：每格一个内容控件（tag = 列 Key）
+    private TableRow CreateTemplateRow(IReadOnlyList<string> columns, TableFormat? format)
+    {
         var dataRow = new TableRow();
         for (var i = 0; i < columns.Count; i++)
         {
@@ -238,14 +220,9 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             dataRow.Append(WordXmlFactory.CreateCell(dataParagraph, WordXmlFactory.GetColumnWidth(format, i), format?.VerticalAlignment));
         }
 
-        table.Append(dataRow);
-
-        _container.Append(table);
-        _currentParagraph = null;
-        return this;
+        return dataRow;
     }
 
-    /// <summary>Starts a layout table (e.g. a header's left/center/right zones); fill it with <see cref="AddCell"/>, row-first.</summary>
     public WordTemplateBuilder AddLayoutTable(int rows, int columns, TableFormat? format = null)
     {
         if (rows <= 0 || columns <= 0)
@@ -253,12 +230,10 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             throw new ArgumentException(Sr.Get("Word.Builder.LayoutTableSizePositive"), nameof(rows));
         }
 
-        var table = new Table();
-        table.Append(WordXmlFactory.CreateTableProperties(format));
-        table.Append(WordXmlFactory.CreateTableGrid(columns, format?.ColumnWidthsCm));
+        var table = WordXmlFactory.CreateTable(columns, format);
         for (var r = 0; r < rows; r++)
         {
-            table.Append(new TableRow()); // 行先建空，单元格由 AddCell 按需追加（支持跨列 gridSpan）
+            table.Append(new TableRow());
         }
 
         _container.Append(table);
@@ -271,8 +246,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Fills the next layout-table cell (row-first from (0,0), wrapping at the row end).</summary>
-    /// <remarks><paramref name="columnSpan"/> 支持跨列（如页眉"平分/四份"布局），跨列单元格宽度为各列之和。</remarks>
     public WordTemplateBuilder AddCell(Action<WordTemplateBuilder> compose, int columnSpan = 1)
     {
         Guard.ThrowIfNull(compose, nameof(compose));
@@ -307,7 +280,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         rows[_layoutRow].Append(cell);
         compose(new WordTemplateBuilder(this, _hostPart, cell));
 
-        // 不预置空段落：内容不足时补一个，避免每格顶部空一行
         if (!cell.Elements<Paragraph>().Any())
         {
             cell.Append(new Paragraph());
@@ -323,7 +295,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return this;
     }
 
-    /// <summary>Appends an image placeholder: the placeholder image wrapped in a content control (tag = key).</summary>
     public WordTemplateBuilder AddImage(string key, string? placeholderPath = null, double? widthInches = null, double? heightInches = null)
     {
         EnsureParagraph();
@@ -333,21 +304,13 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         var run = new Run(WordXmlFactory.CreateDrawing(relId, widthInches, heightInches, extension, (uint)_ids.Next()));
 
         var sdt = new SdtRun(
-            new SdtProperties(
-                new SdtId { Val = _ids.Next() },
-                new Tag { Val = key },
-                new SdtAlias { Val = key }),
+            CreateSdtProperties(key),
             new SdtContentRun(run));
 
         _currentParagraph!.Append(sdt);
         return this;
     }
 
-    /// <summary>Appends a page-number field to the current paragraph (PAGE/NUMPAGES, localized pattern).</summary>
-    /// <remarks>
-    /// 默认 pattern 按语言解析（zh "第{page}页，总{total}页" / en "Page {page} of {total}"，可用 <see cref="DefaultTemplateLocalizer.PageNumberPatternKey"/> 业务覆盖）；
-    /// <paramref name="pattern"/> 为 null 时取本地化默认，显式传入则原样使用（支持 {page} / {total} 占位符）。
-    /// </remarks>
     public void AddPageNumber(string? pattern = null, TextFormat? format = null)
     {
         EnsureParagraph();
@@ -369,7 +332,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         }
     }
 
-    /// <inheritdoc />
     public void Save(Stream target)
     {
         Guard.ThrowIfNull(target, nameof(target));
@@ -383,8 +345,15 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             throw new InvalidOperationException(Sr.Get("Word.Builder.SaveOnce"));
         }
 
-        // OOXML 规定 CT_Body 的 sectPr 必须是最后一个子元素：AddHeader/AddFooter 首次调用时已把 sectPr
-        // 追加到当时还空的 Body，其后写入的段落/表格会排在它之后——Save 时统一归位到末尾。
+        EnsureFinalSectionProperties();
+        FinalizeDocument();
+        _stream.Position = 0;
+        _stream.CopyTo(target);
+        _saved = true;
+    }
+
+    private void EnsureFinalSectionProperties()
+    {
         var sectionProperties = _container.Elements<SectionProperties>().FirstOrDefault();
         if (sectionProperties is null)
         {
@@ -395,17 +364,15 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             sectionProperties.Remove();
             _container.Append(sectionProperties);
         }
+    }
 
-        // 终结包（Dispose）后再复制：netfx 的 ZipPackage 仅 Save/Flush 时 deflate 流不定稿，产物无法重开
+    private void FinalizeDocument()
+    {
         _document.Save();
         _document.Dispose();
         _finalized = true;
-        _stream.Position = 0;
-        _stream.CopyTo(target);
-        _saved = true;
     }
 
-    /// <inheritdoc />
     public void Dispose()
     {
         if (_ownsDocument)
@@ -436,7 +403,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             _container.Append(sectionProperties);
         }
 
-        // 同一类型（default 页眉/页脚）只保留一个引用
         var referenceType = reference.GetType();
         foreach (var existing in sectionProperties.ChildElements
                      .Where(e => e.GetType() == referenceType)
@@ -445,17 +411,19 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
             existing.Remove();
         }
 
-        // CT_SectPr 要求 header/footerReference 位于最前（先于 pgSz/pgMar 等），追加到末尾通不过 schema 校验
         sectionProperties.PrependChild(reference);
     }
 
     private SdtRun CreateTextSdt(string key, TextFormat? format = null)
         => new(
-            new SdtProperties(
-                new SdtId { Val = _ids.Next() },
-                new Tag { Val = key },
-                new SdtAlias { Val = key }),
+            CreateSdtProperties(key),
             new SdtContentRun(WordXmlFactory.CreateRun(_localizer.PlaceholderText(_culture), WordXmlFactory.CreateRunProperties(format))));
+
+    private SdtProperties CreateSdtProperties(string key)
+        => new(
+            new SdtId { Val = _ids.Next() },
+            new Tag { Val = key },
+            new SdtAlias { Val = key });
 
     private string AddImagePart(byte[] bytes, string extension)
     {
@@ -471,7 +439,6 @@ public sealed class WordTemplateBuilder : ITemplateBuilder, IDisposable
         return _hostPart.GetIdOfPart(imagePart);
     }
 
-    /// <summary>全局 w:id 分配器：正文/页眉/页脚/单元格共用，保证整篇文档唯一。</summary>
     private sealed class SdtIdAllocator
     {
         private int _next;

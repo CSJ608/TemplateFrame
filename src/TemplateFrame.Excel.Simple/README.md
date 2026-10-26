@@ -46,6 +46,47 @@ var loaded = SimpleExcel.Read(input); // Headers + Rows（string / bool / DateTi
 - `Write/Read` 处理表头和数据行，不提供合并、图片或页面设置。数值回读为 `double`，日期格式值为 `DateTime`，缺格为 null；decimal/long 写入不经 double 中转不等于回读同等精度。
 - Read 优先按命名区域定位，区域缺失或表头为空时回退；数据读到工作表末行并跳过空行，下方无关内容也可能被读入。完整[定位、回退和数值规则](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences)集中在 DESIGN。
 
+## 大表流式导出
+
+`WriteStreaming` 是独立入口，不改变 `Write` 的完整数据扫描列宽策略，也不自动替换契约服务的 `Fill`。
+
+```csharp
+using TemplateFrame.Engine;
+
+IEnumerable<IReadOnlyList<object?>> ExportRows()
+{
+    for (var row = 0; row < 1_000_000; row++)
+        yield return new object?[] { "M" + row, row };
+}
+
+using var output = File.Create("large-items.xlsx");
+SimpleExcel.WriteStreaming(output, new SimpleExcelStreamingTable
+{
+    Headers = ["物料", "数量"],
+    ColumnKeys = ["Code", "Quantity"],
+    Rows = ExportRows(),
+}, new SimpleExcelStreamingOptions
+{
+    WorkbookOptions = new SimpleExcelOptions
+    {
+        ResourceLimits = new TemplateResourceLimits
+        {
+            MaxTableRows = 1_000_000,
+            MaxTableCells = 2_000_002,
+        },
+    },
+    WidthSampleRows = 100,
+});
+```
+
+- 只枚举一次 `Rows`，边转换边写入 ZIP；请提供惰性数据源，并优先输出到文件。事先 `ToList()` 或输出到 `MemoryStream` 仍会占用相应内存。
+- 自动列宽默认只检查前 100 个源数据行；`WidthSampleRows` 可设为 0–1024，0 表示仅表头。宽表另以 65,536 个采样单元格限制采样行数，实际取两者较小值；空行也占用采样名额。自动宽度限定 8–60，后续长文本不会改变列宽。采样按已序列化文本长度估算（日期 10、布尔 4/5），不重复调用值的格式化函数。
+- `ColumnWidths = [20d, 14d]` 可指定每列固定宽度，跳过数据采样；必须与表头数量一致，且每项为 `(0, 255]` 内有限数值。`WidthSampleRows` 即使在固定宽度模式也须合法。
+- 至少一个表头；可选 `ColumnKeys` 须与表头数量一致。保留起始位置、表头加粗、日期样式和定义名；数值序列化沿用 `Write`，回读的 double 精度限制不变。缺列视为 null，多余列忽略，全 null 行不输出，空字符串保留。
+- 资源预算不变：默认仍限制 10 万源数据行、100 万单元格（含表头）；空行也计入预算。未知行数在枚举时逐行检查；工作表上限另按实际输出行检查。提高写入预算不自动提高以后读取文件的预算。
+- 可传 `CancellationToken`，在行枚举与写入边界协作取消；不能中断阻塞中的数据源或底层同步写入。成功、异常和取消均释放枚举器，始终保留调用方输出流的所有权；支持不可定位输出流，包括 .NET Framework。
+- 不保证失败时输出为空：异常、取消或后续超限可能留下部分 ZIP，调用方必须丢弃该次输出；文件发布可先写临时文件，成功后再移动。没有全局锁或限流器，100 个提交请求仍应由宿主按资源预算排队执行。
+
 ## 契约 + 强类型服务
 
 简单表格也可以接入 TemplateFrame 契约体系，像 Word 那样 `service.Parse` 直接得到强类型数据：
@@ -128,3 +169,42 @@ dotnet run --project samples/TemplateFrame.Demo.Excel.Simple
 - 控制台输出**反解析**结果（读回填充后文件 → `SimpleExcel.Read` → 打印表头与每行数据）
 
 输入包、XML、图片和表数据默认启用可配置资源预算；超限会拒绝输入。Validate 不进行宏或外部关系净化。配置方式与适用边界见[安全说明](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md)。
+## 显式低内存导入
+
+`SimpleExcel.ReadStreaming` 使用同步逐行回调，不返回完整数据集合：
+
+```csharp
+var result = SimpleExcel.ReadStreaming(input, row =>
+{
+    Process(row.RowNumber, row.Headers, row.Values);
+    return true; // false 提前停止
+}, new SimpleExcelStreamingReadOptions
+{
+    TemporaryDirectory = scratchDirectory,
+    MaxTemporaryBytes = 256L * 1024 * 1024,
+});
+```
+
+`result.Headers` 是表头，`RowsRead` 是已交给回调的数据行数，`Completed` 表示是否读到末尾（回调返回 false 时为 false）。`TemporaryBytesWritten` 报告本次计费的临时内容总字节数（不含文件系统分配开销）；方法返回时这些文件已释放。表头、当前行和缓存有界；调用方保留行对象会自行增加内存。空值行跳过，但逐物理数据行计入原资源限额。公式只读缓存值。命名范围只用于定位表头和列，不在范围末行截断数据。
+
+共享字符串正文和索引落盘；不可 Seek 的输入也暂存到磁盘。调用方拥有输入流，方法成功、提前停止、异常或取消时都释放本次临时文件。回调发生前会校验整个 ZIP 的实际解压预算并建立共享字符串索引；表头回退可能额外扫描工作表，因此这不是网络边到边处理接口。方法退出前不要修改输入流或源文件。
+
+新入口要求工作表物理行号严格递增且唯一；缺省行号按前一行加一。原 `Read` 保留原有行为。默认 `MaxRowCharacters` 为 1 Mi 字符，约束单行或单个共享字符串项序列化后的 XML；`MaxMetadataCharacters` 为每个元数据部件 1 Mi 字符。大批量输入需显式提高 `ResourceLimits` 中的数据行、单元格、XML、输入和解压限额；提高工作表限额不会取消独立元数据及单行限额。
+
+发生异常或取消之前，可能已经执行若干次业务回调，事务与回滚由应用负责。临时目录必须预先存在，其权限由宿主负责；临时文件可能含业务数据，不提供加密或安全擦除保证。正常释放会清理文件，但强杀、系统崩溃或文件系统故障可能留下残留；库不扫描删除其他任务文件。不设置全局并发限制，调度由应用负责。
+
+契约读取使用独立 opt-in 入口，复用相同的临时存储、预算和取消选项：
+
+```csharp
+var result = SimpleExcelContract.ReadStreaming(input, contract, row =>
+{
+    Process(row.RowNumber, row.Values);
+    return true;
+}, new SimpleExcelStreamingReadOptions { TemporaryDirectory = scratchDirectory });
+```
+
+契约仍须只有一个表元素。定义名定位成功时按契约键返回值，缺失列补 null，契约列全空的行跳过；回退到表头匹配时优先 DisplayName 再 Key，只返回匹配键，普通表格非空但契约列未匹配的行仍回调空字典。两条路径均保持旧契约读取的值转换规则，不按契约 ValueType 做额外转换。`Headers` 返回实际表头，`RowsRead` 仅计已回调行；回调停止、异常、部分成功和源所有权规则与普通入口相同。
+
+模板流式解析使用 Excel 包独立的 `ExcelTemplateParser.ParseStreaming`，不依赖 Simple 包，详见 Excel README。普通、契约、模板各有独立语义与容量验证，不能相互代替。
+
+已知文本兼容边界：SST 中 `<t>a&#13;&#10;b</t>` 在旧完整 SDK 路径保留 CRLF，在普通/契约流式路径有界序列化后变为 LF，net472/net8/net10 均已复现，尚未修复。需逐字保留此类文本时继续使用旧入口，不将新旧接口视为无条件等价。`MaxRowCharacters` 计算实际序列化 XML，包含命名空间及转义字符。

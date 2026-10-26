@@ -5,7 +5,6 @@ using A = DocumentFormat.OpenXml.Drawing;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>非 PNG 图片（JPEG / GIF / BMP）填充：图片 part 类型按魔数识别，字节原样回读。</summary>
 public sealed class ImageFillTests
 {
     private static readonly byte[] Jpeg = [0xFF, 0xD8, 0xFF, 0xE0, 0x00, 0x10, 0x00, 0x20];

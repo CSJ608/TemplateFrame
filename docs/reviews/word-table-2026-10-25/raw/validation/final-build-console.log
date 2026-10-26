@@ -1,0 +1,39 @@
+  TemplateFrame -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame\bin\Release\net462\TemplateFrame.dll
+  TemplateFrame -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame\bin\Release\netstandard2.0\TemplateFrame.dll
+  TemplateFrame -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame\bin\Release\net8.0\TemplateFrame.dll
+  TemplateFrame.Excel.Simple -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel.Simple\bin\Release\net462\TemplateFrame.Excel.Simple.dll
+  TemplateFrame.Excel.Simple -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel.Simple\bin\Release\netstandard2.0\TemplateFrame.Excel.Simple.dll
+  TemplateFrame.Excel -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel\bin\Release\netstandard2.0\TemplateFrame.Excel.dll
+  TemplateFrame.Word -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Word\bin\Release\netstandard2.0\TemplateFrame.Word.dll
+  TemplateFrame.Excel -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel\bin\Release\net462\TemplateFrame.Excel.dll
+  TemplateFrame.Word -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Word\bin\Release\net462\TemplateFrame.Word.dll
+  TemplateFrame.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Tests\bin\Release\net8.0\TemplateFrame.Tests.dll
+  TemplateFrame.Word -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Word\bin\Release\net8.0\TemplateFrame.Word.dll
+  TemplateFrame.Excel.Simple -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel.Simple\bin\Release\net8.0\TemplateFrame.Excel.Simple.dll
+  TemplateFrame.Excel -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel\bin\Release\net8.0\TemplateFrame.Excel.dll
+  TemplateFrame.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Tests\bin\Release\net10.0\TemplateFrame.Tests.dll
+  TemplateFrame.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Tests\bin\Release\net472\TemplateFrame.Tests.dll
+  TemplateFrame.Demo.Word.AutoMapping -> C:\work\OpenCode\TemplateFrame\samples\TemplateFrame.Demo.Word.AutoMapping\bin\Release\net10.0\TemplateFrame.Demo.Word.AutoMapping.dll
+  TemplateFrame.Excel.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Tests\bin\Release\net8.0\TemplateFrame.Excel.Tests.dll
+  TemplateFrame.Excel.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Tests\bin\Release\net10.0\TemplateFrame.Excel.Tests.dll
+  TemplateFrame.Demo.Word -> C:\work\OpenCode\TemplateFrame\samples\TemplateFrame.Demo.Word\bin\Release\net10.0\TemplateFrame.Demo.Word.dll
+  TemplateFrame.Demo.Word.I18n -> C:\work\OpenCode\TemplateFrame\samples\TemplateFrame.Demo.Word.I18n\bin\Release\net10.0\TemplateFrame.Demo.Word.I18n.dll
+  TemplateFrame.Word.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Word.Tests\bin\Release\net472\TemplateFrame.Word.Tests.dll
+  TemplateFrame.Demo.Excel.AutoMapping -> C:\work\OpenCode\TemplateFrame\samples\TemplateFrame.Demo.Excel.AutoMapping\bin\Release\net10.0\TemplateFrame.Demo.Excel.AutoMapping.dll
+  TemplateFrame.Demo.Excel.I18n -> C:\work\OpenCode\TemplateFrame\samples\TemplateFrame.Demo.Excel.I18n\bin\Release\net10.0\TemplateFrame.Demo.Excel.I18n.dll
+  TemplateFrame.Demo.Excel -> C:\work\OpenCode\TemplateFrame\samples\TemplateFrame.Demo.Excel\bin\Release\net10.0\TemplateFrame.Demo.Excel.dll
+  TemplateFrame.Word.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Word.Tests\bin\Release\net10.0\TemplateFrame.Word.Tests.dll
+  TemplateFrame.Benchmarks -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks.dll
+  TemplateFrame.Demo.Excel.Simple -> C:\work\OpenCode\TemplateFrame\samples\TemplateFrame.Demo.Excel.Simple\bin\Release\net10.0\TemplateFrame.Demo.Excel.Simple.dll
+  TemplateFrame.Demo.Excel.Simple.I18n -> C:\work\OpenCode\TemplateFrame\samples\TemplateFrame.Demo.Excel.Simple.I18n\bin\Release\net10.0\TemplateFrame.Demo.Excel.Simple.I18n.dll
+  TemplateFrame.Excel.Simple.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Simple.Tests\bin\Release\net472\TemplateFrame.Excel.Simple.Tests.dll
+  TemplateFrame.Word.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Word.Tests\bin\Release\net8.0\TemplateFrame.Word.Tests.dll
+  TemplateFrame.Excel.Simple.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Simple.Tests\bin\Release\net10.0\TemplateFrame.Excel.Simple.Tests.dll
+  TemplateFrame.Excel.Simple.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Simple.Tests\bin\Release\net8.0\TemplateFrame.Excel.Simple.Tests.dll
+  TemplateFrame.Excel.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Tests\bin\Release\net472\TemplateFrame.Excel.Tests.dll
+
+已成功生成。
+    0 个警告
+    0 个错误
+
+已用时间 00:00:05.36

@@ -1,0 +1,807 @@
+// Validating benchmarks:
+//    * Assembly TemplateFrame.Benchmarks, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null is located in temp. If you are running benchmarks from xUnit you need to disable shadow copy. It's not supported by design.
+
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 8 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet  restore --nodeReuse:false /p:UseSharedCompilation=false /p:Deterministic=true /p:Optimize=true /p:ArtifactsPath="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1/" /p:OutDir="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" /p:OutputPath="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" /p:PublishDir="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\publish/" in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1
+// command took 3.31 sec and exited with 0
+// start dotnet  build -c Release --no-restore --nodeReuse:false /p:UseSharedCompilation=false /p:Deterministic=true /p:Optimize=true /p:ArtifactsPath="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1/" /p:OutDir="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" /p:OutputPath="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" /p:PublishDir="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\publish/" --output "C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1
+// command took 19.94 sec and exited with 0
+// ***** Done, took 00:00:23 (23.39 sec)   *****
+// Found 8 benchmarks:
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=0]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=1]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=100]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=1000]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=0]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=1]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=100]
+//   WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=1000]
+
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=0]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 832 812 --benchmarkName "TemplateFrame.Benchmarks.WordTableBenchmarks.Parse(Columns: 6, Rows: 0)" --job Word-Isolated --benchmarkId 0 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4)
+
+OverheadJitting  1: 1 op, 277300.00 ns, 277.3000 us/op
+WorkloadJitting  1: 1 op, 2497900.00 ns, 2.4979 ms/op
+
+OverheadJitting  2: 16 op, 533300.00 ns, 33.3313 us/op
+WorkloadJitting  2: 16 op, 31934100.00 ns, 1.9959 ms/op
+
+WorkloadPilot    1: 16 op, 29084300.00 ns, 1.8178 ms/op
+WorkloadPilot    2: 112 op, 195693100.00 ns, 1.7473 ms/op
+WorkloadPilot    3: 128 op, 225050400.00 ns, 1.7582 ms/op
+
+OverheadWarmup   1: 128 op, 1200.00 ns, 9.3750 ns/op
+OverheadWarmup   2: 128 op, 1000.00 ns, 7.8125 ns/op
+OverheadWarmup   3: 128 op, 1000.00 ns, 7.8125 ns/op
+OverheadWarmup   4: 128 op, 1000.00 ns, 7.8125 ns/op
+OverheadWarmup   5: 128 op, 1000.00 ns, 7.8125 ns/op
+OverheadWarmup   6: 128 op, 900.00 ns, 7.0313 ns/op
+
+OverheadActual   1: 128 op, 1200.00 ns, 9.3750 ns/op
+OverheadActual   2: 128 op, 1400.00 ns, 10.9375 ns/op
+OverheadActual   3: 128 op, 1500.00 ns, 11.7188 ns/op
+OverheadActual   4: 128 op, 1300.00 ns, 10.1563 ns/op
+OverheadActual   5: 128 op, 1200.00 ns, 9.3750 ns/op
+OverheadActual   6: 128 op, 1100.00 ns, 8.5938 ns/op
+OverheadActual   7: 128 op, 1100.00 ns, 8.5938 ns/op
+OverheadActual   8: 128 op, 900.00 ns, 7.0313 ns/op
+OverheadActual   9: 128 op, 1100.00 ns, 8.5938 ns/op
+OverheadActual  10: 128 op, 1000.00 ns, 7.8125 ns/op
+OverheadActual  11: 128 op, 1000.00 ns, 7.8125 ns/op
+OverheadActual  12: 128 op, 1100.00 ns, 8.5938 ns/op
+OverheadActual  13: 128 op, 1000.00 ns, 7.8125 ns/op
+OverheadActual  14: 128 op, 1500.00 ns, 11.7188 ns/op
+OverheadActual  15: 128 op, 1100.00 ns, 8.5938 ns/op
+OverheadActual  16: 128 op, 1000.00 ns, 7.8125 ns/op
+OverheadActual  17: 128 op, 900.00 ns, 7.0313 ns/op
+OverheadActual  18: 128 op, 900.00 ns, 7.0313 ns/op
+OverheadActual  19: 128 op, 1100.00 ns, 8.5938 ns/op
+OverheadActual  20: 128 op, 1100.00 ns, 8.5938 ns/op
+
+WorkloadWarmup   1: 128 op, 237056900.00 ns, 1.8520 ms/op
+WorkloadWarmup   2: 128 op, 246242300.00 ns, 1.9238 ms/op
+WorkloadWarmup   3: 128 op, 220588200.00 ns, 1.7233 ms/op
+WorkloadWarmup   4: 128 op, 246824000.00 ns, 1.9283 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 128 op, 208871700.00 ns, 1.6318 ms/op
+WorkloadActual   2: 128 op, 281649400.00 ns, 2.2004 ms/op
+WorkloadActual   3: 128 op, 338190900.00 ns, 2.6421 ms/op
+WorkloadActual   4: 128 op, 382669400.00 ns, 2.9896 ms/op
+WorkloadActual   5: 128 op, 272462300.00 ns, 2.1286 ms/op
+WorkloadActual   6: 128 op, 280722800.00 ns, 2.1931 ms/op
+WorkloadActual   7: 128 op, 329450600.00 ns, 2.5738 ms/op
+WorkloadActual   8: 128 op, 239898100.00 ns, 1.8742 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 128 op, 208870600.00 ns, 1.6318 ms/op
+WorkloadResult   2: 128 op, 281648300.00 ns, 2.2004 ms/op
+WorkloadResult   3: 128 op, 338189800.00 ns, 2.6421 ms/op
+WorkloadResult   4: 128 op, 382668300.00 ns, 2.9896 ms/op
+WorkloadResult   5: 128 op, 272461200.00 ns, 2.1286 ms/op
+WorkloadResult   6: 128 op, 280721700.00 ns, 2.1931 ms/op
+WorkloadResult   7: 128 op, 329449500.00 ns, 2.5738 ms/op
+WorkloadResult   8: 128 op, 239897000.00 ns, 1.8742 ms/op
+// GC:  4 0 0 44011360 128
+// Threading:  0 0 128
+
+// AfterAll
+// Benchmark Process 29100 has exited with code 0.
+
+Mean = 2.279 ms, StdErr = 0.155 ms (6.79%), N = 8, StdDev = 0.438 ms
+Min = 1.632 ms, Q1 = 2.065 ms, Median = 2.197 ms, Q3 = 2.591 ms, Max = 2.990 ms
+IQR = 0.526 ms, LowerFence = 1.276 ms, UpperFence = 3.380 ms
+ConfidenceInterval = [1.442 ms; 3.117 ms] (CI 99.9%), Margin = 0.837 ms (36.74% of Mean)
+Skewness = 0.13, Kurtosis = 1.64, MValue = 2
+
+// ** Remained 7 (87.5%) benchmark(s) to run. Estimated finish 2026-10-25 8:20 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=1]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1312 1456 --benchmarkName "TemplateFrame.Benchmarks.WordTableBenchmarks.Parse(Columns: 6, Rows: 1)" --job Word-Isolated --benchmarkId 1 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4)
+
+OverheadJitting  1: 1 op, 259900.00 ns, 259.9000 us/op
+WorkloadJitting  1: 1 op, 2799000.00 ns, 2.7990 ms/op
+
+OverheadJitting  2: 16 op, 498200.00 ns, 31.1375 us/op
+WorkloadJitting  2: 16 op, 35232400.00 ns, 2.2020 ms/op
+
+WorkloadPilot    1: 16 op, 35207200.00 ns, 2.2005 ms/op
+WorkloadPilot    2: 96 op, 179798200.00 ns, 1.8729 ms/op
+WorkloadPilot    3: 112 op, 200050000.00 ns, 1.7862 ms/op
+
+OverheadWarmup   1: 112 op, 1200.00 ns, 10.7143 ns/op
+OverheadWarmup   2: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadWarmup   3: 112 op, 700.00 ns, 6.2500 ns/op
+OverheadWarmup   4: 112 op, 1000.00 ns, 8.9286 ns/op
+OverheadWarmup   5: 112 op, 1000.00 ns, 8.9286 ns/op
+OverheadWarmup   6: 112 op, 1000.00 ns, 8.9286 ns/op
+OverheadWarmup   7: 112 op, 700.00 ns, 6.2500 ns/op
+
+OverheadActual   1: 112 op, 1200.00 ns, 10.7143 ns/op
+OverheadActual   2: 112 op, 1000.00 ns, 8.9286 ns/op
+OverheadActual   3: 112 op, 1100.00 ns, 9.8214 ns/op
+OverheadActual   4: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadActual   5: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadActual   6: 112 op, 800.00 ns, 7.1429 ns/op
+OverheadActual   7: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadActual   8: 112 op, 800.00 ns, 7.1429 ns/op
+OverheadActual   9: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadActual  10: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadActual  11: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadActual  12: 112 op, 800.00 ns, 7.1429 ns/op
+OverheadActual  13: 112 op, 1000.00 ns, 8.9286 ns/op
+OverheadActual  14: 112 op, 1100.00 ns, 9.8214 ns/op
+OverheadActual  15: 112 op, 800.00 ns, 7.1429 ns/op
+OverheadActual  16: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadActual  17: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadActual  18: 112 op, 900.00 ns, 8.0357 ns/op
+OverheadActual  19: 112 op, 800.00 ns, 7.1429 ns/op
+OverheadActual  20: 112 op, 800.00 ns, 7.1429 ns/op
+
+WorkloadWarmup   1: 112 op, 203254700.00 ns, 1.8148 ms/op
+WorkloadWarmup   2: 112 op, 235226200.00 ns, 2.1002 ms/op
+WorkloadWarmup   3: 112 op, 196045300.00 ns, 1.7504 ms/op
+WorkloadWarmup   4: 112 op, 411528600.00 ns, 3.6744 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 112 op, 358729800.00 ns, 3.2029 ms/op
+WorkloadActual   2: 112 op, 363841700.00 ns, 3.2486 ms/op
+WorkloadActual   3: 112 op, 290140500.00 ns, 2.5905 ms/op
+WorkloadActual   4: 112 op, 259001100.00 ns, 2.3125 ms/op
+WorkloadActual   5: 112 op, 217906700.00 ns, 1.9456 ms/op
+WorkloadActual   6: 112 op, 209402200.00 ns, 1.8697 ms/op
+WorkloadActual   7: 112 op, 224300400.00 ns, 2.0027 ms/op
+WorkloadActual   8: 112 op, 269572600.00 ns, 2.4069 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 112 op, 358728900.00 ns, 3.2029 ms/op
+WorkloadResult   2: 112 op, 363840800.00 ns, 3.2486 ms/op
+WorkloadResult   3: 112 op, 290139600.00 ns, 2.5905 ms/op
+WorkloadResult   4: 112 op, 259000200.00 ns, 2.3125 ms/op
+WorkloadResult   5: 112 op, 217905800.00 ns, 1.9456 ms/op
+WorkloadResult   6: 112 op, 209401300.00 ns, 1.8697 ms/op
+WorkloadResult   7: 112 op, 224299500.00 ns, 2.0027 ms/op
+WorkloadResult   8: 112 op, 269571700.00 ns, 2.4069 ms/op
+// GC:  4 0 0 38842720 112
+// Threading:  0 0 112
+
+// AfterAll
+// Benchmark Process 12220 has exited with code 0.
+
+Mean = 2.447 ms, StdErr = 0.191 ms (7.79%), N = 8, StdDev = 0.539 ms
+Min = 1.870 ms, Q1 = 1.988 ms, Median = 2.360 ms, Q3 = 2.744 ms, Max = 3.249 ms
+IQR = 0.755 ms, LowerFence = 0.856 ms, UpperFence = 3.876 ms
+ConfidenceInterval = [1.416 ms; 3.479 ms] (CI 99.9%), Margin = 1.031 ms (42.14% of Mean)
+Skewness = 0.43, Kurtosis = 1.41, MValue = 2
+
+// ** Remained 6 (75.0%) benchmark(s) to run. Estimated finish 2026-10-25 8:20 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=100]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1448 1360 --benchmarkName "TemplateFrame.Benchmarks.WordTableBenchmarks.Parse(Columns: 6, Rows: 100)" --job Word-Isolated --benchmarkId 2 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4)
+
+OverheadJitting  1: 1 op, 240800.00 ns, 240.8000 us/op
+WorkloadJitting  1: 1 op, 11516700.00 ns, 11.5167 ms/op
+
+OverheadJitting  2: 16 op, 537700.00 ns, 33.6063 us/op
+WorkloadJitting  2: 16 op, 197297700.00 ns, 12.3311 ms/op
+
+WorkloadPilot    1: 16 op, 227547300.00 ns, 14.2217 ms/op
+
+OverheadWarmup   1: 16 op, 800.00 ns, 50.0000 ns/op
+OverheadWarmup   2: 16 op, 900.00 ns, 56.2500 ns/op
+OverheadWarmup   3: 16 op, 700.00 ns, 43.7500 ns/op
+OverheadWarmup   4: 16 op, 500.00 ns, 31.2500 ns/op
+OverheadWarmup   5: 16 op, 600.00 ns, 37.5000 ns/op
+OverheadWarmup   6: 16 op, 800.00 ns, 50.0000 ns/op
+OverheadWarmup   7: 16 op, 700.00 ns, 43.7500 ns/op
+
+OverheadActual   1: 16 op, 1100.00 ns, 68.7500 ns/op
+OverheadActual   2: 16 op, 1200.00 ns, 75.0000 ns/op
+OverheadActual   3: 16 op, 1000.00 ns, 62.5000 ns/op
+OverheadActual   4: 16 op, 1100.00 ns, 68.7500 ns/op
+OverheadActual   5: 16 op, 900.00 ns, 56.2500 ns/op
+OverheadActual   6: 16 op, 800.00 ns, 50.0000 ns/op
+OverheadActual   7: 16 op, 1100.00 ns, 68.7500 ns/op
+OverheadActual   8: 16 op, 1100.00 ns, 68.7500 ns/op
+OverheadActual   9: 16 op, 800.00 ns, 50.0000 ns/op
+OverheadActual  10: 16 op, 800.00 ns, 50.0000 ns/op
+OverheadActual  11: 16 op, 1000.00 ns, 62.5000 ns/op
+OverheadActual  12: 16 op, 900.00 ns, 56.2500 ns/op
+OverheadActual  13: 16 op, 900.00 ns, 56.2500 ns/op
+OverheadActual  14: 16 op, 900.00 ns, 56.2500 ns/op
+OverheadActual  15: 16 op, 900.00 ns, 56.2500 ns/op
+OverheadActual  16: 16 op, 900.00 ns, 56.2500 ns/op
+OverheadActual  17: 16 op, 500.00 ns, 31.2500 ns/op
+OverheadActual  18: 16 op, 600.00 ns, 37.5000 ns/op
+OverheadActual  19: 16 op, 800.00 ns, 50.0000 ns/op
+OverheadActual  20: 16 op, 700.00 ns, 43.7500 ns/op
+
+WorkloadWarmup   1: 16 op, 203376300.00 ns, 12.7110 ms/op
+WorkloadWarmup   2: 16 op, 191734100.00 ns, 11.9834 ms/op
+WorkloadWarmup   3: 16 op, 189361200.00 ns, 11.8351 ms/op
+WorkloadWarmup   4: 16 op, 187467900.00 ns, 11.7167 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 16 op, 186333400.00 ns, 11.6458 ms/op
+WorkloadActual   2: 16 op, 199307100.00 ns, 12.4567 ms/op
+WorkloadActual   3: 16 op, 196100500.00 ns, 12.2563 ms/op
+WorkloadActual   4: 16 op, 238059000.00 ns, 14.8787 ms/op
+WorkloadActual   5: 16 op, 218390400.00 ns, 13.6494 ms/op
+WorkloadActual   6: 16 op, 201695300.00 ns, 12.6060 ms/op
+WorkloadActual   7: 16 op, 196410400.00 ns, 12.2757 ms/op
+WorkloadActual   8: 16 op, 186985500.00 ns, 11.6866 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 16 op, 186332500.00 ns, 11.6458 ms/op
+WorkloadResult   2: 16 op, 199306200.00 ns, 12.4566 ms/op
+WorkloadResult   3: 16 op, 196099600.00 ns, 12.2562 ms/op
+WorkloadResult   4: 16 op, 238058100.00 ns, 14.8786 ms/op
+WorkloadResult   5: 16 op, 218389500.00 ns, 13.6493 ms/op
+WorkloadResult   6: 16 op, 201694400.00 ns, 12.6059 ms/op
+WorkloadResult   7: 16 op, 196409500.00 ns, 12.2756 ms/op
+WorkloadResult   8: 16 op, 186984600.00 ns, 11.6865 ms/op
+// GC:  4 2 0 41344704 16
+// Threading:  0 0 16
+
+// AfterAll
+// Benchmark Process 14676 has exited with code 0.
+
+Mean = 12.682 ms, StdErr = 0.383 ms (3.02%), N = 8, StdDev = 1.084 ms
+Min = 11.646 ms, Q1 = 12.114 ms, Median = 12.366 ms, Q3 = 12.867 ms, Max = 14.879 ms
+IQR = 0.753 ms, LowerFence = 10.984 ms, UpperFence = 13.996 ms
+ConfidenceInterval = [10.609 ms; 14.755 ms] (CI 99.9%), Margin = 2.073 ms (16.35% of Mean)
+Skewness = 0.91, Kurtosis = 2.38, MValue = 2
+
+// ** Remained 5 (62.5%) benchmark(s) to run. Estimated finish 2026-10-25 8:20 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=1000]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1372 1324 --benchmarkName "TemplateFrame.Benchmarks.WordTableBenchmarks.Parse(Columns: 6, Rows: 1000)" --job Word-Isolated --benchmarkId 3 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4)
+
+OverheadJitting  1: 1 op, 248600.00 ns, 248.6000 us/op
+WorkloadJitting  1: 1 op, 125046100.00 ns, 125.0461 ms/op
+
+WorkloadPilot    1: 4 op, 523209100.00 ns, 130.8023 ms/op
+WorkloadPilot    2: 2 op, 283000200.00 ns, 141.5001 ms/op
+
+WorkloadWarmup   1: 2 op, 300106700.00 ns, 150.0534 ms/op
+WorkloadWarmup   2: 2 op, 255878200.00 ns, 127.9391 ms/op
+WorkloadWarmup   3: 2 op, 257764400.00 ns, 128.8822 ms/op
+WorkloadWarmup   4: 2 op, 319589900.00 ns, 159.7950 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 2 op, 255383700.00 ns, 127.6919 ms/op
+WorkloadActual   2: 2 op, 286031500.00 ns, 143.0158 ms/op
+WorkloadActual   3: 2 op, 285379800.00 ns, 142.6899 ms/op
+WorkloadActual   4: 2 op, 258909800.00 ns, 129.4549 ms/op
+WorkloadActual   5: 2 op, 255656300.00 ns, 127.8282 ms/op
+WorkloadActual   6: 2 op, 262226700.00 ns, 131.1134 ms/op
+WorkloadActual   7: 2 op, 253857000.00 ns, 126.9285 ms/op
+WorkloadActual   8: 2 op, 248997300.00 ns, 124.4987 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 2 op, 255383700.00 ns, 127.6919 ms/op
+WorkloadResult   2: 2 op, 286031500.00 ns, 143.0158 ms/op
+WorkloadResult   3: 2 op, 285379800.00 ns, 142.6899 ms/op
+WorkloadResult   4: 2 op, 258909800.00 ns, 129.4549 ms/op
+WorkloadResult   5: 2 op, 255656300.00 ns, 127.8282 ms/op
+WorkloadResult   6: 2 op, 262226700.00 ns, 131.1134 ms/op
+WorkloadResult   7: 2 op, 253857000.00 ns, 126.9285 ms/op
+WorkloadResult   8: 2 op, 248997300.00 ns, 124.4987 ms/op
+// GC:  5 3 1 45834664 2
+// Threading:  0 0 2
+
+// AfterAll
+// Benchmark Process 10332 has exited with code 0.
+
+Mean = 131.653 ms, StdErr = 2.535 ms (1.93%), N = 8, StdDev = 7.170 ms
+Min = 124.499 ms, Q1 = 127.501 ms, Median = 128.642 ms, Q3 = 134.007 ms, Max = 143.016 ms
+IQR = 6.506 ms, LowerFence = 117.741 ms, UpperFence = 143.767 ms
+ConfidenceInterval = [117.944 ms; 145.362 ms] (CI 99.9%), Margin = 13.709 ms (10.41% of Mean)
+Skewness = 0.75, Kurtosis = 1.66, MValue = 2.67
+
+// ** Remained 4 (50.0%) benchmark(s) to run. Estimated finish 2026-10-25 8:20 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=0]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1372 1324 --benchmarkName "TemplateFrame.Benchmarks.WordTableBenchmarks.Parse(Columns: 30, Rows: 0)" --job Word-Isolated --benchmarkId 4 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4)
+
+OverheadJitting  1: 1 op, 255700.00 ns, 255.7000 us/op
+WorkloadJitting  1: 1 op, 3215200.00 ns, 3.2152 ms/op
+
+OverheadJitting  2: 16 op, 492300.00 ns, 30.7688 us/op
+WorkloadJitting  2: 16 op, 43517600.00 ns, 2.7199 ms/op
+
+WorkloadPilot    1: 16 op, 40012800.00 ns, 2.5008 ms/op
+WorkloadPilot    2: 80 op, 195733100.00 ns, 2.4467 ms/op
+WorkloadPilot    3: 96 op, 249244500.00 ns, 2.5963 ms/op
+WorkloadPilot    4: 80 op, 237893100.00 ns, 2.9737 ms/op
+
+OverheadWarmup   1: 80 op, 1200.00 ns, 15.0000 ns/op
+OverheadWarmup   2: 80 op, 800.00 ns, 10.0000 ns/op
+OverheadWarmup   3: 80 op, 800.00 ns, 10.0000 ns/op
+OverheadWarmup   4: 80 op, 900.00 ns, 11.2500 ns/op
+OverheadWarmup   5: 80 op, 1000.00 ns, 12.5000 ns/op
+OverheadWarmup   6: 80 op, 900.00 ns, 11.2500 ns/op
+OverheadWarmup   7: 80 op, 1100.00 ns, 13.7500 ns/op
+
+OverheadActual   1: 80 op, 1100.00 ns, 13.7500 ns/op
+OverheadActual   2: 80 op, 1100.00 ns, 13.7500 ns/op
+OverheadActual   3: 80 op, 1000.00 ns, 12.5000 ns/op
+OverheadActual   4: 80 op, 1200.00 ns, 15.0000 ns/op
+OverheadActual   5: 80 op, 1000.00 ns, 12.5000 ns/op
+OverheadActual   6: 80 op, 1000.00 ns, 12.5000 ns/op
+OverheadActual   7: 80 op, 900.00 ns, 11.2500 ns/op
+OverheadActual   8: 80 op, 1100.00 ns, 13.7500 ns/op
+OverheadActual   9: 80 op, 1100.00 ns, 13.7500 ns/op
+OverheadActual  10: 80 op, 800.00 ns, 10.0000 ns/op
+OverheadActual  11: 80 op, 900.00 ns, 11.2500 ns/op
+OverheadActual  12: 80 op, 1000.00 ns, 12.5000 ns/op
+OverheadActual  13: 80 op, 21400.00 ns, 267.5000 ns/op
+OverheadActual  14: 80 op, 900.00 ns, 11.2500 ns/op
+OverheadActual  15: 80 op, 1000.00 ns, 12.5000 ns/op
+OverheadActual  16: 80 op, 900.00 ns, 11.2500 ns/op
+OverheadActual  17: 80 op, 900.00 ns, 11.2500 ns/op
+OverheadActual  18: 80 op, 1500.00 ns, 18.7500 ns/op
+OverheadActual  19: 80 op, 900.00 ns, 11.2500 ns/op
+OverheadActual  20: 80 op, 900.00 ns, 11.2500 ns/op
+
+WorkloadWarmup   1: 80 op, 201609300.00 ns, 2.5201 ms/op
+WorkloadWarmup   2: 80 op, 203204300.00 ns, 2.5401 ms/op
+WorkloadWarmup   3: 80 op, 196672900.00 ns, 2.4584 ms/op
+WorkloadWarmup   4: 80 op, 232249200.00 ns, 2.9031 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 80 op, 210793900.00 ns, 2.6349 ms/op
+WorkloadActual   2: 80 op, 194351900.00 ns, 2.4294 ms/op
+WorkloadActual   3: 80 op, 194481100.00 ns, 2.4310 ms/op
+WorkloadActual   4: 80 op, 209010700.00 ns, 2.6126 ms/op
+WorkloadActual   5: 80 op, 248934200.00 ns, 3.1117 ms/op
+WorkloadActual   6: 80 op, 211405500.00 ns, 2.6426 ms/op
+WorkloadActual   7: 80 op, 195782700.00 ns, 2.4473 ms/op
+WorkloadActual   8: 80 op, 197392100.00 ns, 2.4674 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 80 op, 210792900.00 ns, 2.6349 ms/op
+WorkloadResult   2: 80 op, 194350900.00 ns, 2.4294 ms/op
+WorkloadResult   3: 80 op, 194480100.00 ns, 2.4310 ms/op
+WorkloadResult   4: 80 op, 209009700.00 ns, 2.6126 ms/op
+WorkloadResult   5: 80 op, 248933200.00 ns, 3.1117 ms/op
+WorkloadResult   6: 80 op, 211404500.00 ns, 2.6426 ms/op
+WorkloadResult   7: 80 op, 195781700.00 ns, 2.4473 ms/op
+WorkloadResult   8: 80 op, 197391100.00 ns, 2.4674 ms/op
+// GC:  3 0 0 37494400 80
+// Threading:  0 0 80
+
+// AfterAll
+// Benchmark Process 26008 has exited with code 0.
+
+Mean = 2.597 ms, StdErr = 0.081 ms (3.10%), N = 8, StdDev = 0.228 ms
+Min = 2.429 ms, Q1 = 2.443 ms, Median = 2.540 ms, Q3 = 2.637 ms, Max = 3.112 ms
+IQR = 0.194 ms, LowerFence = 2.153 ms, UpperFence = 2.927 ms
+ConfidenceInterval = [2.161 ms; 3.033 ms] (CI 99.9%), Margin = 0.436 ms (16.78% of Mean)
+Skewness = 1.28, Kurtosis = 3.36, MValue = 2
+
+// ** Remained 3 (37.5%) benchmark(s) to run. Estimated finish 2026-10-25 8:20 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=1]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1320 972 --benchmarkName "TemplateFrame.Benchmarks.WordTableBenchmarks.Parse(Columns: 30, Rows: 1)" --job Word-Isolated --benchmarkId 5 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4)
+
+OverheadJitting  1: 1 op, 251500.00 ns, 251.5000 us/op
+WorkloadJitting  1: 1 op, 4491200.00 ns, 4.4912 ms/op
+
+OverheadJitting  2: 16 op, 575200.00 ns, 35.9500 us/op
+WorkloadJitting  2: 16 op, 70167900.00 ns, 4.3855 ms/op
+
+WorkloadPilot    1: 16 op, 58222500.00 ns, 3.6389 ms/op
+WorkloadPilot    2: 64 op, 231062600.00 ns, 3.6104 ms/op
+
+OverheadWarmup   1: 64 op, 1300.00 ns, 20.3125 ns/op
+OverheadWarmup   2: 64 op, 1400.00 ns, 21.8750 ns/op
+OverheadWarmup   3: 64 op, 1300.00 ns, 20.3125 ns/op
+OverheadWarmup   4: 64 op, 1200.00 ns, 18.7500 ns/op
+OverheadWarmup   5: 64 op, 1200.00 ns, 18.7500 ns/op
+OverheadWarmup   6: 64 op, 1300.00 ns, 20.3125 ns/op
+
+OverheadActual   1: 64 op, 1200.00 ns, 18.7500 ns/op
+OverheadActual   2: 64 op, 1300.00 ns, 20.3125 ns/op
+OverheadActual   3: 64 op, 1100.00 ns, 17.1875 ns/op
+OverheadActual   4: 64 op, 1200.00 ns, 18.7500 ns/op
+OverheadActual   5: 64 op, 1100.00 ns, 17.1875 ns/op
+OverheadActual   6: 64 op, 1100.00 ns, 17.1875 ns/op
+OverheadActual   7: 64 op, 1100.00 ns, 17.1875 ns/op
+OverheadActual   8: 64 op, 1200.00 ns, 18.7500 ns/op
+OverheadActual   9: 64 op, 1100.00 ns, 17.1875 ns/op
+OverheadActual  10: 64 op, 900.00 ns, 14.0625 ns/op
+OverheadActual  11: 64 op, 1400.00 ns, 21.8750 ns/op
+OverheadActual  12: 64 op, 1400.00 ns, 21.8750 ns/op
+OverheadActual  13: 64 op, 1200.00 ns, 18.7500 ns/op
+OverheadActual  14: 64 op, 800.00 ns, 12.5000 ns/op
+OverheadActual  15: 64 op, 1000.00 ns, 15.6250 ns/op
+OverheadActual  16: 64 op, 1000.00 ns, 15.6250 ns/op
+OverheadActual  17: 64 op, 1000.00 ns, 15.6250 ns/op
+OverheadActual  18: 64 op, 1200.00 ns, 18.7500 ns/op
+OverheadActual  19: 64 op, 1100.00 ns, 17.1875 ns/op
+OverheadActual  20: 64 op, 1000.00 ns, 15.6250 ns/op
+
+WorkloadWarmup   1: 64 op, 237221700.00 ns, 3.7066 ms/op
+WorkloadWarmup   2: 64 op, 196513900.00 ns, 3.0705 ms/op
+WorkloadWarmup   3: 64 op, 232277100.00 ns, 3.6293 ms/op
+WorkloadWarmup   4: 64 op, 220412400.00 ns, 3.4439 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 64 op, 205460800.00 ns, 3.2103 ms/op
+WorkloadActual   2: 64 op, 250489000.00 ns, 3.9139 ms/op
+WorkloadActual   3: 64 op, 182708700.00 ns, 2.8548 ms/op
+WorkloadActual   4: 64 op, 190224700.00 ns, 2.9723 ms/op
+WorkloadActual   5: 64 op, 205830900.00 ns, 3.2161 ms/op
+WorkloadActual   6: 64 op, 219741500.00 ns, 3.4335 ms/op
+WorkloadActual   7: 64 op, 232167100.00 ns, 3.6276 ms/op
+WorkloadActual   8: 64 op, 190164000.00 ns, 2.9713 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 64 op, 205459700.00 ns, 3.2103 ms/op
+WorkloadResult   2: 64 op, 250487900.00 ns, 3.9139 ms/op
+WorkloadResult   3: 64 op, 182707600.00 ns, 2.8548 ms/op
+WorkloadResult   4: 64 op, 190223600.00 ns, 2.9722 ms/op
+WorkloadResult   5: 64 op, 205829800.00 ns, 3.2161 ms/op
+WorkloadResult   6: 64 op, 219740400.00 ns, 3.4334 ms/op
+WorkloadResult   7: 64 op, 232166000.00 ns, 3.6276 ms/op
+WorkloadResult   8: 64 op, 190162900.00 ns, 2.9713 ms/op
+// GC:  3 1 0 30958848 64
+// Threading:  0 0 64
+
+// AfterAll
+// Benchmark Process 8388 has exited with code 0.
+
+Mean = 3.275 ms, StdErr = 0.129 ms (3.93%), N = 8, StdDev = 0.364 ms
+Min = 2.855 ms, Q1 = 2.972 ms, Median = 3.213 ms, Q3 = 3.482 ms, Max = 3.914 ms
+IQR = 0.510 ms, LowerFence = 2.207 ms, UpperFence = 4.247 ms
+ConfidenceInterval = [2.580 ms; 3.970 ms] (CI 99.9%), Margin = 0.695 ms (21.23% of Mean)
+Skewness = 0.46, Kurtosis = 1.65, MValue = 2
+
+// ** Remained 2 (25.0%) benchmark(s) to run. Estimated finish 2026-10-25 8:20 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=100]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1372 1284 --benchmarkName "TemplateFrame.Benchmarks.WordTableBenchmarks.Parse(Columns: 30, Rows: 100)" --job Word-Isolated --benchmarkId 6 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4)
+
+OverheadJitting  1: 1 op, 228900.00 ns, 228.9000 us/op
+WorkloadJitting  1: 1 op, 64085200.00 ns, 64.0852 ms/op
+
+WorkloadPilot    1: 4 op, 247037400.00 ns, 61.7594 ms/op
+
+WorkloadWarmup   1: 4 op, 286699200.00 ns, 71.6748 ms/op
+WorkloadWarmup   2: 4 op, 243363100.00 ns, 60.8408 ms/op
+WorkloadWarmup   3: 4 op, 228973000.00 ns, 57.2433 ms/op
+WorkloadWarmup   4: 4 op, 231243300.00 ns, 57.8108 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 4 op, 252192400.00 ns, 63.0481 ms/op
+WorkloadActual   2: 4 op, 247904100.00 ns, 61.9760 ms/op
+WorkloadActual   3: 4 op, 249637000.00 ns, 62.4093 ms/op
+WorkloadActual   4: 4 op, 250738200.00 ns, 62.6846 ms/op
+WorkloadActual   5: 4 op, 310365000.00 ns, 77.5913 ms/op
+WorkloadActual   6: 4 op, 306138200.00 ns, 76.5346 ms/op
+WorkloadActual   7: 4 op, 249827700.00 ns, 62.4569 ms/op
+WorkloadActual   8: 4 op, 254628100.00 ns, 63.6570 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 4 op, 252192400.00 ns, 63.0481 ms/op
+WorkloadResult   2: 4 op, 247904100.00 ns, 61.9760 ms/op
+WorkloadResult   3: 4 op, 249637000.00 ns, 62.4093 ms/op
+WorkloadResult   4: 4 op, 250738200.00 ns, 62.6846 ms/op
+WorkloadResult   5: 4 op, 310365000.00 ns, 77.5913 ms/op
+WorkloadResult   6: 4 op, 306138200.00 ns, 76.5346 ms/op
+WorkloadResult   7: 4 op, 249827700.00 ns, 62.4569 ms/op
+WorkloadResult   8: 4 op, 254628100.00 ns, 63.6570 ms/op
+// GC:  4 3 0 45569024 4
+// Threading:  0 0 4
+
+// AfterAll
+// Benchmark Process 55212 has exited with code 0.
+
+Mean = 66.295 ms, StdErr = 2.358 ms (3.56%), N = 8, StdDev = 6.671 ms
+Min = 61.976 ms, Q1 = 62.445 ms, Median = 62.866 ms, Q3 = 66.876 ms, Max = 77.591 ms
+IQR = 4.431 ms, LowerFence = 55.798 ms, UpperFence = 73.524 ms
+ConfidenceInterval = [53.541 ms; 79.049 ms] (CI 99.9%), Margin = 12.754 ms (19.24% of Mean)
+Skewness = 0.93, Kurtosis = 1.79, MValue = 2
+
+// ** Remained 1 (12.5%) benchmark(s) to run. Estimated finish 2026-10-25 8:20 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=1000]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1464 1324 --benchmarkName "TemplateFrame.Benchmarks.WordTableBenchmarks.Parse(Columns: 30, Rows: 1000)" --job Word-Isolated --benchmarkId 7 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-word-79ea056bcf1b46a5a2e09e80bb21f3fa\before\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4)
+
+OverheadJitting  1: 1 op, 367800.00 ns, 367.8000 us/op
+WorkloadJitting  1: 1 op, 694551200.00 ns, 694.5512 ms/op
+
+OverheadJitting  2: 1 op, 400.00 ns, 400.0000 ns/op
+WorkloadJitting  2: 1 op, 699380000.00 ns, 699.3800 ms/op
+
+WorkloadWarmup   1: 1 op, 735832600.00 ns, 735.8326 ms/op
+WorkloadWarmup   2: 1 op, 714732900.00 ns, 714.7329 ms/op
+WorkloadWarmup   3: 1 op, 730954500.00 ns, 730.9545 ms/op
+WorkloadWarmup   4: 1 op, 699350100.00 ns, 699.3501 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 1 op, 707453400.00 ns, 707.4534 ms/op
+WorkloadActual   2: 1 op, 639424400.00 ns, 639.4244 ms/op
+WorkloadActual   3: 1 op, 674714900.00 ns, 674.7149 ms/op
+WorkloadActual   4: 1 op, 673052900.00 ns, 673.0529 ms/op
+WorkloadActual   5: 1 op, 653352900.00 ns, 653.3529 ms/op
+WorkloadActual   6: 1 op, 668722900.00 ns, 668.7229 ms/op
+WorkloadActual   7: 1 op, 665587800.00 ns, 665.5878 ms/op
+WorkloadActual   8: 1 op, 745246000.00 ns, 745.2460 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 1 op, 707453400.00 ns, 707.4534 ms/op
+WorkloadResult   2: 1 op, 639424400.00 ns, 639.4244 ms/op
+WorkloadResult   3: 1 op, 674714900.00 ns, 674.7149 ms/op
+WorkloadResult   4: 1 op, 673052900.00 ns, 673.0529 ms/op
+WorkloadResult   5: 1 op, 653352900.00 ns, 653.3529 ms/op
+WorkloadResult   6: 1 op, 668722900.00 ns, 668.7229 ms/op
+WorkloadResult   7: 1 op, 665587800.00 ns, 665.5878 ms/op
+WorkloadResult   8: 1 op, 745246000.00 ns, 745.2460 ms/op
+// GC:  13 10 2 110908904 1
+// Threading:  0 0 1
+
+// AfterAll
+// Benchmark Process 40000 has exited with code 0.
+
+Mean = 678.444 ms, StdErr = 11.771 ms (1.73%), N = 8, StdDev = 33.293 ms
+Min = 639.424 ms, Q1 = 662.529 ms, Median = 670.888 ms, Q3 = 682.900 ms, Max = 745.246 ms
+IQR = 20.370 ms, LowerFence = 631.973 ms, UpperFence = 713.455 ms
+ConfidenceInterval = [614.789 ms; 742.100 ms] (CI 99.9%), Margin = 63.655 ms (9.38% of Mean)
+Skewness = 0.83, Kurtosis = 2.38, MValue = 2.4
+
+// ** Remained 0 (0.0%) benchmark(s) to run. Estimated finish 2026-10-25 8:20 (0h 0m from now) **
+Successfully reverted power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  C:\work\OpenCode\TemplateFrame\artifacts\word-study\parse-baseline\results\TemplateFrame.Benchmarks.WordTableBenchmarks-report.csv
+  C:\work\OpenCode\TemplateFrame\artifacts\word-study\parse-baseline\results\TemplateFrame.Benchmarks.WordTableBenchmarks-report-github.md
+  C:\work\OpenCode\TemplateFrame\artifacts\word-study\parse-baseline\results\TemplateFrame.Benchmarks.WordTableBenchmarks-report.html
+
+// * Detailed results *
+WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=0]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 2.279 ms, StdErr = 0.155 ms (6.79%), N = 8, StdDev = 0.438 ms
+Min = 1.632 ms, Q1 = 2.065 ms, Median = 2.197 ms, Q3 = 2.591 ms, Max = 2.990 ms
+IQR = 0.526 ms, LowerFence = 1.276 ms, UpperFence = 3.380 ms
+ConfidenceInterval = [1.442 ms; 3.117 ms] (CI 99.9%), Margin = 0.837 ms (36.74% of Mean)
+Skewness = 0.13, Kurtosis = 1.64, MValue = 2
+-------------------- Histogram --------------------
+[1.466 ms ; 2.098 ms) | @@
+[2.098 ms ; 2.673 ms) | @@@@@
+[2.673 ms ; 3.277 ms) | @
+---------------------------------------------------
+
+WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=1]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 2.447 ms, StdErr = 0.191 ms (7.79%), N = 8, StdDev = 0.539 ms
+Min = 1.870 ms, Q1 = 1.988 ms, Median = 2.360 ms, Q3 = 2.744 ms, Max = 3.249 ms
+IQR = 0.755 ms, LowerFence = 0.856 ms, UpperFence = 3.876 ms
+ConfidenceInterval = [1.416 ms; 3.479 ms] (CI 99.9%), Margin = 1.031 ms (42.14% of Mean)
+Skewness = 0.43, Kurtosis = 1.41, MValue = 2
+-------------------- Histogram --------------------
+[1.784 ms ; 2.566 ms) | @@@@@
+[2.566 ms ; 3.274 ms) | @@@
+---------------------------------------------------
+
+WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=100]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 12.682 ms, StdErr = 0.383 ms (3.02%), N = 8, StdDev = 1.084 ms
+Min = 11.646 ms, Q1 = 12.114 ms, Median = 12.366 ms, Q3 = 12.867 ms, Max = 14.879 ms
+IQR = 0.753 ms, LowerFence = 10.984 ms, UpperFence = 13.996 ms
+ConfidenceInterval = [10.609 ms; 14.755 ms] (CI 99.9%), Margin = 2.073 ms (16.35% of Mean)
+Skewness = 0.91, Kurtosis = 2.38, MValue = 2
+-------------------- Histogram --------------------
+[11.414 ms ; 12.837 ms) | @@@@@@
+[12.837 ms ; 13.552 ms) | 
+[13.552 ms ; 14.976 ms) | @@
+---------------------------------------------------
+
+WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=6, Rows=1000]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 131.653 ms, StdErr = 2.535 ms (1.93%), N = 8, StdDev = 7.170 ms
+Min = 124.499 ms, Q1 = 127.501 ms, Median = 128.642 ms, Q3 = 134.007 ms, Max = 143.016 ms
+IQR = 6.506 ms, LowerFence = 117.741 ms, UpperFence = 143.767 ms
+ConfidenceInterval = [117.944 ms; 145.362 ms] (CI 99.9%), Margin = 13.709 ms (10.41% of Mean)
+Skewness = 0.75, Kurtosis = 1.66, MValue = 2.67
+-------------------- Histogram --------------------
+[123.101 ms ; 132.511 ms) | @@@@@@
+[132.511 ms ; 138.147 ms) | 
+[138.147 ms ; 147.721 ms) | @@
+---------------------------------------------------
+
+WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=0]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 2.597 ms, StdErr = 0.081 ms (3.10%), N = 8, StdDev = 0.228 ms
+Min = 2.429 ms, Q1 = 2.443 ms, Median = 2.540 ms, Q3 = 2.637 ms, Max = 3.112 ms
+IQR = 0.194 ms, LowerFence = 2.153 ms, UpperFence = 2.927 ms
+ConfidenceInterval = [2.161 ms; 3.033 ms] (CI 99.9%), Margin = 0.436 ms (16.78% of Mean)
+Skewness = 1.28, Kurtosis = 3.36, MValue = 2
+-------------------- Histogram --------------------
+[2.386 ms ; 2.686 ms) | @@@@@@@
+[2.686 ms ; 2.962 ms) | 
+[2.962 ms ; 3.261 ms) | @
+---------------------------------------------------
+
+WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=1]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 3.275 ms, StdErr = 0.129 ms (3.93%), N = 8, StdDev = 0.364 ms
+Min = 2.855 ms, Q1 = 2.972 ms, Median = 3.213 ms, Q3 = 3.482 ms, Max = 3.914 ms
+IQR = 0.510 ms, LowerFence = 2.207 ms, UpperFence = 4.247 ms
+ConfidenceInterval = [2.580 ms; 3.970 ms] (CI 99.9%), Margin = 0.695 ms (21.23% of Mean)
+Skewness = 0.46, Kurtosis = 1.65, MValue = 2
+-------------------- Histogram --------------------
+[2.797 ms ; 3.274 ms) | @@@@@
+[3.274 ms ; 3.769 ms) | @@
+[3.769 ms ; 4.153 ms) | @
+---------------------------------------------------
+
+WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=100]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 66.295 ms, StdErr = 2.358 ms (3.56%), N = 8, StdDev = 6.671 ms
+Min = 61.976 ms, Q1 = 62.445 ms, Median = 62.866 ms, Q3 = 66.876 ms, Max = 77.591 ms
+IQR = 4.431 ms, LowerFence = 55.798 ms, UpperFence = 73.524 ms
+ConfidenceInterval = [53.541 ms; 79.049 ms] (CI 99.9%), Margin = 12.754 ms (19.24% of Mean)
+Skewness = 0.93, Kurtosis = 1.79, MValue = 2
+-------------------- Histogram --------------------
+[57.598 ms ; 67.194 ms) | @@@@@@
+[67.194 ms ; 72.685 ms) | 
+[72.685 ms ; 81.969 ms) | @@
+---------------------------------------------------
+
+WordTableBenchmarks.Parse: Word-Isolated(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=4) [Columns=30, Rows=1000]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 678.444 ms, StdErr = 11.771 ms (1.73%), N = 8, StdDev = 33.293 ms
+Min = 639.424 ms, Q1 = 662.529 ms, Median = 670.888 ms, Q3 = 682.900 ms, Max = 745.246 ms
+IQR = 20.370 ms, LowerFence = 631.973 ms, UpperFence = 713.455 ms
+ConfidenceInterval = [614.789 ms; 742.100 ms] (CI 99.9%), Margin = 63.655 ms (9.38% of Mean)
+Skewness = 0.83, Kurtosis = 2.38, MValue = 2.4
+-------------------- Histogram --------------------
+[635.221 ms ; 678.918 ms) | @@@@@@
+[678.918 ms ; 704.501 ms) | 
+[704.501 ms ; 748.198 ms) | @@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6466/22H2/2022Update)
+12th Gen Intel Core i5-12500H 3.10GHz, 1 CPU, 16 logical and 12 physical cores
+.NET SDK 10.0.402
+  [Host]        : .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+  Word-Isolated : .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+
+Job=Word-Isolated  OutlierMode=DontRemove  IterationCount=8  
+IterationTime=200ms  LaunchCount=1  WarmupCount=4  
+
+| Method | Columns | Rows | Mean       | Error      | StdDev     | Gen0       | Gen1       | Gen2      | Allocated    |
+|------- |-------- |----- |-----------:|-----------:|-----------:|-----------:|-----------:|----------:|-------------:|
+| Parse  | 6       | 0    |   2.279 ms |  0.8374 ms |  0.4380 ms |    31.2500 |          - |         - |    335.78 KB |
+| Parse  | 6       | 1    |   2.447 ms |  1.0313 ms |  0.5394 ms |    35.7143 |          - |         - |    338.68 KB |
+| Parse  | 6       | 100  |  12.682 ms |  2.0730 ms |  1.0842 ms |   250.0000 |   125.0000 |         - |   2523.48 KB |
+| Parse  | 6       | 1000 | 131.653 ms | 13.7091 ms |  7.1701 ms |  2500.0000 |  1500.0000 |  500.0000 |  22380.21 KB |
+| Parse  | 30      | 0    |   2.597 ms |  0.4357 ms |  0.2279 ms |    37.5000 |          - |         - |     457.7 KB |
+| Parse  | 30      | 1    |   3.275 ms |  0.6953 ms |  0.3637 ms |    46.8750 |    15.6250 |         - |    472.39 KB |
+| Parse  | 30      | 100  |  66.295 ms | 12.7539 ms |  6.6706 ms |  1000.0000 |   750.0000 |         - |  11125.25 KB |
+| Parse  | 30      | 1000 | 678.444 ms | 63.6551 ms | 33.2928 ms | 13000.0000 | 10000.0000 | 2000.0000 | 108309.48 KB |
+
+// * Hints *
+Outliers
+  WordTableBenchmarks.Parse: Word-Isolated -> 1 outlier  was  detected (14.88 ms)
+  WordTableBenchmarks.Parse: Word-Isolated -> 1 outlier  was  detected (3.11 ms)
+  WordTableBenchmarks.Parse: Word-Isolated -> 2 outliers were detected (76.53 ms, 77.59 ms)
+  WordTableBenchmarks.Parse: Word-Isolated -> 1 outlier  was  detected (745.25 ms)
+
+// * Legends *
+  Columns   : Value of the 'Columns' parameter
+  Rows      : Value of the 'Rows' parameter
+  Mean      : Arithmetic mean of all measurements
+  Error     : Half of 99.9% confidence interval
+  StdDev    : Standard deviation of all measurements
+  Gen0      : GC Generation 0 collects per 1000 operations
+  Gen1      : GC Generation 1 collects per 1000 operations
+  Gen2      : GC Generation 2 collects per 1000 operations
+  Allocated : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
+  1 ms      : 1 Millisecond (0.001 sec)
+
+// * Diagnostic Output - MemoryDiagnoser *
+
+
+// ***** BenchmarkRunner: End *****
+Run time: 00:00:46 (46.84 sec), executed benchmarks: 8
+
+Global total time: 00:01:10 (70.89 sec), executed benchmarks: 8
+// * Artifacts cleanup *
+Artifacts cleanup is finished

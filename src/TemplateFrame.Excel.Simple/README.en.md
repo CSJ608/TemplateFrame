@@ -46,6 +46,47 @@ var loaded = SimpleExcel.Read(input); // Headers + Rows (string / bool / DateTim
 - `Write/Read` handles header + data rows, with no merges, images or page setup. Read returns numbers as `double`, date-formatted values as `DateTime`, and missing cells as null; writing decimal/long without double conversion does not imply equal read-back precision.
 - Read uses the named range, with header fallback when it is absent or empty. It reads to the worksheet's last row and skips empty rows; unrelated content below the table can also be included. Full [location, fallback and value rules](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.md#format-differences) are in DESIGN (Chinese).
 
+## Streaming large-table export
+
+`WriteStreaming` is an explicit opt-in API. Existing `Write` still scans the entire table for column widths; contract/service `Fill` does not switch to streaming automatically.
+
+```csharp
+using TemplateFrame.Engine;
+
+IEnumerable<IReadOnlyList<object?>> ExportRows()
+{
+    for (var row = 0; row < 1_000_000; row++)
+        yield return new object?[] { "M" + row, row };
+}
+
+using var output = File.Create("large-items.xlsx");
+SimpleExcel.WriteStreaming(output, new SimpleExcelStreamingTable
+{
+    Headers = ["Material", "Quantity"],
+    ColumnKeys = ["Code", "Quantity"],
+    Rows = ExportRows(),
+}, new SimpleExcelStreamingOptions
+{
+    WorkbookOptions = new SimpleExcelOptions
+    {
+        ResourceLimits = new TemplateResourceLimits
+        {
+            MaxTableRows = 1_000_000,
+            MaxTableCells = 2_000_002,
+        },
+    },
+    WidthSampleRows = 100,
+});
+```
+
+- Rows are enumerated once and written directly into ZIP entries. Use a lazy source and preferably a file output; pre-materializing rows or using `MemoryStream` still consumes memory proportional to those inputs/outputs.
+- Automatic widths sample only the first 100 source rows by default. `WidthSampleRows` accepts 0–1024 (0 uses headers only); a 65,536 sampled-cell cap can further reduce the effective row count for wide tables. Blank rows consume sample slots. Widths are clamped to 8–60; later long values do not resize columns. Measurement uses serialized text length (10 for dates, 4/5 for booleans) without formatting values twice.
+- Set `ColumnWidths = [20d, 14d]` for fixed widths without data sampling. Supply one finite width in `(0, 255]` per header. `WidthSampleRows` must remain valid even with fixed widths.
+- At least one header is required. Optional `ColumnKeys` must match the header count. Offsets, bold headers, date styles, defined names and numeric serialization are retained; reading numbers as double retains its precision limitations. Missing values are null, extra values are ignored, all-null rows are omitted, and empty strings are retained.
+- Default budgets remain 100,000 source rows and 1,000,000 cells including headers; blank rows also consume budget. Unknown row counts are checked incrementally, while worksheet row bounds apply to emitted rows. Raising export limits does not raise limits for a subsequent read.
+- Optional `CancellationToken` supports cooperative cancellation at enumeration/write boundaries, not interruption of a blocking source or synchronous output operation. Enumerators are disposed on completion, failure and cancellation. The caller always owns the output stream; non-seekable streams work on .NET Framework too.
+- Errors, cancellation or late limit violations can leave a partial ZIP: discard failed output. For atomic file publication, write a temporary file and move it only on success. There is no global throttling; hosts should queue up to 100 submitted requests and choose execution concurrency from their resource budget.
+
 ## Contract + strongly-typed service
 
 Simple tables can also join the TemplateFrame contract system, so `service.Parse` yields strongly-typed data just like Word:
@@ -128,3 +169,17 @@ Outputs go to the system temp directory `%TEMP%\TemplateFrame.Demo.Excel.Simple`
 - The console prints the **re-parse** result (read the filled file → `SimpleExcel.Read` → print headers and each row)
 
 Input packages, XML, images and table data use configurable finite resource budgets. Validate does not sanitize macros or external relationships. See the [security guidance](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md) for configuration and boundaries.
+
+## Opt-in bounded-memory import
+
+`SimpleExcel.ReadStreaming(source, consume, options, cancellationToken)` invokes `Func<SimpleExcelReadRow, bool>` synchronously for each non-null data row. Return `false` to stop early. The result contains `Headers`, `RowsRead`, `Completed`, and `TemporaryBytesWritten`; it does not retain data rows. Retaining rows in the consumer is the application's responsibility.
+
+Shared-string text and its fixed-width index are stored in temporary files with a bounded cache. Non-seekable input is also spooled to disk. Configure an existing `TemporaryDirectory` and `MaxTemporaryBytes` (default 256 MiB). Files owned by the operation are disposed on completion, early stop, exceptions, and cancellation; the caller's input stream remains open. `TemporaryBytesWritten` reports charged logical content bytes, not filesystem allocation overhead. Files have been released when the method returns.
+
+The ZIP is validated and shared strings indexed before callbacks begin. Header fallback may require additional worksheet scans. Only the current row is materialized; `MaxRowCharacters` bounds each serialized row or shared-string item (default 1 Mi characters), while `MaxMetadataCharacters` independently bounds each metadata part (default 1 Mi characters). Increase the existing `ResourceLimits` explicitly for large trusted inputs. Physical row numbers must be unique and strictly increasing; the original `Read` behavior is unchanged. Formula results come from cached values only. Defined ranges locate headers and columns, but do not truncate reading at their final row.
+
+Callbacks may already have processed data when an error or cancellation occurs; transaction rollback belongs to the application. Protect the scratch directory: files may contain business data and are not encrypted or securely erased. Crashes, forced termination, or filesystem failures may leave remnants; the library does not scan for or delete other operations' files. Scheduling is application-owned; there is no global concurrency gate.
+
+Single-table contract import is available through `SimpleExcelContract.ReadStreaming`, with the same options and lifetime rules. It preserves defined-name versus header-fallback mapping and missing-key behavior. Template parsing uses the separate `ExcelTemplateParser.ParseStreaming` in the Excel package; it does not depend on Simple. Each path has separate semantics and capacity evidence.
+
+Known text compatibility boundary: SST text `<t>a&#13;&#10;b</t>` retains CRLF with the legacy full-SDK path but becomes LF after bounded serialization in ordinary/contract streaming reads. This is reproduced on net472/net8/net10 and is not fixed. Keep using the legacy API when exact preservation of this text is required; the paths are not unconditionally text-equivalent. `MaxRowCharacters` counts actual serialized XML, including namespace declarations and escaping.

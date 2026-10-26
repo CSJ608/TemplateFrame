@@ -1,0 +1,19 @@
+{
+  "Mode": "contract-streaming-read",
+  "Rows": 100000,
+  "Columns": 6,
+  "Concurrency": 1,
+  "Framework": "net10.0",
+  "Limits": "capacity",
+  "ExitCode": 0,
+  "Guard": null,
+  "WallSeconds": 12.5013693,
+  "SampledPeakPrivateBytes": 26779648,
+  "SampledPeakWorkingSetBytes": 58785792,
+  "MinimumFreeBytes": 6688849920,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 180,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation"
+}

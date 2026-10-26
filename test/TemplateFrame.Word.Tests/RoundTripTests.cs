@@ -4,11 +4,6 @@ using Xunit;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>
-/// Fill→Parse 往返对称矩阵（文本/数字/日期/布尔 × 标量与表格列 + 图片）。
-/// 与 Excel 插件的 RoundTripTests 对应：保证任一值类型的「导出↔导入」闭环不静默断链
-/// （Word 侧值为文本形态，日期按 Format 写出、按 ValueType 解析）。
-/// </summary>
 public sealed class RoundTripTests
 {
     private static readonly DateTime SampleDate = new(2026, 8, 27);

@@ -14,27 +14,17 @@ using Sr = TemplateFrame.Word.Localization.Sr;
 
 namespace TemplateFrame.Word;
 
-/// <summary>Reads Word template data using a contract.</summary>
-/// <remarks>
-/// 与 <see cref="WordTemplateFiller"/> 共享同一套按 tag 定位逻辑（<see cref="SdtLocator"/>），只是方向相反。
-/// Text 读 w:t 文本并按 <see cref="TextElement.ValueType"/> 转换；Table 找到示例行克隆区逐行读出字段；
-/// Image 读回占位/填充后的图片字节（可选能力）。
-/// Parse 规范化：已知占位符（默认 zh "待填充" / en "To be filled"，不依赖模板语言）规范化为 null
-/// （空字符串保留为空字符串）；控件缺失仍保持"键省略"语义。
-/// </remarks>
 public sealed class WordTemplateParser
 {
     private readonly ITemplateLocalizer _localizer;
     private readonly TemplateResourceLimits _limits;
+    private readonly ContractTextParser _textParser = new("Word", (key, args) => Sr.Get(key, args));
 
-    /// <summary>Creates a template parser.</summary>
-    /// <remarks>localizer 为 null 时使用 DefaultTemplateLocalizer.Instance。</remarks>
     public WordTemplateParser(ITemplateLocalizer? localizer = null)
         : this(TemplateResourceLimits.Default, localizer)
     {
     }
 
-    /// <summary>Creates a parser with explicit resource limits and an optional localizer.</summary>
     public WordTemplateParser(TemplateResourceLimits limits, ITemplateLocalizer? localizer)
     {
         Guard.ThrowIfNull(limits, nameof(limits));
@@ -43,17 +33,9 @@ public sealed class WordTemplateParser
         _localizer = localizer ?? DefaultTemplateLocalizer.Instance;
     }
 
-    /// <summary>Reads template data using the contract.</summary>
-    /// <remarks>不改写输入内容，也不释放输入流；可定位流先归零，读取后不恢复原位置。</remarks>
     public FillData Parse(Stream template, TemplateContract contract)
         => ParseCore(template, contract, null).Data;
 
-    /// <summary>Reads template data with conversion warnings.</summary>
-    /// <remarks>
-    /// 文本转换失败时保留原文，并报告 ConversionFailed（Warning）；已知占位符转为 null。
-    /// null 也可能来自缺失单元格等读取分支，告警不覆盖所有无法读取的值。
-    /// 输入流的所有权和位置行为与 Parse 相同。
-    /// </remarks>
     public TemplateParseResult ParseDetailed(Stream template, TemplateContract contract)
         => ParseCore(template, contract, []);
 
@@ -83,7 +65,7 @@ public sealed class WordTemplateParser
                         var (found, textValue) = ReadText(document, text, issues);
                         if (found)
                         {
-                            values[text.Key] = textValue; // 占位符 → null（未填充），控件缺失 → 键省略
+                            values[text.Key] = textValue;
                         }
 
                         break;
@@ -110,7 +92,6 @@ public sealed class WordTemplateParser
         }
         catch (Exception ex) when (ex is XmlException or OpenXmlPackageException or InvalidDataException or FileFormatException)
         {
-            // zip 有效但 document.xml 损坏：惰性 DOM 在首次树访问时才抛（OpenDocument 的 catch 罩不到这里）
             throw new InvalidOperationException(Sr.Get("Word.Validation.XmlCorrupt", ex.Message), ex);
         }
 
@@ -121,10 +102,6 @@ public sealed class WordTemplateParser
         };
     }
 
-    /// <summary>
-    /// 打开文档包：损坏流（非 OOXML / 截断 zip）统一包装为
-    /// <see cref="InvalidOperationException"/> + 本地化消息（与 Validate / Fill 的异常契约一致）。
-    /// </summary>
     private WordprocessingDocument OpenDocument(Stream package)
     {
         try
@@ -137,10 +114,6 @@ public sealed class WordTemplateParser
         }
     }
 
-    /// <summary>
-    /// 读取文本控件：w:t 文本按 ValueType 转换；控件缺失返回 (false, null)；
-    /// 已知占位符返回 (true, null)（未填充）；其余返回 (true, 转换值)。
-    /// </summary>
     private (bool Found, object? Value) ReadText(
         WordprocessingDocument document,
         TextElement element,
@@ -152,57 +125,15 @@ public sealed class WordTemplateParser
             return (false, null);
         }
 
-        // 只拼接控件直属的 w:t：嵌套内层控件的文本归内层元素自己，不混入外层值
         var text = string.Concat(SdtLocator.OwnTexts(match.Element).Select(t => t.Text ?? string.Empty));
         if (_localizer.IsPlaceholderText(text))
         {
             return (true, null);
         }
 
-        return (true, ConvertCell(text, element, issues, element.Key, null));
+        return (true, _textParser.Parse(text, element, new ParseLocation(element.Key), issues));
     }
 
-    /// <summary>
-    /// 转换并（可选）收集失败告警：失败时保留原始文本（与 <see cref="Parse"/> 的兜底一致），
-    /// <paramref name="issues"/> 为 null 时不收集告警。
-    /// </summary>
-    private object? ConvertCell(
-        string text,
-        TextElement element,
-        List<TemplateValidationIssue>? issues,
-        string key,
-        int? rowNumber, string? tableKey = null, int? dataRowNumber = null)
-    {
-        if (ContractValueConverter.TryConvert(text, element.ValueType, out var value))
-        {
-            return value;
-        }
-
-        if (issues is not null)
-        {
-            var messageKey = rowNumber is null ? "Word.Parse.ConversionFailed" : "Word.Parse.TableConversionFailed";
-            var args = rowNumber is { } row
-                ? new object?[] { key, row, text, element.ValueType.Name }
-                : new object?[] { key, text, element.ValueType.Name };
-            issues.Add(new TemplateValidationIssue
-            {
-                Code = TemplateValidationIssueCode.ConversionFailed,
-                Key = key,
-                TableKey = tableKey,
-                DataRowNumber = dataRowNumber,
-                RawValue = text,
-                TargetType = element.ValueType.ToString(),
-                Severity = TemplateValidationSeverity.Warning,
-                MessageKey = messageKey,
-                MessageArgs = args,
-                Message = Sr.Get(messageKey, args),
-            });
-        }
-
-        return text;
-    }
-
-    /// <summary>读取图片控件：blip r:embed 指向的图片 part 字节；无 blip 或控件缺失返回 null。</summary>
     private byte[]? ReadImage(WordprocessingDocument document, string tag)
     {
         var match = SdtLocator.FindByTag(document, tag).FirstOrDefault();
@@ -227,10 +158,6 @@ public sealed class WordTemplateParser
         return StreamUtil.ReadImageBytes(stream, _limits);
     }
 
-    /// <summary>
-    /// 读取表格数据：找到包含完整示例行（含全部列 SDT）的表格，逐行读回含列 SDT 的数据行；
-    /// 已知占位符列值规范化为 null；找不到完整行模板返回 null。
-    /// </summary>
     private IReadOnlyList<IReadOnlyDictionary<string, object?>>? ReadTableRows(
         WordprocessingDocument document,
         TableElement table,
@@ -257,7 +184,7 @@ public sealed class WordTemplateParser
                     .ToList();
                 if (rowSdts.Count == 0)
                 {
-                    continue; // 表头等无列 SDT 的行不是数据行
+                    continue;
                 }
 
                 budget.AddRows(1, table.Columns.Count);
@@ -275,7 +202,7 @@ public sealed class WordTemplateParser
                     var text = string.Concat(SdtLocator.OwnTexts(sdt).Select(t => t.Text ?? string.Empty));
                     rowValues[column.Key] = _localizer.IsPlaceholderText(text)
                         ? null
-                        : ConvertCell(text, column, issues, column.Key, dataRowNumber, table.Key, dataRowNumber);
+                        : _textParser.Parse(text, column, new ParseLocation(column.Key, table.Key, dataRowNumber, dataRowNumber), issues);
                 }
 
                 rows.Add(rowValues);

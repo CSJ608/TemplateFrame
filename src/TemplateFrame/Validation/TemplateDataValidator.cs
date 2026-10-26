@@ -4,16 +4,8 @@ using TemplateFrame.Localization;
 
 namespace TemplateFrame.Validation;
 
-/// <summary>
-/// Data validator ("ValidateData") — checks a <see cref="FillData"/> against a <see cref="TemplateContract"/>.
-/// </summary>
-/// <remarks>
-/// 与模板校验（WordTemplateValidator）互补——一个查模板缺不缺元素，一个查数据缺不缺必填值。
-/// 必填字段/表格缺失报 Error；契约外字段、类型不匹配只告警放行。
-/// </remarks>
 public sealed class TemplateDataValidator
 {
-    /// <summary>Validates whether the data matches the contract.</summary>
     public TemplateValidationResult Validate(FillData data, TemplateContract contract)
     {
         Guard.ThrowIfNull(data, nameof(data));
@@ -22,16 +14,24 @@ public sealed class TemplateDataValidator
         var issues = new List<TemplateValidationIssue>();
         var knownKeys = new HashSet<string>(contract.EnumerateTagKeys(), StringComparer.Ordinal);
 
+        CheckElements(data, contract, issues);
+        CheckExtraValues(data, knownKeys, issues);
+
+        return new TemplateValidationResult { Issues = issues };
+    }
+
+    private static void CheckElements(FillData data, TemplateContract contract, List<TemplateValidationIssue> issues)
+    {
         foreach (var element in contract.Elements)
         {
             switch (element)
             {
                 case TextElement text:
-                    CheckScalarValue(text.Key, text.DisplayName, text.Required, text.ValueType, data, issues);
+                    CheckScalarValue(text, text.ValueType, data, issues);
                     break;
 
                 case ImageElement image:
-                    CheckScalarValue(image.Key, image.DisplayName, image.Required, typeof(byte[]), data, issues);
+                    CheckScalarValue(image, typeof(byte[]), data, issues);
                     break;
 
                 case TableElement table:
@@ -39,8 +39,10 @@ public sealed class TemplateDataValidator
                     break;
             }
         }
+    }
 
-        // 数据里契约外的字段：告警放行
+    private static void CheckExtraValues(FillData data, HashSet<string> knownKeys, List<TemplateValidationIssue> issues)
+    {
         foreach (var key in data.Values.Keys)
         {
             if (!knownKeys.Contains(key))
@@ -53,40 +55,35 @@ public sealed class TemplateDataValidator
                     TemplateValidationSeverity.Warning));
             }
         }
-
-        return new TemplateValidationResult { Issues = issues };
     }
 
     private static void CheckScalarValue(
-        string key,
-        string displayName,
-        bool required,
+        TemplateElement element,
         Type valueType,
         FillData data,
         List<TemplateValidationIssue> issues)
     {
-        if (!data.Values.TryGetValue(key, out var value))
+        if (!data.Values.TryGetValue(element.Key, out var value))
         {
-            if (required)
+            if (element.Required)
             {
                 issues.Add(Issue(
                     TemplateValidationIssueCode.Missing,
-                    key,
+                    element.Key,
                     "Validation.DataMissingRequiredField",
-                    [key, displayName]));
+                    [element.Key, element.DisplayName]));
             }
 
             return;
         }
 
-        // 类型不匹配只告警：类型转换收敛在业务服务边界，这里给提示不阻断
         if (value is not null && valueType != typeof(object) && !valueType.IsInstanceOfType(value))
         {
             issues.Add(Issue(
                 TemplateValidationIssueCode.WrongType,
-                key,
+                element.Key,
                 "Validation.DataFieldTypeMismatch",
-                [key, valueType.Name, value.GetType().Name],
+                [element.Key, valueType.Name, value.GetType().Name],
                 TemplateValidationSeverity.Warning));
         }
     }

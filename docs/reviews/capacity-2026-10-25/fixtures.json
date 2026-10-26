@@ -1,0 +1,65 @@
+[
+  {
+    "Fixture": "fixture-1000",
+    "Bytes": 34502,
+    "Sha256": "D2CD9E7FD6DB6D0C19DEEF9D1B2928433CC88B7BFD0435F17EDF3DE14EFEF611",
+    "SheetXmlBytes": 430724,
+    "ExpandedBytes": 433605.0
+  },
+  {
+    "Fixture": "fixture-10000",
+    "Bytes": 319118,
+    "Sha256": "6DBDD3CC5AFAA18BDE17AF8C134D18C8B73AC8C7C572136D57F8CC9C47BD237D",
+    "SheetXmlBytes": 4381748,
+    "ExpandedBytes": 4384642.0
+  },
+  {
+    "Fixture": "fixture-100000",
+    "Bytes": 3172625,
+    "Sha256": "2F6B0E9EEABAEC4D544DB9EFFECFE820D7182BB944BB74F663BA691106A4330D",
+    "SheetXmlBytes": 44611772,
+    "ExpandedBytes": 44614679.0
+  },
+  {
+    "Fixture": "fixture-1000000",
+    "Bytes": 31705206,
+    "Sha256": "E4064C5921CB694DD324C4119E6BA61954B48CCD5B652E31510874107DA8E52A",
+    "SheetXmlBytes": 454111796,
+    "ExpandedBytes": 454114716.0
+  },
+  {
+    "Fixture": "fixture-v2-1000",
+    "Bytes": 34509,
+    "Sha256": "40A386BA231FDF1EAFB2270C729D8271D0BE58F6F6232A262192F3CF377112EC",
+    "SheetXmlBytes": 430724,
+    "ExpandedBytes": 433557.0
+  },
+  {
+    "Fixture": "fixture-v2-10000",
+    "Bytes": 319122,
+    "Sha256": "C84B555C19F727C74E7D0A650DEBDCBF677754FF8977CCB41867C438E0698D13",
+    "SheetXmlBytes": 4381748,
+    "ExpandedBytes": 4384588.0
+  },
+  {
+    "Fixture": "fixture-v2-100000",
+    "Bytes": 3172624,
+    "Sha256": "51272EFFC5D36DC63FBECE70A2E5F740F4C4504A8F21A8315CE3C9DEAD160C6B",
+    "SheetXmlBytes": 44611772,
+    "ExpandedBytes": 44614619.0
+  },
+  {
+    "Fixture": "fixture-v2-1000000",
+    "Bytes": 31705208,
+    "Sha256": "4ECDD1A6F72E48F731890E00DCD3EDE42E94605A68B086E6E8F3612CA010C783",
+    "SheetXmlBytes": 454111796,
+    "ExpandedBytes": 454114650.0
+  },
+  {
+    "Fixture": "fixture-v2-wide",
+    "Bytes": 1193115,
+    "Sha256": "6A29C1CA2028E9589BA307BADF2294A7B8BE07AB1D0F9BA5F5A73AE7841E03A0",
+    "SheetXmlBytes": 20992436,
+    "ExpandedBytes": 20998401.0
+  }
+]

@@ -1,0 +1,19 @@
+{
+  "Mode": "simple-read",
+  "Rows": 100000,
+  "Columns": 6,
+  "Concurrency": 1,
+  "Framework": "net10.0",
+  "Limits": "capacity",
+  "ExitCode": 0,
+  "Guard": null,
+  "WallSeconds": 4.5989042,
+  "SampledPeakPrivateBytes": 506925056,
+  "SampledPeakWorkingSetBytes": 535633920,
+  "MinimumFreeBytes": 12585377792,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 180,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation"
+}

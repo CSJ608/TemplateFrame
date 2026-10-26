@@ -75,9 +75,20 @@ Use `FillDetailed` / `ParseDetailed` for warnings. Engine failures retain raw te
 
 - Target frameworks `netstandard2.0 / net462 / net8.0` (NuGet picks per runtime automatically).
 - Depends on `DocumentFormat.OpenXml` (3.5.1, same as the Word plugin).
+- Large-table filling now interleaves cloning and value writes, serializes XML directly into the final ZIP, and releases private rows after writing. Public APIs, template semantics and default budgets remain unchanged. This is not a low-memory streaming API: input data and the complete worksheet DOM are still retained during filling, and the result is an in-memory stream. Hosts should queue large requests according to their memory budget. See the [template Excel export study](https://github.com/CSJ608/TemplateFrame/blob/main/docs/reviews/excel-save-2026-10-25/README.md) for measured capacity and limitations.
 - Historical snapshot (2026-08-24; sample-specific, with no guarantee of linear scaling or current-version timings): 1k-row detail fill ~60ms, parse ~115ms, build ~1ms; snapshots in [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md), benchmark project [benchmarks](https://github.com/CSJ608/TemplateFrame/blob/main/test/TemplateFrame.Benchmarks/README.md).
 - Tests in `test/TemplateFrame.Excel.Tests`: generate → validate → fill → parse → assert (including named-range inventories, typed values,
   range re-pointing after row cloning, elements below shifted down, image replacement, unfilled placeholders and other edge cases).
+
+## Streaming template export
+
+Opt in with `ExcelTemplateFiller.FillStreaming(template, target, contract, data, cancellationToken)`.
+`ExcelStreamingData.Values` holds scalar values; `Tables` maps keys to `IEnumerable<IReadOnlyDictionary<string, object?>>`.
+Sources are consumed once, in workbook-sheet and physical-row order, and may reuse a row dictionary. Generate rows lazily and use a file or forward-only target to avoid retaining input/output yourself. The method returns validation warnings and leaves both caller streams open.
+
+The bounded template is still loaded, but generated rows are cloned, filled and immediately written to ZIP without accumulating an output DOM. Existing Fill/services and default budgets (100,000 rows, 1,000,000 cells and the cloned-XML budget) are unchanged. Failure, cancellation or a limit violation can leave partial output that must be discarded. Scheduling belongs to the application; there is no global semaphore.
+
+Supported layouts include independent single-row prototype tables across sheets, footers, merges, images, styles and shared strings. Ordinary formulas retain literal text; non-TF_ names remain unchanged. Overlapping prototype rows/scalars, shared/array formulas, charts, hyperlinks, conditional formatting and other unsupported structures on expanded sheets are rejected before output/source enumeration, with no materializing fallback. See the [complete boundaries](https://github.com/CSJ608/TemplateFrame/blob/main/docs/EXCEL-STREAMING.md) (Chinese).
 
 ## Full example
 
@@ -92,3 +103,45 @@ Design: [DESIGN](https://github.com/CSJ608/TemplateFrame/blob/main/docs/DESIGN.m
 See the R5 section of repository [PERFORMANCE](https://github.com/CSJ608/TemplateFrame/blob/main/docs/PERFORMANCE.md) for the Excel lookup optimization and three-size comparison. Historical timings do not promise current performance; cumulative managed allocation is not peak memory.
 
 Input packages, XML, images and table data use configurable finite resource budgets. Validate does not sanitize macros or external relationships. See the [security guidance](https://github.com/CSJ608/TemplateFrame/blob/main/docs/SECURITY.md) for configuration and boundaries.
+## Opt-in low-memory template import
+
+Use `ExcelTemplateParser.ParseStreaming(input, contract, consume, options, warning, cancellationToken)`.
+The synchronous consumer receives `ExcelStreamingParseValue` (scalar or image bytes) or
+`ExcelStreamingParseRow` (table key, one-based logical `DataRowNumber`, read-only values).
+Return false to stop the entire operation. The result contains `ValuesRead`, `RowsRead`,
+`Completed` and `TemporaryBytesWritten`, never complete tables. Warnings are delivered individually.
+Callbacks run in contract element order; retaining their data is the caller's memory responsibility.
+
+`ExcelStreamingParseOptions` exposes resource limits, an existing temporary directory, a default
+256 MiB cumulative temporary-write budget, a 1 Mi-character/1024-entry string cache, a 1 Mi-character
+metadata-part limit and a 1 Mi-character serialized row/shared-string-item limit. Increase finite
+package/XML/table limits explicitly for large inputs. Omitted options inherit the parser's resource
+limits; explicitly supplied options use their own limits.
+
+This reads ZIP/XML directly, without SpreadsheetDocument or complete worksheet/SST objects.
+Shared-string text and its fixed-size index go to disk; non-seekable input is also staged there.
+ZIP expanded-byte validation and SST indexing precede business callbacks. Each distinct table-column
+start row uses one forward cursor, so memory depends on start groups and current row width, not total rows.
+
+Legacy template semantics are preserved: first matching defined name, exact sheet names, missing scalar
+keys omitted, unmatched columns omitted, blank logical rows retained, maximum matched range length,
+each column's own start offset, and the last matched column's sheet for the whole table. Boolean values
+bypass contract conversion; explicit numeric dates use OADate rather than styles; formulas use cached
+values. Template shared strings use direct Text only (rich-text-only items remain null), unlike Simple.
+Images retain first drawing/first matching oneCellAnchor/embed behavior and `MaxImageBytes`; drawings
+also obey metadata limits. No twoCellAnchor support is added.
+
+Only explicit row indices participate. Encountered duplicate, descending or out-of-range row indices
+are rejected by this new API; exact cell references retain their first value. Unused XML beyond the
+requested range need not be scanned. Original Parse/ParseDetailed behavior is unchanged. Conversion
+warnings retain all diagnostic fields. Callback exceptions propagate unchanged; other exception wrappers
+are not guaranteed to match legacy APIs.
+
+The caller owns the source and must not modify it during parsing. Success, early stop, cancellation and
+exceptions dispose operation-owned temporary files. Temporary bytes exclude filesystem overhead.
+Partial callbacks may precede errors; application transactions/rollback remain the caller's responsibility.
+The host protects the temporary directory, which may contain business data. No encryption, secure erasure,
+or crash/forced-termination cleanup guarantee is provided; other tasks' files are never scanned/deleted.
+There is no global concurrency semaphore or expansion of template support.
+
+Known text compatibility boundary: SST text `<t>a&#13;&#10;b</t>` retains CRLF with the legacy full-SDK path but becomes LF after bounded serialization in the streaming path. This is reproduced on net472/net8/net10 and is not fixed. Keep using the legacy API when exact preservation of this text is required; the paths are not unconditionally text-equivalent. `MaxRowCharacters` counts actual serialized XML, including namespace declarations and escaping.

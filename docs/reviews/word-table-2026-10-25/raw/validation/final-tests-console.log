@@ -1,0 +1,84 @@
+  TemplateFrame -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame\bin\Release\net462\TemplateFrame.dll
+  TemplateFrame -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame\bin\Release\net8.0\TemplateFrame.dll
+  TemplateFrame -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame\bin\Release\netstandard2.0\TemplateFrame.dll
+  TemplateFrame.Excel.Simple -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel.Simple\bin\Release\net462\TemplateFrame.Excel.Simple.dll
+  TemplateFrame.Excel -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel\bin\Release\net462\TemplateFrame.Excel.dll
+  TemplateFrame.Excel -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel\bin\Release\netstandard2.0\TemplateFrame.Excel.dll
+  TemplateFrame.Word -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Word\bin\Release\netstandard2.0\TemplateFrame.Word.dll
+  TemplateFrame.Excel -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel\bin\Release\net8.0\TemplateFrame.Excel.dll
+  TemplateFrame.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Tests\bin\Release\net472\TemplateFrame.Tests.dll
+  TemplateFrame.Excel.Simple.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Simple.Tests\bin\Release\net472\TemplateFrame.Excel.Simple.Tests.dll
+  TemplateFrame.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Tests\bin\Release\net8.0\TemplateFrame.Tests.dll
+  TemplateFrame.Word -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Word\bin\Release\net462\TemplateFrame.Word.dll
+  TemplateFrame.Excel.Simple -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel.Simple\bin\Release\net8.0\TemplateFrame.Excel.Simple.dll
+  TemplateFrame.Word -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Word\bin\Release\net8.0\TemplateFrame.Word.dll
+  TemplateFrame.Excel.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Tests\bin\Release\net8.0\TemplateFrame.Excel.Tests.dll
+  TemplateFrame.Excel.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Tests\bin\Release\net472\TemplateFrame.Excel.Tests.dll
+  TemplateFrame.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Tests\bin\Release\net10.0\TemplateFrame.Tests.dll
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Tests\bin\Release\net10.0\TemplateFrame.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Tests\bin\Release\net472\TemplateFrame.Tests.dll (.NETFramework,Version=v4.7.2)的测试运行
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Tests\bin\Release\net8.0\TemplateFrame.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+总共 1 个测试文件与指定模式相匹配。
+总共 1 个测试文件与指定模式相匹配。
+  TemplateFrame.Excel.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Tests\bin\Release\net10.0\TemplateFrame.Excel.Tests.dll
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Tests\bin\Release\net8.0\TemplateFrame.Excel.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Tests\bin\Release\net10.0\TemplateFrame.Excel.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Tests\bin\Release\net472\TemplateFrame.Excel.Tests.dll (.NETFramework,Version=v4.7.2)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+总共 1 个测试文件与指定模式相匹配。
+总共 1 个测试文件与指定模式相匹配。
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_01_net8.0.trx
+
+已通过! - 失败:     0，通过:   133，已跳过:     0，总计:   133，持续时间: 384 ms - TemplateFrame.Tests.dll (net8.0)
+  TemplateFrame.Excel.Simple -> C:\work\OpenCode\TemplateFrame\src\TemplateFrame.Excel.Simple\bin\Release\netstandard2.0\TemplateFrame.Excel.Simple.dll
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_01_net10.0.trx
+
+已通过! - 失败:     0，通过:   133，已跳过:     0，总计:   133，持续时间: 345 ms - TemplateFrame.Tests.dll (net10.0)
+  TemplateFrame.Word.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Word.Tests\bin\Release\net8.0\TemplateFrame.Word.Tests.dll
+  TemplateFrame.Excel.Simple.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Simple.Tests\bin\Release\net8.0\TemplateFrame.Excel.Simple.Tests.dll
+  TemplateFrame.Word.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Word.Tests\bin\Release\net472\TemplateFrame.Word.Tests.dll
+  TemplateFrame.Excel.Simple.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Simple.Tests\bin\Release\net10.0\TemplateFrame.Excel.Simple.Tests.dll
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Simple.Tests\bin\Release\net10.0\TemplateFrame.Excel.Simple.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Simple.Tests\bin\Release\net472\TemplateFrame.Excel.Simple.Tests.dll (.NETFramework,Version=v4.7.2)的测试运行
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Excel.Simple.Tests\bin\Release\net8.0\TemplateFrame.Excel.Simple.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+总共 1 个测试文件与指定模式相匹配。
+总共 1 个测试文件与指定模式相匹配。
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_04_net10.0.trx
+
+已通过! - 失败:     0，通过:   194，已跳过:     0，总计:   194，持续时间: 2 s - TemplateFrame.Excel.Tests.dll (net10.0)
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_05_net472.trx
+
+已通过! - 失败:     0，通过:   133，已跳过:     0，总计:   133，持续时间: 1 s - TemplateFrame.Tests.dll (net472)
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_04_net8.0.trx
+
+已通过! - 失败:     0，通过:   194，已跳过:     0，总计:   194，持续时间: 3 s - TemplateFrame.Excel.Tests.dll (net8.0)
+  TemplateFrame.Word.Tests -> C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Word.Tests\bin\Release\net10.0\TemplateFrame.Word.Tests.dll
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Word.Tests\bin\Release\net10.0\TemplateFrame.Word.Tests.dll (.NETCoreApp,Version=v10.0)的测试运行
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Word.Tests\bin\Release\net8.0\TemplateFrame.Word.Tests.dll (.NETCoreApp,Version=v8.0)的测试运行
+C:\work\OpenCode\TemplateFrame\test\TemplateFrame.Word.Tests\bin\Release\net472\TemplateFrame.Word.Tests.dll (.NETFramework,Version=v4.7.2)的测试运行
+总共 1 个测试文件与指定模式相匹配。
+总共 1 个测试文件与指定模式相匹配。
+总共 1 个测试文件与指定模式相匹配。
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_09_net10.0.trx
+
+已通过! - 失败:     0，通过:   116，已跳过:     0，总计:   116，持续时间: 5 s - TemplateFrame.Excel.Simple.Tests.dll (net10.0)
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_09_net8.0.trx
+
+已通过! - 失败:     0，通过:   116，已跳过:     0，总计:   116，持续时间: 5 s - TemplateFrame.Excel.Simple.Tests.dll (net8.0)
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_09_net472.trx
+
+已通过! - 失败:     0，通过:   194，已跳过:     0，总计:   194，持续时间: 6 s - TemplateFrame.Excel.Tests.dll (net472)
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_12_net10.0.trx
+
+已通过! - 失败:     0，通过:   164，已跳过:     0，总计:   164，持续时间: 3 s - TemplateFrame.Word.Tests.dll (net10.0)
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_13_net8.0.trx
+
+已通过! - 失败:     0，通过:   164，已跳过:     0，总计:   164，持续时间: 2 s - TemplateFrame.Word.Tests.dll (net8.0)
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_14_net472.trx
+
+已通过! - 失败:     0，通过:   115，已跳过:     0，总计:   115，持续时间: 2 s - TemplateFrame.Excel.Simple.Tests.dll (net472)
+结果文件: C:\work\OpenCode\TemplateFrame\artifacts\word-study\final-tests\Marci_DESKTOP-IR7RCO3_2026-10-25_08_47_17_net472.trx
+
+已通过! - 失败:     0，通过:   164，已跳过:     0，总计:   164，持续时间: 2 s - TemplateFrame.Word.Tests.dll (net472)

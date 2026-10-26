@@ -1,0 +1,25 @@
+{"Phase":"prepare","settings":{"Mode":"shared-profile-read","Rows":100000,"Columns":6,"Concurrency":1,"Directory":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\sst-sdk-profile-20261026\\net8-100000-r2","DefaultLimits":false,"InputPath":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\sst-sdk-profile-20261026\\net8-100000-r2\\input-100000-6.xlsx","Limits":{"MaxInputBytes":536870912,"MaxPackageEntryBytes":2147483648,"MaxExpandedBytes":3221225472,"MaxPackageEntries":4096,"MaxImageBytes":16777216,"MaxXmlCharactersPerPart":1500000000,"MaxClonedXmlCharacters":1500000000,"MaxTableRows":1000000,"MaxTableCells":30000030}},"Runtime":".NET 8.0.32","ProcessId":39212,"HeapBudgetBytes":5368709120,"ServerGc":false}
+{"Phase":"profile","Name":"zip-validation","Milliseconds":42.6176,"AllocatedBytes":106072,"Result":null}
+{"Phase":"profile","Name":"metadata","Milliseconds":38.5066,"AllocatedBytes":518384,"Result":null}
+{"Phase":"profile","Name":"sst-build","Milliseconds":2993.4978,"AllocatedBytes":9210377136,"Result":null}
+{"Phase":"profile","Name":"worksheet-and-lookup","Milliseconds":2578.6153,"AllocatedBytes":4694098568,"Result":100001}
+{"Phase":"profile","Name":"disk-sequential-lookup","Milliseconds":125.1331,"AllocatedBytes":86401008,"Result":400006}
+{"Phase":"profile","Name":"sst-xml-only","Milliseconds":2889.3138,"AllocatedBytes":15728801200,"Result":400006}
+{"Phase":"profile","Name":"disk-append-only","Milliseconds":80.1888,"AllocatedBytes":41619088,"Result":400006}
+{"Phase":"profile","Name":"sst-reuse-serialize-only","Milliseconds":436.5627,"AllocatedBytes":348838576,"Result":42400564}
+{"Phase":"profile","Name":"sst-reuse-sdk-select","Milliseconds":1994.5019,"AllocatedBytes":9190208240,"Result":42400564}
+{"Phase":"profile","Name":"sst-reuse-sdk-select-repeat","Milliseconds":1727.0472,"AllocatedBytes":9190195840,"Result":42400564}
+{"Phase":"profile","Name":"sst-reuse-serialize-only-repeat","Milliseconds":390.7174,"AllocatedBytes":348838656,"Result":42400564}
+{"Phase":"profile","Name":"sdk-sample-short-construct","Milliseconds":477.3446,"AllocatedBytes":4294880968,"Result":400006}
+{"Phase":"profile","Name":"sdk-sample-short-construct-select","Milliseconds":1446.7803,"AllocatedBytes":8763787128,"Result":400006}
+{"Phase":"profile","Name":"sdk-sample-short-construct-select","Milliseconds":1284.3603,"AllocatedBytes":8763786648,"Result":400006}
+{"Phase":"profile","Name":"sdk-sample-short-construct","Milliseconds":465.6349,"AllocatedBytes":4294881288,"Result":400006}
+{"Phase":"profile","Name":"sdk-sample-rich-construct","Milliseconds":476.7198,"AllocatedBytes":4294880888,"Result":400006}
+{"Phase":"profile","Name":"sdk-sample-rich-construct-select","Milliseconds":2472.9063,"AllocatedBytes":9472915544,"Result":400006}
+{"Phase":"profile","Name":"sdk-sample-rich-construct-select","Milliseconds":2573.6702,"AllocatedBytes":9472765144,"Result":400006}
+{"Phase":"profile","Name":"sdk-sample-rich-construct","Milliseconds":468.7591,"AllocatedBytes":4294880968,"Result":400006}
+{"Phase":"profile","Name":"sdk-sample-long-construct","Milliseconds":1.5453,"AllocatedBytes":10737240,"Result":1000}
+{"Phase":"profile","Name":"sdk-sample-long-construct-select","Milliseconds":46.7887,"AllocatedBytes":246704120,"Result":1000}
+{"Phase":"profile","Name":"sdk-sample-long-construct-select","Milliseconds":45.7991,"AllocatedBytes":246704040,"Result":1000}
+{"Phase":"profile","Name":"sdk-sample-long-construct","Milliseconds":1.1337,"AllocatedBytes":10737160,"Result":1000}
+{"Phase":"complete","Status":"passed","ScratchPeakBytes":27200168,"ScratchRemainingFiles":0,"PeakWorkingSetBytes":60628992}

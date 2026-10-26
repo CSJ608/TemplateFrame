@@ -8,15 +8,10 @@ using DW = DocumentFormat.OpenXml.Drawing.Wordprocessing;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>
-/// 真实场景正确性护栏（迭代 21）：
-/// 嵌套 SDT（手工模板常见——填外层不吞内层）、0 行数据清空示例行占位、多图 docPr id 唯一。
-/// </summary>
 public sealed class RealScenarioTests
 {
     // ---------------- 嵌套 SDT ----------------
 
-    /// <summary>构造外层 SDT（tag=Outer，直属一个 run）内嵌子 SDT（tag=Inner）的手工模板。</summary>
     private static MemoryStream BuildNestedSdtDocument()
     {
         var stream = new MemoryStream();

@@ -1,0 +1,1041 @@
+// Validating benchmarks:
+//    * Assembly TemplateFrame.Benchmarks, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null is located in temp. If you are running benchmarks from xUnit you need to disable shadow copy. It's not supported by design.
+
+// ***** BenchmarkRunner: Start   *****
+// ***** Found 12 benchmark(s) in total *****
+// ***** Building 1 exe(s) in Parallel: Start   *****
+// start dotnet  restore --nodeReuse:false /p:UseSharedCompilation=false /p:Deterministic=true /p:Optimize=true /p:ArtifactsPath="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1/" /p:OutDir="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" /p:OutputPath="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" /p:PublishDir="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\publish/" in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1
+// command took 3.66 sec and exited with 0
+// start dotnet  build -c Release --no-restore --nodeReuse:false /p:UseSharedCompilation=false /p:Deterministic=true /p:Optimize=true /p:ArtifactsPath="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1/" /p:OutDir="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" /p:OutputPath="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" /p:PublishDir="C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\publish/" --output "C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0/" in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1
+// command took 17.4 sec and exited with 0
+// ***** Done, took 00:00:21 (21.17 sec)   *****
+// Found 8 benchmarks:
+//   SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=2]
+//   SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=2]
+//   SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=64]
+//   SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=64]
+//   SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=2]
+//   SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=2]
+//   SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=64]
+//   SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=64]
+
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=2]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1296 1332 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks.Read(Columns: 6, Rows: 1000, Styles: 2)" --job Isolated-2x10 --benchmarkId 0 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 262800.00 ns, 262.8000 us/op
+WorkloadJitting  1: 1 op, 63198500.00 ns, 63.1985 ms/op
+
+WorkloadPilot    1: 4 op, 307545200.00 ns, 76.8863 ms/op
+
+WorkloadWarmup   1: 4 op, 388062800.00 ns, 97.0157 ms/op
+WorkloadWarmup   2: 4 op, 337650200.00 ns, 84.4126 ms/op
+WorkloadWarmup   3: 4 op, 313281300.00 ns, 78.3203 ms/op
+WorkloadWarmup   4: 4 op, 283812200.00 ns, 70.9531 ms/op
+WorkloadWarmup   5: 4 op, 248923800.00 ns, 62.2310 ms/op
+WorkloadWarmup   6: 4 op, 242454500.00 ns, 60.6136 ms/op
+WorkloadWarmup   7: 4 op, 216634800.00 ns, 54.1587 ms/op
+WorkloadWarmup   8: 4 op, 197906900.00 ns, 49.4767 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 4 op, 202056700.00 ns, 50.5142 ms/op
+WorkloadActual   2: 4 op, 214953000.00 ns, 53.7383 ms/op
+WorkloadActual   3: 4 op, 192960700.00 ns, 48.2402 ms/op
+WorkloadActual   4: 4 op, 184482600.00 ns, 46.1207 ms/op
+WorkloadActual   5: 4 op, 187771400.00 ns, 46.9429 ms/op
+WorkloadActual   6: 4 op, 177722900.00 ns, 44.4307 ms/op
+WorkloadActual   7: 4 op, 148429000.00 ns, 37.1073 ms/op
+WorkloadActual   8: 4 op, 123205600.00 ns, 30.8014 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 4 op, 202056700.00 ns, 50.5142 ms/op
+WorkloadResult   2: 4 op, 214953000.00 ns, 53.7383 ms/op
+WorkloadResult   3: 4 op, 192960700.00 ns, 48.2402 ms/op
+WorkloadResult   4: 4 op, 184482600.00 ns, 46.1207 ms/op
+WorkloadResult   5: 4 op, 187771400.00 ns, 46.9429 ms/op
+WorkloadResult   6: 4 op, 177722900.00 ns, 44.4307 ms/op
+WorkloadResult   7: 4 op, 148429000.00 ns, 37.1073 ms/op
+WorkloadResult   8: 4 op, 123205600.00 ns, 30.8014 ms/op
+// GC:  2 1 0 27571848 4
+// Threading:  0 0 4
+
+// AfterAll
+// Benchmark Process 48492 has exited with code 0.
+
+Mean = 44.737 ms, StdErr = 2.625 ms (5.87%), N = 8, StdDev = 7.425 ms
+Min = 30.801 ms, Q1 = 42.600 ms, Median = 46.532 ms, Q3 = 48.809 ms, Max = 53.738 ms
+IQR = 6.209 ms, LowerFence = 33.287 ms, UpperFence = 58.122 ms
+ConfidenceInterval = [30.540 ms; 58.934 ms] (CI 99.9%), Margin = 14.197 ms (31.73% of Mean)
+Skewness = -0.66, Kurtosis = 2.01, MValue = 2.4
+
+// ** Remained 11 (91.7%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=2]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1372 1364 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks.ContractRead(Columns: 6, Rows: 1000, Styles: 2)" --job Isolated-2x10 --benchmarkId 1 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 271500.00 ns, 271.5000 us/op
+WorkloadJitting  1: 1 op, 67597800.00 ns, 67.5978 ms/op
+
+WorkloadPilot    1: 4 op, 270882000.00 ns, 67.7205 ms/op
+
+WorkloadWarmup   1: 4 op, 318846300.00 ns, 79.7116 ms/op
+WorkloadWarmup   2: 4 op, 162921500.00 ns, 40.7304 ms/op
+WorkloadWarmup   3: 4 op, 175672700.00 ns, 43.9182 ms/op
+WorkloadWarmup   4: 4 op, 197618400.00 ns, 49.4046 ms/op
+WorkloadWarmup   5: 4 op, 188938400.00 ns, 47.2346 ms/op
+WorkloadWarmup   6: 4 op, 177592600.00 ns, 44.3982 ms/op
+WorkloadWarmup   7: 4 op, 168386100.00 ns, 42.0965 ms/op
+WorkloadWarmup   8: 4 op, 181896200.00 ns, 45.4741 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 4 op, 184966800.00 ns, 46.2417 ms/op
+WorkloadActual   2: 4 op, 171019700.00 ns, 42.7549 ms/op
+WorkloadActual   3: 4 op, 133585100.00 ns, 33.3963 ms/op
+WorkloadActual   4: 4 op, 126997300.00 ns, 31.7493 ms/op
+WorkloadActual   5: 4 op, 169444900.00 ns, 42.3612 ms/op
+WorkloadActual   6: 4 op, 122418400.00 ns, 30.6046 ms/op
+WorkloadActual   7: 4 op, 136155100.00 ns, 34.0388 ms/op
+WorkloadActual   8: 4 op, 132549600.00 ns, 33.1374 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 4 op, 184966800.00 ns, 46.2417 ms/op
+WorkloadResult   2: 4 op, 171019700.00 ns, 42.7549 ms/op
+WorkloadResult   3: 4 op, 133585100.00 ns, 33.3963 ms/op
+WorkloadResult   4: 4 op, 126997300.00 ns, 31.7493 ms/op
+WorkloadResult   5: 4 op, 169444900.00 ns, 42.3612 ms/op
+WorkloadResult   6: 4 op, 122418400.00 ns, 30.6046 ms/op
+WorkloadResult   7: 4 op, 136155100.00 ns, 34.0388 ms/op
+WorkloadResult   8: 4 op, 132549600.00 ns, 33.1374 ms/op
+// GC:  3 2 0 29324568 4
+// Threading:  0 0 4
+
+// AfterAll
+// Benchmark Process 52496 has exited with code 0.
+
+Mean = 36.786 ms, StdErr = 2.122 ms (5.77%), N = 8, StdDev = 6.001 ms
+Min = 30.605 ms, Q1 = 32.790 ms, Median = 33.718 ms, Q3 = 42.460 ms, Max = 46.242 ms
+IQR = 9.669 ms, LowerFence = 18.286 ms, UpperFence = 56.964 ms
+ConfidenceInterval = [25.313 ms; 48.258 ms] (CI 99.9%), Margin = 11.473 ms (31.19% of Mean)
+Skewness = 0.44, Kurtosis = 1.22, MValue = 3.2
+
+// ** Remained 10 (83.3%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=64]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1512 1384 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks.Read(Columns: 6, Rows: 1000, Styles: 64)" --job Isolated-2x10 --benchmarkId 2 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 260600.00 ns, 260.6000 us/op
+WorkloadJitting  1: 1 op, 65271800.00 ns, 65.2718 ms/op
+
+WorkloadPilot    1: 4 op, 252904500.00 ns, 63.2261 ms/op
+
+WorkloadWarmup   1: 4 op, 323162400.00 ns, 80.7906 ms/op
+WorkloadWarmup   2: 4 op, 193651200.00 ns, 48.4128 ms/op
+WorkloadWarmup   3: 4 op, 188993300.00 ns, 47.2483 ms/op
+WorkloadWarmup   4: 4 op, 177517800.00 ns, 44.3795 ms/op
+WorkloadWarmup   5: 4 op, 175252100.00 ns, 43.8130 ms/op
+WorkloadWarmup   6: 4 op, 179169900.00 ns, 44.7925 ms/op
+WorkloadWarmup   7: 4 op, 218251500.00 ns, 54.5629 ms/op
+WorkloadWarmup   8: 4 op, 185854400.00 ns, 46.4636 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 4 op, 179467100.00 ns, 44.8668 ms/op
+WorkloadActual   2: 4 op, 174609200.00 ns, 43.6523 ms/op
+WorkloadActual   3: 4 op, 126637000.00 ns, 31.6593 ms/op
+WorkloadActual   4: 4 op, 106130700.00 ns, 26.5327 ms/op
+WorkloadActual   5: 4 op, 103108200.00 ns, 25.7771 ms/op
+WorkloadActual   6: 4 op, 105023800.00 ns, 26.2560 ms/op
+WorkloadActual   7: 4 op, 79752600.00 ns, 19.9382 ms/op
+WorkloadActual   8: 4 op, 86015100.00 ns, 21.5038 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 4 op, 179467100.00 ns, 44.8668 ms/op
+WorkloadResult   2: 4 op, 174609200.00 ns, 43.6523 ms/op
+WorkloadResult   3: 4 op, 126637000.00 ns, 31.6593 ms/op
+WorkloadResult   4: 4 op, 106130700.00 ns, 26.5327 ms/op
+WorkloadResult   5: 4 op, 103108200.00 ns, 25.7771 ms/op
+WorkloadResult   6: 4 op, 105023800.00 ns, 26.2560 ms/op
+WorkloadResult   7: 4 op, 79752600.00 ns, 19.9382 ms/op
+WorkloadResult   8: 4 op, 86015100.00 ns, 21.5038 ms/op
+// GC:  2 1 0 28021736 4
+// Threading:  0 0 4
+
+// AfterAll
+// Benchmark Process 48676 has exited with code 0.
+
+Mean = 30.023 ms, StdErr = 3.347 ms (11.15%), N = 8, StdDev = 9.468 ms
+Min = 19.938 ms, Q1 = 24.709 ms, Median = 26.394 ms, Q3 = 34.658 ms, Max = 44.867 ms
+IQR = 9.949 ms, LowerFence = 9.786 ms, UpperFence = 49.581 ms
+ConfidenceInterval = [11.921 ms; 48.125 ms] (CI 99.9%), Margin = 18.102 ms (60.29% of Mean)
+Skewness = 0.59, Kurtosis = 1.55, MValue = 2.67
+
+// ** Remained 9 (75.0%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=64]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 668 1304 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks.ContractRead(Columns: 6, Rows: 1000, Styles: 64)" --job Isolated-2x10 --benchmarkId 3 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 258500.00 ns, 258.5000 us/op
+WorkloadJitting  1: 1 op, 65043300.00 ns, 65.0433 ms/op
+
+WorkloadPilot    1: 4 op, 253215400.00 ns, 63.3039 ms/op
+
+WorkloadWarmup   1: 4 op, 340892400.00 ns, 85.2231 ms/op
+WorkloadWarmup   2: 4 op, 191896200.00 ns, 47.9741 ms/op
+WorkloadWarmup   3: 4 op, 191889400.00 ns, 47.9724 ms/op
+WorkloadWarmup   4: 4 op, 213227100.00 ns, 53.3068 ms/op
+WorkloadWarmup   5: 4 op, 222010800.00 ns, 55.5027 ms/op
+WorkloadWarmup   6: 4 op, 204847000.00 ns, 51.2118 ms/op
+WorkloadWarmup   7: 4 op, 158489100.00 ns, 39.6223 ms/op
+WorkloadWarmup   8: 4 op, 140513600.00 ns, 35.1284 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 4 op, 145493200.00 ns, 36.3733 ms/op
+WorkloadActual   2: 4 op, 132241500.00 ns, 33.0604 ms/op
+WorkloadActual   3: 4 op, 123618300.00 ns, 30.9046 ms/op
+WorkloadActual   4: 4 op, 116383000.00 ns, 29.0958 ms/op
+WorkloadActual   5: 4 op, 88847700.00 ns, 22.2119 ms/op
+WorkloadActual   6: 4 op, 91931100.00 ns, 22.9828 ms/op
+WorkloadActual   7: 4 op, 87307600.00 ns, 21.8269 ms/op
+WorkloadActual   8: 4 op, 85728000.00 ns, 21.4320 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 4 op, 145493200.00 ns, 36.3733 ms/op
+WorkloadResult   2: 4 op, 132241500.00 ns, 33.0604 ms/op
+WorkloadResult   3: 4 op, 123618300.00 ns, 30.9046 ms/op
+WorkloadResult   4: 4 op, 116383000.00 ns, 29.0958 ms/op
+WorkloadResult   5: 4 op, 88847700.00 ns, 22.2119 ms/op
+WorkloadResult   6: 4 op, 91931100.00 ns, 22.9828 ms/op
+WorkloadResult   7: 4 op, 87307600.00 ns, 21.8269 ms/op
+WorkloadResult   8: 4 op, 85728000.00 ns, 21.4320 ms/op
+// GC:  3 2 0 29774776 4
+// Threading:  0 0 4
+
+// AfterAll
+// Benchmark Process 11876 has exited with code 0.
+
+Mean = 27.236 ms, StdErr = 2.073 ms (7.61%), N = 8, StdDev = 5.863 ms
+Min = 21.432 ms, Q1 = 22.116 ms, Median = 26.039 ms, Q3 = 31.444 ms, Max = 36.373 ms
+IQR = 9.328 ms, LowerFence = 8.124 ms, UpperFence = 45.435 ms
+ConfidenceInterval = [16.026 ms; 38.445 ms] (CI 99.9%), Margin = 11.210 ms (41.16% of Mean)
+Skewness = 0.28, Kurtosis = 1.19, MValue = 2
+
+// ** Remained 8 (66.7%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=2]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1548 956 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks.Read(Columns: 100, Rows: 1000, Styles: 2)" --job Isolated-2x10 --benchmarkId 4 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 748600.00 ns, 748.6000 us/op
+WorkloadJitting  1: 1 op, 487056200.00 ns, 487.0562 ms/op
+
+OverheadJitting  2: 1 op, 900.00 ns, 900.0000 ns/op
+WorkloadJitting  2: 1 op, 508100100.00 ns, 508.1001 ms/op
+
+WorkloadWarmup   1: 1 op, 428218900.00 ns, 428.2189 ms/op
+WorkloadWarmup   2: 1 op, 385525100.00 ns, 385.5251 ms/op
+WorkloadWarmup   3: 1 op, 415605000.00 ns, 415.6050 ms/op
+WorkloadWarmup   4: 1 op, 429726700.00 ns, 429.7267 ms/op
+WorkloadWarmup   5: 1 op, 412833400.00 ns, 412.8334 ms/op
+WorkloadWarmup   6: 1 op, 396006100.00 ns, 396.0061 ms/op
+WorkloadWarmup   7: 1 op, 427559100.00 ns, 427.5591 ms/op
+WorkloadWarmup   8: 1 op, 498755800.00 ns, 498.7558 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 1 op, 527194700.00 ns, 527.1947 ms/op
+WorkloadActual   2: 1 op, 497390200.00 ns, 497.3902 ms/op
+WorkloadActual   3: 1 op, 540712000.00 ns, 540.7120 ms/op
+WorkloadActual   4: 1 op, 521418100.00 ns, 521.4181 ms/op
+WorkloadActual   5: 1 op, 453887200.00 ns, 453.8872 ms/op
+WorkloadActual   6: 1 op, 554798700.00 ns, 554.7987 ms/op
+WorkloadActual   7: 1 op, 611522200.00 ns, 611.5222 ms/op
+WorkloadActual   8: 1 op, 527335700.00 ns, 527.3357 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 1 op, 527194700.00 ns, 527.1947 ms/op
+WorkloadResult   2: 1 op, 497390200.00 ns, 497.3902 ms/op
+WorkloadResult   3: 1 op, 540712000.00 ns, 540.7120 ms/op
+WorkloadResult   4: 1 op, 521418100.00 ns, 521.4181 ms/op
+WorkloadResult   5: 1 op, 453887200.00 ns, 453.8872 ms/op
+WorkloadResult   6: 1 op, 554798700.00 ns, 554.7987 ms/op
+WorkloadResult   7: 1 op, 611522200.00 ns, 611.5222 ms/op
+WorkloadResult   8: 1 op, 527335700.00 ns, 527.3357 ms/op
+// GC:  13 10 3 103155640 1
+// Threading:  0 0 1
+
+// AfterAll
+// Benchmark Process 10176 has exited with code 0.
+
+Mean = 529.282 ms, StdErr = 15.989 ms (3.02%), N = 8, StdDev = 45.224 ms
+Min = 453.887 ms, Q1 = 515.411 ms, Median = 527.265 ms, Q3 = 544.234 ms, Max = 611.522 ms
+IQR = 28.823 ms, LowerFence = 472.177 ms, UpperFence = 587.467 ms
+ConfidenceInterval = [442.815 ms; 615.750 ms] (CI 99.9%), Margin = 86.468 ms (16.34% of Mean)
+Skewness = 0.15, Kurtosis = 2.38, MValue = 2
+
+// ** Remained 7 (58.3%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=2]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1420 1444 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks.ContractRead(Columns: 100, Rows: 1000, Styles: 2)" --job Isolated-2x10 --benchmarkId 5 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 260200.00 ns, 260.2000 us/op
+WorkloadJitting  1: 1 op, 432663100.00 ns, 432.6631 ms/op
+
+OverheadJitting  2: 1 op, 700.00 ns, 700.0000 ns/op
+WorkloadJitting  2: 1 op, 446451000.00 ns, 446.4510 ms/op
+
+WorkloadWarmup   1: 1 op, 522817500.00 ns, 522.8175 ms/op
+WorkloadWarmup   2: 1 op, 453459000.00 ns, 453.4590 ms/op
+WorkloadWarmup   3: 1 op, 422675000.00 ns, 422.6750 ms/op
+WorkloadWarmup   4: 1 op, 415075500.00 ns, 415.0755 ms/op
+WorkloadWarmup   5: 1 op, 442137900.00 ns, 442.1379 ms/op
+WorkloadWarmup   6: 1 op, 452715900.00 ns, 452.7159 ms/op
+WorkloadWarmup   7: 1 op, 408457700.00 ns, 408.4577 ms/op
+WorkloadWarmup   8: 1 op, 495645200.00 ns, 495.6452 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 1 op, 644503600.00 ns, 644.5036 ms/op
+WorkloadActual   2: 1 op, 495383400.00 ns, 495.3834 ms/op
+WorkloadActual   3: 1 op, 461570200.00 ns, 461.5702 ms/op
+WorkloadActual   4: 1 op, 475704600.00 ns, 475.7046 ms/op
+WorkloadActual   5: 1 op, 636977000.00 ns, 636.9770 ms/op
+WorkloadActual   6: 1 op, 509424600.00 ns, 509.4246 ms/op
+WorkloadActual   7: 1 op, 430202600.00 ns, 430.2026 ms/op
+WorkloadActual   8: 1 op, 431327800.00 ns, 431.3278 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 1 op, 644503600.00 ns, 644.5036 ms/op
+WorkloadResult   2: 1 op, 495383400.00 ns, 495.3834 ms/op
+WorkloadResult   3: 1 op, 461570200.00 ns, 461.5702 ms/op
+WorkloadResult   4: 1 op, 475704600.00 ns, 475.7046 ms/op
+WorkloadResult   5: 1 op, 636977000.00 ns, 636.9770 ms/op
+WorkloadResult   6: 1 op, 509424600.00 ns, 509.4246 ms/op
+WorkloadResult   7: 1 op, 430202600.00 ns, 430.2026 ms/op
+WorkloadResult   8: 1 op, 431327800.00 ns, 431.3278 ms/op
+// GC:  14 10 3 111402056 1
+// Threading:  0 0 1
+
+// AfterAll
+// Benchmark Process 15860 has exited with code 0.
+
+Mean = 510.637 ms, StdErr = 30.031 ms (5.88%), N = 8, StdDev = 84.940 ms
+Min = 430.203 ms, Q1 = 454.010 ms, Median = 485.544 ms, Q3 = 541.313 ms, Max = 644.504 ms
+IQR = 87.303 ms, LowerFence = 323.055 ms, UpperFence = 672.267 ms
+ConfidenceInterval = [348.233 ms; 673.040 ms] (CI 99.9%), Margin = 162.403 ms (31.80% of Mean)
+Skewness = 0.66, Kurtosis = 1.6, MValue = 2.67
+
+// ** Remained 6 (50.0%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=64]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1400 1572 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks.Read(Columns: 100, Rows: 1000, Styles: 64)" --job Isolated-2x10 --benchmarkId 6 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 254200.00 ns, 254.2000 us/op
+WorkloadJitting  1: 1 op, 567860500.00 ns, 567.8605 ms/op
+
+OverheadJitting  2: 1 op, 1800.00 ns, 1.8000 us/op
+WorkloadJitting  2: 1 op, 542703700.00 ns, 542.7037 ms/op
+
+WorkloadWarmup   1: 1 op, 505923700.00 ns, 505.9237 ms/op
+WorkloadWarmup   2: 1 op, 588453600.00 ns, 588.4536 ms/op
+WorkloadWarmup   3: 1 op, 442405700.00 ns, 442.4057 ms/op
+WorkloadWarmup   4: 1 op, 424003900.00 ns, 424.0039 ms/op
+WorkloadWarmup   5: 1 op, 441010200.00 ns, 441.0102 ms/op
+WorkloadWarmup   6: 1 op, 441595800.00 ns, 441.5958 ms/op
+WorkloadWarmup   7: 1 op, 466962000.00 ns, 466.9620 ms/op
+WorkloadWarmup   8: 1 op, 452531500.00 ns, 452.5315 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 1 op, 472896100.00 ns, 472.8961 ms/op
+WorkloadActual   2: 1 op, 454552100.00 ns, 454.5521 ms/op
+WorkloadActual   3: 1 op, 461951000.00 ns, 461.9510 ms/op
+WorkloadActual   4: 1 op, 421479900.00 ns, 421.4799 ms/op
+WorkloadActual   5: 1 op, 405581200.00 ns, 405.5812 ms/op
+WorkloadActual   6: 1 op, 409653900.00 ns, 409.6539 ms/op
+WorkloadActual   7: 1 op, 408367900.00 ns, 408.3679 ms/op
+WorkloadActual   8: 1 op, 414407400.00 ns, 414.4074 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 1 op, 472896100.00 ns, 472.8961 ms/op
+WorkloadResult   2: 1 op, 454552100.00 ns, 454.5521 ms/op
+WorkloadResult   3: 1 op, 461951000.00 ns, 461.9510 ms/op
+WorkloadResult   4: 1 op, 421479900.00 ns, 421.4799 ms/op
+WorkloadResult   5: 1 op, 405581200.00 ns, 405.5812 ms/op
+WorkloadResult   6: 1 op, 409653900.00 ns, 409.6539 ms/op
+WorkloadResult   7: 1 op, 408367900.00 ns, 408.3679 ms/op
+WorkloadResult   8: 1 op, 414407400.00 ns, 414.4074 ms/op
+// GC:  14 10 3 103898896 1
+// Threading:  0 0 1
+
+// AfterAll
+// Benchmark Process 22296 has exited with code 0.
+
+Mean = 431.111 ms, StdErr = 9.680 ms (2.25%), N = 8, StdDev = 27.380 ms
+Min = 405.581 ms, Q1 = 409.332 ms, Median = 417.944 ms, Q3 = 456.402 ms, Max = 472.896 ms
+IQR = 47.069 ms, LowerFence = 338.728 ms, UpperFence = 527.006 ms
+ConfidenceInterval = [378.761 ms; 483.462 ms] (CI 99.9%), Margin = 52.351 ms (12.14% of Mean)
+Skewness = 0.43, Kurtosis = 1.17, MValue = 3.2
+
+// ** Remained 5 (41.7%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=64]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1600 1604 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks.ContractRead(Columns: 100, Rows: 1000, Styles: 64)" --job Isolated-2x10 --benchmarkId 7 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 274900.00 ns, 274.9000 us/op
+WorkloadJitting  1: 1 op, 477915400.00 ns, 477.9154 ms/op
+
+OverheadJitting  2: 1 op, 900.00 ns, 900.0000 ns/op
+WorkloadJitting  2: 1 op, 452275000.00 ns, 452.2750 ms/op
+
+WorkloadWarmup   1: 1 op, 516899700.00 ns, 516.8997 ms/op
+WorkloadWarmup   2: 1 op, 457129700.00 ns, 457.1297 ms/op
+WorkloadWarmup   3: 1 op, 418972800.00 ns, 418.9728 ms/op
+WorkloadWarmup   4: 1 op, 426356500.00 ns, 426.3565 ms/op
+WorkloadWarmup   5: 1 op, 399332300.00 ns, 399.3323 ms/op
+WorkloadWarmup   6: 1 op, 445233500.00 ns, 445.2335 ms/op
+WorkloadWarmup   7: 1 op, 397988800.00 ns, 397.9888 ms/op
+WorkloadWarmup   8: 1 op, 440577500.00 ns, 440.5775 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 1 op, 433313800.00 ns, 433.3138 ms/op
+WorkloadActual   2: 1 op, 418977800.00 ns, 418.9778 ms/op
+WorkloadActual   3: 1 op, 385571900.00 ns, 385.5719 ms/op
+WorkloadActual   4: 1 op, 412003600.00 ns, 412.0036 ms/op
+WorkloadActual   5: 1 op, 407625000.00 ns, 407.6250 ms/op
+WorkloadActual   6: 1 op, 445048900.00 ns, 445.0489 ms/op
+WorkloadActual   7: 1 op, 466863100.00 ns, 466.8631 ms/op
+WorkloadActual   8: 1 op, 512926400.00 ns, 512.9264 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 1 op, 433313800.00 ns, 433.3138 ms/op
+WorkloadResult   2: 1 op, 418977800.00 ns, 418.9778 ms/op
+WorkloadResult   3: 1 op, 385571900.00 ns, 385.5719 ms/op
+WorkloadResult   4: 1 op, 412003600.00 ns, 412.0036 ms/op
+WorkloadResult   5: 1 op, 407625000.00 ns, 407.6250 ms/op
+WorkloadResult   6: 1 op, 445048900.00 ns, 445.0489 ms/op
+WorkloadResult   7: 1 op, 466863100.00 ns, 466.8631 ms/op
+WorkloadResult   8: 1 op, 512926400.00 ns, 512.9264 ms/op
+// GC:  14 10 3 112144968 1
+// Threading:  0 0 1
+
+// AfterAll
+// Benchmark Process 7196 has exited with code 0.
+
+Mean = 435.291 ms, StdErr = 14.123 ms (3.24%), N = 8, StdDev = 39.945 ms
+Min = 385.572 ms, Q1 = 410.909 ms, Median = 426.146 ms, Q3 = 450.502 ms, Max = 512.926 ms
+IQR = 39.593 ms, LowerFence = 351.519 ms, UpperFence = 509.893 ms
+ConfidenceInterval = [358.918 ms; 511.664 ms] (CI 99.9%), Margin = 76.373 ms (17.55% of Mean)
+Skewness = 0.67, Kurtosis = 2.18, MValue = 2
+
+// ** Remained 4 (33.3%) benchmark(s) to run. Estimated finish 2026-10-25 7:53 (0h 0m from now) **
+Successfully reverted power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  C:\work\OpenCode\TemplateFrame\artifacts\simple-read-study\default-after\results\TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks-report.csv
+  C:\work\OpenCode\TemplateFrame\artifacts\simple-read-study\default-after\results\TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks-report-github.md
+  C:\work\OpenCode\TemplateFrame\artifacts\simple-read-study\default-after\results\TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks-report.html
+  C:\work\OpenCode\TemplateFrame\artifacts\simple-read-study\default-after\results\TemplateFrame.Benchmarks.SimpleExcelReadBenchmarks-report-full-compressed.json
+
+// * Detailed results *
+SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=2]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 44.737 ms, StdErr = 2.625 ms (5.87%), N = 8, StdDev = 7.425 ms
+Min = 30.801 ms, Q1 = 42.600 ms, Median = 46.532 ms, Q3 = 48.809 ms, Max = 53.738 ms
+IQR = 6.209 ms, LowerFence = 33.287 ms, UpperFence = 58.122 ms
+ConfidenceInterval = [30.540 ms; 58.934 ms] (CI 99.9%), Margin = 14.197 ms (31.73% of Mean)
+Skewness = -0.66, Kurtosis = 2.01, MValue = 2.4
+-------------------- Histogram --------------------
+[29.081 ms ; 38.827 ms) | @@
+[38.827 ms ; 44.212 ms) | 
+[44.212 ms ; 53.957 ms) | @@@@@@
+---------------------------------------------------
+
+SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=2]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 36.786 ms, StdErr = 2.122 ms (5.77%), N = 8, StdDev = 6.001 ms
+Min = 30.605 ms, Q1 = 32.790 ms, Median = 33.718 ms, Q3 = 42.460 ms, Max = 46.242 ms
+IQR = 9.669 ms, LowerFence = 18.286 ms, UpperFence = 56.964 ms
+ConfidenceInterval = [25.313 ms; 48.258 ms] (CI 99.9%), Margin = 11.473 ms (31.19% of Mean)
+Skewness = 0.44, Kurtosis = 1.22, MValue = 3.2
+-------------------- Histogram --------------------
+[28.384 ms ; 36.260 ms) | @@@@@
+[36.260 ms ; 40.364 ms) | 
+[40.364 ms ; 48.239 ms) | @@@
+---------------------------------------------------
+
+SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=64]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 30.023 ms, StdErr = 3.347 ms (11.15%), N = 8, StdDev = 9.468 ms
+Min = 19.938 ms, Q1 = 24.709 ms, Median = 26.394 ms, Q3 = 34.658 ms, Max = 44.867 ms
+IQR = 9.949 ms, LowerFence = 9.786 ms, UpperFence = 49.581 ms
+ConfidenceInterval = [11.921 ms; 48.125 ms] (CI 99.9%), Margin = 18.102 ms (60.29% of Mean)
+Skewness = 0.59, Kurtosis = 1.55, MValue = 2.67
+-------------------- Histogram --------------------
+[19.586 ms ; 32.012 ms) | @@@@@@
+[32.012 ms ; 38.046 ms) | 
+[38.046 ms ; 51.080 ms) | @@
+---------------------------------------------------
+
+SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=6, Rows=1000, Styles=64]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 27.236 ms, StdErr = 2.073 ms (7.61%), N = 8, StdDev = 5.863 ms
+Min = 21.432 ms, Q1 = 22.116 ms, Median = 26.039 ms, Q3 = 31.444 ms, Max = 36.373 ms
+IQR = 9.328 ms, LowerFence = 8.124 ms, UpperFence = 45.435 ms
+ConfidenceInterval = [16.026 ms; 38.445 ms] (CI 99.9%), Margin = 11.210 ms (41.16% of Mean)
+Skewness = 0.28, Kurtosis = 1.19, MValue = 2
+-------------------- Histogram --------------------
+[21.416 ms ; 29.111 ms) | @@@@@
+[29.111 ms ; 37.486 ms) | @@@
+---------------------------------------------------
+
+SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=2]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 529.282 ms, StdErr = 15.989 ms (3.02%), N = 8, StdDev = 45.224 ms
+Min = 453.887 ms, Q1 = 515.411 ms, Median = 527.265 ms, Q3 = 544.234 ms, Max = 611.522 ms
+IQR = 28.823 ms, LowerFence = 472.177 ms, UpperFence = 587.467 ms
+ConfidenceInterval = [442.815 ms; 615.750 ms] (CI 99.9%), Margin = 86.468 ms (16.34% of Mean)
+Skewness = 0.15, Kurtosis = 2.38, MValue = 2
+-------------------- Histogram --------------------
+[424.209 ms ; 483.566 ms) | @
+[483.566 ms ; 555.773 ms) | @@@@@@
+[555.773 ms ; 581.844 ms) | 
+[581.844 ms ; 641.201 ms) | @
+---------------------------------------------------
+
+SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=2]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 510.637 ms, StdErr = 30.031 ms (5.88%), N = 8, StdDev = 84.940 ms
+Min = 430.203 ms, Q1 = 454.010 ms, Median = 485.544 ms, Q3 = 541.313 ms, Max = 644.504 ms
+IQR = 87.303 ms, LowerFence = 323.055 ms, UpperFence = 672.267 ms
+ConfidenceInterval = [348.233 ms; 673.040 ms] (CI 99.9%), Margin = 162.403 ms (31.80% of Mean)
+Skewness = 0.66, Kurtosis = 1.6, MValue = 2.67
+-------------------- Histogram --------------------
+[414.072 ms ; 525.555 ms) | @@@@@@
+[525.555 ms ; 584.998 ms) | 
+[584.998 ms ; 700.245 ms) | @@
+---------------------------------------------------
+
+SimpleExcelReadBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=64]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 431.111 ms, StdErr = 9.680 ms (2.25%), N = 8, StdDev = 27.380 ms
+Min = 405.581 ms, Q1 = 409.332 ms, Median = 417.944 ms, Q3 = 456.402 ms, Max = 472.896 ms
+IQR = 47.069 ms, LowerFence = 338.728 ms, UpperFence = 527.006 ms
+ConfidenceInterval = [378.761 ms; 483.462 ms] (CI 99.9%), Margin = 52.351 ms (12.14% of Mean)
+Skewness = 0.43, Kurtosis = 1.17, MValue = 3.2
+-------------------- Histogram --------------------
+[395.562 ms ; 431.499 ms) | @@@@@
+[431.499 ms ; 445.756 ms) | 
+[445.756 ms ; 481.692 ms) | @@@
+---------------------------------------------------
+
+SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Columns=100, Rows=1000, Styles=64]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 435.291 ms, StdErr = 14.123 ms (3.24%), N = 8, StdDev = 39.945 ms
+Min = 385.572 ms, Q1 = 410.909 ms, Median = 426.146 ms, Q3 = 450.502 ms, Max = 512.926 ms
+IQR = 39.593 ms, LowerFence = 351.519 ms, UpperFence = 509.893 ms
+ConfidenceInterval = [358.918 ms; 511.664 ms] (CI 99.9%), Margin = 76.373 ms (17.55% of Mean)
+Skewness = 0.67, Kurtosis = 2.18, MValue = 2
+-------------------- Histogram --------------------
+[359.358 ms ; 400.123 ms) | @
+[400.123 ms ; 452.551 ms) | @@@@@
+[452.551 ms ; 516.108 ms) | @@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6466/22H2/2022Update)
+12th Gen Intel Core i5-12500H 3.10GHz, 1 CPU, 16 logical and 12 physical cores
+.NET SDK 10.0.402
+  [Host]        : .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+  Isolated-2x10 : .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+
+Job=Isolated-2x10  OutlierMode=DontRemove  IterationCount=8  
+IterationTime=200ms  LaunchCount=1  WarmupCount=8  
+
+| Method       | Columns | Rows | Styles | Mean      | Error     | StdDev    | Gen0       | Gen1       | Gen2      | Allocated |
+|------------- |-------- |----- |------- |----------:|----------:|----------:|-----------:|-----------:|----------:|----------:|
+| Read         | 6       | 1000 | 2      |  44.74 ms |  14.20 ms |  7.425 ms |   500.0000 |   250.0000 |         - |   6.57 MB |
+| ContractRead | 6       | 1000 | 2      |  36.79 ms |  11.47 ms |  6.001 ms |   750.0000 |   500.0000 |         - |   6.99 MB |
+| Read         | 6       | 1000 | 64     |  30.02 ms |  18.10 ms |  9.468 ms |   500.0000 |   250.0000 |         - |   6.68 MB |
+| ContractRead | 6       | 1000 | 64     |  27.24 ms |  11.21 ms |  5.863 ms |   750.0000 |   500.0000 |         - |    7.1 MB |
+| Read         | 100     | 1000 | 2      | 529.28 ms |  86.47 ms | 45.224 ms | 13000.0000 | 10000.0000 | 3000.0000 |  98.38 MB |
+| ContractRead | 100     | 1000 | 2      | 510.64 ms | 162.40 ms | 84.940 ms | 14000.0000 | 10000.0000 | 3000.0000 | 106.24 MB |
+| Read         | 100     | 1000 | 64     | 431.11 ms |  52.35 ms | 27.380 ms | 14000.0000 | 10000.0000 | 3000.0000 |  99.09 MB |
+| ContractRead | 100     | 1000 | 64     | 435.29 ms |  76.37 ms | 39.945 ms | 14000.0000 | 10000.0000 | 3000.0000 | 106.95 MB |
+
+// * Warnings *
+MinIterationTime
+  SimpleExcelReadBenchmarks.Read: Isolated-2x10         -> The minimum observed iteration time is 79.753ms which is very small. It's recommended to increase it to at least 100ms using more operations.
+  SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10 -> The minimum observed iteration time is 85.728ms which is very small. It's recommended to increase it to at least 100ms using more operations.
+
+// * Hints *
+Outliers
+  SimpleExcelReadBenchmarks.Read: Isolated-2x10         -> 1 outlier  was  detected (30.80 ms)
+  SimpleExcelReadBenchmarks.Read: Isolated-2x10         -> 2 outliers were detected (453.89 ms, 611.52 ms)
+  SimpleExcelReadBenchmarks.ContractRead: Isolated-2x10 -> 1 outlier  was  detected (512.93 ms)
+
+// * Legends *
+  Columns   : Value of the 'Columns' parameter
+  Rows      : Value of the 'Rows' parameter
+  Styles    : Value of the 'Styles' parameter
+  Mean      : Arithmetic mean of all measurements
+  Error     : Half of 99.9% confidence interval
+  StdDev    : Standard deviation of all measurements
+  Gen0      : GC Generation 0 collects per 1000 operations
+  Gen1      : GC Generation 1 collects per 1000 operations
+  Gen2      : GC Generation 2 collects per 1000 operations
+  Allocated : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
+  1 ms      : 1 Millisecond (0.001 sec)
+
+// * Diagnostic Output - MemoryDiagnoser *
+
+
+// ***** BenchmarkRunner: End *****
+Run time: 00:01:09 (69.39 sec), executed benchmarks: 8
+
+// Found 4 benchmarks:
+//   SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=SingleText]
+//   SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=SixText]
+//   SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=WideFirst]
+//   SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=WideLast]
+
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=SingleText]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1708 924 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBoundaryBenchmarks.Read(Scenario: \"SingleText\")" --job Isolated-2x10 --benchmarkId 8 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 230100.00 ns, 230.1000 us/op
+WorkloadJitting  1: 1 op, 19504700.00 ns, 19.5047 ms/op
+
+WorkloadPilot    1: 4 op, 107689900.00 ns, 26.9225 ms/op
+WorkloadPilot    2: 7 op, 166607800.00 ns, 23.8011 ms/op
+
+WorkloadWarmup   1: 7 op, 240095700.00 ns, 34.2994 ms/op
+WorkloadWarmup   2: 7 op, 239871200.00 ns, 34.2673 ms/op
+WorkloadWarmup   3: 7 op, 250623100.00 ns, 35.8033 ms/op
+WorkloadWarmup   4: 7 op, 179115600.00 ns, 25.5879 ms/op
+WorkloadWarmup   5: 7 op, 175278900.00 ns, 25.0398 ms/op
+WorkloadWarmup   6: 7 op, 156984400.00 ns, 22.4263 ms/op
+WorkloadWarmup   7: 7 op, 119845500.00 ns, 17.1208 ms/op
+WorkloadWarmup   8: 7 op, 111555500.00 ns, 15.9365 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 7 op, 118542600.00 ns, 16.9347 ms/op
+WorkloadActual   2: 7 op, 117201500.00 ns, 16.7431 ms/op
+WorkloadActual   3: 7 op, 113279300.00 ns, 16.1828 ms/op
+WorkloadActual   4: 7 op, 113131100.00 ns, 16.1616 ms/op
+WorkloadActual   5: 7 op, 112163300.00 ns, 16.0233 ms/op
+WorkloadActual   6: 7 op, 107340600.00 ns, 15.3344 ms/op
+WorkloadActual   7: 7 op, 113105500.00 ns, 16.1579 ms/op
+WorkloadActual   8: 7 op, 95637200.00 ns, 13.6625 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 7 op, 118542600.00 ns, 16.9347 ms/op
+WorkloadResult   2: 7 op, 117201500.00 ns, 16.7431 ms/op
+WorkloadResult   3: 7 op, 113279300.00 ns, 16.1828 ms/op
+WorkloadResult   4: 7 op, 113131100.00 ns, 16.1616 ms/op
+WorkloadResult   5: 7 op, 112163300.00 ns, 16.0233 ms/op
+WorkloadResult   6: 7 op, 107340600.00 ns, 15.3344 ms/op
+WorkloadResult   7: 7 op, 113105500.00 ns, 16.1579 ms/op
+WorkloadResult   8: 7 op, 95637200.00 ns, 13.6625 ms/op
+// GC:  1 0 0 15564808 7
+// Threading:  0 0 7
+
+// AfterAll
+// Benchmark Process 21512 has exited with code 0.
+
+Mean = 15.900 ms, StdErr = 0.362 ms (2.28%), N = 8, StdDev = 1.024 ms
+Min = 13.662 ms, Q1 = 15.851 ms, Median = 16.160 ms, Q3 = 16.323 ms, Max = 16.935 ms
+IQR = 0.472 ms, LowerFence = 15.143 ms, UpperFence = 17.030 ms
+ConfidenceInterval = [13.942 ms; 17.858 ms] (CI 99.9%), Margin = 1.958 ms (12.31% of Mean)
+Skewness = -1.12, Kurtosis = 3.05, MValue = 2
+
+// ** Remained 3 (25.0%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=SixText]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1780 1776 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBoundaryBenchmarks.Read(Scenario: \"SixText\")" --job Isolated-2x10 --benchmarkId 9 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 229000.00 ns, 229.0000 us/op
+WorkloadJitting  1: 1 op, 90342700.00 ns, 90.3427 ms/op
+
+WorkloadPilot    1: 4 op, 396442100.00 ns, 99.1105 ms/op
+WorkloadPilot    2: 2 op, 237880800.00 ns, 118.9404 ms/op
+
+WorkloadWarmup   1: 2 op, 261135600.00 ns, 130.5678 ms/op
+WorkloadWarmup   2: 2 op, 137163500.00 ns, 68.5818 ms/op
+WorkloadWarmup   3: 2 op, 151169200.00 ns, 75.5846 ms/op
+WorkloadWarmup   4: 2 op, 137054400.00 ns, 68.5272 ms/op
+WorkloadWarmup   5: 2 op, 135892800.00 ns, 67.9464 ms/op
+WorkloadWarmup   6: 2 op, 133578600.00 ns, 66.7893 ms/op
+WorkloadWarmup   7: 2 op, 130119600.00 ns, 65.0598 ms/op
+WorkloadWarmup   8: 2 op, 122500800.00 ns, 61.2504 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 2 op, 124038900.00 ns, 62.0195 ms/op
+WorkloadActual   2: 2 op, 124358900.00 ns, 62.1795 ms/op
+WorkloadActual   3: 2 op, 120552900.00 ns, 60.2765 ms/op
+WorkloadActual   4: 2 op, 97488000.00 ns, 48.7440 ms/op
+WorkloadActual   5: 2 op, 81496000.00 ns, 40.7480 ms/op
+WorkloadActual   6: 2 op, 77036700.00 ns, 38.5184 ms/op
+WorkloadActual   7: 2 op, 71496000.00 ns, 35.7480 ms/op
+WorkloadActual   8: 2 op, 70294300.00 ns, 35.1472 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 2 op, 124038900.00 ns, 62.0195 ms/op
+WorkloadResult   2: 2 op, 124358900.00 ns, 62.1795 ms/op
+WorkloadResult   3: 2 op, 120552900.00 ns, 60.2765 ms/op
+WorkloadResult   4: 2 op, 97488000.00 ns, 48.7440 ms/op
+WorkloadResult   5: 2 op, 81496000.00 ns, 40.7480 ms/op
+WorkloadResult   6: 2 op, 77036700.00 ns, 38.5184 ms/op
+WorkloadResult   7: 2 op, 71496000.00 ns, 35.7480 ms/op
+WorkloadResult   8: 2 op, 70294300.00 ns, 35.1472 ms/op
+// GC:  1 0 0 17693432 2
+// Threading:  0 0 2
+
+// AfterAll
+// Benchmark Process 18856 has exited with code 0.
+
+Mean = 47.923 ms, StdErr = 4.240 ms (8.85%), N = 8, StdDev = 11.992 ms
+Min = 35.147 ms, Q1 = 37.826 ms, Median = 44.746 ms, Q3 = 60.712 ms, Max = 62.179 ms
+IQR = 22.886 ms, LowerFence = 3.496 ms, UpperFence = 95.042 ms
+ConfidenceInterval = [24.995 ms; 70.851 ms] (CI 99.9%), Margin = 22.928 ms (47.84% of Mean)
+Skewness = 0.18, Kurtosis = 0.99, MValue = 2
+
+// ** Remained 2 (16.7%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=WideFirst]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1780 1808 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBoundaryBenchmarks.Read(Scenario: \"WideFirst\")" --job Isolated-2x10 --benchmarkId 10 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 194000.00 ns, 194.0000 us/op
+WorkloadJitting  1: 1 op, 448799400.00 ns, 448.7994 ms/op
+
+OverheadJitting  2: 1 op, 1200.00 ns, 1.2000 us/op
+WorkloadJitting  2: 1 op, 450649800.00 ns, 450.6498 ms/op
+
+WorkloadWarmup   1: 1 op, 473492900.00 ns, 473.4929 ms/op
+WorkloadWarmup   2: 1 op, 526249200.00 ns, 526.2492 ms/op
+WorkloadWarmup   3: 1 op, 459762600.00 ns, 459.7626 ms/op
+WorkloadWarmup   4: 1 op, 433989900.00 ns, 433.9899 ms/op
+WorkloadWarmup   5: 1 op, 417846700.00 ns, 417.8467 ms/op
+WorkloadWarmup   6: 1 op, 382377300.00 ns, 382.3773 ms/op
+WorkloadWarmup   7: 1 op, 430460100.00 ns, 430.4601 ms/op
+WorkloadWarmup   8: 1 op, 421622400.00 ns, 421.6224 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 1 op, 403916600.00 ns, 403.9166 ms/op
+WorkloadActual   2: 1 op, 386548700.00 ns, 386.5487 ms/op
+WorkloadActual   3: 1 op, 381704700.00 ns, 381.7047 ms/op
+WorkloadActual   4: 1 op, 397258200.00 ns, 397.2582 ms/op
+WorkloadActual   5: 1 op, 458693800.00 ns, 458.6938 ms/op
+WorkloadActual   6: 1 op, 429838200.00 ns, 429.8382 ms/op
+WorkloadActual   7: 1 op, 431231400.00 ns, 431.2314 ms/op
+WorkloadActual   8: 1 op, 400958000.00 ns, 400.9580 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 1 op, 403916600.00 ns, 403.9166 ms/op
+WorkloadResult   2: 1 op, 386548700.00 ns, 386.5487 ms/op
+WorkloadResult   3: 1 op, 381704700.00 ns, 381.7047 ms/op
+WorkloadResult   4: 1 op, 397258200.00 ns, 397.2582 ms/op
+WorkloadResult   5: 1 op, 458693800.00 ns, 458.6938 ms/op
+WorkloadResult   6: 1 op, 429838200.00 ns, 429.8382 ms/op
+WorkloadResult   7: 1 op, 431231400.00 ns, 431.2314 ms/op
+WorkloadResult   8: 1 op, 400958000.00 ns, 400.9580 ms/op
+// GC:  12 11 2 98591536 1
+// Threading:  0 0 1
+
+// AfterAll
+// Benchmark Process 40952 has exited with code 0.
+
+Mean = 411.269 ms, StdErr = 9.291 ms (2.26%), N = 8, StdDev = 26.279 ms
+Min = 381.705 ms, Q1 = 394.581 ms, Median = 402.437 ms, Q3 = 430.187 ms, Max = 458.694 ms
+IQR = 35.606 ms, LowerFence = 341.172 ms, UpperFence = 483.595 ms
+ConfidenceInterval = [361.023 ms; 461.514 ms] (CI 99.9%), Margin = 50.246 ms (12.22% of Mean)
+Skewness = 0.52, Kurtosis = 1.71, MValue = 3.2
+
+// ** Remained 1 (8.3%) benchmark(s) to run. Estimated finish 2026-10-25 7:52 (0h 0m from now) **
+Setup power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// **************************
+// Benchmark: SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=WideLast]
+// *** Execute ***
+// Launch: 1 / 1
+// Execute: dotnet TemplateFrame.Benchmarks-1.dll --anonymousPipes 1780 1808 --benchmarkName "TemplateFrame.Benchmarks.SimpleExcelReadBoundaryBenchmarks.Read(Scenario: \"WideLast\")" --job Isolated-2x10 --benchmarkId 11 in C:\Users\Marci\AppData\Local\Temp\TemplateFrame-simple-read-73d832420c8f4b69b7c15ccd415ebb60\after\test\TemplateFrame.Benchmarks\bin\Release\net10.0\TemplateFrame.Benchmarks-1\bin\Release\net10.0
+// BeforeAnythingElse
+
+// Benchmark Process Environment Information:
+// BenchmarkDotNet v0.15.8
+// Runtime=.NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+// GC=Concurrent Workstation
+// HardwareIntrinsics=AVX2+BMI1+BMI2+F16C+FMA+LZCNT+MOVBE,AVX,SSE3+SSSE3+SSE4.1+SSE4.2+POPCNT,X86Base+SSE+SSE2,AES+PCLMUL VectorSize=256
+// Job: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8)
+
+OverheadJitting  1: 1 op, 238300.00 ns, 238.3000 us/op
+WorkloadJitting  1: 1 op, 482912600.00 ns, 482.9126 ms/op
+
+OverheadJitting  2: 1 op, 1200.00 ns, 1.2000 us/op
+WorkloadJitting  2: 1 op, 437596600.00 ns, 437.5966 ms/op
+
+WorkloadWarmup   1: 1 op, 402081600.00 ns, 402.0816 ms/op
+WorkloadWarmup   2: 1 op, 433066300.00 ns, 433.0663 ms/op
+WorkloadWarmup   3: 1 op, 453709100.00 ns, 453.7091 ms/op
+WorkloadWarmup   4: 1 op, 561092300.00 ns, 561.0923 ms/op
+WorkloadWarmup   5: 1 op, 513223600.00 ns, 513.2236 ms/op
+WorkloadWarmup   6: 1 op, 454745200.00 ns, 454.7452 ms/op
+WorkloadWarmup   7: 1 op, 517566300.00 ns, 517.5663 ms/op
+WorkloadWarmup   8: 1 op, 452605000.00 ns, 452.6050 ms/op
+
+// BeforeActualRun
+WorkloadActual   1: 1 op, 572998400.00 ns, 572.9984 ms/op
+WorkloadActual   2: 1 op, 484293300.00 ns, 484.2933 ms/op
+WorkloadActual   3: 1 op, 545532800.00 ns, 545.5328 ms/op
+WorkloadActual   4: 1 op, 435989800.00 ns, 435.9898 ms/op
+WorkloadActual   5: 1 op, 526040000.00 ns, 526.0400 ms/op
+WorkloadActual   6: 1 op, 554502200.00 ns, 554.5022 ms/op
+WorkloadActual   7: 1 op, 513498900.00 ns, 513.4989 ms/op
+WorkloadActual   8: 1 op, 479278400.00 ns, 479.2784 ms/op
+
+// AfterActualRun
+WorkloadResult   1: 1 op, 572998400.00 ns, 572.9984 ms/op
+WorkloadResult   2: 1 op, 484293300.00 ns, 484.2933 ms/op
+WorkloadResult   3: 1 op, 545532800.00 ns, 545.5328 ms/op
+WorkloadResult   4: 1 op, 435989800.00 ns, 435.9898 ms/op
+WorkloadResult   5: 1 op, 526040000.00 ns, 526.0400 ms/op
+WorkloadResult   6: 1 op, 554502200.00 ns, 554.5022 ms/op
+WorkloadResult   7: 1 op, 513498900.00 ns, 513.4989 ms/op
+WorkloadResult   8: 1 op, 479278400.00 ns, 479.2784 ms/op
+// GC:  12 11 2 98633848 1
+// Threading:  0 0 1
+
+// AfterAll
+// Benchmark Process 24940 has exited with code 0.
+
+Mean = 514.017 ms, StdErr = 16.055 ms (3.12%), N = 8, StdDev = 45.410 ms
+Min = 435.990 ms, Q1 = 483.040 ms, Median = 519.769 ms, Q3 = 547.775 ms, Max = 572.998 ms
+IQR = 64.736 ms, LowerFence = 385.936 ms, UpperFence = 644.879 ms
+ConfidenceInterval = [427.194 ms; 600.839 ms] (CI 99.9%), Margin = 86.823 ms (16.89% of Mean)
+Skewness = -0.32, Kurtosis = 1.62, MValue = 3.2
+
+// ** Remained 0 (0.0%) benchmark(s) to run. Estimated finish 2026-10-25 7:53 (0h 0m from now) **
+Successfully reverted power plan (GUID: 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c FriendlyName: 高性能)
+// ***** BenchmarkRunner: Finish  *****
+
+// * Export *
+  C:\work\OpenCode\TemplateFrame\artifacts\simple-read-study\default-after\results\TemplateFrame.Benchmarks.SimpleExcelReadBoundaryBenchmarks-report.csv
+  C:\work\OpenCode\TemplateFrame\artifacts\simple-read-study\default-after\results\TemplateFrame.Benchmarks.SimpleExcelReadBoundaryBenchmarks-report-github.md
+  C:\work\OpenCode\TemplateFrame\artifacts\simple-read-study\default-after\results\TemplateFrame.Benchmarks.SimpleExcelReadBoundaryBenchmarks-report.html
+  C:\work\OpenCode\TemplateFrame\artifacts\simple-read-study\default-after\results\TemplateFrame.Benchmarks.SimpleExcelReadBoundaryBenchmarks-report-full-compressed.json
+
+// * Detailed results *
+SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=SingleText]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 15.900 ms, StdErr = 0.362 ms (2.28%), N = 8, StdDev = 1.024 ms
+Min = 13.662 ms, Q1 = 15.851 ms, Median = 16.160 ms, Q3 = 16.323 ms, Max = 16.935 ms
+IQR = 0.472 ms, LowerFence = 15.143 ms, UpperFence = 17.030 ms
+ConfidenceInterval = [13.942 ms; 17.858 ms] (CI 99.9%), Margin = 1.958 ms (12.31% of Mean)
+Skewness = -1.12, Kurtosis = 3.05, MValue = 2
+-------------------- Histogram --------------------
+[12.991 ms ; 14.334 ms) | @
+[14.334 ms ; 15.807 ms) | @
+[15.807 ms ; 17.151 ms) | @@@@@@
+---------------------------------------------------
+
+SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=SixText]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 47.923 ms, StdErr = 4.240 ms (8.85%), N = 8, StdDev = 11.992 ms
+Min = 35.147 ms, Q1 = 37.826 ms, Median = 44.746 ms, Q3 = 60.712 ms, Max = 62.179 ms
+IQR = 22.886 ms, LowerFence = 3.496 ms, UpperFence = 95.042 ms
+ConfidenceInterval = [24.995 ms; 70.851 ms] (CI 99.9%), Margin = 22.928 ms (47.84% of Mean)
+Skewness = 0.18, Kurtosis = 0.99, MValue = 2
+-------------------- Histogram --------------------
+[34.076 ms ; 53.358 ms) | @@@@@
+[53.358 ms ; 70.049 ms) | @@@
+---------------------------------------------------
+
+SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=WideFirst]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 411.269 ms, StdErr = 9.291 ms (2.26%), N = 8, StdDev = 26.279 ms
+Min = 381.705 ms, Q1 = 394.581 ms, Median = 402.437 ms, Q3 = 430.187 ms, Max = 458.694 ms
+IQR = 35.606 ms, LowerFence = 341.172 ms, UpperFence = 483.595 ms
+ConfidenceInterval = [361.023 ms; 461.514 ms] (CI 99.9%), Margin = 50.246 ms (12.22% of Mean)
+Skewness = 0.52, Kurtosis = 1.71, MValue = 3.2
+-------------------- Histogram --------------------
+[375.565 ms ; 410.056 ms) | @@@@@
+[410.056 ms ; 427.020 ms) | 
+[427.020 ms ; 461.512 ms) | @@@
+---------------------------------------------------
+
+SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10(OutlierMode=DontRemove, IterationCount=8, IterationTime=200ms, LaunchCount=1, WarmupCount=8) [Scenario=WideLast]
+Runtime = .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3; GC = Concurrent Workstation
+Mean = 514.017 ms, StdErr = 16.055 ms (3.12%), N = 8, StdDev = 45.410 ms
+Min = 435.990 ms, Q1 = 483.040 ms, Median = 519.769 ms, Q3 = 547.775 ms, Max = 572.998 ms
+IQR = 64.736 ms, LowerFence = 385.936 ms, UpperFence = 644.879 ms
+ConfidenceInterval = [427.194 ms; 600.839 ms] (CI 99.9%), Margin = 86.823 ms (16.89% of Mean)
+Skewness = -0.32, Kurtosis = 1.62, MValue = 3.2
+-------------------- Histogram --------------------
+[430.341 ms ; 489.942 ms) | @@@
+[489.942 ms ; 513.448 ms) | 
+[513.448 ms ; 573.049 ms) | @@@@@
+---------------------------------------------------
+
+// * Summary *
+
+BenchmarkDotNet v0.15.8, Windows 10 (10.0.19045.6466/22H2/2022Update)
+12th Gen Intel Core i5-12500H 3.10GHz, 1 CPU, 16 logical and 12 physical cores
+.NET SDK 10.0.402
+  [Host]        : .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+  Isolated-2x10 : .NET 10.0.13 (10.0.13, 10.0.1326.50504), X64 RyuJIT x86-64-v3
+
+Job=Isolated-2x10  OutlierMode=DontRemove  IterationCount=8  
+IterationTime=200ms  LaunchCount=1  WarmupCount=8  
+
+| Method | Scenario   | Mean      | Error     | StdDev    | Gen0       | Gen1       | Gen2      | Allocated |
+|------- |----------- |----------:|----------:|----------:|-----------:|-----------:|----------:|----------:|
+| Read   | SingleText |  15.90 ms |  1.958 ms |  1.024 ms |   142.8571 |          - |         - |   2.12 MB |
+| Read   | SixText    |  47.92 ms | 22.928 ms | 11.992 ms |   500.0000 |          - |         - |   8.44 MB |
+| Read   | WideFirst  | 411.27 ms | 50.246 ms | 26.279 ms | 12000.0000 | 11000.0000 | 2000.0000 |  94.02 MB |
+| Read   | WideLast   | 514.02 ms | 86.823 ms | 45.410 ms | 12000.0000 | 11000.0000 | 2000.0000 |  94.06 MB |
+
+// * Warnings *
+MinIterationTime
+  SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10 -> The minimum observed iteration time is 95.637ms which is very small. It's recommended to increase it to at least 100ms using more operations.
+  SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10 -> The minimum observed iteration time is 70.294ms which is very small. It's recommended to increase it to at least 100ms using more operations.
+
+// * Hints *
+Outliers
+  SimpleExcelReadBoundaryBenchmarks.Read: Isolated-2x10 -> 1 outlier  was  detected (13.66 ms)
+
+// * Legends *
+  Scenario  : Value of the 'Scenario' parameter
+  Mean      : Arithmetic mean of all measurements
+  Error     : Half of 99.9% confidence interval
+  StdDev    : Standard deviation of all measurements
+  Gen0      : GC Generation 0 collects per 1000 operations
+  Gen1      : GC Generation 1 collects per 1000 operations
+  Gen2      : GC Generation 2 collects per 1000 operations
+  Allocated : Allocated memory per single operation (managed only, inclusive, 1KB = 1024B)
+  1 ms      : 1 Millisecond (0.001 sec)
+
+// * Diagnostic Output - MemoryDiagnoser *
+
+
+// ***** BenchmarkRunner: End *****
+Run time: 00:00:30 (30.7 sec), executed benchmarks: 4
+
+Global total time: 00:02:02 (122.07 sec), executed benchmarks: 12
+// * Artifacts cleanup *
+Artifacts cleanup is finished

@@ -1,0 +1,19 @@
+{
+  "Mode": "fixed-streaming-write",
+  "Rows": 1000000,
+  "Columns": 6,
+  "Concurrency": 1,
+  "Framework": "net10.0",
+  "Limits": "capacity",
+  "ExitCode": 0,
+  "Guard": null,
+  "WallSeconds": 22.2815043,
+  "SampledPeakPrivateBytes": 24457216,
+  "SampledPeakWorkingSetBytes": 56774656,
+  "MinimumFreeBytes": 9754656768,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 180,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation"
+}

@@ -12,55 +12,40 @@ using A = DocumentFormat.OpenXml.Drawing;
 
 namespace TemplateFrame.Word;
 
-/// <summary>Kind of a content control: text / image / table column (sample-row cell).</summary>
 public enum SdtKind
 {
-    /// <summary>A plain text control.</summary>
     Text,
 
-    /// <summary>An image control (contains w:drawing / a:blip).</summary>
     Image,
 
-    /// <summary>A table-column control (inside w:tbl, sample-row cell).</summary>
     Table,
 }
 
-/// <summary>Information about one enumerated content control (for validation listings).</summary>
 public sealed record SdtInfo
 {
-    /// <summary>The content-control tag.</summary>
     public string Tag { get; init; } = string.Empty;
 
-    /// <summary>The content-control w:id.</summary>
     public int? Id { get; init; }
 
-    /// <summary>Where the control lives (body / header / footer).</summary>
     public SdtLocation Location { get; init; }
 
-    /// <summary>The control kind.</summary>
     public SdtKind Kind { get; init; }
 }
 
-/// <summary>Word validation result — the base result plus the enumerated SDT list.</summary>
 public sealed record WordTemplateValidationResult : TemplateValidationResult
 {
-    /// <summary>All enumerated content controls (body + headers + footers).</summary>
     public IReadOnlyList<SdtInfo> Sdts { get; init; } = [];
 }
 
-/// <summary>Word template validator — enumerates content controls and reports Missing / WrongType / Ambiguous (§5.3).</summary>
-/// <remarks>Extra 只告警放行。</remarks>
 public sealed class WordTemplateValidator
 {
     private readonly TemplateResourceLimits _limits;
 
-    /// <summary>Creates a validator with the default resource limits.</summary>
     public WordTemplateValidator()
         : this(TemplateResourceLimits.Default)
     {
     }
 
-    /// <summary>Creates a validator with explicit resource limits.</summary>
     public WordTemplateValidator(TemplateResourceLimits limits)
     {
         Guard.ThrowIfNull(limits, nameof(limits));
@@ -68,11 +53,9 @@ public sealed class WordTemplateValidator
         _limits = limits;
     }
 
-    /// <summary>Validates whether a .docx template matches the contract.</summary>
     public WordTemplateValidationResult Validate(Stream template, TemplateContract contract)
         => Validate(template, contract, packageChecked: false);
 
-    /// <summary>Validates document structure after the caller has checked the package with the same resource limits.</summary>
     internal WordTemplateValidationResult ValidateCheckedPackage(Stream template, TemplateContract contract)
         => Validate(template, contract, packageChecked: true);
 
@@ -102,7 +85,7 @@ public sealed class WordTemplateValidator
             return ValidateCore(document, contract);
         }
         catch (Exception ex) when (ex is OpenXmlPackageException or InvalidDataException or InvalidOperationException or FileFormatException
-                                   or XmlException) // zip 有效但 XML 损坏：惰性 DOM 在树访问时才抛
+                                   or XmlException)
         {
             return Invalid("Word.Validation.CannotOpen", ex.Message);
         }
@@ -113,7 +96,6 @@ public sealed class WordTemplateValidator
         var issues = new List<TemplateValidationIssue>();
         var matches = SdtLocator.FindAll(document);
 
-        // 1) 枚举控件清单
         var sdtInfos = matches
             .Select(m => new SdtInfo
             {
@@ -124,8 +106,17 @@ public sealed class WordTemplateValidator
             })
             .ToList();
 
-        // 2) 契约内部 Key 唯一性（含表格列 Key）
         var contractTagKeys = contract.EnumerateTagKeys().ToList();
+        CheckDuplicateContractKeys(contractTagKeys, issues);
+        CheckAmbiguousTags(sdtInfos, issues);
+        CheckElements(document, contract, sdtInfos, issues);
+        CheckExtraTags(contractTagKeys, sdtInfos, issues);
+
+        return new WordTemplateValidationResult { Issues = issues, Sdts = sdtInfos };
+    }
+
+    private static void CheckDuplicateContractKeys(IReadOnlyList<string> contractTagKeys, List<TemplateValidationIssue> issues)
+    {
         foreach (var duplicate in contractTagKeys
                      .GroupBy(k => k)
                      .Where(g => g.Count() > 1))
@@ -139,8 +130,10 @@ public sealed class WordTemplateValidator
                 Message = Sr.Get("Word.Validation.ContractDuplicateKey", duplicate.Key),
             });
         }
+    }
 
-        // 3) tag 全局唯一（正文 / 页眉 / 页脚）
+    private static void CheckAmbiguousTags(IReadOnlyList<SdtInfo> sdtInfos, List<TemplateValidationIssue> issues)
+    {
         foreach (var group in sdtInfos
                      .Where(i => !string.IsNullOrEmpty(i.Tag))
                      .GroupBy(i => i.Tag)
@@ -155,8 +148,14 @@ public sealed class WordTemplateValidator
                 Message = Sr.Get("Word.Validation.AmbiguousTag", group.Key, group.Count()),
             });
         }
+    }
 
-        // 4) 逐元素校验
+    private static void CheckElements(
+        WordprocessingDocument document,
+        TemplateContract contract,
+        IReadOnlyList<SdtInfo> sdtInfos,
+        List<TemplateValidationIssue> issues)
+    {
         foreach (var element in contract.Elements)
         {
             switch (element)
@@ -172,8 +171,13 @@ public sealed class WordTemplateValidator
                     break;
             }
         }
+    }
 
-        // 5) 契约外元素：默认放行（告警）
+    private static void CheckExtraTags(
+        IReadOnlyList<string> contractTagKeys,
+        IReadOnlyList<SdtInfo> sdtInfos,
+        List<TemplateValidationIssue> issues)
+    {
         var knownTags = new HashSet<string>(contractTagKeys, StringComparer.Ordinal);
         foreach (var sdt in sdtInfos.Where(i => !string.IsNullOrEmpty(i.Tag) && !knownTags.Contains(i.Tag)))
         {
@@ -187,8 +191,6 @@ public sealed class WordTemplateValidator
                 Severity = TemplateValidationSeverity.Warning,
             });
         }
-
-        return new WordTemplateValidationResult { Issues = issues, Sdts = sdtInfos };
     }
 
     private static void CheckTextElement(
@@ -199,7 +201,6 @@ public sealed class WordTemplateValidator
         var found = sdts.Where(i => i.Tag == element.Key).ToList();
         if (found.Count == 0)
         {
-            // 可选元素缺失只告警（模板仍有效），必填缺失才失败
             issues.Add(Missing(
                 element.Key,
                 "Word.Validation.MissingTextElement",
@@ -220,7 +221,6 @@ public sealed class WordTemplateValidator
         var found = sdts.Where(i => i.Tag == element.Key).ToList();
         if (found.Count == 0)
         {
-            // 可选元素缺失只告警（模板仍有效），必填缺失才失败
             issues.Add(Missing(
                 element.Key,
                 "Word.Validation.MissingImageElement",
@@ -253,7 +253,6 @@ public sealed class WordTemplateValidator
             }
         }
 
-        // 行模板只需包含全部必填列；可选列缺失不阻断（模板仍有效）
         var requiredKeys = new HashSet<string>(element.Columns.Where(c => c.Required).Select(c => c.Key), StringComparer.Ordinal);
         var missingRequired = missingColumns.Where(requiredKeys.Contains).ToList();
         var hasCompleteRow = SdtLocator.EnumerateTables(document).Any(table =>

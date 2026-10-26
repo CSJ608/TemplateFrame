@@ -3,9 +3,6 @@ using TemplateFrame.Demo.Word.I18n;
 using TemplateFrame.Localization;
 using TemplateFrame.Validation;
 
-// i18n 演示（Word 插件）：
-//   迭代 12 —— 同一套操作在 zh-CN（中文默认）与 en（英文）两种文化下执行，展示库的校验/异常消息随 CurrentUICulture 自动切换；
-//   迭代 13 —— 文档内容中英模板：同一版式代码输出 zh/en 两份模板 + 填充 + 回读（未填充占位符 → null）。
 var service = new I18nWordTemplateService();
 
 var dir = args.Length > 0
@@ -20,7 +17,6 @@ foreach (var element in service.Contract.Elements)
     Console.WriteLine($"  - {element.Key}（{element.DisplayName}）DataPath={element.DataPath}");
 }
 
-// [1] 生成模板：故意只含「单据编号」内容控件 → 供应商 / 制单日期 缺失
 using (var template = service.BuildInitialTemplateFile())
 {
     File.WriteAllBytes(templatePath, ReadAllBytes(template));
@@ -28,12 +24,10 @@ using (var template = service.BuildInitialTemplateFile())
 
 Console.WriteLine($"\n[1] 生成模板（仅含「单据编号」控件，契约还要求 供应商 / 制单日期）：{templatePath}");
 
-// [2][3] Validate：同一模板，两种文化下的校验消息
 Console.WriteLine("\n[2][3] Validate —— 同一份模板，两种文化的校验消息（MessageKey / MessageArgs 结构化输出）");
 RunValidation("zh-CN", service, templatePath);
 RunValidation("en", service, templatePath);
 
-// [4][5] Fill：模板缺必填元素 → 抛异常（默认 MissingElementPolicy.Throw），两种文化的异常消息
 var order = new DeliveryOrderData { No = "DO202608080001", Supplier = "华宇精密制造有限公司", OrderDate = new DateTime(2026, 8, 8) };
 Console.WriteLine("\n[4][5] Fill —— 缺必填元素抛异常，两种文化的异常消息");
 RunFill("zh-CN", service, templatePath, order);
@@ -43,10 +37,8 @@ Console.WriteLine("\n[6] 结论（消息 i18n）：");
 Console.WriteLine("  - 库消息（校验 + 异常）按 CurrentUICulture 自动中英切换：中文为中性文化默认（行为不变），英文系统/调用方设 en 文化自动出英文；");
 Console.WriteLine("  - MessageKey + MessageArgs 是稳定结构（不随语言变），调用方可用它自行翻译/映射 UI 文案，不依赖库内置语言。");
 
-// ==================== 迭代 13：文档内容中英模板 ====================
 Console.WriteLine("\n════════ 文档内容 i18n：中英模板（迭代 13）════════");
 
-// 业务注入本地化器：文化限定键（"zh-CN:Doc.Title" / "en:Doc.Title"，按文化祖先链回退）+ 文化中立兜底
 var contentLocalizer = new DefaultTemplateLocalizer(new Dictionary<string, string>
 {
     ["zh-CN:Doc.Title"] = "送货单",
@@ -86,7 +78,6 @@ Console.WriteLine($"  - 占位符：zh=\"{contentLocalizer.PlaceholderText(new C
 Console.WriteLine($"  - 页码 pattern：zh=\"{contentLocalizer.GetString(DefaultTemplateLocalizer.PageNumberPatternKey, new CultureInfo("zh-CN"))}\"  en=\"{contentLocalizer.GetString(DefaultTemplateLocalizer.PageNumberPatternKey, new CultureInfo("en"))}\"");
 Console.WriteLine("  - 版式文本/表头按语言解析（同一版式代码，键不同 → 文案不同）");
 
-// [8] 填充：同一份数据 → 中英模板各一份填充文件
 var content = new DeliveryOrderContentData
 {
     No = "DO202608080002",
@@ -102,12 +93,14 @@ var content = new DeliveryOrderContentData
 var zhFilledPath = Path.Combine(dir, "Word-I18n-DeliveryOrder-zh-filled.docx");
 var enFilledPath = Path.Combine(dir, "Word-I18n-DeliveryOrder-en-filled.docx");
 Console.WriteLine("\n[8] 填充（同一份数据 → 中英模板各一份填充文件）：");
-using (var filled = contentService.Fill(File.OpenRead(zhTemplatePath), content))
+using (var input = File.OpenRead(zhTemplatePath))
+using (var filled = contentService.Fill(input, content))
 {
     File.WriteAllBytes(zhFilledPath, ReadAllBytes(filled));
 }
 
-using (var filled = contentService.Fill(File.OpenRead(enTemplatePath), content))
+using (var input = File.OpenRead(enTemplatePath))
+using (var filled = contentService.Fill(input, content))
 {
     File.WriteAllBytes(enFilledPath, ReadAllBytes(filled));
 }
@@ -115,15 +108,19 @@ using (var filled = contentService.Fill(File.OpenRead(enTemplatePath), content))
 Console.WriteLine($"  - {zhFilledPath}");
 Console.WriteLine($"  - {enFilledPath}");
 
-// [9] 回读未填充模板 → 占位符规范化 null（null=未填充、""=有意留空；不依赖模板语言）
 Console.WriteLine("\n[9] 回读未填充模板（Parse 规范化：已知占位符 → null，null=未填充）：");
-var unfilled = contentService.Parse(File.OpenRead(zhTemplatePath));
-PrintContentReadback("zh 未填充", unfilled);
+using (var input = File.OpenRead(zhTemplatePath))
+{
+    var unfilled = contentService.Parse(input);
+    PrintContentReadback("zh 未填充", unfilled);
+}
 
-// [10] 回读已填充模板 → 数据值原样（值不翻译，值格式化继续 InvariantCulture）
 Console.WriteLine("\n[10] 回读已填充模板（数据值原样、不翻译，值格式化 InvariantCulture）：");
-var readback = contentService.Parse(File.OpenRead(zhFilledPath));
-PrintContentReadback("zh 已填充", readback);
+using (var input = File.OpenRead(zhFilledPath))
+{
+    var readback = contentService.Parse(input);
+    PrintContentReadback("zh 已填充", readback);
+}
 
 Console.WriteLine("\n[11] 结论（文档内容 i18n）：");
 Console.WriteLine("  - 同一版式代码输出 zh/en 两份模板：占位符/页码/版式文本/表头按语言解析，样式名/字体不本地化；");

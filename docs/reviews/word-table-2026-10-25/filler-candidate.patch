@@ -1,0 +1,46 @@
+diff --git a/src/TemplateFrame.Word/WordTemplateFiller.cs b/src/TemplateFrame.Word/WordTemplateFiller.cs
+index e1bfafa..ef70e99 100644
+--- a/src/TemplateFrame.Word/WordTemplateFiller.cs
++++ b/src/TemplateFrame.Word/WordTemplateFiller.cs
+@@ -197,6 +197,14 @@ public sealed class WordTemplateFiller
+ 
+         var nextId = NextSdtId(document);
+         var clones = CloneRows(templateRow, rows.Count);
++        var columns = new Dictionary<string, TextElement>(StringComparer.Ordinal);
++        foreach (var column in table.Columns)
++        {
++            if (column.Key is { } key && !columns.ContainsKey(key))
++            {
++                columns.Add(key, column);
++            }
++        }
+ 
+         for (var i = 0; i < clones.Count; i++)
+         {
+@@ -205,7 +213,7 @@ public sealed class WordTemplateFiller
+                 ReassignSdtIds(clones[i], ref nextId);
+             }
+ 
+-            FillTableRow(clones[i], table, rows[i]);
++            FillTableRow(clones[i], columns, rows[i]);
+         }
+     }
+ 
+@@ -224,7 +232,7 @@ public sealed class WordTemplateFiller
+         return clones;
+     }
+ 
+-    private static void FillTableRow(TableRow row, TableElement table, IReadOnlyDictionary<string, object?> values)
++    private static void FillTableRow(TableRow row, IReadOnlyDictionary<string, TextElement> columns, IReadOnlyDictionary<string, object?> values)
+     {
+         foreach (var sdt in row.Descendants<SdtElement>())
+         {
+@@ -234,7 +242,7 @@ public sealed class WordTemplateFiller
+                 continue;
+             }
+ 
+-            var column = table.Columns.FirstOrDefault(c => c.Key == tag);
++            columns.TryGetValue(tag, out var column);
+             SetSdtText(sdt, FormatValue(value, column ?? new TextElement()));
+         }
+     }

@@ -3,9 +3,6 @@ using TemplateFrame.Demo.Excel.I18n;
 using TemplateFrame.Localization;
 using TemplateFrame.Validation;
 
-// i18n 演示（Excel 插件，作为一个整体）：
-//   迭代 12 —— 消息层：同一套操作在 zh-CN（中文默认）与 en（英文）两种文化下执行，Validate/Fill 消息随 CurrentUICulture 自动切换；
-//   迭代 13/14 —— 文档内容：同一版式代码输出 zh/en 两份模板（版式文本 / 表头 / 占位符按语言）+ 填充 + 回读（未填充 → null）。
 var messageService = new I18nExcelMessageTemplateService();
 
 var dir = args.Length > 0
@@ -20,7 +17,6 @@ foreach (var element in messageService.Contract.Elements)
     Console.WriteLine($"  - {element.Key}（{element.DisplayName}）DataPath={element.DataPath}");
 }
 
-// [1] 生成模板：故意只含「单据编号」内容控件 → 供应商 / 制单日期 缺失
 using (var template = messageService.BuildInitialTemplateFile())
 {
     File.WriteAllBytes(messageTemplatePath, ReadAllBytes(template));
@@ -28,12 +24,10 @@ using (var template = messageService.BuildInitialTemplateFile())
 
 Console.WriteLine($"\n[1] 生成模板（仅含「单据编号」控件，契约还要求 供应商 / 制单日期）：{messageTemplatePath}");
 
-// [2][3] Validate：同一模板，两种文化下的校验消息
 Console.WriteLine("\n[2][3] Validate —— 同一份模板，两种文化的校验消息（MessageKey / MessageArgs 结构化输出）");
 RunValidation("zh-CN", messageService, messageTemplatePath);
 RunValidation("en", messageService, messageTemplatePath);
 
-// [4][5] Fill：模板缺必填元素 → 抛异常（默认 MissingElementPolicy.Throw），两种文化的异常消息
 var order = new I18nExcelData { No = "DO202608080001", Supplier = "华宇精密制造有限公司", OrderDate = new DateTime(2026, 8, 8) };
 Console.WriteLine("\n[4][5] Fill —— 缺必填元素抛异常，两种文化的异常消息");
 RunFill("zh-CN", messageService, messageTemplatePath, order);
@@ -43,10 +37,8 @@ Console.WriteLine("\n[6] 结论（消息 i18n）：");
 Console.WriteLine("  - 库消息（校验 + 异常）按 CurrentUICulture 自动中英切换：中文为中性文化默认（行为不变），英文系统/调用方设 en 文化自动出英文；");
 Console.WriteLine("  - MessageKey + MessageArgs 是稳定结构（不随语言变），调用方可用它自行翻译/映射 UI 文案，不依赖库内置语言。");
 
-// ==================== 文档内容 i18n：中英模板 ====================
 Console.WriteLine("\n════════ 文档内容 i18n：中英模板（迭代 13/14）════════");
 
-// 业务注入本地化器：文化限定键（"zh-CN:Doc.Title" / "en:Doc.Title"，按文化祖先链回退）+ 文化中立兜底
 var contentLocalizer = new DefaultTemplateLocalizer(new Dictionary<string, string>
 {
     ["zh-CN:Doc.Title"] = "送货单",
@@ -85,7 +77,6 @@ Console.WriteLine($"  - en 模板：{enTemplatePath}");
 Console.WriteLine($"  - 占位符：zh=\"{contentLocalizer.PlaceholderText(new CultureInfo("zh-CN"))}\"  en=\"{contentLocalizer.PlaceholderText(new CultureInfo("en"))}\"");
 Console.WriteLine("  - 版式文本/表头按语言解析（同一版式代码，键不同 → 文案不同）");
 
-// [8] 填充：同一份数据 → 中英模板各一份填充文件
 var content = new I18nExcelData
 {
     No = "DO202608080002",
@@ -101,12 +92,14 @@ var content = new I18nExcelData
 var zhFilledPath = Path.Combine(dir, "Excel-I18n-DeliveryOrder-zh-filled.xlsx");
 var enFilledPath = Path.Combine(dir, "Excel-I18n-DeliveryOrder-en-filled.xlsx");
 Console.WriteLine("\n[8] 填充（同一份数据 → 中英模板各一份填充文件）：");
-using (var filled = contentService.Fill(File.OpenRead(zhTemplatePath), content))
+using (var input = File.OpenRead(zhTemplatePath))
+using (var filled = contentService.Fill(input, content))
 {
     File.WriteAllBytes(zhFilledPath, ReadAllBytes(filled));
 }
 
-using (var filled = contentService.Fill(File.OpenRead(enTemplatePath), content))
+using (var input = File.OpenRead(enTemplatePath))
+using (var filled = contentService.Fill(input, content))
 {
     File.WriteAllBytes(enFilledPath, ReadAllBytes(filled));
 }
@@ -114,15 +107,27 @@ using (var filled = contentService.Fill(File.OpenRead(enTemplatePath), content))
 Console.WriteLine($"  - {zhFilledPath}");
 Console.WriteLine($"  - {enFilledPath}");
 
-// [9] 回读未填充模板 → 占位符规范化 null（null=未填充、""=有意留空；不依赖模板语言）
 Console.WriteLine("\n[9] 回读未填充模板（Parse 规范化：已知占位符 → null，null=未填充）：");
-PrintContentReadback("zh 未填充", contentService.Parse(File.OpenRead(zhTemplatePath)));
-PrintContentReadback("en 未填充", contentService.Parse(File.OpenRead(enTemplatePath)));
+using (var input = File.OpenRead(zhTemplatePath))
+{
+    PrintContentReadback("zh 未填充", contentService.Parse(input));
+}
 
-// [10] 回读已填充模板 → 数据值原样（值不翻译，值格式化继续 InvariantCulture）
+using (var input = File.OpenRead(enTemplatePath))
+{
+    PrintContentReadback("en 未填充", contentService.Parse(input));
+}
+
 Console.WriteLine("\n[10] 回读已填充模板（数据值原样、不翻译，值格式化 InvariantCulture）：");
-PrintContentReadback("zh 已填充", contentService.Parse(File.OpenRead(zhFilledPath)));
-PrintContentReadback("en 已填充", contentService.Parse(File.OpenRead(enFilledPath)));
+using (var input = File.OpenRead(zhFilledPath))
+{
+    PrintContentReadback("zh 已填充", contentService.Parse(input));
+}
+
+using (var input = File.OpenRead(enFilledPath))
+{
+    PrintContentReadback("en 已填充", contentService.Parse(input));
+}
 
 Console.WriteLine("\n[11] 结论（文档内容 i18n）：");
 Console.WriteLine("  - 同一版式代码输出 zh/en 两份模板：版式文本/表头/占位符按语言解析，样式名/字体不本地化；");

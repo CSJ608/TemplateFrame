@@ -3,7 +3,6 @@ using Xunit;
 
 namespace TemplateFrame.Tests;
 
-/// <summary>图片魔数探测的类型矩阵（png / jpg / gif / bmp / tiff / 未知回退）。</summary>
 public sealed class ImageTypeDetectorTests
 {
     private static byte[] Png { get; } = [0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00];

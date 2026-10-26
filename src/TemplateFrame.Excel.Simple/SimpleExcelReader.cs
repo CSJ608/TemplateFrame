@@ -10,10 +10,6 @@ using TemplateFrame.Internal;
 
 namespace TemplateFrame.Excel.Simple;
 
-/// <summary>
-/// SimpleExcel 导入实现（公共入口见 <see cref="SimpleExcel.Read(Stream, string)"/>）：共享字符串物化、
-/// 行/单元格定位、定义名查找与单元格取值（SimpleExcelContract 复用）。
-/// </summary>
 internal static class SimpleExcelReader
 {
     internal static SimpleExcelTable Read(Stream source, string? tableName, TemplateResourceLimits limits, bool packageChecked = false)
@@ -28,7 +24,6 @@ internal static class SimpleExcelReader
         }
         catch (XmlException ex)
         {
-            // zip 有效但 sheet XML 损坏：惰性 DOM 在首次树访问时才抛（OpenWorkbook 的 catch 罩不到这里）
             throw new InvalidOperationException(Sr.Get("SimpleExcel.Read.XmlCorrupt", ex.Message), ex);
         }
         catch (Exception ex) when (ex is FormatException or OverflowException)
@@ -47,12 +42,10 @@ internal static class SimpleExcelReader
             return new SimpleExcelTable();
         }
 
-        // 共享字符串表一次性物化（避免逐单元格 O(n) 查找）；富文本项拼接所有 <r> 片段。
         var sharedStrings = MaterializeSharedStrings(workbookPart);
 
         var tableRange = FindTableRange(workbookPart, string.IsNullOrWhiteSpace(tableName) ? SimpleExcel.DefaultTableName : tableName!.Trim());
 
-        // 工作表只解析一次；行查找表（行缺 r 属性时按文档顺序推断）供表头定位与数据读取共用。
         var worksheetPart = tableRange.HasValue
             ? ResolveWorksheetPart(workbookPart, tableRange.Value.Sheet)
             : workbookPart.WorksheetParts.FirstOrDefault();
@@ -69,61 +62,88 @@ internal static class SimpleExcelReader
             new TemplateResourceBudget(limits).AddCells((long)requestedRange.EndCol - requestedRange.StartCol + 1);
         }
 
-        int headerRow;
-        int colStart;
-        int colCount;
-        if (tableRange is { } range
-            && HasNonEmptyCellInSpan(rowLookup, range.StartRow, range.StartCol, range.EndCol - range.StartCol + 1, sharedStrings))
+        var layout = FindHeaderLayout(rows, rowLookup, tableRange, sharedStrings);
+        if (layout is not { } header)
         {
-            // 区域表头行有内容 → 按区域行/列跨度定位。
-            headerRow = range.StartRow;
-            colStart = range.StartCol;
-            colCount = range.EndCol - range.StartCol + 1;
+            return new SimpleExcelTable();
         }
-        else
-        {
-            // 区域不存在/错位/指向空处 → 回退"首非空行"扫描（跳过仅 1 个非空单元格的标题/装饰行）。
-            var headerIndex = FindHeaderRowIndex(rows, sharedStrings);
-            if (headerIndex < 0)
-            {
-                return new SimpleExcelTable();
-            }
 
-            headerRow = GetRowIndex(rows, headerIndex);
-            // 起始列取表头行首个单元格的列号——非 A 列起始的第三方表格不再错位丢列；
-            // 宽度按最大列号推算——物理元素数会因 Excel 不写空单元格而少计，导致末列被静默丢弃
-            var headerColumnNumbers = rows[headerIndex].Elements<Cell>().Select(CellColumnNumber)
-                .Where(c => c.HasValue).Select(c => c!.Value).ToList();
-            if (headerColumnNumbers.Count == 0)
+        var headers = ReadHeaders(rowLookup, sharedStrings, header, budget);
+        var result = ReadRows(workbookPart, rowLookup, sharedStrings, header, budget);
+        return new SimpleExcelTable { Headers = headers, Rows = result };
+    }
+
+    private readonly record struct HeaderLayout(int Row, int StartColumn, int ColumnCount);
+
+    private static HeaderLayout? FindHeaderLayout(
+        IReadOnlyList<Row> rows,
+        IReadOnlyDictionary<int, Row> rowLookup,
+        SimpleExcelAddress.TableRange? tableRange,
+        IReadOnlyList<string> sharedStrings)
+    {
+        if (tableRange is { } range)
+        {
+            var requestedHeader = new HeaderLayout(range.StartRow, range.StartCol, range.EndCol - range.StartCol + 1);
+            if (HasNonEmptyHeaderCell(rowLookup, requestedHeader, sharedStrings))
             {
-                colStart = 1;
-                colCount = rows[headerIndex].Elements<Cell>().Count();
-            }
-            else
-            {
-                colStart = headerColumnNumbers.Min();
-                colCount = headerColumnNumbers.Max() - colStart + 1;
+                return requestedHeader;
             }
         }
 
-        budget.AddCells(colCount);
+        var headerIndex = FindHeaderRowIndex(rows, sharedStrings);
+        if (headerIndex < 0)
+        {
+            return null;
+        }
+
+        var headerRow = GetRowIndex(rows, headerIndex);
+        var headerColumnNumbers = rows[headerIndex].Elements<Cell>().Select(CellColumnNumber)
+            .Where(c => c.HasValue).Select(c => c!.Value).ToList();
+        if (headerColumnNumbers.Count == 0)
+        {
+            return new HeaderLayout(headerRow, 1, rows[headerIndex].Elements<Cell>().Count());
+        }
+
+        var colStart = headerColumnNumbers.Min();
+        return new HeaderLayout(headerRow, colStart, headerColumnNumbers.Max() - colStart + 1);
+    }
+
+    private static List<string> ReadHeaders(
+        IReadOnlyDictionary<int, Row> rowLookup,
+        IReadOnlyList<string> sharedStrings,
+        HeaderLayout header,
+        TemplateResourceBudget budget)
+    {
+        budget.AddCells(header.ColumnCount);
         var headers = new List<string>();
-        for (var c = 0; c < colCount; c++)
+        for (var c = 0; c < header.ColumnCount; c++)
         {
-            var cell = FindCell(rowLookup, headerRow, colStart + c);
+            var cell = FindCell(rowLookup, header.Row, header.StartColumn + c);
             headers.Add(GetCellText(sharedStrings, cell) ?? string.Empty);
         }
 
+        return headers;
+    }
+
+    private static List<IReadOnlyList<object?>> ReadRows(
+        WorkbookPart workbookPart,
+        IReadOnlyDictionary<int, Row> rowLookup,
+        IReadOnlyList<string> sharedStrings,
+        HeaderLayout header,
+        TemplateResourceBudget budget)
+    {
         var result = new List<IReadOnlyList<object?>>();
-        // Missing rows are already omitted from the result; visit only physical rows in row-number order.
-        foreach (var r in rowLookup.Keys.Where(r => r > headerRow).OrderBy(r => r))
+        var cells = new SimpleExcelRowCells();
+        var dateStyles = new SimpleExcelDateStyles(workbookPart);
+        foreach (var r in rowLookup.Keys.Where(r => r > header.Row).OrderBy(r => r))
         {
-            budget.AddRows(1, colCount);
+            budget.AddRows(1, header.ColumnCount);
+            cells.Load(rowLookup[r]);
             var values = new List<object?>();
-            for (var c = 0; c < colCount; c++)
+            for (var c = 0; c < header.ColumnCount; c++)
             {
-                var cell = FindCell(rowLookup, r, colStart + c);
-                values.Add(cell is null ? null : ReadCellValue(workbookPart, sharedStrings, cell));
+                var cell = cells.Find(r, header.StartColumn + c);
+                values.Add(cell is null ? null : ReadCellValue(dateStyles, sharedStrings, cell));
             }
 
             if (values.All(v => v is null))
@@ -134,10 +154,10 @@ internal static class SimpleExcelReader
             result.Add(values);
         }
 
-        return new SimpleExcelTable { Headers = headers, Rows = result };
+        return result;
     }
 
-    internal static object? ReadCellValue(WorkbookPart workbookPart, IReadOnlyList<string> sharedStrings, Cell cell)
+    internal static object? ReadCellValue(SimpleExcelDateStyles dateStyles, IReadOnlyList<string> sharedStrings, Cell cell)
     {
         if (cell.DataType?.Value == CellValues.Boolean)
         {
@@ -163,22 +183,12 @@ internal static class SimpleExcelReader
                 return null;
             }
 
-            return IsDateCell(workbookPart, cell) ? DateTime.FromOADate(number) : number;
+            return dateStyles.IsDateCell(cell) ? DateTime.FromOADate(number) : number;
         }
 
-        if (cell.DataType?.Value == CellValues.SharedString)
-        {
-            return cell.CellValue?.Text is { } indexText
-                   && int.TryParse(indexText, NumberStyles.Integer, CultureInfo.InvariantCulture, out var index)
-                   && index >= 0 && index < sharedStrings.Count
-                ? sharedStrings[index]
-                : null;
-        }
-
-        return GetInlineStringText(cell.InlineString) ?? cell.CellValue?.Text;
+        return GetCellText(sharedStrings, cell);
     }
 
-    /// <summary>按名取定义名引用文本（兼容 Excel 可能写的 "=Sheet!..." 前缀）。</summary>
     internal static string? FindDefinedNameReference(WorkbookPart workbookPart, string name)
     {
         var definedName = workbookPart.Workbook?.DefinedNames
@@ -187,41 +197,9 @@ internal static class SimpleExcelReader
         return reference is null ? null : reference.TrimStart('=');
     }
 
-    /// <summary>定义名出现次数（重复 = 合并/手工修改导致，Validate 报 Ambiguous）。</summary>
     internal static int CountDefinedName(WorkbookPart workbookPart, string name)
         => workbookPart.Workbook?.DefinedNames
             ?.Elements<DefinedName>().Count(d => d.Name?.Value == name) ?? 0;
-
-    private static bool IsDateCell(WorkbookPart workbookPart, Cell cell)
-    {
-        if (cell.StyleIndex is not { } styleIndex
-            || workbookPart.WorkbookStylesPart?.Stylesheet?.GetFirstChild<CellFormats>() is not { } cellFormats)
-        {
-            return false;
-        }
-
-        var cellFormat = cellFormats.Elements<CellFormat>().ElementAtOrDefault((int)styleIndex.Value);
-        var numberFormatId = cellFormat?.NumberFormatId?.Value;
-        if (numberFormatId is null)
-        {
-            return false;
-        }
-
-        if (numberFormatId >= 14 && numberFormatId <= 22
-            || numberFormatId >= 27 && numberFormatId <= 36
-            || numberFormatId >= 45 && numberFormatId <= 47
-            || numberFormatId >= 50 && numberFormatId <= 58)
-        {
-            return true;
-        }
-
-        var formatCode = workbookPart.WorkbookStylesPart?.Stylesheet?.GetFirstChild<NumberingFormats>()
-            ?.Elements<NumberingFormat>().FirstOrDefault(n => n.NumberFormatId?.Value == numberFormatId)?.FormatCode?.Value;
-        return formatCode is not null
-               && (formatCode.IndexOf("yy", StringComparison.OrdinalIgnoreCase) >= 0
-                   || formatCode.IndexOf("hh", StringComparison.OrdinalIgnoreCase) >= 0
-                   || formatCode.IndexOf("dd", StringComparison.OrdinalIgnoreCase) >= 0);
-    }
 
     internal static string? GetCellText(IReadOnlyList<string> sharedStrings, Cell? cell)
     {
@@ -242,7 +220,6 @@ internal static class SimpleExcelReader
         return GetInlineStringText(cell.InlineString) ?? cell.CellValue?.Text;
     }
 
-    /// <summary>共享字符串表物化：索引 → 文本。直接 &lt;t&gt; 优先；富文本项（多 &lt;r&gt; 片段）拼接所有片段文本。</summary>
     internal static IReadOnlyList<string> MaterializeSharedStrings(WorkbookPart workbookPart)
     {
         var sharedStringTable = workbookPart.SharedStringTablePart?.SharedStringTable;
@@ -260,7 +237,7 @@ internal static class SimpleExcelReader
         return result;
     }
 
-    private static string GetSharedStringText(SharedStringItem item)
+    internal static string GetSharedStringText(SharedStringItem item)
     {
         if (item.Text?.Text is { } direct)
         {
@@ -276,7 +253,6 @@ internal static class SimpleExcelReader
         return sb.ToString();
     }
 
-    /// <summary>行内字符串文本：直接 &lt;t&gt; 优先；富文本 InlineString（多 &lt;r&gt; 片段）拼接所有片段文本。</summary>
     private static string? GetInlineStringText(InlineString? inlineString)
     {
         if (inlineString is null)
@@ -304,7 +280,6 @@ internal static class SimpleExcelReader
         return sb.ToString();
     }
 
-    /// <summary>行索引推断：优先显式 r 属性；缺失按"前一行的下一行"推断（r 属性可省略）。</summary>
     internal static int GetRowIndex(IReadOnlyList<Row> rows, int index)
     {
         var current = 0;
@@ -316,7 +291,6 @@ internal static class SimpleExcelReader
         return current;
     }
 
-    /// <summary>行索引 → Row 查找表：RowIndex 缺失时按文档顺序推断；重复行号保留首个匹配。</summary>
     internal static Dictionary<int, Row> BuildRowLookup(IReadOnlyList<Row> rows)
     {
         var lookup = new Dictionary<int, Row>();
@@ -345,10 +319,6 @@ internal static class SimpleExcelReader
         return checked((int)index);
     }
 
-    /// <summary>
-    /// 回退表头定位：第一个"非空单元格 ≥ 2"的行；整表都没有时回退首个非空行。
-    /// 跳过仅 1 个非空单元格的前导行（标题/装饰行特征），避免把标题当表头、数据被截断。
-    /// </summary>
     internal static int FindHeaderRowIndex(IReadOnlyList<Row> rows, IReadOnlyList<string> sharedStrings)
     {
         var firstNonEmpty = -1;
@@ -374,16 +344,14 @@ internal static class SimpleExcelReader
         return firstNonEmpty;
     }
 
-    private static bool HasNonEmptyCellInSpan(
+    private static bool HasNonEmptyHeaderCell(
         IReadOnlyDictionary<int, Row> rowLookup,
-        int headerRow,
-        int colStart,
-        int colCount,
+        HeaderLayout header,
         IReadOnlyList<string> sharedStrings)
     {
-        for (var c = 0; c < colCount; c++)
+        for (var c = 0; c < header.ColumnCount; c++)
         {
-            var cell = FindCell(rowLookup, headerRow, colStart + c);
+            var cell = FindCell(rowLookup, header.Row, header.StartColumn + c);
             if (!string.IsNullOrEmpty(GetCellText(sharedStrings, cell)))
             {
                 return true;
@@ -393,7 +361,6 @@ internal static class SimpleExcelReader
         return false;
     }
 
-    /// <summary>单元格列号（1 起）；CellReference 缺失或无法解析时为 null（该单元格对 FindCell 也不可见）。</summary>
     private static int? CellColumnNumber(Cell cell)
         => cell.CellReference?.Value is { } reference && SimpleExcelAddress.TryParseReference(reference, out var parsed)
             ? parsed.StartCol
@@ -429,7 +396,7 @@ internal static class SimpleExcelReader
             throw new FormatException(Sr.Get("SimpleExcel.InvalidCellAddress", reference));
         }
 
-        return null; // Unusable names, e.g. #REF! or formulas, retain header-text fallback.
+        return null;
     }
 
     internal static WorksheetPart? ResolveWorksheetPart(WorkbookPart workbookPart, string sheet)
@@ -446,7 +413,6 @@ internal static class SimpleExcelReader
             : workbookPart.WorksheetParts.FirstOrDefault();
     }
 
-    /// <summary>打开工作簿：损坏流（非 OOXML / 截断 zip）统一包装为 <see cref="InvalidOperationException"/> + 本地化消息。</summary>
     private static SpreadsheetDocument OpenWorkbook(Stream source, TemplateResourceLimits limits, bool packageChecked)
     {
         try

@@ -12,7 +12,6 @@ namespace TemplateFrame.Tests;
 
 public sealed record TestData(string Value = "");
 
-/// <summary>记录组装调用的假构建器（ITemplateBuilder 只约定 Save）。</summary>
 public sealed class FakeBuilder : ITemplateBuilder
 {
     public List<string> Calls { get; } = [];
@@ -43,7 +42,6 @@ public sealed class FakeBuilder : ITemplateBuilder
     }
 }
 
-/// <summary>记录调用的假引擎。</summary>
 public sealed class RecordingEngine : ITemplateEngine
 {
     public FakeBuilder? LastBuilder { get; private set; }
@@ -94,7 +92,6 @@ public sealed class RecordingEngine : ITemplateEngine
         => new() { Data = Parse(template, contract) };
 }
 
-/// <summary>提供带告警 FillDetailed 的假引擎（验证服务层告警出口，迭代 15）。</summary>
 public sealed class WarningEngine : ITemplateEngine
 {
     public ITemplateBuilder CreateBuilder() => new FakeBuilder();
@@ -119,7 +116,6 @@ public sealed class WarningEngine : ITemplateEngine
         };
 }
 
-/// <summary>完整实现的测试服务（含手写映射）。</summary>
 public sealed class MappedTemplateService : TemplateService<TestData, FakeBuilder>
 {
     public MappedTemplateService(ITemplateEngine engine) : base(engine)
@@ -144,7 +140,6 @@ public sealed class MappedTemplateService : TemplateService<TestData, FakeBuilde
         => new TestData((string?)data.Values["A"] ?? string.Empty);
 }
 
-/// <summary>不重写映射的服务（验证默认骨架抛 NotSupportedException）。</summary>
 public sealed class SkeletonTemplateService : TemplateService<TestData, FakeBuilder>
 {
     public SkeletonTemplateService(ITemplateEngine engine) : base(engine)
@@ -265,7 +260,6 @@ public sealed class TemplateServiceTests
     }
 }
 
-/// <summary>返回错误构建器类型的引擎（验证类型不匹配抛错）。</summary>
 public sealed class WrongBuilderEngine : ITemplateEngine
 {
     public ITemplateBuilder CreateBuilder() => new OtherBuilder();
@@ -288,7 +282,6 @@ public sealed class WrongBuilderEngine : ITemplateEngine
     public TemplateParseResult ParseDetailed(Stream template, TemplateContract contract) => new();
 }
 
-/// <summary>另一个构建器实现（用于类型不匹配测试）。</summary>
 public sealed class OtherBuilder : ITemplateBuilder
 {
     public void Save(Stream target)

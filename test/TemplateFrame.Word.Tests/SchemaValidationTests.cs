@@ -6,14 +6,8 @@ using Xunit;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>
-/// 生成文档的 OOXML schema 合法性护栏。
-/// 缘起 2.1.1：先 AddHeader/AddFooter 再写正文时，sectPr 停在 Body 中部（CT_Body 要求 sectPr 必须是最后一个子元素），
-/// Save 时未归位——官方 Demo 的调用顺序恰好触发，严格消费者（schema 校验管线/转换器）会要求修复文档。
-/// </summary>
 public sealed class SchemaValidationTests
 {
-    /// <summary>官方 Demo 的调用顺序：SetPageSetup → AddHeader/AddFooter → 正文（历史缺陷的触发顺序）。</summary>
     private static MemoryStream BuildDemoOrderTemplate()
         => TestDocuments.BuildTemplate(builder =>
         {

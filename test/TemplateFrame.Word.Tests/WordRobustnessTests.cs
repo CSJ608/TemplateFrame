@@ -6,7 +6,6 @@ using Xunit;
 
 namespace TemplateFrame.Word.Tests;
 
-/// <summary>迭代 4 健壮性：页眉页脚、多表、批量填充（边界场景单测）。</summary>
 public sealed class WordRobustnessTests
 {
     [Fact]

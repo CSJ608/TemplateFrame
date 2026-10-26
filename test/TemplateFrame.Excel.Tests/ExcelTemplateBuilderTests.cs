@@ -45,10 +45,6 @@ public sealed class ExcelTemplateBuilderTests
         Assert.Equal("'送货单'!$B$2", orderNo!.Reference);
     }
 
-    /// <summary>
-    /// 2.1.1 评审落地 B-4：SetSheetName 晚于 AddElement 调用时，命名区域引用此前仍指向旧表名
-    /// （登记时即拼死表名）——区域失效、Validate 报 Missing。现表名延迟到 Save 时拼接。
-    /// </summary>
     [Fact]
     public void Build_SheetNameRenamedAfterElements_NamedRangesFollowNewName()
     {
@@ -130,6 +126,28 @@ public sealed class ExcelTemplateBuilderTests
         Assert.NotNull(anchor);
         Assert.Equal(((long)(0.375 * 914400)).ToString(), anchor!.FromMarker!.ColumnOffset!.Text);
         Assert.Equal(((long)(0.146 * 914400)).ToString(), anchor.FromMarker.RowOffset!.Text);
+    }
+
+    [Fact]
+    public void Build_ImageAnchor_PreservesIndependentAxesAndMatchingShapeSize()
+    {
+        using var stream = TestDocuments.BuildTemplate(builder =>
+            builder.AddImage("Logo", "D7", 2.25, 0.75, xOffsetInches: 0.125, yOffsetInches: -0.25));
+        using var document = SpreadsheetDocument.Open(stream, false);
+        var worksheetPart = document.WorkbookPart!.WorksheetParts.First();
+        var anchor = ExcelDrawingHelper.FindAnchor(worksheetPart, 3, 6);
+
+        Assert.NotNull(anchor);
+        Assert.Equal("114300", anchor!.FromMarker!.ColumnOffset!.Text);
+        Assert.Equal("-228600", anchor.FromMarker.RowOffset!.Text);
+        Assert.Equal(2057400L, anchor.Extent!.Cx!.Value);
+        Assert.Equal(685800L, anchor.Extent.Cy!.Value);
+        var shapeSize = anchor.GetFirstChild<DocumentFormat.OpenXml.Drawing.Spreadsheet.Picture>()!
+            .ShapeProperties!.GetFirstChild<DocumentFormat.OpenXml.Drawing.Transform2D>()!
+            .GetFirstChild<DocumentFormat.OpenXml.Drawing.Extents>()!;
+        Assert.Equal(anchor.Extent.Cx.Value, shapeSize.Cx!.Value);
+        Assert.Equal(anchor.Extent.Cy.Value, shapeSize.Cy!.Value);
+        Assert.NotNull(ExcelDrawingHelper.GetBlipEmbed(anchor));
     }
 
     [Fact]

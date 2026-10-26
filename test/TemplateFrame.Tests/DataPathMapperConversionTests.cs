@@ -5,10 +5,6 @@ using Xunit;
 
 namespace TemplateFrame.Tests;
 
-/// <summary>
-/// DataPathMapper 回填（FromFillData）的类型转换矩阵：
-/// 失败路径抛带属性名的 InvalidOperationException；空串/null 的值类型语义；支持的收敛路径。
-/// </summary>
 public sealed class DataPathMapperConversionTests
 {
     private enum Color

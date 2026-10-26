@@ -1,0 +1,19 @@
+{
+  "Mode": "generate",
+  "Rows": 100000,
+  "Columns": 6,
+  "Concurrency": 1,
+  "Framework": "net10.0",
+  "Limits": "capacity",
+  "ExitCode": 0,
+  "Guard": null,
+  "WallSeconds": 1.9405661,
+  "SampledPeakPrivateBytes": 102195200,
+  "SampledPeakWorkingSetBytes": 125423616,
+  "MinimumFreeBytes": 12527747072,
+  "MaxPrivateGiB": 6.0,
+  "MinimumFreeGiB": 4.0,
+  "TimeoutSeconds": 180,
+  "ManagedHeapHardLimitGiB": 5,
+  "MemoryScope": "process lifetime including preparation and validation"
+}
