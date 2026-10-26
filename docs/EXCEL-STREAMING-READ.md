@@ -32,21 +32,34 @@
 
 ## 当前接续点（普通读取已完成，契约入口已接入，模板待做）
 
-2026-10-26 接续批次新增 `SimpleExcelContract.ReadStreaming` 与 `SimpleExcelContractReadRow`，复用直接 ZIP/XML 和磁盘 SST 读取，不构造完整表格。抽取定义名布局映射核心供旧接口和新接口共用，保留重复定义名、位置冲突、无效列范围回退等旧语义；定义名路径缺键补 null/契约列全空跳过，表头回退路径仅匹配键且保留空字典行。新增 12 场景覆盖旧接口逐键对照与非 Seek 成功、提前停止、取消、消费者异常、磁盘预算清理。契约容量验证和模板接口仍待完成，不代表整体交付。
+2026-10-26 接续批次 `7114a1e` 新增 `SimpleExcelContract.ReadStreaming` 与 `SimpleExcelContractReadRow`，复用直接 ZIP/XML 和磁盘 SST 读取，不构造完整表格。抽取定义名布局映射核心供旧接口和新接口共用，保留重复定义名、位置冲突、无效列范围回退等旧语义；定义名路径缺键补 null/契约列全空跳过，表头回退路径仅匹配键且保留空字典行。新增 12 场景覆盖旧接口逐键对照与非 Seek 成功、提前停止、取消、消费者异常、磁盘预算清理。模板接口仍待完成，不代表整体交付。
 
-本批全方案 net472/net8/net10 共 2,144 次测试通过（Core399、Word492、Excel702、Simple551）；方案已 format，独立探针构建零警告零错误并 whitespace format，git diff --check 通过。探针新增 `contract-streaming-read`，逐键逐格验证；尚未将新增模式的实验结果计入容量报告。
+本批全方案 net472/net8/net10 共 2,144 次测试通过（Core399、Word492、Excel702、Simple551）；方案已 format，独立探针构建零警告零错误并 whitespace format，git diff --check 通过。探针新增 `contract-streaming-read`，逐键逐格验证。契约千/万/十万/百万行 inline/shared 均已按序验证，.NET 10 百万 inline 30.152 秒/60.32 MiB，shared 108.015 秒/57.89 MiB，均零临时文件残留，详见[契约容量证据](reviews/contract-streaming-read-2026-10-26/README.md)。
+
+`75d615c` 将四个底层类提取到 `src/Shared/Excel`，命名空间 `TemplateFrame.Internal.Excel`，重命名为 `ExcelReadPackage`、`ExcelBoundedXml`、`ExcelTemporaryStorage`、`ExcelDiskStrings`。两 Excel csproj 以链接源码编译，不增加 NuGet 包或项目间依赖。内部配置接口 `IExcelStreamingReadSettings` 由现有公开 Simple 选项实现；模板选项后续可实现相同接口。提取后全量 2,144 测试再通过，方案及探针 Release 构建零警告零错误。逐行 worksheet/SST 的扫描逻辑仍在 `SimpleExcelStreamingReader`，尚未提取或接入模板。
+
+契约补充验证：.NET 8 百万 inline 51.626 秒/56.83 MiB，shared 102.341 秒/56.81 MiB；8 个独立千行 shared 小任务并发逐格通过，批次 0.838 秒/66.58 MiB，全部零残留。首轮 .NET 8 shared 启动前内存保护拒绝，未启动子进程；原目录保留，系统空闲恢复后新 r2 目录成功，未降低任何保护或关闭用户应用。详情与原始归档见契约容量证据。
 
 普通流式读取百万行已验证。详见 [容量证据](reviews/streaming-read-2026-10-26/README.md)：六列逐格校验；.NET 10 inline 32.94 秒/60.22 MiB 峰值工作集，4,000,006 项高基数 shared-string 108.50 秒/57.82 MiB；.NET 8 对应 32.71 秒/58.23 MiB、126.90 秒/56.23 MiB。SST 临时内容 136,000,084 字节，所有成功样例退出后零文件。万行到百万行的内存没有线性增长。保护参数未降低；首次启动前因可用内存不足被拒绝，正常关闭构建服务器后新 case 重试。生成样本的内存不能混作读取结果。
 
-公开同步回调入口、临时写入计费结果、中英文使用文档已实现。补充 XML 底层每次读入的取消/条目字节检查、损坏 ZIP/XML、预取消不消费源和无效临时目录测试。全方案三框架目前 2,108 测试通过（Core399、Word492、Excel702、Simple515）；容量探针支持 `generate-shared`、`streaming-read`，不在方案内，需独立构建/format。
+普通接口阶段公开同步回调入口、临时写入计费结果、中英文使用文档已实现。补充 XML 底层每次读入的取消/条目字节检查、损坏 ZIP/XML、预取消不消费源和无效临时目录测试。当时全方案三框架 2,108 测试通过；当前计数见上。容量探针不在方案内，需独立构建/format。
 
 下一批务必继续，不能把普通读取当成全部交付：
 
-1. 复用 `SimpleExcelReadPackage`、`SimpleExcelBoundedXml`、临时存储/磁盘字符串与逐行扫描能力，接入独立 opt-in 契约流式读取。阅读 `SimpleExcelContractReader`、`DefinedNameLayoutResolver`、`SimpleExcelHeaderLookup`，区分定义名路径（按契约键、缺失列处理）和表头回退路径的旧语义。
-2. 接入模板流式解析。阅读 `ExcelTemplateParser` 及相关解析操作/布局类，保留类型转换、缺键和诊断语义；警告采用回调或明确有界输出。考虑共享内部能力的合适归属，避免把两种上层语义混成普通表格读取。旧入口及默认限额不变。
+1. 契约入口、旧语义对照和容量验证已有独立证据，不必重做；后续共享底层修改仍需回归契约与普通入口。
+2. 接入模板流式解析。复用 `src/Shared/Excel`，继续提取真正共用的 worksheet/SST 扫描逻辑；不让 Excel 项目依赖 Simple 项目。阅读 `ExcelTemplateParser` 及相关解析操作/布局类，保留类型转换、缺键和诊断语义；警告采用回调或明确有界输出。旧入口及默认限额不变。
 3. 保持真正 ZIP/XML 流式和有界内存，不能通过 OpenXml Packaging 再物化工作表或 SST；拒绝倒序/重复行的行为已有文档。常规 transitional OOXML 样本已测；新 reader 对非预期 worksheet/SST 根命名空间显式报错，不可悄悄当空表。
 4. 补充契约/模板各自对照、生命周期/异常与容量验证，必要时安全小任务并发；不要执行百个百万行并发或 Word 导入。原保护/规模上限不变。
 5. 每完成并验证小批本地提交、不推送。后续按用户约定仅新建独立会话接续，不 fork；工具没有可核验上下文百分比，不编造 70% 读数。
+
+模板旧语义排查（仅分析，尚未实现）：
+
+- 定义名 `TF_Key`、`TF_TableKey_ColumnKey`，首匹配；`ExcelNamedRangeLocator.ParseReference` 与 Simple 地址解析规则不同，不能直接替换。ResolveWorksheetPart 按工作表名大小写精确匹配，不存在不回退首表。
+- 表按已匹配列的最大范围长度输出，空逻辑行也保留；每列从自己的 Start.Row 加逻辑偏移读取，即使超出该列自己的 End.Row 仍读。所有列使用最后匹配列的工作表（旧行为）。可按起始行偏移分组建前向游标，不能为错位列缓存整个表；需要保留多表与不同起点的对照测试。
+- 旧 CellLookup 只索引显式 RowIndex，精确 CellReference 首值；普通读取对缺省行号的推断不应自动套用。新接口拒绝重复/倒序行可延续已约定边界，须文档说明。
+- 布尔值不经 ValueType 转换；只有显式 t=n 且契约类型 DateTime 才按 OADate 转换，不按样式。其他文本交给 ContractTextParser，保留失败时原字符串和 ConversionFailed 各诊断字段。SST 旧模板只读 item.Text?.Text，富文本无直属 Text 时为 null；Simple 则拼接富文本。共享磁盘字符串目前只支持非 null string，不能把模板 null 偷换成空串。inline 也只读直属 Text，再回退 CellValue/空串。
+- 标量无命名单元格/无实际 cell 不返回键；图片复用现有 oneCellAnchor、精确零基位置、首 drawing/anchor、embed 关系与 MaxImageBytes 规则，不扩展 twoCellAnchor 等模板能力。不得通过 SpreadsheetDocument 打开全包来读图片；共享包目前只公开 XML/元数据，可能需增加有预算的二进制部件读取。
+- ContractTextParser 当前诊断接收 List；可用逐单元格清空的小列表再回调或适当提取诊断投递接口，禁止全表警告累积。错误/取消/消费者异常必须清理，保持部分业务回调的责任说明。
 
 以下为历史批次和原始验收清单，状态以本节为准。
 
