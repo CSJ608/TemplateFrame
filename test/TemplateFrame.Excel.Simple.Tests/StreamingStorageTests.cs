@@ -6,6 +6,34 @@ namespace TemplateFrame.Excel.Simple.Tests;
 
 public sealed class StreamingStorageTests
 {
+    [Theory]
+    [InlineData(0)]
+    [InlineData(2)]
+    public void DiskStrings_AppendingAfterRandomReadsPreservesOffsetsAndNulls(int cacheEntries)
+    {
+        using var fixture = new ScratchDirectory();
+        var options = new SimpleExcelStreamingReadOptions { TemporaryDirectory = fixture.Path, SharedStringCacheEntries = cacheEntries };
+        using (var storage = new ExcelTemporaryStorage(options))
+        {
+            var strings = new ExcelDiskStrings(storage, options);
+            var expected = new List<string?>();
+            long bytes = 0;
+            for (var index = 0; index < 5000; index++)
+            {
+                string? value = index % 3 == 0 ? null : index % 3 == 1 ? "" : "中文😀" + index;
+                strings.AddNullable(value);
+                expected.Add(value);
+                bytes += 12 + (value is null ? 0 : System.Text.Encoding.UTF8.GetByteCount(value));
+                Assert.Equal(expected[index / 2], strings.ReadNullable(index / 2));
+                Assert.Equal(expected[0], strings.ReadNullable(0));
+            }
+            for (var index = expected.Count - 1; index >= 0; index--)
+                Assert.Equal(expected[index], strings.ReadNullable(index));
+            Assert.Equal(bytes, storage.ReservedBytes);
+        }
+        Assert.Empty(Directory.GetFiles(fixture.Path));
+    }
+
     [Fact]
     public void DiskStrings_PreservesNullSeparatelyFromEmptyText()
     {

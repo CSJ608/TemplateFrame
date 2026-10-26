@@ -14,6 +14,7 @@ internal sealed class ExcelDiskStrings : IReadOnlyList<string>
     private readonly Dictionary<int, LinkedListNode<(int Index, string Text)>> _cache = new();
     private readonly LinkedList<(int Index, string Text)> _recent = new();
     private int _cacheCharacters;
+    private long _textLength;
 
     internal ExcelDiskStrings(ExcelTemporaryStorage storage, IExcelStreamingReadSettings options)
     {
@@ -38,11 +39,13 @@ internal sealed class ExcelDiskStrings : IReadOnlyList<string>
         if (Count == int.MaxValue) throw new InvalidOperationException("Shared string index exceeds supported range.");
         var bytes = text is null ? Array.Empty<byte>() : Encoding.UTF8.GetBytes(text);
         _storage.Reserve(12L + bytes.Length);
-        _index.Position = _index.Length;
-        _text.Position = _text.Length;
-        _indexWriter.Write(_text.Position);
+        var indexOffset = Count * 12L;
+        if (_index.Position != indexOffset) _index.Position = indexOffset;
+        if (_text.Position != _textLength) _text.Position = _textLength;
+        _indexWriter.Write(_textLength);
         _indexWriter.Write(text is null ? -1 : bytes.Length);
         _text.Write(bytes, 0, bytes.Length);
+        _textLength += bytes.Length;
         Count++;
     }
 

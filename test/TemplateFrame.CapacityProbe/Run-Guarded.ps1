@@ -80,6 +80,8 @@ try {
         MaxPrivateGiB=$MaxPrivateGiB;MinimumFreeGiB=$MinimumFreeGiB;TimeoutSeconds=$TimeoutSeconds
         ManagedHeapHardLimitGiB=5;MemoryScope='process lifetime including preparation and validation'
         ProbeAssembly=$assembly;ProbeAssemblySha256=(Get-FileHash -LiteralPath $assembly).Hash
+        ExcelAssemblySha256=(Get-FileHash -LiteralPath (Join-Path (Split-Path $assembly) 'TemplateFrame.Excel.dll')).Hash
+        SimpleAssemblySha256=(Get-FileHash -LiteralPath (Join-Path (Split-Path $assembly) 'TemplateFrame.Excel.Simple.dll')).Hash
     }
     $summary | ConvertTo-Json | Set-Content -LiteralPath (Join-Path $casePath 'summary.json') -Encoding utf8
     $summary | ConvertTo-Json -Compress
