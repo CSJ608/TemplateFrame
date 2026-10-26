@@ -1,0 +1,9 @@
+{"Phase":"prepare","settings":{"Mode":"shared-profile-read","Rows":100000,"Columns":6,"Concurrency":1,"Directory":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\sst-xml-reuse-20261026\\profile-candidate-100000","DefaultLimits":false,"InputPath":"C:\\work\\OpenCode\\TemplateFrame\\artifacts\\sst-xml-reuse-20261026\\profile-candidate-100000\\input-100000-6.xlsx","Limits":{"MaxInputBytes":536870912,"MaxPackageEntryBytes":2147483648,"MaxExpandedBytes":3221225472,"MaxPackageEntries":4096,"MaxImageBytes":16777216,"MaxXmlCharactersPerPart":1500000000,"MaxClonedXmlCharacters":1500000000,"MaxTableRows":1000000,"MaxTableCells":30000030}},"Runtime":".NET 10.0.13","ProcessId":16564,"HeapBudgetBytes":5368709120,"ServerGc":false}
+{"Phase":"profile","Name":"zip-validation","Milliseconds":38.4049,"AllocatedBytes":113992}
+{"Phase":"profile","Name":"metadata","Milliseconds":55.7635,"AllocatedBytes":215376}
+{"Phase":"profile","Name":"sst-build","Milliseconds":4175.7925,"AllocatedBytes":9257975096}
+{"Phase":"profile","Name":"worksheet-and-lookup","Milliseconds":3290.3378,"AllocatedBytes":4706642952}
+{"Phase":"profile","Name":"disk-sequential-lookup","Milliseconds":139.1692,"AllocatedBytes":86401008}
+{"Phase":"profile","Name":"sst-xml-only","Milliseconds":3699.6477,"AllocatedBytes":15779442392}
+{"Phase":"profile","Name":"disk-append-only","Milliseconds":66.8178,"AllocatedBytes":41619032}
+{"Phase":"complete","Status":"passed","ScratchPeakBytes":27200168,"ScratchRemainingFiles":0,"PeakWorkingSetBytes":61280256}
