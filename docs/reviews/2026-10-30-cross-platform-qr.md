@@ -1,5 +1,7 @@
 # 跨平台二维码替换（2026-10-30）
 
+> 本文保留实现阶段的验证快照；后续提交、远程 CI 和 3.1.1 发布结果见[发布核验](2026-10-30-release-3.1.1.md)。
+
 ## 最终选择
 
 四个二维码 Demo 改用 **Net.Codecrete.QrCodeGenerator 3.2.1**，替换 QRCoder，并移除显式 System.Drawing.Common 引用。生产框架包没有新增二维码依赖。
