@@ -33,7 +33,7 @@ public sealed record DeliveryOrderData
 
     public string No { get; init; } = string.Empty;
 
-    /// <summary>二维码内容（填充时由 Demo 用 QRCoder 生成 PNG 填进页眉二维码控件）。</summary>
+    /// <summary>二维码内容（填充时由 Demo 用跨平台二维码库生成 PNG）。</summary>
     public string QrContent { get; init; } = string.Empty;
 
     public DateTime OrderDate { get; init; }

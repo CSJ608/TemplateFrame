@@ -4,6 +4,17 @@
 
 ## [Unreleased]
 
+## [3.1.1] - 2026-10-30
+
+### 依赖与兼容性
+- 三个 Office 插件在非 net462 目标显式要求 System.IO.Packaging 10.0.14；net462 保留 WindowsBase 路径，仍需宿主系统安全更新。四包公共 API 与目标框架不变。
+- Word/Excel 的 net472 测试依赖 System.Text.Json 升至 10.0.14。本轮属于依赖维护，不宣称修复了已证实可利用的现存漏洞。
+
+### 样例与工程
+- 四个二维码 Demo 使用 MIT 许可、无传递包依赖的 Net.Codecrete.QrCodeGenerator 3.2.1 替换 QRCoder，不再依赖 System.Drawing.Common，未引入 ImageSharp 或 SkiaSharp；二维码依赖不进入生产框架包。
+- 保留 M 级纠错、四模块留白和默认每模块八像素；PNG 编码、选段及掩码可能变化，不保证字节一致。
+- CI 新增 Windows/Linux 四个二维码 Demo 冒烟检查，并更新相关注释和样例文档。验证不包括 macOS 实机或独立扫码解码回验，详见[跨平台复核](docs/reviews/2026-10-30-cross-platform-qr.md)。
+
 ## [3.1.0] - 2026-10-26
 
 ### 新增
