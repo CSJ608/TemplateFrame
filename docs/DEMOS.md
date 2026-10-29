@@ -67,7 +67,7 @@ new ImageElement { Key = "QRCode",   DisplayName = "二维码",    DataPath = "Q
 #### TemplateFrame.Demo.Word.AutoMapping
 - 内容与 Word 手写映射版一致；控制台打印每个元素的 `DataPath`；
 - **没有** `MapToData` / `MapFromData`——契约声明 DataPath 即自动映射；
-- 数据构造处准备好 `LogoBytes` / `QrBytes`（读资产文件 + QRCoder 生成二维码）。
+- 数据构造处准备好 `LogoBytes` / `QrBytes`（读资产文件 + Net.Codecrete.QrCodeGenerator 生成二维码 PNG；MIT、无传递包依赖、不依赖 Windows 绘图组件）。
 
 #### TemplateFrame.Demo.Excel.AutoMapping
 - 内容与 Excel 手写映射版一致；控制台打印每个元素的 `DataPath`；无手写映射方法。

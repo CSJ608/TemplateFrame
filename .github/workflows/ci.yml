@@ -48,6 +48,19 @@ jobs:
         if: runner.os == 'Linux'
         run: dotnet test TemplateFrame.slnx -c Release --no-build -f net8.0 --collect:"XPlat Code Coverage"
 
+      - name: Smoke test cross-platform QR demos
+        # Runs on both matrix platforms, including Linux without GDI+.
+        shell: pwsh
+        run: |
+          foreach ($name in @('Word', 'Excel', 'Word.AutoMapping', 'Excel.AutoMapping')) {
+            $project = "samples/TemplateFrame.Demo.$name/TemplateFrame.Demo.$name.csproj"
+            $output = dotnet run --project $project -c Release --no-build -- "artifacts/qr-smoke/$name"
+            $output | Write-Host
+            if ($LASTEXITCODE -ne 0 -or ($output -match '未通过')) {
+              throw "QR demo failed: $name"
+            }
+          }
+
       - name: Test Linux net10.0
         if: runner.os == 'Linux'
         run: dotnet test TemplateFrame.slnx -c Release --no-build -f net10.0 --collect:"XPlat Code Coverage"

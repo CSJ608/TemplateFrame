@@ -12,7 +12,7 @@ namespace TemplateFrame.Demo.Word.AutoMapping;
 /// </summary>
 internal static class Program
 {
-    // 数据直接携带图片字节：LOGO 读资产文件，二维码由 QRCoder 生成（不再在映射方法里做）
+    // 数据直接携带图片字节：LOGO 读资产文件，二维码由纯托管库生成（不再在映射方法里做）
     private static readonly byte[] LogoBytes =
         File.ReadAllBytes(Path.Combine(AppContext.BaseDirectory, "assets", "github-mark.png"));
 
